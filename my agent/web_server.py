@@ -188,10 +188,16 @@ def get_config():
 
 
 if __name__ == '__main__':
+    import os
+    port = int(os.environ.get('PORT', 5000))
+
     print('=' * 60)
     print('AI News Agent Portfolio')
     print('=' * 60)
-    print('Dashboard running at: http://localhost:5000')
+    print(f'Dashboard running at: http://0.0.0.0:{port}')
     print('Press CTRL+C to stop')
     print('=' * 60)
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    # Use debug=False in production
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
