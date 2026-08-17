@@ -1,0 +1,89 @@
+2026-08-17 18:44:56,303 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 18:44:58,993 - ERROR - Error fetching AI news: 401 Client Error: Unauthorized for url: https://newsapi.org/v2/everything?q=artificial+intelligence+OR+machine+learning+OR+generative+AI+OR+ChatGPT+OR+LLM+OR+AI+policy+OR+AI+safety&sortBy=publishedAt&language=en&pageSize=5&apiKey=your_newsapi_key_here
+2026-08-17 18:44:58,999 - WARNING - No news items were returned. Check the NewsAPI key and internet connection.
+2026-08-17 19:00:15,170 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 19:00:30,887 - INFO - ============================================================
+2026-08-17 19:00:30,888 - INFO - Starting AI morning briefing workflow...
+2026-08-17 19:00:30,889 - INFO - ============================================================
+2026-08-17 19:00:30,890 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 19:00:32,971 - ERROR - Error fetching AI news: 401 Client Error: Unauthorized for url: https://newsapi.org/v2/everything?q=artificial+intelligence+OR+machine+learning+OR+generative+AI+OR+ChatGPT+OR+LLM+OR+AI+policy+OR+AI+safety&sortBy=publishedAt&language=en&pageSize=5&apiKey=b821f8eee175a8db6800a1a311ab050e309d26d122f2e2ba8435f79a80047fa5
+2026-08-17 19:00:37,008 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 19:00:37,009 - INFO - Sent digest with 0 AI stories.
+2026-08-17 19:00:37,010 - INFO - ============================================================
+2026-08-17 19:05:39,728 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 19:05:41,986 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 19:06:07,155 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 19:06:09,262 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 19:15:35,040 - INFO - ============================================================
+2026-08-17 19:15:35,041 - INFO - Starting AI morning briefing workflow...
+2026-08-17 19:15:35,041 - INFO - ============================================================
+2026-08-17 19:15:35,041 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 19:15:37,272 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 19:15:41,668 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 19:15:41,669 - INFO - Sent digest with 4 AI stories.
+2026-08-17 19:15:41,669 - INFO - ============================================================
+2026-08-17 19:41:19,355 - INFO - ============================================================
+2026-08-17 19:41:19,355 - INFO - Starting AI morning briefing workflow...
+2026-08-17 19:41:19,356 - INFO - ============================================================
+2026-08-17 19:41:19,411 - INFO - Database initialized at news_history.db
+2026-08-17 19:41:19,425 - INFO - Sending to 1 recipient(s): syedali6160@gmail.com
+2026-08-17 19:41:19,426 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 19:41:21,729 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 19:41:21,836 - INFO - Saved 4 articles to database
+2026-08-17 19:41:21,838 - INFO - Saved 4 articles to database
+2026-08-17 19:41:25,803 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 19:41:25,827 - INFO - Sent digest with 4 AI stories to 1/1 recipients.
+2026-08-17 19:41:25,862 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-17 19:41:25,863 - INFO - ============================================================
+2026-08-17 20:17:58,278 - INFO - ============================================================
+2026-08-17 20:17:58,278 - INFO - Starting AI morning briefing workflow...
+2026-08-17 20:17:58,279 - INFO - ============================================================
+2026-08-17 20:17:58,282 - INFO - Database initialized at news_history.db
+2026-08-17 20:17:58,298 - INFO - Sending to 2 recipient(s): syedali6160@gmail.com, syedalihussain325@gmail.com
+2026-08-17 20:17:58,298 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 20:18:00,916 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 20:18:00,980 - INFO - Saved 4 articles to database
+2026-08-17 20:18:00,981 - INFO - Saved 4 articles to database
+2026-08-17 20:18:05,004 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 20:18:08,691 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-17 20:18:08,708 - INFO - Sent digest with 4 AI stories to 2/2 recipients.
+2026-08-17 20:18:08,726 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-17 20:18:08,726 - INFO - ============================================================
+2026-08-17 20:18:08,727 - INFO - 127.0.0.1 - - [17/Aug/2026 20:18:08] "POST /api/agent/run-now HTTP/1.1" 200 -
+2026-08-17 20:18:10,753 - INFO - 127.0.0.1 - - [17/Aug/2026 20:18:10] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-17 20:18:11,063 - INFO - 127.0.0.1 - - [17/Aug/2026 20:18:11] "GET /api/config HTTP/1.1" 200 -
+2026-08-17 20:18:11,071 - INFO - 127.0.0.1 - - [17/Aug/2026 20:18:11] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-17 20:18:11,076 - INFO - 127.0.0.1 - - [17/Aug/2026 20:18:11] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-17 20:19:04,457 - INFO - Added recipient: syedalishah7057@gmail.com
+2026-08-17 20:19:04,460 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:04] "POST /api/recipients/add HTTP/1.1" 200 -
+2026-08-17 20:19:04,763 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:04] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-17 20:19:08,331 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:08] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-17 20:19:08,641 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:08] "GET /api/config HTTP/1.1" 200 -
+2026-08-17 20:19:08,652 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:08] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-17 20:19:08,661 - INFO - 127.0.0.1 - - [17/Aug/2026 20:19:08] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-17 20:20:21,710 - INFO - ============================================================
+2026-08-17 20:20:21,711 - INFO - Starting AI morning briefing workflow...
+2026-08-17 20:20:21,712 - INFO - ============================================================
+2026-08-17 20:20:21,718 - INFO - Database initialized at news_history.db
+2026-08-17 20:20:21,747 - INFO - Sending to 3 recipient(s): syedali6160@gmail.com, syedalihussain325@gmail.com, syedalishah7057@gmail.com
+2026-08-17 20:20:21,748 - INFO - Fetching AI news from NewsAPI...
+2026-08-17 20:20:24,151 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-17 20:20:24,258 - INFO - Saved 4 articles to database
+2026-08-17 20:20:24,258 - INFO - Saved 4 articles to database
+2026-08-17 20:20:28,255 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-17 20:20:32,366 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-17 20:20:36,357 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-17 20:20:36,383 - INFO - Sent digest with 4 AI stories to 3/3 recipients.
+2026-08-17 20:20:36,419 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-17 20:20:36,419 - INFO - ============================================================
+2026-08-17 20:20:36,421 - INFO - 127.0.0.1 - - [17/Aug/2026 20:20:36] "POST /api/agent/run-now HTTP/1.1" 200 -
+2026-08-17 20:20:38,448 - INFO - 127.0.0.1 - - [17/Aug/2026 20:20:38] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-17 20:20:38,748 - INFO - 127.0.0.1 - - [17/Aug/2026 20:20:38] "GET /api/config HTTP/1.1" 200 -
+2026-08-17 20:20:38,752 - INFO - 127.0.0.1 - - [17/Aug/2026 20:20:38] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-17 20:20:38,756 - INFO - 127.0.0.1 - - [17/Aug/2026 20:20:38] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-17 20:22:47,578 - INFO - 127.0.0.1 - - [17/Aug/2026 20:22:47] "GET /api/config HTTP/1.1" 200 -
+2026-08-17 20:22:47,582 - INFO - 127.0.0.1 - - [17/Aug/2026 20:22:47] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-17 20:22:47,585 - INFO - 127.0.0.1 - - [17/Aug/2026 20:22:47] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-17 20:22:47,586 - INFO - 127.0.0.1 - - [17/Aug/2026 20:22:47] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-17 20:25:59,870 - INFO -  * Detected change in 'C:\\Users\\DELL\\OneDrive\\Desktop\\my agent\\web_server.py', reloading
+2026-08-17 20:25:59,871 - INFO -  * Detected change in 'C:\\Users\\DELL\\OneDrive\\Desktop\\my agent\\web_server.py.tmp.23016.5b3143507893', reloading
