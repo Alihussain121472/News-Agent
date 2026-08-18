@@ -85,6 +85,15 @@ def track_visitor():
 # Get the absolute path to the recipients.json file
 RECIPIENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'recipients.json')
 
+# Auto-create recipients.json if missing (e.g. fresh Render deploy)
+if not os.path.exists(RECIPIENTS_FILE):
+    try:
+        with open(RECIPIENTS_FILE, 'w') as _f:
+            json.dump({'recipients': []}, _f)
+        logger.info('Created empty recipients.json')
+    except Exception as _e:
+        logger.warning(f'Could not create recipients.json: {_e}')
+
 
 @app.route('/')
 def index():

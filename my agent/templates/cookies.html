@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie Policy - Nova Brief</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .legal-page {
+            padding: 4rem 0;
+        }
+        
+        .legal-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .legal-page h1 {
+            margin-bottom: 2rem;
+        }
+        
+        .legal-page h2 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .legal-page h3 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .legal-page p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+        
+        .legal-page ul, .legal-page ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .legal-page li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .last-updated {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Nova Brief</span>
+                </div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="/#features" class="nav-link">Features</a>
+                    <a href="/#contact" class="nav-link">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="legal-page">
+        <div class="container legal-container">
+            <h1>Cookie Policy</h1>
+            <p class="last-updated">Last updated: January 2024</p>
+
+            <h2>1. What Are Cookies?</h2>
+            <p>
+                Cookies are small text files that are placed on your computer or mobile device when you visit our website. 
+                They help us remember information about your visit, such as your preferred language and other settings. 
+                This makes your next visit to our website easier and the website more useful to you.
+            </p>
+
+            <h2>2. Why We Use Cookies</h2>
+            <p>We use cookies for the following purposes:</p>
+            <ul>
+                <li><strong>Essential Cookies:</strong> Required for basic website functionality</li>
+                <li><strong>Analytics Cookies:</strong> Help us understand how visitors use our website</li>
+                <li><strong>Preference Cookies:</strong> Remember your settings and preferences</li>
+                <li><strong>Marketing Cookies:</strong> Track advertising effectiveness</li>
+            </ul>
+
+            <h2>3. Types of Cookies We Use</h2>
+            
+            <h3>First-Party Cookies</h3>
+            <p>
+                These are cookies set by Nova Brief directly. They help us understand how you use our website and 
+                remember your preferences.
+            </p>
+
+            <h3>Third-Party Cookies</h3>
+            <p>
+                We may also allow third-party service providers (such as analytics companies) to place cookies on your 
+                device to collect information about your browsing activities.
+            </p>
+
+            <h3>Session Cookies</h3>
+            <p>
+                These cookies are temporary and are deleted when you close your browser.
+            </p>
+
+            <h3>Persistent Cookies</h3>
+            <p>
+                These cookies remain on your device for a specified period or until you delete them.
+            </p>
+
+            <h2>4. Managing Cookies</h2>
+            <p>
+                Most web browsers allow you to control cookies through their settings. You can:
+            </p>
+            <ul>
+                <li>Block all cookies</li>
+                <li>Allow all cookies</li>
+                <li>Allow cookies from specific websites only</li>
+                <li>Delete cookies from your device</li>
+            </ul>
+
+            <p>
+                Please note that disabling cookies may affect the functionality and performance of our website.
+            </p>
+
+            <h2>5. Analytics</h2>
+            <p>
+                We use analytics cookies to collect information about how visitors use our website. This information helps us 
+                improve our website and services. These cookies collect information in an aggregated and anonymized form.
+            </p>
+
+            <h2>6. Changes to This Policy</h2>
+            <p>
+                We may update this Cookie Policy from time to time to reflect changes in our practices or for other operational, 
+                legal, or regulatory reasons. We will notify you by updating the "Last Updated" date.
+            </p>
+
+            <h2>7. Contact Us</h2>
+            <p>
+                If you have questions about this Cookie Policy, please contact us at 
+                <a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a>
+            </p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Nova Brief. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

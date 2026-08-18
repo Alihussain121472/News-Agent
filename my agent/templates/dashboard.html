@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI News Agent Portfolio</title>
+    <title>Nova Brief</title>
     <style>
         * {
             margin: 0;
@@ -436,8 +436,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🤖 AI News Agent Portfolio</h1>
-            <p class="subtitle">Your personalized AI news digest manager - Automated daily briefings with 3-month history</p>
+            <h1>Nova Brief</h1>
+            <p class="subtitle">Your personalized AI news digest manager — daily briefings, global headlines, and 3-month history</p>
         </header>
 
         <div class="stats-grid" id="statsGrid">
@@ -457,9 +457,29 @@
                 <div class="stat-value" id="monthArticles">-</div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon">�</div>
+                <div class="stat-label">Monthly Logins</div>
+                <div class="stat-value" id="monthlyLogins">-</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-label">Emails Sent</div>
                 <div class="stat-value" id="totalEmails">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧑‍💼</div>
+                <div class="stat-label">Users This Month</div>
+                <div class="stat-value" id="usersThisMonth">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🌐</div>
+                <div class="stat-label">Total Visits</div>
+                <div class="stat-value" id="totalVisits">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👤</div>
+                <div class="stat-label">Unique Visitors</div>
+                <div class="stat-value" id="uniqueVisitors">-</div>
             </div>
         </div>
 
@@ -562,6 +582,13 @@
                 </div>
 
                 <div class="control-group">
+                    <div class="control-title">📈 User Activity</div>
+                    <div id="userActivityList" style="max-height: 220px; overflow-y: auto;">
+                        <div class="loading" style="text-align: center; padding: 20px; font-size: 13px;">Loading user activity...</div>
+                    </div>
+                </div>
+
+                <div class="control-group">
                     <div class="control-title">⚙️ Configuration</div>
                     <div class="control-item">
                         <span class="control-label">Sender</span>
@@ -607,7 +634,11 @@
                 document.getElementById('totalArticles').textContent = stats.total_articles || 0;
                 document.getElementById('weekArticles').textContent = stats.articles_last_week || 0;
                 document.getElementById('monthArticles').textContent = stats.articles_last_month || 0;
+                document.getElementById('monthlyLogins').textContent = stats.monthly_logins || 0;
+                document.getElementById('usersThisMonth').textContent = stats.users_this_month || 0;
                 document.getElementById('totalEmails').textContent = stats.total_emails || 0;
+                document.getElementById('totalVisits').textContent = stats.total_visits || 0;
+                document.getElementById('uniqueVisitors').textContent = stats.unique_visitors || 0;
 
                 if (stats.last_email_sent) {
                     const lastEmailDate = new Date(stats.last_email_sent);
@@ -671,7 +702,7 @@
             }
 
             try {
-                const response = await fetch('/api/recipients/add', {
+                const response = await fetch('/api/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -680,11 +711,14 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    showNotification(`✅ Added ${email}`, 'success');
+                    const message = result.already_registered
+                        ? `ℹ️ ${email} is already subscribed.`
+                        : `✅ Added ${email}`;
+                    showNotification(message, result.already_registered ? 'success' : 'success');
                     input.value = '';
                     loadRecipients();
                 } else {
-                    showNotification(result.error || 'Failed to add recipient', 'error');
+                    showNotification(result.message || result.error || 'Failed to add recipient', 'error');
                 }
             } catch (error) {
                 console.error('Error adding recipient:', error);
@@ -853,8 +887,26 @@
             }
         }
 
-        async function loadAgentLogs() {
-            const container = document.getElementById('agentLogsContainer');
+        async function loadUserActivity() {
+            const container = document.getElementById('userActivityList');
+            try {
+                const response = await fetch('/api/user-activity');
+                if (!response.ok) { container.innerHTML = '<div style="text-align:center;padding:15px;color:#6b7280;font-size:13px;">No activity yet</div>'; return; }
+                const activities = await response.json();
+                if (!activities.length) {
+                    container.innerHTML = '<div style="text-align:center;padding:15px;color:#6b7280;font-size:13px;">No activity yet</div>';
+                    return;
+                }
+                container.innerHTML = activities.map(a => {
+                    const t = a.event_time ? new Date(a.event_time).toLocaleString() : '-';
+                    return `<div style="padding:8px 0;border-bottom:1px solid #e5e7eb;font-size:13px;"><span style="font-weight:600;color:#374151;">${a.email || '-'}</span><br><span style="color:#6b7280;">${a.action || ''} &bull; ${t}</span></div>`;
+                }).join('');
+            } catch (err) {
+                container.innerHTML = '<div style="text-align:center;padding:15px;color:#6b7280;font-size:13px;">No activity yet</div>';
+            }
+        }
+
+        async function loadAgentLogs() {            const container = document.getElementById('agentLogsContainer');
             container.innerHTML = '<div class="loading">Loading agent logs...</div>';
 
             try {
@@ -954,6 +1006,7 @@
             loadStatistics();
             loadConfig();
             loadRecipients();
+            loadUserActivity();
             loadArticles(currentFilter === 'all' ? null : currentFilter);
             if (currentTab === 'emails') loadEmailLogs();
             if (currentTab === 'agent') loadAgentLogs();
@@ -968,6 +1021,7 @@
             loadStatistics();
             loadConfig();
             loadRecipients();
+            loadUserActivity();
             loadArticles();
         });
 

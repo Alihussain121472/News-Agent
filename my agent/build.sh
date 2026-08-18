@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
-# Build script for Render deployment
+set -e
 
-# Install dependencies
+echo "=== Nova Brief Build Script ==="
+
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Create necessary directories
-mkdir -p templates
+# Create recipients.json if it doesn't exist
+if [ ! -f "recipients.json" ]; then
+    echo '{"recipients":[]}' > recipients.json
+    echo "Created empty recipients.json"
+fi
 
-echo "Build completed successfully!"
+# Initialize the database
+python -c "from database import NewsDatabase; NewsDatabase().init_database(); print('Database initialized')"
+
+echo "=== Build completed successfully! ==="

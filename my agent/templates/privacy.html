@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Nova Brief</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .legal-page {
+            padding: 4rem 0;
+        }
+        
+        .legal-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .legal-page h1 {
+            margin-bottom: 2rem;
+        }
+        
+        .legal-page h2 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .legal-page h3 {
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .legal-page p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+        
+        .legal-page ul, .legal-page ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .legal-page li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        .last-updated {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Nova Brief</span>
+                </div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="/#features" class="nav-link">Features</a>
+                    <a href="/#contact" class="nav-link">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="legal-page">
+        <div class="container legal-container">
+            <h1>Privacy Policy</h1>
+            <p class="last-updated">Last updated: January 2024</p>
+
+            <h2>1. Introduction</h2>
+            <p>
+                Nova Brief ("we," "us," "our," or "Company") operates the Nova Brief website and newsletter service. 
+                This Privacy Policy explains our online information practices and the choices you can make about how 
+                your information is used.
+            </p>
+
+            <h2>2. Information We Collect</h2>
+            <p>We may collect information about you in the following ways:</p>
+            <ul>
+                <li><strong>Email Address:</strong> When you subscribe to our newsletter</li>
+                <li><strong>Name:</strong> When you voluntarily provide it during registration</li>
+                <li><strong>Usage Data:</strong> Information about how you interact with our website (pages visited, time spent, etc.)</li>
+                <li><strong>Device Information:</strong> Browser type, IP address, and device type</li>
+                <li><strong>Contact Information:</strong> When you submit the contact form</li>
+            </ul>
+
+            <h2>3. How We Use Your Information</h2>
+            <p>We use the information we collect for various purposes:</p>
+            <ul>
+                <li>To send you our daily news briefing</li>
+                <li>To communicate with you about your subscription</li>
+                <li>To respond to your inquiries and support requests</li>
+                <li>To improve our website and services</li>
+                <li>To analyze website usage and trends</li>
+                <li>To comply with legal obligations</li>
+            </ul>
+
+            <h2>4. Data Security</h2>
+            <p>
+                We implement appropriate technical and organizational measures to protect your personal information 
+                against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission 
+                over the Internet or method of electronic storage is 100% secure.
+            </p>
+
+            <h2>5. Email Communications</h2>
+            <p>
+                When you subscribe to Nova Brief, you agree to receive our daily news briefing via email. You can 
+                unsubscribe at any time by clicking the unsubscribe link in any email or by contacting us directly.
+            </p>
+
+            <h2>6. Third-Party Services</h2>
+            <p>
+                We may use third-party services (such as email providers and analytics platforms) to support our operations. 
+                These services may have access to your information as necessary to perform their functions, but they are 
+                contractually obligated to use it only for the purposes we specify.
+            </p>
+
+            <h2>7. Cookies</h2>
+            <p>
+                Our website may use cookies to enhance your experience. You can choose to disable cookies through your 
+                browser settings, but this may affect functionality of our website.
+            </p>
+
+            <h2>8. Your Rights</h2>
+            <p>Depending on your location, you may have certain rights regarding your personal information:</p>
+            <ul>
+                <li>Right to access your data</li>
+                <li>Right to correct inaccurate data</li>
+                <li>Right to delete your data</li>
+                <li>Right to restrict processing</li>
+                <li>Right to data portability</li>
+            </ul>
+
+            <h2>9. Changes to This Policy</h2>
+            <p>
+                We may update this Privacy Policy from time to time. We will notify you of any changes by posting 
+                the new Privacy Policy on this page and updating the "Last Updated" date.
+            </p>
+
+            <h2>10. Contact Us</h2>
+            <p>
+                If you have any questions about this Privacy Policy, please contact us at 
+                <a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a>
+            </p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 Nova Brief. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

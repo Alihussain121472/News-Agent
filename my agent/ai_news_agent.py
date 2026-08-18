@@ -180,6 +180,42 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
         return fetch_news_from_rss(limit)
 
 
+def format_welcome_email(subscriber_email: str) -> str:
+    """Generate a welcome email for newly subscribed portal users."""
+    today_label = datetime.now().strftime('%A, %B %d, %Y')
+    return f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background: #f4f7ff; color: #1f2937; padding: 24px;">
+        <div style="max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 28px; box-shadow: 0 12px 30px rgba(31, 41, 55, 0.08);">
+            <div style="background: linear-gradient(135deg, #111827 0%, #2563eb 100%); color: white; padding: 22px; border-radius: 12px; margin-bottom: 18px;">
+                <h1 style="margin: 0 0 8px; font-size: 30px;">Welcome to Nova Brief</h1>
+                <p style="margin: 0; font-size: 14px; opacity: 0.9;">{today_label}</p>
+            </div>
+
+            <p style="font-size: 16px; line-height: 1.7; margin: 0 0 18px;">
+                Hello,
+            </p>
+            <p style="font-size: 16px; line-height: 1.7; margin: 0 0 18px;">
+                Thanks for signing up for our AI news brief. You are now subscribed to receive a daily summary of the most important AI, technology, and global business stories.
+            </p>
+            <div style="background: #eef4ff; border-left: 5px solid #2563eb; border-radius: 10px; padding: 16px; margin: 18px 0; font-size: 14px; line-height: 1.7; color: #334155;">
+                <strong>Subscriber email:</strong> {subscriber_email}<br>
+                <strong>Delivery:</strong> Daily AI brief in your inbox<br>
+                <strong>Next update:</strong> Expect the next digest soon.
+            </div>
+            <p style="font-size: 16px; line-height: 1.7; margin: 0 0 18px;">
+                We’ll keep the briefing short, useful, and easy to scan so you can stay informed without the noise.
+            </p>
+            <p style="font-size: 16px; line-height: 1.7; margin: 0;">
+                Best,<br>
+                <strong>Nova Brief Team</strong>
+            </p>
+        </div>
+    </body>
+    </html>
+    """
+
+
 def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     """Create the morning briefing email with 5 AI digest items."""
     today_label = datetime.now().strftime('%A, %B %d, %Y')
@@ -272,20 +308,69 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
         return False
 
 
+def send_welcome_email(to_email: str) -> bool:
+    """Send a welcome email to a newly registered portal subscriber."""
+    subject = 'Welcome to Nova Brief'
+    html_content = format_welcome_email(to_email)
+    return send_email(to_email, subject, html_content)
+
+
+def send_contact_notification_email(name: str, email: str, subject: str, message: str) -> bool:
+    """Send an admin notification email when a contact form is submitted."""
+    admin_email = get_env_value('ADMIN_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
+    if not admin_email:
+        logger.warning('No admin email configured for contact notifications.')
+        return False
+
+    today_label = datetime.now().strftime('%A, %B %d, %Y %H:%M')
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; background: #f4f7ff; color: #1f2937; padding: 24px;">
+        <div style="max-width: 680px; margin: 0 auto; background: #ffffff; border-radius: 16px; padding: 28px; box-shadow: 0 12px 30px rgba(31,41,55,0.08);">
+            <div style="background: linear-gradient(135deg, #111827 0%, #2563eb 100%); color: white; padding: 18px 22px; border-radius: 12px; margin-bottom: 18px;">
+                <h2 style="margin:0 0 4px;">Nova Brief — Contact Form</h2>
+                <p style="margin:0; font-size:13px; opacity:0.85;">{today_label}</p>
+            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:15px;">
+                <tr><td style="padding:8px 0; color:#64748b; width:110px;">From</td><td style="font-weight:600;">{name}</td></tr>
+                <tr><td style="padding:8px 0; color:#64748b;">Email</td><td><a href="mailto:{email}" style="color:#2563eb;">{email}</a></td></tr>
+                <tr><td style="padding:8px 0; color:#64748b;">Subject</td><td style="font-weight:600;">{subject}</td></tr>
+            </table>
+            <div style="background:#f8fafc; border-left:4px solid #2563eb; border-radius:8px; padding:16px; margin-top:18px; font-size:14px; line-height:1.7; color:#334155;">
+                {message}
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return send_email(admin_email, f'[Nova Brief Contact] {subject}', html_content)
+
+
 def get_recipients() -> List[str]:
-    """Get list of recipient emails from recipients.json or .env"""
+    """Get list of recipient emails from registered users database and recipients.json"""
+    db = NewsDatabase()
+
+    # Get all registered users from database
+    registered_users = db.get_all_active_users()
+
+    # Also get recipients from recipients.json for backward compatibility
     try:
         with open('recipients.json', 'r') as f:
             data = json.load(f)
-            recipients = data.get('recipients', [])
-            if recipients:
-                return recipients
+            json_recipients = data.get('recipients', [])
     except (FileNotFoundError, json.JSONDecodeError):
-        pass
+        json_recipients = []
 
-    # Fallback to .env
-    default_email = get_env_value('RECIPIENT_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
-    return [default_email] if default_email else []
+    # Combine both sources and remove duplicates
+    all_recipients = list(set(registered_users + json_recipients))
+
+    # Fallback to .env if no recipients found
+    if not all_recipients:
+        default_email = get_env_value('RECIPIENT_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
+        if default_email:
+            all_recipients = [default_email]
+
+    return all_recipients
 
 
 def run_news_digest() -> bool:
@@ -293,11 +378,16 @@ def run_news_digest() -> bool:
     logger.info('Starting AI morning briefing workflow...')
     logger.info('=' * 60)
 
-    # Initialize database
     db = NewsDatabase()
+    today_key = datetime.now().strftime('%Y-%m-%d')
+
+    if db.has_daily_digest_run(today_key):
+        logger.info(f'Digest already sent for {today_key}. Skipping duplicate daily send.')
+        db.log_agent_event('digest_skipped', f'Digest already sent for {today_key}; duplicate send prevented.')
+        return False
+
     db.log_agent_event('digest_start', 'Starting news digest workflow')
 
-    # Get all recipients
     recipients = get_recipients()
     if not recipients:
         logger.error('No recipients configured. Add emails to recipients.json or RECIPIENT_EMAIL to .env.')
@@ -308,7 +398,6 @@ def run_news_digest() -> bool:
 
     news_items = search_ai_news(limit=5)
 
-    # Save articles to database
     if news_items:
         db.save_news_batch(news_items)
         logger.info(f'Saved {len(news_items)} articles to database')
@@ -316,7 +405,6 @@ def run_news_digest() -> bool:
     html_content = format_news_email(news_items)
     subject = f'AI Morning Brief - {datetime.now().strftime("%B %d, %Y")}'
 
-    # Send to all recipients
     success_count = 0
     failed_recipients = []
 
@@ -325,11 +413,13 @@ def run_news_digest() -> bool:
         if success:
             success_count += 1
             db.log_email_sent(to_email, subject, len(news_items), 'success')
+            db.update_user_email_sent(to_email)
         else:
             failed_recipients.append(to_email)
             db.log_email_sent(to_email, subject, len(news_items), 'failed', 'Email sending failed')
 
-    # Log overall result
+    db.record_daily_digest_run(len(recipients), success_count, len(news_items), 'success' if success_count > 0 else 'failed')
+
     if success_count > 0:
         logger.info(f'Sent digest with {len(news_items)} AI stories to {success_count}/{len(recipients)} recipients.')
         db.log_agent_event('email_sent', f'Successfully sent {len(news_items)} articles to {success_count} recipient(s)')
@@ -340,13 +430,12 @@ def run_news_digest() -> bool:
         logger.warning('Digest was not sent to any recipients.')
         db.log_agent_event('error', 'Failed to send email to all recipients')
 
-    # Cleanup old articles (older than 3 months)
     deleted = db.cleanup_old_articles(months=3)
     if deleted > 0:
         logger.info(f'Cleaned up {deleted} articles older than 3 months')
 
     logger.info('=' * 60)
-    return success
+    return success_count > 0
 
 
 def start_scheduler() -> bool:
