@@ -12,6 +12,10 @@ services:
         value: production
       - key: SECRET_KEY
         generateValue: true
+      - key: ADMIN_EMAIL
+        value: "admin@novabrief.local"
+      - key: ADMIN_PASSWORD
+        value: "change-me-now"
       - key: GMAIL_USER
         value: ""
       - key: GMAIL_APP_PASSWORD

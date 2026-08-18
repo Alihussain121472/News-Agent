@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Brief - Your Daily Tech News Intelligence</title>
+    <meta name="description" content="Stay informed with curated AI, technology, and business news delivered daily. Subscribe now for premium daily briefings.">
+    <meta name="keywords" content="AI news, technology news, daily briefing, artificial intelligence, tech updates">
+    <meta name="author" content="Nova Brief Team">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="canonical" href="https://novabrief.ai-news.app/">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <div class="logo">
+                    <i class="fas fa-newspaper"></i>
+                    <span>Nova Brief</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features" class="nav-link">Features</a>
+                    <a href="#faq" class="nav-link">FAQ</a>
+                    <a href="#contact" class="nav-link">Contact</a>
+                    <a href="/user/login" class="nav-link">User Portal</a>
+                    <a href="/admin/login" class="nav-link">Admin</a>
+                    <button class="btn-primary" onclick="scrollToSection('subscribe')">Subscribe</button>
+                </div>
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Your Daily <span class="highlight">Intelligence</span> Briefing
+                </h1>
+                <p class="hero-subtitle">
+                    Curated, insightful AI and technology news delivered to your inbox every morning. Stay ahead of the curve.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="subscriberCount">0</div>
+                        <div class="stat-label">Active Subscribers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="articleCount">0</div>
+                        <div class="stat-label">Articles Curated</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Always Running</div>
+                    </div>
+                </div>
+                <div class="hero-cta">
+                    <button class="btn-primary btn-lg" onclick="scrollToSection('subscribe')">
+                        <i class="fas fa-envelope"></i> Get Started Free
+                    </button>
+                    <button class="btn-secondary btn-lg" onclick="scrollToSection('features')">
+                        <i class="fas fa-arrow-down"></i> Learn More
+                    </button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-card">
+                    <div class="card-header">Latest News</div>
+                    <div class="card-item">
+                        <div class="dot pulse"></div>
+                        <div class="item-text">
+                            <div class="item-title">AI Breakthrough</div>
+                            <div class="item-time">2 minutes ago</div>
+                        </div>
+                    </div>
+                    <div class="card-item">
+                        <div class="dot"></div>
+                        <div class="item-text">
+                            <div class="item-title">Tech Innovation</div>
+                            <div class="item-time">15 minutes ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose Nova Brief?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Powered Curation</h3>
+                    <p>Our intelligent algorithms analyze hundreds of sources to bring you the most relevant AI news daily.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>8 AM Delivery</h3>
+                    <p>Every morning at 8 AM, receive your personalized briefing with actionable insights.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <h3>Smart Filtering</h3>
+                    <p>Content automatically categorized by impact, importance, and relevance to you.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Privacy First</h3>
+                    <p>Your data is encrypted and never shared. We respect your privacy completely.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Trend Analysis</h3>
+                    <p>Track trending topics and emerging patterns in the AI and tech industry.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Mobile Ready</h3>
+                    <p>Beautiful emails that look perfect on any device - desktop, tablet, or mobile.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subscription Section -->
+    <section id="subscribe" class="subscription">
+        <div class="container">
+            <div class="subscription-card">
+                <h2>Join Our Community Today</h2>
+                <p class="subscribe-subtitle">Get your first briefing tomorrow morning. No credit card required.</p>
+                <form id="subscribeForm" class="subscribe-form" onsubmit="handleSubscribe(event)">
+                    <div class="form-group">
+                        <input type="text" id="subName" placeholder="Your Name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="subEmail" placeholder="your@email.com" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg btn-submit">
+                        <i class="fas fa-check"></i> Subscribe Now
+                    </button>
+                    <p class="privacy-text">
+                        <i class="fas fa-lock"></i> We'll send you a welcome email. No spam, ever.
+                    </p>
+                </form>
+                <div id="subscribeMessage" class="message-box" style="display: none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">How often do you send emails?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We send one curated briefing every morning at 8 AM. You'll never receive more than one email per day.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">Can I unsubscribe anytime?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolutely! Unsubscribe with one click from any email. You can also manage your preferences in your account.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">Is my email address safe?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! We encrypt your data and never sell or share your information with third parties.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">What sources do you use?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>We aggregate content from 50+ trusted AI, technology, and business news sources worldwide.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">Can I customize my briefing?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes. We continue adding more customization options so you can tailor topics and format to your interests.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-toggle" onclick="toggleFAQ(this)">
+                        <span class="faq-question">Is there an API?</span>
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>API access is on our roadmap. Reach out through the contact form if you want early access updates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4>Email</h4>
+                            <p><a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div>
+                            <h4>Twitter/X</h4>
+                            <p><a href="https://x.com/SyedAlinova" target="_blank">@SyedAlinova</a></p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-life-ring"></i>
+                        </div>
+                        <div>
+                            <h4>Support</h4>
+                            <p><a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a></p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" onsubmit="handleContactForm(event)">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="your@email.com" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <select required class="form-input">
+                            <option value="">Select Subject</option>
+                            <option value="support">Support</option>
+                            <option value="sales">Sales Inquiry</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="partnership">Partnership</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your message..." rows="5" required class="form-input"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Nova Brief</h4>
+                    <p>Your daily intelligence briefing, delivered every morning.</p>
+                    <div class="social-links">
+                        <a href="https://x.com/SyedAlinova" title="Twitter/X" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h5>Product</h5>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="/user/dashboard">User Dashboard</a></li>
+                        <li><a href="/dashboard">Admin Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Company</h5>
+                    <ul>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h5>Legal</h5>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/cookies">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Nova Brief. All rights reserved. | <a href="/sitemap.xml">Sitemap</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

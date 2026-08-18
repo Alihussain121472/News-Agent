@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Nova Brief</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <section class="subscription" style="min-height:100vh;display:flex;align-items:center;">
+        <div class="container" style="max-width:560px;">
+            <div class="subscription-card">
+                <h2>Admin Login</h2>
+                <p class="subscribe-subtitle">Restricted access. Admin only.</p>
+                <form id="adminLoginForm" class="subscribe-form">
+                    <div class="form-group">
+                        <input type="email" id="email" placeholder="Admin Email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Admin Password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn-primary btn-lg btn-submit">Login as Admin</button>
+                    <p class="privacy-text"><a href="/user/login">User Login</a></p>
+                </form>
+                <div id="message" class="message-box" style="display:none;"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+    document.getElementById('adminLoginForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        const messageBox = document.getElementById('message');
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+
+        const payload = {
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value
+        };
+
+        try {
+            const response = await fetch('/api/auth/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+
+            messageBox.style.display = 'block';
+            if (response.ok && data.status === 'success') {
+                messageBox.className = 'message-box success';
+                messageBox.textContent = data.message;
+                window.location.href = data.redirect || '/dashboard';
+                return;
+            }
+            messageBox.className = 'message-box error';
+            messageBox.textContent = data.message || 'Admin login failed.';
+        } catch (error) {
+            messageBox.style.display = 'block';
+            messageBox.className = 'message-box error';
+            messageBox.textContent = 'Unexpected error. Please try again.';
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
+    </script>
+</body>
+</html>
