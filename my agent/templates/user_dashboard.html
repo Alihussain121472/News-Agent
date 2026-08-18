@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Nova Brief</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        .dash-wrap { min-height: 100vh; padding: 2rem 1rem; background: var(--bg-primary); }
+        .dash-container { max-width: 1100px; margin: 0 auto; }
+        .dash-header { display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1.5rem; }
+        .dash-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; }
+        .dash-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem; margin-bottom:1rem; }
+        .dash-list { display:grid; gap:0.75rem; }
+        .dash-item { background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem; }
+        .muted { color: var(--text-secondary); font-size: 0.95rem; }
+        .value { font-size: 1.6rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="dash-wrap">
+        <div class="dash-container">
+            <div class="dash-header">
+                <div>
+                    <h1>User Dashboard</h1>
+                    <p class="muted">Welcome, {{ user_name or 'User' }} ({{ user_email }})</p>
+                </div>
+                <div style="display:flex; gap:0.75rem;">
+                    <a href="/" class="btn btn-secondary">Home</a>
+                    <button id="logoutBtn" class="btn btn-danger">Logout</button>
+                </div>
+            </div>
+
+            <div class="dash-grid" id="summaryGrid"></div>
+
+            <div class="dash-card">
+                <h3 style="margin-bottom:0.75rem;">Latest Articles</h3>
+                <div class="dash-list" id="articlesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function loadUserOverview() {
+        const response = await fetch('/api/user/overview');
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = '/user/login';
+            return;
+        }
+
+        const data = await response.json();
+        const summary = data.summary || {};
+
+        const summaryGrid = document.getElementById('summaryGrid');
+        summaryGrid.innerHTML = `
+            <div class="dash-card"><div class="muted">Emails Received</div><div class="value">${summary.total_emails_received || 0}</div></div>
+            <div class="dash-card"><div class="muted">Total Logins</div><div class="value">${summary.login_count || 0}</div></div>
+            <div class="dash-card"><div class="muted">Last Email Sent</div><div class="value" style="font-size:1rem;">${summary.last_email_sent || 'N/A'}</div></div>
+            <div class="dash-card"><div class="muted">Account Status</div><div class="value" style="font-size:1rem;">${summary.is_active ? 'Active' : 'Inactive'}</div></div>
+        `;
+
+        const articles = data.articles || [];
+        const list = document.getElementById('articlesList');
+        if (!articles.length) {
+            list.innerHTML = '<div class="muted">No articles available yet.</div>';
+            return;
+        }
+
+        list.innerHTML = articles.map(article => `
+            <article class="dash-item">
+                <h4 style="margin-bottom:0.35rem;">${article.title || 'Untitled'}</h4>
+                <p class="muted">${article.source || 'Unknown source'} • ${article.fetched_at || ''}</p>
+                <p style="margin-top:0.45rem;">${(article.summary || '').slice(0, 220)}</p>
+            </article>
+        `).join('');
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        window.location.href = '/';
+    });
+
+    loadUserOverview();
+    </script>
+</body>
+</html>
