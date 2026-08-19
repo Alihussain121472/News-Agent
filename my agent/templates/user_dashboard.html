@@ -1,86 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard - Nova Brief</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <style>
-        .dash-wrap { min-height: 100vh; padding: 2rem 1rem; background: var(--bg-primary); }
-        .dash-container { max-width: 1100px; margin: 0 auto; }
-        .dash-header { display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1.5rem; }
-        .dash-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.25rem; }
-        .dash-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:1rem; margin-bottom:1rem; }
-        .dash-list { display:grid; gap:0.75rem; }
-        .dash-item { background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem; }
-        .muted { color: var(--text-secondary); font-size: 0.95rem; }
-        .value { font-size: 1.6rem; font-weight: 700; }
-    </style>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Dashboard — Nova Brief</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','sans-serif']}}}}</script>
+  <style>
+    body{background:linear-gradient(180deg,#020817 0%,#0f172a 100%);min-height:100vh;}
+    .glass{background:rgba(15,23,42,0.7);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,0.15);}
+    .gradient-text{background:linear-gradient(135deg,#60a5fa,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .sidebar{background:rgba(10,15,30,0.9);border-right:1px solid rgba(148,163,184,0.1);}
+    .nav-item{transition:all .2s;}
+    .nav-item:hover,.nav-item.active{background:rgba(59,130,246,0.15);color:#60a5fa;}
+    .nav-item.active{border-left:3px solid #3b82f6;}
+    .tab-btn.active{background:rgba(59,130,246,0.2);color:#60a5fa;border-color:#3b82f6;}
+    ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:#0f172a;} ::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
+  </style>
 </head>
-<body>
-    <div class="dash-wrap">
-        <div class="dash-container">
-            <div class="dash-header">
-                <div>
-                    <h1>User Dashboard</h1>
-                    <p class="muted">Welcome, {{ user_name or 'User' }} ({{ user_email }})</p>
-                </div>
-                <div style="display:flex; gap:0.75rem;">
-                    <a href="/" class="btn btn-secondary">Home</a>
-                    <button id="logoutBtn" class="btn btn-danger">Logout</button>
-                </div>
-            </div>
+<body class="font-sans text-slate-200">
+<div class="flex h-screen overflow-hidden">
 
-            <div class="dash-grid" id="summaryGrid"></div>
-
-            <div class="dash-card">
-                <h3 style="margin-bottom:0.75rem;">Latest Articles</h3>
-                <div class="dash-list" id="articlesList"></div>
-            </div>
+  <!-- Sidebar -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col overflow-y-auto hidden lg:flex">
+    <div class="p-6 border-b border-slate-800">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+          <i class="fas fa-newspaper text-white text-sm"></i>
         </div>
+        <span class="font-bold text-white">Nova Brief</span>
+      </a>
     </div>
+    <div class="p-4 border-b border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm" id="avatarInitial">U</div>
+        <div>
+          <div class="text-sm font-semibold text-white" id="sidebarName">{{ user_name or 'User' }}</div>
+          <div class="text-xs text-slate-500" id="sidebarEmail">{{ user_email }}</div>
+        </div>
+      </div>
+    </div>
+    <nav class="p-3 flex-1">
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-2">Overview</div>
+      <button onclick="switchTab('overview')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-overview">
+        <i class="fas fa-th-large w-4 text-center"></i> Dashboard
+      </button>
+      <button onclick="switchTab('activity')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-activity">
+        <i class="fas fa-chart-line w-4 text-center"></i> My Activity
+      </button>
+      <button onclick="switchTab('articles')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-articles">
+        <i class="fas fa-newspaper w-4 text-center"></i> News Articles
+      </button>
+      <button onclick="switchTab('programs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-programs">
+        <i class="fas fa-graduation-cap w-4 text-center"></i> Programs
+      </button>
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Account</div>
+      <button onclick="switchTab('progress')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-progress">
+        <i class="fas fa-chart-bar w-4 text-center"></i> Progress Report
+      </button>
+      <button onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4">
+        <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
+      </button>
+    </nav>
+  </aside>
 
-    <script>
-    async function loadUserOverview() {
-        const response = await fetch('/api/user/overview');
-        if (response.status === 401 || response.status === 403) {
-            window.location.href = '/user/login';
-            return;
-        }
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <!-- Top bar -->
+    <header class="sticky top-0 z-10 bg-dark-900/80 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold text-white">User Dashboard</h1>
+        <p class="text-xs text-slate-500">Welcome back, <span id="topName">{{ user_name or 'User' }}</span></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="/" class="glass px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white transition"><i class="fas fa-home mr-1"></i>Home</a>
+        <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs transition"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+      </div>
+    </header>
 
-        const data = await response.json();
-        const summary = data.summary || {};
+    <div class="p-6">
 
-        const summaryGrid = document.getElementById('summaryGrid');
-        summaryGrid.innerHTML = `
-            <div class="dash-card"><div class="muted">Emails Received</div><div class="value">${summary.total_emails_received || 0}</div></div>
-            <div class="dash-card"><div class="muted">Total Logins</div><div class="value">${summary.login_count || 0}</div></div>
-            <div class="dash-card"><div class="muted">Last Email Sent</div><div class="value" style="font-size:1rem;">${summary.last_email_sent || 'N/A'}</div></div>
-            <div class="dash-card"><div class="muted">Account Status</div><div class="value" style="font-size:1rem;">${summary.is_active ? 'Active' : 'Inactive'}</div></div>
-        `;
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsGrid"></div>
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> Latest Articles</h3>
+            <div id="overviewArticles" class="space-y-3"></div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Open Programs</h3>
+            <div id="overviewPrograms" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
 
-        const articles = data.articles || [];
-        const list = document.getElementById('articlesList');
-        if (!articles.length) {
-            list.innerHTML = '<div class="muted">No articles available yet.</div>';
-            return;
-        }
+      <!-- ACTIVITY TAB -->
+      <div id="tab-activity" class="hidden">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="activityStats"></div>
+        <div class="glass rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-history text-blue-400"></i> Activity Log</h3>
+            <span class="text-xs text-slate-500">Your tracked actions on Nova Brief</span>
+          </div>
+          <div id="activityLog" class="space-y-2 max-h-[500px] overflow-y-auto"></div>
+        </div>
+      </div>
 
-        list.innerHTML = articles.map(article => `
-            <article class="dash-item">
-                <h4 style="margin-bottom:0.35rem;">${article.title || 'Untitled'}</h4>
-                <p class="muted">${article.source || 'Unknown source'} • ${article.fetched_at || ''}</p>
-                <p style="margin-top:0.45rem;">${(article.summary || '').slice(0, 220)}</p>
-            </article>
-        `).join('');
-    }
+      <!-- ARTICLES TAB -->
+      <div id="tab-articles" class="hidden">
+        <div class="glass rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> AI News Articles</h3>
+          </div>
+          <div class="relative mb-4">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <input type="text" id="articleSearch" placeholder="Search articles..." onkeyup="liveSearch()" class="w-full bg-dark-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition"/>
+          </div>
+          <div id="articlesList" class="space-y-4"></div>
+        </div>
+      </div>
 
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        window.location.href = '/';
-    });
+      <!-- PROGRAMS TAB -->
+      <div id="tab-programs" class="hidden">
+        <div class="glass rounded-2xl p-5">
+          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs</h3>
+          <p class="text-slate-400 text-sm mb-6">You receive email alerts for all programs below before they launch — with direct registration links.</p>
+          <div id="programsList" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
 
-    loadUserOverview();
-    </script>
+      <!-- PROGRESS TAB -->
+      <div id="tab-progress" class="hidden">
+        <div class="glass rounded-2xl p-5 mb-6">
+          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-purple-400"></i> Progress Report</h3>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="progressStats"></div>
+        </div>
+        <div class="glass rounded-2xl p-5">
+          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-400"></i> Top Actions</h3>
+          <div id="topActionsList" class="space-y-3"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const USER_NAME = '{{ user_name or "User" }}';
+const USER_EMAIL = '{{ user_email }}';
+let allArticles = [];
+let overviewData = {};
+
+// Set initials
+const init = (USER_NAME||'U').charAt(0).toUpperCase();
+document.getElementById('avatarInitial').textContent = init;
+
+function switchTab(name){
+  ['overview','activity','articles','programs','progress'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.add('hidden');
+    const n = document.getElementById('nav-'+t);
+    if(n){ n.classList.remove('active'); }
+  });
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  const navBtn = document.getElementById('nav-'+name);
+  if(navBtn) navBtn.classList.add('active');
+  if(name==='activity') loadActivity();
+  if(name==='articles') loadArticles();
+  if(name==='programs') loadPrograms();
+  if(name==='progress') loadProgress();
+}
+
+function fmt(dt){ if(!dt) return 'Never'; try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; } }
+function relTime(dt){ if(!dt) return ''; try{ const d=new Date(dt); const s=Math.floor((Date.now()-d)/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }catch(e){ return ''; } }
+
+const actionIcons = { login:'fas fa-sign-in-alt text-blue-400', logout:'fas fa-sign-out-alt text-red-400', page_visit:'fas fa-eye text-slate-400', dashboard_view:'fas fa-th-large text-purple-400', activity_view:'fas fa-chart-line text-green-400', programs_view:'fas fa-graduation-cap text-emerald-400', account_created:'fas fa-user-plus text-green-400', program_notification_sent:'fas fa-bell text-yellow-400', articles_view:'fas fa-newspaper text-blue-300', progress_view:'fas fa-chart-bar text-orange-400', default:'fas fa-circle text-slate-500' };
+function getIcon(action){ return actionIcons[action]||actionIcons.default; }
+
+// Load overview
+async function loadOverview(){
+  try{
+    const r = await fetch('/api/user/overview');
+    if(r.status===401||r.status===403){ window.location.href='/user/login'; return; }
+    overviewData = await r.json();
+    const s = overviewData.summary||{};
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-blue-400 mb-1">${s.total_emails_received||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Received</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 mb-1">${s.login_count||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Total Logins</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-lg font-bold text-purple-400 mb-1">${s.last_email_sent ? relTime(s.last_email_sent) : 'N/A'}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-clock mr-1"></i>Last Email</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-lg font-bold mb-1 ${s.is_active?'text-emerald-400':'text-red-400'}">${s.is_active?'Active':'Inactive'}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-user-check mr-1"></i>Status</div>
+      </div>`;
+
+    const arts = (overviewData.articles||[]).slice(0,5);
+    document.getElementById('overviewArticles').innerHTML = arts.length ? arts.map(a=>`
+      <div class="bg-dark-800/60 rounded-xl p-3 border border-slate-700/50 hover:border-blue-500/30 transition">
+        <div class="text-sm font-semibold text-white leading-snug mb-1">${a.title||'Untitled'}</div>
+        <div class="text-xs text-slate-500">${a.source||''} · ${relTime(a.fetched_at)}</div>
+      </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-4">No articles yet.</div>';
+
+    const progs = (overviewData.programs||[]).slice(0,4);
+    document.getElementById('overviewPrograms').innerHTML = progs.length ? progs.map(p=>`
+      <div class="bg-dark-800/60 rounded-xl p-3 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-sm font-semibold text-white">${p.title}</div>
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">${p.company}</span>
+        </div>
+        ${p.deadline?`<div class="text-xs text-orange-400"><i class="fas fa-calendar mr-1"></i>Deadline: ${p.deadline}</div>`:''}
+        ${p.registration_url?`<a href="${p.registration_url}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 transition mt-1 block"><i class="fas fa-external-link-alt mr-1"></i>Register Now</a>`:''}
+      </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-4">No programs yet. Admin will add soon.</div>';
+  }catch(e){ console.error(e); }
+}
+
+// Load activity
+async function loadActivity(){
+  const container = document.getElementById('activityLog');
+  container.innerHTML = '<div class="text-slate-500 text-sm text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
+  try{
+    const r = await fetch('/api/user/activity?limit=80');
+    if(!r.ok){ container.innerHTML='<div class="text-slate-500 text-sm text-center py-4">Could not load activity.</div>'; return; }
+    const d = await r.json();
+    const stats = d.stats||{};
+
+    document.getElementById('activityStats').innerHTML = `
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-blue-400 mb-1">${stats.total_actions||0}</div>
+        <div class="text-xs text-slate-500">Total Actions</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 mb-1">${stats.today_actions||0}</div>
+        <div class="text-xs text-slate-500">Today</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-purple-400 mb-1">${stats.week_actions||0}</div>
+        <div class="text-xs text-slate-500">This Week</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-orange-400 mb-1">${stats.active_days||0}</div>
+        <div class="text-xs text-slate-500">Active Days</div>
+      </div>`;
+
+    const log = d.activity||[];
+    container.innerHTML = log.length ? log.map(a=>`
+      <div class="flex items-start gap-3 bg-dark-800/40 rounded-xl p-3 hover:bg-dark-700/40 transition">
+        <div class="w-7 h-7 rounded-lg bg-dark-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <i class="${getIcon(a.action)} text-xs"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-white capitalize">${(a.action||'').replace(/_/g,' ')}</div>
+          ${a.detail?`<div class="text-xs text-slate-500 truncate">${a.detail}</div>`:''}
+          ${a.page?`<div class="text-xs text-slate-600">${a.page}</div>`:''}
+        </div>
+        <div class="text-xs text-slate-600 flex-shrink-0">${relTime(a.logged_at)}</div>
+      </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-8">No activity recorded yet. Start browsing!</div>';
+  }catch(e){ container.innerHTML='<div class="text-slate-500 text-sm text-center py-4">Error loading activity.</div>'; }
+}
+
+// Load articles
+async function loadArticles(){
+  const r = await fetch('/api/articles?limit=50');
+  allArticles = await r.json();
+  renderArticles(allArticles);
+}
+
+function renderArticles(arts){
+  document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
+    <div class="glass rounded-xl p-5 hover:border-blue-500/30 border border-transparent transition">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <h4 class="text-sm font-bold text-white leading-snug">${a.title||'Untitled'}</h4>
+        ${a.url&&a.url!=='#'?`<a href="${a.url}" target="_blank" class="flex-shrink-0 text-xs text-blue-400 hover:text-blue-300 transition"><i class="fas fa-external-link-alt"></i></a>`:''}
+      </div>
+      <div class="text-xs text-slate-500 mb-2">${a.source||'Unknown'} · ${relTime(a.fetched_at)}</div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-3">${(a.summary||'').substring(0,200)}${(a.summary||'').length>200?'...':''}</p>
+      ${a.why_important?`<div class="text-xs text-slate-500"><span class="text-blue-400 font-semibold">Why it matters:</span> ${a.why_important}</div>`:''}
+    </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-8">No articles yet.</div>';
+}
+
+function liveSearch(){
+  const q = document.getElementById('articleSearch').value.toLowerCase();
+  renderArticles(q ? allArticles.filter(a=>(a.title||'').toLowerCase().includes(q)||(a.summary||'').toLowerCase().includes(q)) : allArticles);
+}
+
+// Load programs
+async function loadPrograms(){
+  const r = await fetch('/api/user/programs');
+  const progs = await r.json();
+  document.getElementById('programsList').innerHTML = progs.length ? progs.map(p=>`
+    <div class="glass rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+          <i class="fas fa-graduation-cap text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-white">${p.title}</div>
+          <div class="text-xs text-emerald-400">${p.company}</div>
+        </div>
+        <span class="ml-auto text-xs bg-${p.category==='internship'?'blue':'emerald'}-500/20 text-${p.category==='internship'?'blue':'emerald'}-400 px-2 py-0.5 rounded-full">${(p.category||'program').toUpperCase()}</span>
+      </div>
+      <p class="text-xs text-slate-400 leading-relaxed mb-3">${p.description||'Check the registration link for full details.'}</p>
+      <div class="space-y-1 text-xs text-slate-500 mb-4">
+        ${p.deadline?`<div><i class="fas fa-calendar-alt mr-2 text-orange-400"></i>Deadline: <span class="text-orange-400 font-semibold">${p.deadline}</span></div>`:''}
+        ${p.launch_date?`<div><i class="fas fa-rocket mr-2 text-blue-400"></i>Launch: <span class="text-blue-400">${p.launch_date}</span></div>`:''}
+      </div>
+      ${p.registration_url?`
+      <a href="${p.registration_url}" target="_blank"
+         class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-sm transition">
+        <i class="fas fa-rocket"></i> Register Now
+      </a>`:'<div class="text-xs text-slate-600 text-center">Registration link coming soon</div>'}
+    </div>`).join('') : '<div class="col-span-2 text-slate-500 text-sm text-center py-8">No programs available yet. You will receive email alerts when new programs are added.</div>';
+}
+
+// Load progress
+async function loadProgress(){
+  try{
+    const r = await fetch('/api/user/activity?limit=100');
+    const d = await r.json(); const stats = d.stats||{};
+    document.getElementById('progressStats').innerHTML = `
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-blue-400 mb-1">${stats.total_logins||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Total Logins</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-emerald-400 mb-1">${stats.emails_received||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Received</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-purple-400 mb-1">${stats.active_days||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-calendar-check mr-1"></i>Active Days</div>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <div class="text-3xl font-black text-orange-400 mb-1">${stats.total_actions||0}</div>
+        <div class="text-xs text-slate-500"><i class="fas fa-bolt mr-1"></i>Total Actions</div>
+      </div>`;
+    const top = stats.top_actions||[];
+    document.getElementById('topActionsList').innerHTML = top.length ? top.map(t=>`
+      <div class="flex items-center gap-4">
+        <div class="w-32 text-sm text-slate-300 capitalize">${(t.action||'').replace(/_/g,' ')}</div>
+        <div class="flex-1 bg-dark-700 rounded-full h-2">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full" style="width:${Math.min(100,Math.round((t.count/(top[0]?.count||1))*100))}%"></div>
+        </div>
+        <div class="text-sm font-bold text-blue-400 w-8 text-right">${t.count}</div>
+      </div>`).join('') : '<div class="text-slate-500 text-sm">No actions recorded yet.</div>';
+  }catch(e){ console.error(e); }
+}
+
+async function handleLogout(){
+  await fetch('/api/auth/logout',{method:'POST'});
+  window.location.href='/';
+}
+
+loadOverview();
+</script>
 </body>
 </html>
