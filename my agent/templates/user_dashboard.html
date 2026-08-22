@@ -133,13 +133,33 @@
 
       <!-- PROGRESS TAB -->
       <div id="tab-progress" class="hidden">
+        <!-- Daily Progress -->
         <div class="glass rounded-2xl p-5 mb-6">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-purple-400"></i> Progress Report</h3>
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="progressStats"></div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-calendar-day text-blue-400"></i> Today's Progress</h3>
+            <span class="text-xs text-slate-500" id="dailyDate"></span>
+          </div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="dailyProgressStats"></div>
         </div>
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-400"></i> Top Actions</h3>
-          <div id="topActionsList" class="space-y-3"></div>
+
+        <!-- Weekly Summary -->
+        <div class="glass rounded-2xl p-5 mb-6">
+          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-purple-400"></i> Weekly Summary</h3>
+          <div id="weeklyChart" class="flex items-end justify-between h-40 pt-4 border-b border-slate-700/50 pb-2">
+            <!-- Bars injected here -->
+          </div>
+        </div>
+
+        <!-- All-Time Progress Report -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-trophy text-emerald-400"></i> All-Time Stats</h3>
+            <div class="grid grid-cols-2 gap-4" id="progressStats"></div>
+          </div>
+          <div class="glass rounded-2xl p-5">
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-400"></i> Top Actions</h3>
+            <div id="topActionsList" class="space-y-3"></div>
+          </div>
         </div>
       </div>
 
@@ -325,34 +345,81 @@ async function loadPrograms(){
 // Load progress
 async function loadProgress(){
   try{
-    const r = await fetch('/api/user/activity?limit=100');
-    const d = await r.json(); const stats = d.stats||{};
+    // Fetch all 3 endpoints concurrently
+    const [actRes, dailyRes, weeklyRes] = await Promise.all([
+      fetch('/api/user/activity?limit=100'),
+      fetch('/api/user/daily-progress'),
+      fetch('/api/user/weekly-summary')
+    ]);
+    
+    // Process All-Time
+    const d = await actRes.json(); const stats = d.stats||{};
     document.getElementById('progressStats').innerHTML = `
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-blue-400 mb-1">${stats.total_logins||0}</div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-blue-400 mb-1">${stats.total_logins||0}</div>
         <div class="text-xs text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Total Logins</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-emerald-400 mb-1">${stats.emails_received||0}</div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-emerald-400 mb-1">${stats.emails_received||0}</div>
         <div class="text-xs text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Received</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-purple-400 mb-1">${stats.active_days||0}</div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-purple-400 mb-1">${stats.active_days||0}</div>
         <div class="text-xs text-slate-500"><i class="fas fa-calendar-check mr-1"></i>Active Days</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-orange-400 mb-1">${stats.total_actions||0}</div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-orange-400 mb-1">${stats.total_actions||0}</div>
         <div class="text-xs text-slate-500"><i class="fas fa-bolt mr-1"></i>Total Actions</div>
       </div>`;
     const top = stats.top_actions||[];
     document.getElementById('topActionsList').innerHTML = top.length ? top.map(t=>`
       <div class="flex items-center gap-4">
-        <div class="w-32 text-sm text-slate-300 capitalize">${(t.action||'').replace(/_/g,' ')}</div>
+        <div class="w-24 text-xs text-slate-300 capitalize truncate">${(t.action||'').replace(/_/g,' ')}</div>
         <div class="flex-1 bg-dark-700 rounded-full h-2">
           <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full" style="width:${Math.min(100,Math.round((t.count/(top[0]?.count||1))*100))}%"></div>
         </div>
-        <div class="text-sm font-bold text-blue-400 w-8 text-right">${t.count}</div>
-      </div>`).join('') : '<div class="text-slate-500 text-sm">No actions recorded yet.</div>';
+        <div class="text-xs font-bold text-blue-400 w-6 text-right">${t.count}</div>
+      </div>`).join('') : '<div class="text-slate-500 text-xs">No actions recorded yet.</div>';
+
+    // Process Daily
+    if(dailyRes.ok) {
+      const daily = await dailyRes.json();
+      document.getElementById('dailyDate').textContent = daily.date || '';
+      document.getElementById('dailyProgressStats').innerHTML = `
+        <div class="bg-blue-500/10 rounded-xl p-4 text-center border border-blue-500/20">
+          <div class="text-2xl font-black text-blue-400 mb-1">${daily.pages_visited||0}</div>
+          <div class="text-xs text-blue-300">Pages Visited</div>
+        </div>
+        <div class="bg-emerald-500/10 rounded-xl p-4 text-center border border-emerald-500/20">
+          <div class="text-2xl font-black text-emerald-400 mb-1">${daily.articles_read||0}</div>
+          <div class="text-xs text-emerald-300">Articles Read</div>
+        </div>
+        <div class="bg-purple-500/10 rounded-xl p-4 text-center border border-purple-500/20">
+          <div class="text-2xl font-black text-purple-400 mb-1">${daily.programs_explored||0}</div>
+          <div class="text-xs text-purple-300">Programs Explored</div>
+        </div>
+        <div class="bg-orange-500/10 rounded-xl p-4 text-center border border-orange-500/20">
+          <div class="text-2xl font-black text-orange-400 mb-1">${daily.total_actions||0}</div>
+          <div class="text-xs text-orange-300">Total Actions Today</div>
+        </div>`;
+    }
+
+    // Process Weekly
+    if(weeklyRes.ok) {
+      const weekly = await weeklyRes.json();
+      const maxActions = Math.max(1, ...weekly.map(d => d.actions));
+      document.getElementById('weeklyChart').innerHTML = weekly.map(d => {
+        const h = Math.max(5, Math.round((d.actions / maxActions) * 100));
+        return `
+          <div class="flex flex-col items-center justify-end w-full group">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-slate-400 mb-1">${d.actions}</div>
+            <div class="w-3/4 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-sm transition-all duration-500" style="height:${h}%"></div>
+            <div class="text-[10px] text-slate-500 mt-2">${d.label}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
   }catch(e){ console.error(e); }
 }
 

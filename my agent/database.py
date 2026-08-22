@@ -363,6 +363,47 @@ class NewsDatabase:
             'emails_received': emails_received, 'total_logins': total_logins,
         }
 
+    def get_user_daily_progress(self, email: str) -> Dict[str, Any]:
+        """Get detailed daily progress for the user dashboard tracking feature."""
+        normalized = email.strip().lower()
+        conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
+        today = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today)); total_today = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action='page_visit'", (normalized, today)); pages_today = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action IN ('articles_view','dashboard_view')", (normalized, today)); reads_today = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action='programs_view'", (normalized, today)); programs_today = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM user_login_events WHERE email=? AND date(login_time)=?", (normalized, today)); logins_today = cursor.fetchone()[0]
+        cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=? AND date(logged_at)=? GROUP BY action ORDER BY cnt DESC', (normalized, today))
+        today_breakdown = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
+        cursor.execute('SELECT MIN(logged_at) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        first_action = cursor.fetchone()[0]
+        cursor.execute('SELECT MAX(logged_at) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        last_action = cursor.fetchone()[0]
+        conn.close()
+        return {
+            'total_actions': total_today, 'pages_visited': pages_today,
+            'articles_read': reads_today, 'programs_explored': programs_today,
+            'logins': logins_today, 'breakdown': today_breakdown,
+            'first_action': first_action, 'last_action': last_action,
+            'date': today,
+        }
+
+    def get_user_weekly_summary(self, email: str) -> List[Dict[str, Any]]:
+        """Get per-day activity counts for the last 7 days for chart display."""
+        normalized = email.strip().lower()
+        conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
+        days = []
+        for i in range(6, -1, -1):
+            d = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+            cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, d))
+            count = cursor.fetchone()[0]
+            cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=? AND date(login_time)=?', (normalized, d))
+            logins = cursor.fetchone()[0]
+            day_label = (datetime.now() - timedelta(days=i)).strftime('%a')
+            days.append({'date': d, 'label': day_label, 'actions': count, 'logins': logins})
+        conn.close()
+        return days
+
     # ── Feature 3: Admin user monitoring ──────────────────────────────────────
 
     def get_all_users_with_stats(self) -> List[Dict[str, Any]]:

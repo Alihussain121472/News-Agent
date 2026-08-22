@@ -215,6 +215,21 @@ def get_user_programs():
     return jsonify(db.get_active_programs(limit=20))
 
 
+@app.route('/api/user/daily-progress')
+@user_required
+def get_user_daily_progress():
+    email = session.get('user_email')
+    db.log_user_activity(email, 'progress_view', 'Viewed daily progress')
+    return jsonify(db.get_user_daily_progress(email))
+
+
+@app.route('/api/user/weekly-summary')
+@user_required
+def get_user_weekly_summary():
+    email = session.get('user_email')
+    return jsonify(db.get_user_weekly_summary(email))
+
+
 # ── Admin dashboard API ────────────────────────────────────────────────────────
 
 @app.route('/api/statistics')
