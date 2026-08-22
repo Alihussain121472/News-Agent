@@ -477,15 +477,32 @@ def handle_contact():
 def sitemap():
     return '''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://novabrief.ai-news.app/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-<url><loc>https://novabrief.ai-news.app/privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>https://novabrief.ai-news.app/terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>https://novabrief-web.onrender.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+<url><loc>https://novabrief-web.onrender.com/privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>https://novabrief-web.onrender.com/terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>''', 200, {'Content-Type': 'application/xml'}
 
 
 @app.route('/robots.txt')
 def robots():
-    return 'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: https://novabrief.ai-news.app/sitemap.xml', 200, {'Content-Type': 'text/plain'}
+    return 'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: https://novabrief-web.onrender.com/sitemap.xml', 200, {'Content-Type': 'text/plain'}
+
+
+@app.route('/api/admin/ping-google', methods=['POST'])
+@admin_required
+def ping_google():
+    """Use REST API in the backend to ping Google to index the website."""
+    try:
+        import requests
+        sitemap_url = 'https://novabrief-web.onrender.com/sitemap.xml'
+        google_ping_url = f'https://www.google.com/ping?sitemap={sitemap_url}'
+        response = requests.get(google_ping_url)
+        if response.status_code == 200:
+            return jsonify({'status': 'success', 'message': 'Successfully pinged Google! The website will be indexed.'})
+        else:
+            return jsonify({'status': 'error', 'message': f'Failed to ping Google. Status: {response.status_code}'}), 500
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 @app.errorhandler(404)
