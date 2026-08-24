@@ -105,7 +105,7 @@ def index():
 @app.route('/dashboard')
 @admin_required
 def dashboard():
-    return render_template('dashboard.html')
+    return redirect(url_for('analytics.dashboard'))
 
 @app.route('/user/dashboard')
 @user_required
@@ -129,7 +129,7 @@ def user_register_page():
 @app.route('/admin/login')
 def admin_login_page():
     if session.get('role') == 'admin':
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('analytics.dashboard'))
     return render_template('admin_login.html')
 
 @app.route('/privacy')
@@ -225,11 +225,11 @@ def login_admin_account():
     email = (p.get('email') or '').strip().lower()
     password = p.get('password') or ''
     if email != ADMIN_EMAIL or password != ADMIN_PASSWORD:
-        return jsonify({'status': 'error', 'message': 'Invalid admin credentials.'}), 401
+        return jsonify({'status': 'error', 'message': 'Invalid email or password. Please try again.'}), 401
     session.permanent = True
     session.update({'user_email': ADMIN_EMAIL, 'user_name': 'Administrator', 'role': 'admin'})
     db.record_user_login(ADMIN_EMAIL, 'admin_login')
-    return jsonify({'status': 'success', 'message': 'Admin login successful.', 'redirect': '/dashboard'})
+    return jsonify({'status': 'success', 'message': 'Admin login successful.', 'redirect': '/analytics/dashboard'})
 
 
 @app.route('/api/auth/me')
@@ -690,6 +690,8 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f'\n{"="*60}\nNova Brief - running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
+
 
 
 
