@@ -1,4 +1,4 @@
-﻿import sqlite3
+import sqlite3
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -219,20 +219,20 @@ class NewsDatabase:
         row = cursor.fetchone(); conn.close()
         return dict(row) if row else None
 
-    def create_or_update_user_account(self, email: str, name: str, password_hash: str) -> str:
+    def create_or_update_user_account(self, email: str, name: str = None, password_hash: str = None) -> str:
         normalized = email.strip().lower()
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
-        cursor.execute('SELECT id, password_hash FROM registered_users WHERE email = ? LIMIT 1', (normalized,))
+        cursor.execute('SELECT id, name, password_hash FROM registered_users WHERE email = ? LIMIT 1', (normalized,))
         existing = cursor.fetchone()
         if not existing:
             cursor.execute("INSERT INTO registered_users (email,name,is_active,role,password_hash) VALUES (?,?,1,'user',?)",
                            (normalized, name, password_hash))
             conn.commit(); conn.close(); return 'created'
-        user_id, existing_hash = existing
-        if existing_hash:
-            conn.close(); return 'exists'
-        cursor.execute('UPDATE registered_users SET name=COALESCE(?,name), password_hash=?, role="user", is_active=1 WHERE id=?',
-                       (name, password_hash, user_id))
+        user_id, existing_name, existing_hash = existing
+        final_name = name if name else existing_name
+        final_hash = password_hash if password_hash else existing_hash
+        cursor.execute('UPDATE registered_users SET name=?, password_hash=?, role="user", is_active=1 WHERE id=?',
+                       (final_name, final_hash, user_id))
         conn.commit(); conn.close(); return 'updated'
 
     def get_user_dashboard_summary(self, email: str) -> Dict[str, Any]:
