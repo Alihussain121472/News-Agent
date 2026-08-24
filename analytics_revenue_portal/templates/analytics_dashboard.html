@@ -57,7 +57,7 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <p class="text-sm font-medium text-slate-500">Total Revenue</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">`$4,820.50.00</h3>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">`$0.00</h3>
       </div>
       <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
         <i class="fas fa-dollar-sign"></i>
@@ -73,14 +73,14 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
   <div class="kpi-card lg:col-span-2">
     <div class="flex justify-between items-center mb-6">
-      <h3 class="font-bold text-slate-900">Traffic vs Revenue History</h3>
+      <h3 class="font-bold text-slate-900">Traffic History</h3>
       <select class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
         <option>Last 30 Days</option>
         <option>Last 3 Months</option>
         <option>This Year</option>
       </select>
     </div>
-    <canvas id="mainChart" height="250"></canvas>
+    <div class="w-full relative h-[300px] mt-4"><canvas id="mainChart"></canvas></div>
   </div>
   
   <div class="kpi-card bg-gradient-to-br from-slate-900 to-blue-900 text-white border-none shadow-xl">
@@ -104,55 +104,69 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+  <script>
     const ctx = document.getElementById('mainChart').getContext('2d');
-  const mainChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [
-        {
-          label: 'Website Visits',
-          data: [],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4
+    const mainChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [
+          {
+            label: 'Website Visits',
+            data: [],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+            borderWidth: 3,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { 
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#1e293b',
+                padding: 12,
+                titleFont: { size: 13, family: 'Inter' },
+                bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
+                displayColors: false,
+                cornerRadius: 8
+            }
         },
-        {
-          label: 'Revenue ($)',
-          data: [],
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.0)',
-          borderWidth: 2,
-          borderDash: [5, 5],
-          tension: 0.4
+        scales: {
+          y: { 
+              beginAtZero: true, 
+              grid: { borderDash: [4, 4], color: '#f1f5f9' },
+              ticks: { font: { family: 'Inter' }, color: '#64748b', padding: 10 }
+          },
+          x: { 
+              grid: { display: false },
+              ticks: { font: { family: 'Inter' }, color: '#64748b', padding: 10 }
+          }
         }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'top' } },
-      scales: {
-        y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#e2e8f0' } },
-        x: { grid: { display: false } }
       }
-    }
-  });
-
-  // Fetch true live data from the server
-  fetch('/analytics/api/stats')
-    .then(res => res.json())
-    .then(data => {
-      mainChart.data.labels = data.labels;
-      mainChart.data.datasets[0].data = data.traffic;
-      mainChart.data.datasets[1].data = data.revenue;
-      mainChart.update();
     });
-</script>
+
+    fetch('/analytics/api/stats')
+      .then(res => res.json())
+      .then(data => {
+        mainChart.data.labels = data.labels;
+        mainChart.data.datasets[0].data = data.traffic;
+        mainChart.update();
+      });
+  </script>
 {% endblock %}
+
+
+
 
 
 
