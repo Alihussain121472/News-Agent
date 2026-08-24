@@ -1,4 +1,4 @@
-import os, sys, json, logging, smtplib
+﻿import os, sys, json, logging, smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -130,7 +130,7 @@ def format_welcome_email(subscriber_email: str) -> str:
     <p style="margin:0;font-size:13px;opacity:.9;">{today}</p>
   </div>
   <p style="font-size:16px;line-height:1.7;">Hello,</p>
-  <p style="font-size:16px;line-height:1.7;">You are now subscribed to receive daily AI news <strong>and</strong> early alerts about student programs from Google, Microsoft, Amazon, NASA and more — including direct registration links.</p>
+  <p style="font-size:16px;line-height:1.7;">You are now subscribed to receive daily AI news <strong>and</strong> early alerts about student programs from Google, Microsoft, Amazon, NASA and more â€” including direct registration links.</p>
   <div style="background:#eef4ff;border-left:5px solid #2563eb;border-radius:10px;padding:16px;margin:18px 0;font-size:14px;line-height:1.7;color:#334155;">
     <strong>Email:</strong> {subscriber_email}<br>
     <strong>Daily AI Brief:</strong> Every morning at 8 AM<br>
@@ -145,7 +145,7 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     if not news_items:
         return f"""<html><body style="font-family:Arial,sans-serif;background:#f5f7fb;padding:20px;">
 <div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;">
-  <h2>AI Morning Brief — {today}</h2>
+  <h2>AI Morning Brief â€” {today}</h2>
   <div style="padding:18px;background:#fff3cd;border-left:5px solid #f59e0b;border-radius:8px;color:#7c4a00;">
     No AI news could be fetched right now.
   </div></div></body></html>"""
@@ -153,12 +153,12 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     items_html = ''.join(f"""
     <div style="margin:18px 0;padding:18px;background:#f8fafc;border-left:5px solid #2563eb;border-radius:8px;">
       <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:8px;">{i}. {item['title']}</div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">{item['source']} • {item['published']}</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">{item['source']} â€¢ {item['published']}</div>
       <div style="font-size:14px;color:#334155;margin-bottom:8px;"><strong>Summary:</strong> {item['summary']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:6px;"><strong>Why it matters:</strong> {item['why_important']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:6px;"><strong>What could change:</strong> {item['future_change']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:8px;"><strong>Why you should care:</strong> {item['why_care']}</div>
-      <a href="{item['url']}" style="color:#2563eb;font-size:12px;font-weight:600;text-decoration:none;">Read article →</a>
+      <a href="{item['url']}" style="color:#2563eb;font-size:12px;font-weight:600;text-decoration:none;">Read article â†’</a>
     </div>""" for i, item in enumerate(news_items, 1))
 
     return f"""<html><body style="font-family:Arial,sans-serif;background:#eef4ff;color:#1f2937;padding:20px;">
@@ -168,7 +168,7 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     <p style="margin:0;font-size:14px;opacity:.9;">{today}</p>
   </div>
   <div style="font-size:14px;color:#475569;margin-bottom:20px;line-height:1.6;">
-    Here are today's most important AI developments — each one brief, important, and tied to what it could mean for the future.
+    Here are today's most important AI developments â€” each one brief, important, and tied to what it could mean for the future.
   </div>
   {items_html}
   <div style="margin-top:22px;padding-top:18px;border-top:1px solid #e5e7eb;font-size:13px;color:#475569;">
@@ -186,9 +186,9 @@ def format_program_email(program: Dict[str, Any]) -> str:
     return f"""<html><body style="font-family:Arial,sans-serif;background:#f0fdf4;color:#1f2937;padding:24px;">
 <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(0,0,0,.08);">
   <div style="background:linear-gradient(135deg,#065f46,#10b981);color:#fff;padding:22px;border-radius:12px;margin-bottom:18px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:6px;">🎓 Student Program Alert</div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:6px;">ðŸŽ“ Student Program Alert</div>
     <h1 style="margin:0 0 8px;font-size:26px;">{program.get('title', 'New Program')}</h1>
-    <p style="margin:0;font-size:14px;opacity:.9;">by <strong>{program.get('company', 'Company')}</strong> • {today}</p>
+    <p style="margin:0;font-size:14px;opacity:.9;">by <strong>{program.get('company', 'Company')}</strong> â€¢ {today}</p>
   </div>
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">A new opportunity has opened for students. Here's everything you need to know:</p>
   <div style="background:#f0fdf4;border-left:5px solid #10b981;border-radius:10px;padding:16px;margin:0 0 20px;font-size:14px;line-height:1.8;color:#134e4a;">
@@ -203,7 +203,7 @@ def format_program_email(program: Dict[str, Any]) -> str:
        style="display:inline-block;background:linear-gradient(135deg,#065f46,#10b981);color:#fff;
               padding:16px 36px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;
               box-shadow:0 8px 20px rgba(16,185,129,.35);">
-      🚀 Register Now →
+      ðŸš€ Register Now â†’
     </a>
   </div>
   <p style="font-size:13px;color:#6b7280;text-align:center;margin-top:20px;">
@@ -214,7 +214,26 @@ def format_program_email(program: Dict[str, Any]) -> str:
 
 
 def send_welcome_email(to_email: str) -> bool:
-    return send_email(to_email, 'Welcome to Nova Brief — Daily AI & Student Program Alerts', format_welcome_email(to_email))
+    return send_email(to_email, 'Welcome to Nova Brief â€” Daily AI & Student Program Alerts', format_welcome_email(to_email))
+
+def format_login_email(subscriber_email: str) -> str:
+    now = datetime.now().strftime('%A, %B %d, %Y at %I:%M %p')
+    return f"\"<html><body style="font-family:Arial,sans-serif;background:#f4f7ff;color:#1f2937;padding:24px;">
+<div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(31,41,55,.08);">
+  <div style="background:linear-gradient(135deg,#111827,#2563eb);color:#fff;padding:22px;border-radius:12px;margin-bottom:18px;">
+    <h1 style="margin:0 0 8px;font-size:24px;">New Login Alert</h1>
+  </div>
+  <p style="font-size:16px;line-height:1.7;">Hello,</p>
+  <p style="font-size:16px;line-height:1.7;">We noticed a new login to your Nova Brief account.</p>
+  <div style="background:#eef4ff;border-left:5px solid #2563eb;border-radius:10px;padding:16px;margin:18px 0;font-size:14px;line-height:1.7;color:#334155;">
+    <strong>Account:</strong> {subscriber_email}<br>
+    <strong>Time:</strong> {now}
+  </div>
+  <p style="font-size:14px;color:#6b7280;">If this was you, you can safely ignore this email. If you did not log in, please reset your password immediately.</p>
+</div></body></html>"\"
+
+def send_login_email(to_email: str) -> bool:
+    return send_email(to_email, 'Security Alert: New login to Nova Brief', format_login_email(to_email))
 
 
 def send_contact_notification_email(name: str, email: str, subject: str, message: str) -> bool:
@@ -224,7 +243,7 @@ def send_contact_notification_email(name: str, email: str, subject: str, message
     html = f"""<html><body style="font-family:Arial,sans-serif;background:#f4f7ff;padding:24px;">
 <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;">
   <div style="background:linear-gradient(135deg,#111827,#2563eb);color:#fff;padding:18px 22px;border-radius:12px;margin-bottom:18px;">
-    <h2 style="margin:0 0 4px;">Nova Brief — Contact Form</h2><p style="margin:0;font-size:13px;opacity:.85;">{today}</p>
+    <h2 style="margin:0 0 4px;">Nova Brief â€” Contact Form</h2><p style="margin:0;font-size:13px;opacity:.85;">{today}</p>
   </div>
   <table style="width:100%;border-collapse:collapse;font-size:15px;">
     <tr><td style="padding:8px 0;color:#64748b;width:110px;">From</td><td style="font-weight:600;">{name}</td></tr>
@@ -249,7 +268,7 @@ def send_program_notifications() -> int:
 
     sent_count = 0
     for program in programs:
-        subject = f"🎓 New Program Alert: {program['title']} by {program['company']}"
+        subject = f"ðŸŽ“ New Program Alert: {program['title']} by {program['company']}"
         html = format_program_email(program)
         for email in subscribers:
             if send_email(email, subject, html):
@@ -351,7 +370,7 @@ def main() -> None:
     if args.test_email:
         to = get_env_value('RECIPIENT_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
         if to:
-            send_email(to, 'Nova Brief - Test Email', '<html><body><h2>✅ Test Email</h2><p>Your Nova Brief agent is working correctly.</p></body></html>')
+            send_email(to, 'Nova Brief - Test Email', '<html><body><h2>âœ… Test Email</h2><p>Your Nova Brief agent is working correctly.</p></body></html>')
         return
 
     if args.schedule:
@@ -375,3 +394,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+

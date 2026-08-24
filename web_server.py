@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for, session
+﻿from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime
 import os, logging, json
@@ -24,7 +24,7 @@ if not os.path.exists(RECIPIENTS_FILE):
     except Exception: pass
 
 
-# ── Auth helpers ───────────────────────────────────────────────────────────────
+# â”€â”€ Auth helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def role_required(required_role: str):
     def decorator(func):
@@ -69,7 +69,7 @@ def _safe_add_recipient(email: str):
         with open(RECIPIENTS_FILE, 'w') as f: json.dump(data, f, indent=2)
 
 
-# ── Page routes ────────────────────────────────────────────────────────────────
+# â”€â”€ Page routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/')
 def index():
@@ -111,7 +111,7 @@ def terms(): return render_template('terms.html')
 def cookies(): return render_template('cookies.html')
 
 
-# ── Auth API ───────────────────────────────────────────────────────────────────
+# â”€â”€ Auth API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/auth/register', methods=['POST'])
 def register_user_account():
@@ -130,7 +130,8 @@ def register_user_account():
     db.log_user_activity(email, 'account_created', f'Registered as {name}')
     try:
         from ai_news_agent import send_welcome_email
-        send_welcome_email(email)
+        import threading
+        threading.Thread(target=send_welcome_email, args=(email,), daemon=True).start()
     except Exception: pass
     msg = 'Account created successfully.' if result == 'created' else 'Account activated with new password.'
     return jsonify({'status': 'success', 'message': msg, 'redirect': '/user/dashboard'})
@@ -149,6 +150,11 @@ def login_user_account():
     session.update({'user_email': user['email'], 'user_name': user.get('name') or 'User', 'role': 'user'})
     db.record_user_login(email, 'user_login')
     db.log_user_activity(email, 'login', 'User logged in')
+    try:
+        from ai_news_agent import send_login_email
+        import threading
+        threading.Thread(target=send_login_email, args=(email,), daemon=True).start()
+    except Exception: pass
     return jsonify({'status': 'success', 'message': 'Logged in successfully.', 'redirect': '/user/dashboard'})
 
 
@@ -180,7 +186,7 @@ def logout_account():
     return jsonify({'status': 'success', 'redirect': '/'})
 
 
-# ── User dashboard API ─────────────────────────────────────────────────────────
+# â”€â”€ User dashboard API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/user/overview')
 @user_required
@@ -230,7 +236,7 @@ def get_user_weekly_summary():
     return jsonify(db.get_user_weekly_summary(email))
 
 
-# ── Admin dashboard API ────────────────────────────────────────────────────────
+# â”€â”€ Admin dashboard API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/statistics')
 def get_statistics():
@@ -281,7 +287,7 @@ def admin_get_contact_messages():
     return jsonify(db.get_contact_messages(limit=50))
 
 
-# ── Student programs API ───────────────────────────────────────────────────────
+# â”€â”€ Student programs API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/programs')
 def get_programs():
@@ -332,7 +338,7 @@ def admin_send_program_notifications():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
-# ── Articles API ───────────────────────────────────────────────────────────────
+# â”€â”€ Articles API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/articles')
 def get_articles():
@@ -352,7 +358,7 @@ def get_articles_by_range():
     return jsonify(db.get_articles_by_date_range(start, end))
 
 
-# ── Admin control API ──────────────────────────────────────────────────────────
+# â”€â”€ Admin control API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/email-logs')
 @admin_required
@@ -533,5 +539,7 @@ def server_error(e): logger.error(f'Server error: {e}'); return jsonify({'error'
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print(f'\n{"="*60}\nNova Brief — running at http://0.0.0.0:{port}\n{"="*60}\n')
+    print(f'\n{"="*60}\nNova Brief â€” running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
+
