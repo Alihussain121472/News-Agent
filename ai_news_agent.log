@@ -87,3 +87,316 @@
 2026-08-17 20:22:47,586 - INFO - 127.0.0.1 - - [17/Aug/2026 20:22:47] "GET /api/statistics HTTP/1.1" 200 -
 2026-08-17 20:25:59,870 - INFO -  * Detected change in 'C:\\Users\\DELL\\OneDrive\\Desktop\\my agent\\web_server.py', reloading
 2026-08-17 20:25:59,871 - INFO -  * Detected change in 'C:\\Users\\DELL\\OneDrive\\Desktop\\my agent\\web_server.py.tmp.23016.5b3143507893', reloading
+2026-08-18 01:00:31,475 - INFO - Database initialized at news_history.db
+2026-08-18 01:00:31,483 - INFO - New user registered: public-demo@example.com
+2026-08-18 01:00:36,294 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 01:00:36,295 - INFO - Public signup: public-demo@example.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:07:29,937 - INFO - Database initialized at news_history.db
+2026-08-18 01:07:29,945 - INFO - New user registered: syedalihussain325@gmail.com
+2026-08-18 01:07:29,945 - INFO - Public signup: syedalihussain325@gmail.com | already_registered=True | welcome_email_sent=False
+2026-08-18 01:07:29,946 - INFO - 127.0.0.1 - - [18/Aug/2026 01:07:29] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:07:54,194 - INFO - Database initialized at news_history.db
+2026-08-18 01:07:54,200 - INFO - New user registered: syedalibusinesshub.14@gmail.com
+2026-08-18 01:07:58,547 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 01:07:58,548 - INFO - Public signup: syedalibusinesshub.14@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:07:58,548 - INFO - 127.0.0.1 - - [18/Aug/2026 01:07:58] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:10:56,547 - INFO - Database initialized at news_history.db
+2026-08-18 01:10:56,553 - INFO - New user registered: syedbusinesshub.14@gmail.com
+2026-08-18 01:10:59,942 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 01:10:59,942 - INFO - Public signup: syedbusinesshub.14@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:10:59,942 - INFO - 127.0.0.1 - - [18/Aug/2026 01:10:59] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:11:39,976 - INFO - 127.0.0.1 - - [18/Aug/2026 01:11:39] "GET /api/config HTTP/1.1" 200 -
+2026-08-18 01:11:39,979 - INFO - 127.0.0.1 - - [18/Aug/2026 01:11:39] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 01:11:39,981 - INFO - 127.0.0.1 - - [18/Aug/2026 01:11:39] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-18 01:11:39,995 - INFO - 127.0.0.1 - - [18/Aug/2026 01:11:39] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-18 01:16:38,430 - INFO - Database initialized at news_history.db
+2026-08-18 01:16:38,440 - INFO - New user registered: shahsyedali7057@gmail.com
+2026-08-18 01:16:39,980 - INFO - 127.0.0.1 - - [18/Aug/2026 01:16:39] "GET /api/config HTTP/1.1" 200 -
+2026-08-18 01:16:39,983 - INFO - 127.0.0.1 - - [18/Aug/2026 01:16:39] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-18 01:16:39,991 - INFO - 127.0.0.1 - - [18/Aug/2026 01:16:39] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 01:16:39,995 - INFO - 127.0.0.1 - - [18/Aug/2026 01:16:39] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-18 01:16:41,760 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 01:16:41,761 - INFO - Public signup: shahsyedali7057@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:16:41,761 - INFO - 127.0.0.1 - - [18/Aug/2026 01:16:41] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:21:39,980 - INFO - 127.0.0.1 - - [18/Aug/2026 01:21:39] "GET /api/config HTTP/1.1" 200 -
+2026-08-18 01:21:39,983 - INFO - 127.0.0.1 - - [18/Aug/2026 01:21:39] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-18 01:21:39,984 - INFO - 127.0.0.1 - - [18/Aug/2026 01:21:39] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-18 01:21:39,986 - INFO - 127.0.0.1 - - [18/Aug/2026 01:21:39] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 01:22:53,201 - INFO - 127.0.0.1 - - [18/Aug/2026 01:22:53] "GET / HTTP/1.1" 200 -
+2026-08-18 01:25:55,007 - INFO - 127.0.0.1 - - [18/Aug/2026 01:25:55] "GET / HTTP/1.1" 200 -
+2026-08-18 01:25:55,764 - INFO - 127.0.0.1 - - [18/Aug/2026 01:25:55] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:26:37,999 - INFO - Database initialized at news_history.db
+2026-08-18 01:26:38,015 - INFO - New user registered: ishah110@yahoo.com
+2026-08-18 01:26:39,993 - INFO - 127.0.0.1 - - [18/Aug/2026 01:26:39] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 01:26:40,003 - INFO - 127.0.0.1 - - [18/Aug/2026 01:26:40] "GET /api/config HTTP/1.1" 200 -
+2026-08-18 01:26:40,054 - INFO - 127.0.0.1 - - [18/Aug/2026 01:26:40] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-18 01:26:40,060 - INFO - 127.0.0.1 - - [18/Aug/2026 01:26:40] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-18 01:26:41,419 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 01:26:41,420 - INFO - Public signup: ishah110@yahoo.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:26:41,420 - INFO - 127.0.0.1 - - [18/Aug/2026 01:26:41] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:28:01,454 - INFO - 127.0.0.1 - - [18/Aug/2026 01:28:01] "HEAD / HTTP/1.1" 200 -
+2026-08-18 01:28:09,190 - INFO - 127.0.0.1 - - [18/Aug/2026 01:28:09] "HEAD / HTTP/1.1" 200 -
+2026-08-18 01:29:04,717 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:04] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:08,428 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:08] "GET / HTTP/1.1" 200 -
+2026-08-18 01:29:08,434 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:08] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:11,070 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:11] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:12,005 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:12,183 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:12] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:23,104 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:23] "GET / HTTP/1.1" 200 -
+2026-08-18 01:29:25,972 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:27,733 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:27] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:29:55,825 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:55] "GET / HTTP/1.1" 200 -
+2026-08-18 01:29:58,915 - INFO - 127.0.0.1 - - [18/Aug/2026 01:29:58] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:30:00,601 - INFO - 127.0.0.1 - - [18/Aug/2026 01:30:00] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:30:25,514 - INFO - Database initialized at news_history.db
+2026-08-18 01:30:25,520 - INFO - New user registered: syeytradehub14@gmail.com
+2026-08-18 01:30:29,913 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 01:30:29,913 - INFO - Public signup: syeytradehub14@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 01:30:29,914 - INFO - 127.0.0.1 - - [18/Aug/2026 01:30:29] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 01:31:01,292 - INFO - 192.168.1.5 - - [18/Aug/2026 01:31:01] "GET / HTTP/1.1" 200 -
+2026-08-18 01:31:01,638 - INFO - 192.168.1.5 - - [18/Aug/2026 01:31:01] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 01:31:39,974 - INFO - 127.0.0.1 - - [18/Aug/2026 01:31:39] "GET /api/config HTTP/1.1" 200 -
+2026-08-18 01:31:39,978 - INFO - 127.0.0.1 - - [18/Aug/2026 01:31:39] "GET /api/articles?limit=50 HTTP/1.1" 200 -
+2026-08-18 01:31:39,979 - INFO - 127.0.0.1 - - [18/Aug/2026 01:31:39] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 01:31:39,994 - INFO - 127.0.0.1 - - [18/Aug/2026 01:31:39] "GET /api/recipients HTTP/1.1" 200 -
+2026-08-18 09:43:59,194 - INFO - ============================================================
+2026-08-18 09:43:59,195 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:43:59,196 - INFO - ============================================================
+2026-08-18 09:43:59,213 - INFO - Database initialized at news_history.db
+2026-08-18 09:43:59,228 - INFO - Database initialized at news_history.db
+2026-08-18 09:43:59,253 - INFO - Sending to 9 recipient(s): shahsyedali7057@gmail.com, syedalibusinesshub.14@gmail.com, public-demo@example.com, syedalishah7057@gmail.com, syedalihussain325@gmail.com, syeytradehub14@gmail.com, syedbusinesshub.14@gmail.com, ishah110@yahoo.com, syedali6160@gmail.com
+2026-08-18 09:43:59,253 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:44:00,586 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:44:00,655 - INFO - Saved 3 articles to database
+2026-08-18 09:44:00,656 - INFO - Saved 3 articles to database
+2026-08-18 09:44:04,821 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:44:08,514 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:44:12,251 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:44:16,091 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:44:20,588 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:44:24,176 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:44:29,098 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:44:33,925 - INFO - ============================================================
+2026-08-18 09:44:33,926 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:44:33,927 - INFO - ============================================================
+2026-08-18 09:44:33,931 - INFO - Database initialized at news_history.db
+2026-08-18 09:44:33,947 - INFO - Database initialized at news_history.db
+2026-08-18 09:44:33,949 - INFO - Sending to 9 recipient(s): syedalihussain325@gmail.com, public-demo@example.com, syedalibusinesshub.14@gmail.com, ishah110@yahoo.com, syedali6160@gmail.com, syedbusinesshub.14@gmail.com, syeytradehub14@gmail.com, shahsyedali7057@gmail.com, syedalishah7057@gmail.com
+2026-08-18 09:44:33,950 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:44:34,106 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:44:35,149 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:44:35,232 - INFO - Saved 3 articles to database
+2026-08-18 09:44:35,233 - INFO - Saved 3 articles to database
+2026-08-18 09:44:37,851 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:44:37,878 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:44:37,904 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:44:37,905 - INFO - ============================================================
+2026-08-18 09:44:39,031 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:44:42,544 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:44:46,085 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:44:47,194 - INFO - ============================================================
+2026-08-18 09:44:47,194 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:44:47,195 - INFO - ============================================================
+2026-08-18 09:44:47,199 - INFO - Database initialized at news_history.db
+2026-08-18 09:44:47,212 - INFO - Database initialized at news_history.db
+2026-08-18 09:44:47,214 - INFO - Sending to 9 recipient(s): public-demo@example.com, syedbusinesshub.14@gmail.com, shahsyedali7057@gmail.com, syedalihussain325@gmail.com, syeytradehub14@gmail.com, syedalishah7057@gmail.com, syedali6160@gmail.com, syedalibusinesshub.14@gmail.com, ishah110@yahoo.com
+2026-08-18 09:44:47,215 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:44:48,448 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:44:48,513 - INFO - Saved 3 articles to database
+2026-08-18 09:44:48,514 - INFO - Saved 3 articles to database
+2026-08-18 09:44:50,081 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:44:52,232 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:44:55,777 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:44:56,152 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:44:59,776 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:44:59,974 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:45:03,390 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:45:03,583 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:45:07,153 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:45:07,367 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:45:11,938 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:45:12,139 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:45:12,157 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:45:12,176 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:45:12,176 - INFO - ============================================================
+2026-08-18 09:45:17,479 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:45:21,208 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:45:24,771 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:45:24,795 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:45:24,819 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:45:24,820 - INFO - ============================================================
+2026-08-18 09:45:26,740 - INFO - ============================================================
+2026-08-18 09:45:26,742 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:45:26,743 - INFO - ============================================================
+2026-08-18 09:45:26,751 - INFO - Database initialized at news_history.db
+2026-08-18 09:45:26,778 - INFO - Database initialized at news_history.db
+2026-08-18 09:45:26,783 - INFO - Sending to 9 recipient(s): syedalibusinesshub.14@gmail.com, syedalishah7057@gmail.com, syeytradehub14@gmail.com, syedali6160@gmail.com, syedalihussain325@gmail.com, shahsyedali7057@gmail.com, ishah110@yahoo.com, syedbusinesshub.14@gmail.com, public-demo@example.com
+2026-08-18 09:45:26,783 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:45:28,132 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:45:28,206 - INFO - Saved 3 articles to database
+2026-08-18 09:45:28,207 - INFO - Saved 3 articles to database
+2026-08-18 09:45:33,208 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:45:37,960 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:45:41,809 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:45:45,844 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:45:49,736 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:45:53,916 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:45:58,828 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:46:02,382 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:46:05,847 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:46:05,869 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:46:05,887 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:46:05,887 - INFO - ============================================================
+2026-08-18 09:46:07,115 - INFO - ============================================================
+2026-08-18 09:46:07,115 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:46:07,116 - INFO - ============================================================
+2026-08-18 09:46:07,119 - INFO - Database initialized at news_history.db
+2026-08-18 09:46:07,141 - INFO - Database initialized at news_history.db
+2026-08-18 09:46:07,145 - INFO - Sending to 9 recipient(s): ishah110@yahoo.com, syedali6160@gmail.com, syeytradehub14@gmail.com, syedalihussain325@gmail.com, shahsyedali7057@gmail.com, syedbusinesshub.14@gmail.com, syedalibusinesshub.14@gmail.com, syedalishah7057@gmail.com, public-demo@example.com
+2026-08-18 09:46:07,146 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:46:08,626 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:46:08,668 - INFO - Saved 3 articles to database
+2026-08-18 09:46:08,668 - INFO - Saved 3 articles to database
+2026-08-18 09:46:12,485 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:46:17,383 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:46:22,111 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:46:25,873 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:46:29,570 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:46:33,262 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:46:36,923 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:46:41,564 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:46:45,005 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:46:45,023 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:46:45,040 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:46:45,041 - INFO - ============================================================
+2026-08-18 09:49:14,024 - INFO - ============================================================
+2026-08-18 09:49:14,025 - INFO - Starting AI morning briefing workflow...
+2026-08-18 09:49:14,025 - INFO - ============================================================
+2026-08-18 09:49:14,029 - INFO - Database initialized at news_history.db
+2026-08-18 09:49:14,047 - INFO - Database initialized at news_history.db
+2026-08-18 09:49:14,050 - INFO - Sending to 9 recipient(s): syedalihussain325@gmail.com, shahsyedali7057@gmail.com, public-demo@example.com, syedalibusinesshub.14@gmail.com, syedalishah7057@gmail.com, syedbusinesshub.14@gmail.com, syedali6160@gmail.com, syeytradehub14@gmail.com, ishah110@yahoo.com
+2026-08-18 09:49:14,051 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 09:49:15,039 - INFO - Retrieved 3 articles from NewsAPI
+2026-08-18 09:49:15,089 - INFO - Saved 3 articles to database
+2026-08-18 09:49:15,090 - INFO - Saved 3 articles to database
+2026-08-18 09:49:19,947 - INFO - Email sent successfully to syedalihussain325@gmail.com
+2026-08-18 09:49:24,981 - INFO - Email sent successfully to shahsyedali7057@gmail.com
+2026-08-18 09:49:28,778 - INFO - Email sent successfully to public-demo@example.com
+2026-08-18 09:49:32,559 - INFO - Email sent successfully to syedalibusinesshub.14@gmail.com
+2026-08-18 09:49:37,643 - INFO - Email sent successfully to syedalishah7057@gmail.com
+2026-08-18 09:49:41,468 - INFO - Email sent successfully to syedbusinesshub.14@gmail.com
+2026-08-18 09:49:46,225 - INFO - Email sent successfully to syedali6160@gmail.com
+2026-08-18 09:49:51,001 - INFO - Email sent successfully to syeytradehub14@gmail.com
+2026-08-18 09:49:55,829 - INFO - Email sent successfully to ishah110@yahoo.com
+2026-08-18 09:49:55,850 - INFO - Sent digest with 3 AI stories to 9/9 recipients.
+2026-08-18 09:49:55,874 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 09:49:55,875 - INFO - ============================================================
+2026-08-18 10:35:26,034 - INFO - Database initialized at news_history.db
+2026-08-18 10:35:26,046 - INFO - New user registered: bahicode295@gmail.com
+2026-08-18 10:35:30,086 - INFO - Email sent successfully to bahicode295@gmail.com
+2026-08-18 10:35:30,087 - INFO - Public signup: bahicode295@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 10:35:30,089 - INFO - 127.0.0.1 - - [18/Aug/2026 10:35:30] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 10:49:22,268 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:22] "GET / HTTP/1.1" 200 -
+2026-08-18 10:49:22,352 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:22] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 10:49:22,356 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:22] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 10:49:22,429 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:22] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 10:49:26,438 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:26] "GET / HTTP/1.1" 200 -
+2026-08-18 10:49:26,525 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:26] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 10:49:26,531 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:26] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 10:49:26,585 - INFO - 127.0.0.1 - - [18/Aug/2026 10:49:26] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 10:50:25,739 - INFO - 127.0.0.1 - - [18/Aug/2026 10:50:25] "GET / HTTP/1.1" 200 -
+2026-08-18 10:52:48,070 - INFO - 127.0.0.1 - - [18/Aug/2026 10:52:48] "GET / HTTP/1.1" 200 -
+2026-08-18 10:52:48,221 - INFO - 127.0.0.1 - - [18/Aug/2026 10:52:48] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 10:52:48,235 - INFO - 127.0.0.1 - - [18/Aug/2026 10:52:48] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 10:52:48,363 - INFO - 127.0.0.1 - - [18/Aug/2026 10:52:48] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 10:56:42,349 - INFO - 127.0.0.1 - - [18/Aug/2026 10:56:42] "GET / HTTP/1.1" 200 -
+2026-08-18 10:59:12,350 - INFO - 127.0.0.1 - - [18/Aug/2026 10:59:12] "GET / HTTP/1.1" 200 -
+2026-08-18 11:00:14,476 - INFO - 127.0.0.1 - - [18/Aug/2026 11:00:14] "GET / HTTP/1.1" 200 -
+2026-08-18 11:00:14,567 - INFO - 127.0.0.1 - - [18/Aug/2026 11:00:14] "GET /static/css/main.css HTTP/1.1" 200 -
+2026-08-18 11:00:14,572 - INFO - 127.0.0.1 - - [18/Aug/2026 11:00:14] "GET /static/js/main.js HTTP/1.1" 200 -
+2026-08-18 11:00:16,400 - INFO - 127.0.0.1 - - [18/Aug/2026 11:00:16] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 11:00:17,919 - INFO - 127.0.0.1 - - [18/Aug/2026 11:00:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 11:01:16,597 - INFO - Database initialized at news_history.db
+2026-08-18 11:01:16,599 - WARNING - User already exists: syedalihussain325@gmail.com
+2026-08-18 11:01:16,615 - INFO - Public signup: syedalihussain325@gmail.com | already_registered=True | welcome_email_sent=False
+2026-08-18 11:01:16,615 - INFO - 127.0.0.1 - - [18/Aug/2026 11:01:16] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 11:02:40,863 - INFO - Database initialized at news_history.db
+2026-08-18 11:02:40,880 - INFO - New user registered: muhammadimran325n@gmail.com
+2026-08-18 11:02:49,472 - INFO - Email sent successfully to muhammadimran325n@gmail.com
+2026-08-18 11:02:49,472 - INFO - Public signup: muhammadimran325n@gmail.com | already_registered=False | welcome_email_sent=True
+2026-08-18 11:02:49,474 - INFO - 127.0.0.1 - - [18/Aug/2026 11:02:49] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 11:06:30,058 - INFO - 127.0.0.1 - - [18/Aug/2026 11:06:30] "GET / HTTP/1.1" 200 -
+2026-08-18 11:07:25,739 - INFO - 192.168.1.5 - - [18/Aug/2026 11:07:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 11:07:33,057 - INFO - 127.0.0.1 - - [18/Aug/2026 11:07:33] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 11:10:21,336 - INFO - 127.0.0.1 - - [18/Aug/2026 11:10:21] "GET / HTTP/1.1" 200 -
+2026-08-18 11:11:30,496 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:30] "GET / HTTP/1.1" 200 -
+2026-08-18 11:11:30,630 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:30] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 11:11:30,645 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:30] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 11:11:30,693 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:30] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 11:11:49,083 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:49] "GET / HTTP/1.1" 200 -
+2026-08-18 11:11:49,236 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:49] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 11:11:49,271 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:49] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 11:11:49,382 - INFO - 127.0.0.1 - - [18/Aug/2026 11:11:49] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 11:18:45,555 - INFO - 127.0.0.1 - - [18/Aug/2026 11:18:45] "GET / HTTP/1.1" 200 -
+2026-08-18 11:18:45,664 - INFO - 127.0.0.1 - - [18/Aug/2026 11:18:45] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 11:18:45,744 - INFO - 127.0.0.1 - - [18/Aug/2026 11:18:45] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 11:18:45,878 - INFO - 127.0.0.1 - - [18/Aug/2026 11:18:45] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 11:44:16,378 - INFO - 127.0.0.1 - - [18/Aug/2026 11:44:16] "GET / HTTP/1.1" 200 -
+2026-08-18 11:44:16,430 - INFO - 127.0.0.1 - - [18/Aug/2026 11:44:16] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 11:44:16,434 - INFO - 127.0.0.1 - - [18/Aug/2026 11:44:16] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 11:44:16,989 - INFO - 127.0.0.1 - - [18/Aug/2026 11:44:16] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 13:19:30,511 - INFO - 127.0.0.1 - - [18/Aug/2026 13:19:30] "[33mGET /user/login HTTP/1.1[0m" 404 -
+2026-08-18 17:15:50,636 - INFO - ============================================================
+2026-08-18 17:15:50,637 - INFO - Starting AI morning briefing workflow...
+2026-08-18 17:15:50,638 - INFO - ============================================================
+2026-08-18 17:15:50,648 - INFO - Database initialized at news_history.db
+2026-08-18 17:15:50,670 - INFO - Database initialized at news_history.db
+2026-08-18 17:15:50,674 - INFO - Sending to 13 recipient(s): roletest@example.com, syedalihussain325@gmail.com, syedalibusinesshub.14@gmail.com, ishah110@yahoo.com, public-demo@example.com, bahicode295@gmail.com, testuser@example.com, syedalishah7057@gmail.com, syeytradehub14@gmail.com, muhammadimran325n@gmail.com, syedbusinesshub.14@gmail.com, syedali6160@gmail.com, shahsyedali7057@gmail.com
+2026-08-18 17:15:50,676 - INFO - Fetching AI news from NewsAPI...
+2026-08-18 17:15:52,599 - INFO - Retrieved 4 articles from NewsAPI
+2026-08-18 17:15:52,641 - INFO - Saved 4 articles to database
+2026-08-18 17:15:52,642 - INFO - Saved 4 articles to database
+2026-08-18 17:15:56,414 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-49996100082sm326515245e9.2 - gsmtp')
+2026-08-18 17:15:59,012 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-4999d0876b8sm181520085e9.8 - gsmtp')
+2026-08-18 17:16:01,751 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-4999d0fb85csm171014625e9.11 - gsmtp')
+2026-08-18 17:16:04,908 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-49987b1a31esm365915085e9.2 - gsmtp')
+2026-08-18 17:16:07,772 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482a5b783basm12021698f8f.30 - gsmtp')
+2026-08-18 17:16:10,542 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-4999d086c6dsm123788045e9.7 - gsmtp')
+2026-08-18 17:16:13,270 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-4999d0fb85csm171030405e9.11 - gsmtp')
+2026-08-18 17:16:18,631 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482a9f0dec2sm6920105f8f.10 - gsmtp')
+2026-08-18 17:16:21,514 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482a5a3b896sm12136554f8f.16 - gsmtp')
+2026-08-18 17:16:24,286 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-4999d10be27sm159781215e9.14 - gsmtp')
+2026-08-18 17:16:26,967 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-49987b203cfsm294007975e9.3 - gsmtp')
+2026-08-18 17:16:29,715 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-499a5684e06sm26845115e9.1 - gsmtp')
+2026-08-18 17:16:32,371 - ERROR - Failed to send email: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482a5b783d1sm11829226f8f.25 - gsmtp')
+2026-08-18 17:16:32,395 - WARNING - Digest was not sent to any recipients.
+2026-08-18 17:16:32,410 - INFO - Cleaned up 0 articles older than 3 months
+2026-08-18 17:16:32,411 - INFO - ============================================================
+2026-08-18 17:21:22,810 - INFO - Database initialized at news_history.db
+2026-08-18 17:21:22,813 - WARNING - User already exists: syedalihussain325@gmail.com
+2026-08-18 17:21:22,824 - INFO - Public signup: syedalihussain325@gmail.com | already_registered=True | welcome_email_sent=False
+2026-08-18 17:21:22,826 - INFO - 127.0.0.1 - - [18/Aug/2026 17:21:22] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 17:21:31,284 - INFO - 127.0.0.1 - - [18/Aug/2026 17:21:31] "GET /user/login HTTP/1.1" 200 -
+2026-08-18 17:21:31,334 - INFO - 127.0.0.1 - - [18/Aug/2026 17:21:31] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 17:21:51,064 - INFO - 127.0.0.1 - - [18/Aug/2026 17:21:51] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2026-08-18 17:23:05,234 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:05] "[33mPOST /api/auth/login HTTP/1.1[0m" 404 -
+2026-08-18 17:23:09,067 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:09] "GET /user/register HTTP/1.1" 200 -
+2026-08-18 17:23:09,118 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:09] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 17:23:45,923 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:45] "POST /api/auth/register HTTP/1.1" 200 -
+2026-08-18 17:23:45,958 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:45] "GET /user/dashboard HTTP/1.1" 200 -
+2026-08-18 17:23:46,002 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:46] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 17:23:46,021 - INFO - 127.0.0.1 - - [18/Aug/2026 17:23:46] "GET /api/user/overview HTTP/1.1" 200 -
+2026-08-18 17:25:18,306 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:18] "GET / HTTP/1.1" 200 -
+2026-08-18 17:25:18,392 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:18] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 17:25:18,406 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:18] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+2026-08-18 17:25:19,250 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:19] "GET /api/statistics HTTP/1.1" 200 -
+2026-08-18 17:25:20,971 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:20] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-08-18 17:25:48,816 - INFO - Database initialized at news_history.db
+2026-08-18 17:25:48,818 - WARNING - User already exists: ishah110@yahoo.com
+2026-08-18 17:25:48,831 - INFO - Public signup: ishah110@yahoo.com | already_registered=True | welcome_email_sent=False
+2026-08-18 17:25:48,832 - INFO - 127.0.0.1 - - [18/Aug/2026 17:25:48] "POST /api/subscribe HTTP/1.1" 200 -
+2026-08-18 17:26:31,090 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:31] "GET /user/login HTTP/1.1" 200 -
+2026-08-18 17:26:31,204 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:31] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 17:26:35,032 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:35] "GET /user/register HTTP/1.1" 200 -
+2026-08-18 17:26:35,105 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:35] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2026-08-18 19:50:01,906 - INFO - Database initialized at news_history.db

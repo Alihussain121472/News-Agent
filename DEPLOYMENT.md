@@ -39,10 +39,10 @@ git push origin main
 
 4. **Add Environment Variables** (Click "Advanced" → "Add Environment Variable"):
    ```
-   GMAIL_USER=syedali6160@gmail.com
-   GMAIL_APP_PASSWORD=vpkkgunofjxgvjch
-   NEWSAPI_KEY=1cba8c9342c240a9806f42b18ef78ef0
-   RECIPIENT_EMAIL=syedali6160@gmail.com
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_APP_PASSWORD=your-gmail-app-password
+   NEWSAPI_KEY=your-newsapi-key
+   RECIPIENT_EMAIL=your-email@gmail.com
    PORT=10000
    FLASK_ENV=production
    ```
@@ -71,10 +71,10 @@ git push origin main
 2. Go to "Variables" tab
 3. Add these variables:
    ```
-   GMAIL_USER=syedali6160@gmail.com
-   GMAIL_APP_PASSWORD=vpkkgunofjxgvjch
-   NEWSAPI_KEY=1cba8c9342c240a9806f42b18ef78ef0
-   RECIPIENT_EMAIL=syedali6160@gmail.com
+   GMAIL_USER=your-email@gmail.com
+   GMAIL_APP_PASSWORD=your-gmail-app-password
+   NEWSAPI_KEY=your-newsapi-key
+   RECIPIENT_EMAIL=your-email@gmail.com
    FLASK_ENV=production
    ```
 
@@ -97,7 +97,7 @@ git push origin main
 ## After Deployment
 
 ### Your App Will Be Accessible At:
-- **Public URL**: `https://your-app-name.onrender.com` (or Railway/PythonAnywhere URL)
+- **Public URL**: `https://novabrief.ai-news.app` (after DNS + custom domain setup)
 - Accessible from **any device** (phone, tablet, laptop)
 - Accessible from **anywhere in the world**
 - **Always online** (as long as free tier limits aren't exceeded)
