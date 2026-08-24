@@ -1,4 +1,4 @@
-﻿import sqlite3
+import sqlite3
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -96,6 +96,27 @@ class NewsDatabase:
             email TEXT NOT NULL, note TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
+        # Feature 4: Payout and bank account settings
+        cursor.execute('''CREATE TABLE IF NOT EXISTS payout_accounts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            account_name TEXT NOT NULL,
+            account_number TEXT NOT NULL,
+            bank_name TEXT NOT NULL,
+            iban TEXT,
+            payout_method TEXT DEFAULT 'Digital Wallet / IBAN',
+            status TEXT DEFAULT 'Active / Configured',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
+        # Feature 5: Real-time Ad & Impression Tracking
+        cursor.execute('''CREATE TABLE IF NOT EXISTS ad_interactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_type TEXT NOT NULL, -- 'impression', 'click', 'view'
+            page TEXT,
+            ip_address TEXT,
+            detail TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
         self._ensure_table_columns(conn, 'registered_users', [
             'last_login_at TIMESTAMP', 'login_count INTEGER DEFAULT 0',
             'password_hash TEXT', 'role TEXT DEFAULT "user"',
@@ -110,6 +131,7 @@ class NewsDatabase:
             'CREATE INDEX IF NOT EXISTS idx_active_users ON registered_users(is_active)',
             'CREATE INDEX IF NOT EXISTS idx_activity_email ON user_activity_log(email)',
             'CREATE INDEX IF NOT EXISTS idx_programs_active ON student_programs(is_active)',
+            'CREATE INDEX IF NOT EXISTS idx_ad_event_type ON ad_interactions(event_type)',
         ]:
             cursor.execute(idx_sql)
 
@@ -117,6 +139,7 @@ class NewsDatabase:
         conn.close()
         logger.info(f'Database initialized at {self.db_path}')
         self.seed_default_programs()
+        self.seed_default_payout_account()
 
     # â”€â”€ News articles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -788,3 +811,98 @@ class NewsDatabase:
             conn.close()
             return True
         except Exception: return False
+
+    # ── Payout & Bank Account Management ──────────────────────────────────────
+
+    def seed_default_payout_account(self):
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM payout_accounts')
+        if cursor.fetchone()[0] == 0:
+            cursor.execute('''INSERT INTO payout_accounts (account_name, account_number, bank_name, payout_method, status)
+                VALUES (?, ?, ?, ?, ?)''', (
+                'Syed Ali Hussain',
+                '03146618622',
+                'NayaPay',
+                'NayaPay Wallet / IBAN Wire Transfer',
+                'Active & Configured'
+            ))
+            conn.commit()
+            logger.info("Seeded primary payout account: Syed Ali Hussain (NayaPay).")
+        conn.close()
+
+    def get_payout_account(self) -> Dict[str, Any]:
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM payout_accounts ORDER BY id ASC LIMIT 1')
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return dict(row)
+        return {
+            'account_name': 'Syed Ali Hussain',
+            'account_number': '03146618622',
+            'bank_name': 'NayaPay',
+            'iban': 'PK82NAYA03146618622001',
+            'payout_method': 'NayaPay Wallet / IBAN Wire Transfer',
+            'status': 'Active & Configured'
+        }
+
+    def update_payout_account(self, account_name: str, account_number: str, bank_name: str, iban: str = None) -> bool:
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id FROM payout_accounts ORDER BY id ASC LIMIT 1')
+        row = cursor.fetchone()
+        if row:
+            cursor.execute('''UPDATE payout_accounts 
+                SET account_name=?, account_number=?, bank_name=?, iban=?, updated_at=CURRENT_TIMESTAMP 
+                WHERE id=?''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip(), row[0]))
+        else:
+            cursor.execute('''INSERT INTO payout_accounts (account_name, account_number, bank_name, iban, status)
+                VALUES (?,?,?,?,'Active & Configured')''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip()))
+        conn.commit()
+        conn.close()
+        return True
+
+    # ── Real AdSense & Click/Impression Tracking ──────────────────────────────
+
+    def log_ad_event(self, event_type: str, page: str = None, ip_address: str = None, detail: str = None) -> int:
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO ad_interactions (event_type, page, ip_address, detail) VALUES (?,?,?,?)',
+                       (event_type or 'view', (page or '/')[:100], (ip_address or '')[:50], (detail or '')[:200]))
+        conn.commit()
+        event_id = cursor.lastrowid
+        conn.close()
+        return event_id
+
+    def get_ad_stats(self) -> Dict[str, Any]:
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        today = datetime.now().strftime('%Y-%m-%d')
+        month_start = datetime.now().replace(day=1).strftime('%Y-%m-%d')
+
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression'")
+        total_impressions = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression' AND date(created_at)=?", (today,))
+        today_impressions = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click'")
+        total_clicks = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click' AND date(created_at)=?", (today,))
+        today_clicks = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM site_visits WHERE date(visit_time)=?", (today,))
+        today_traffic = cursor.fetchone()[0]
+
+        conn.close()
+        return {
+            'publisher_id': 'ca-pub-1036052096443002',
+            'ad_status': 'Live on Website (Script & Slots Active)',
+            'total_impressions': total_impressions,
+            'today_impressions': today_impressions,
+            'total_clicks': total_clicks,
+            'today_clicks': today_clicks,
+            'today_traffic': today_traffic,
+        }

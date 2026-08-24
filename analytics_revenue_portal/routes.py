@@ -1,4 +1,4 @@
-﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 from functools import wraps
 from database import NewsDatabase
 import sqlite3
@@ -39,7 +39,41 @@ def dashboard():
 @analytics_bp.route('/revenue')
 @admin_required
 def revenue():
-    return render_template('analytics_revenue.html')
+    db = NewsDatabase()
+    payout = db.get_payout_account()
+    ad_stats = db.get_ad_stats()
+    visitor_stats = db.get_visitor_stats()
+    return render_template('analytics_revenue.html', payout=payout, ad_stats=ad_stats, visitor_stats=visitor_stats)
+
+
+@analytics_bp.route('/api/payout-account', methods=['GET', 'POST'])
+@admin_required
+def payout_account_api():
+    from flask import request
+    db = NewsDatabase()
+    if request.method == 'POST':
+        data = request.get_json(silent=True) or request.form.to_dict()
+        name = (data.get('account_name') or '').strip()
+        num = (data.get('account_number') or '').strip()
+        bank = (data.get('bank_name') or '').strip()
+        iban = (data.get('iban') or '').strip()
+        if not name or not num or not bank:
+            return jsonify({'status': 'error', 'message': 'Account name, number, and bank are required.'}), 400
+        db.update_payout_account(name, num, bank, iban)
+        return jsonify({'status': 'success', 'message': 'Payout account updated successfully.', 'payout': db.get_payout_account()})
+    return jsonify(db.get_payout_account())
+
+
+@analytics_bp.route('/api/track-ad-event', methods=['POST'])
+def track_ad_event():
+    from flask import request
+    db = NewsDatabase()
+    data = request.get_json(silent=True) or {}
+    event_type = data.get('event_type') or 'impression'
+    page = data.get('page') or request.referrer or '/'
+    detail = data.get('detail') or 'Google AdSense ca-pub-1036052096443002'
+    db.log_ad_event(event_type, page, request.remote_addr, detail)
+    return jsonify({'status': 'ok'})
 
 @analytics_bp.route('/reports')
 @admin_required

@@ -43,6 +43,8 @@
       <button onclick="switchTab('articles')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-articles"><i class="fas fa-newspaper w-4 text-center"></i> Articles</button>
       <button onclick="switchTab('programs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-programs"><i class="fas fa-graduation-cap w-4 text-center"></i> Programs</button>
       <button onclick="switchTab('recipients')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-recipients"><i class="fas fa-envelope w-4 text-center"></i> Recipients</button>
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Monetization</div>
+      <a href="/analytics/revenue" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-emerald-400 mb-1 hover:bg-emerald-500/10 transition"><i class="fas fa-dollar-sign w-4 text-center"></i> Revenue & Payouts</a>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Logs</div>
       <button onclick="switchTab('emaillogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-emaillogs"><i class="fas fa-envelope-open-text w-4 text-center"></i> Email Logs</button>
       <button onclick="switchTab('agentlogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-agentlogs"><i class="fas fa-robot w-4 text-center"></i> Agent Logs</button>
@@ -79,13 +81,23 @@
             <div id="recentActivity" class="space-y-2 max-h-64 overflow-y-auto"></div>
           </div>
           <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-cogs text-purple-400"></i> Quick Actions</h3>
-            <div class="space-y-3">
-              <button onclick="runAgentNow()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2"><i class="fas fa-play"></i> Run News Digest Now</button>
-              <button onclick="sendProgramNotifications()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2"><i class="fas fa-graduation-cap"></i> Send Program Notifications</button>
-              <button onclick="cleanupData()" class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-3 rounded-xl text-sm transition flex items-center justify-center gap-2 border border-red-500/30"><i class="fas fa-trash-alt"></i> Cleanup Old Articles (3 months)</button>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-wallet text-emerald-400"></i> Payout & Monetization</h3>
+              <a href="/analytics/revenue" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold">Manage →</a>
             </div>
-            <div class="mt-4 space-y-2 text-xs" id="configInfo"></div>
+            <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl mb-4 text-xs space-y-1.5">
+              <div class="flex justify-between"><span class="text-slate-400">Account:</span> <span class="text-white font-bold">Syed Ali Hussain</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Company:</span> <span class="text-white font-bold">NayaPay</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Number:</span> <span class="text-emerald-400 font-mono font-bold">03146618622</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Status:</span> <span class="text-emerald-300 font-bold">Verified for Wire Transfer</span></div>
+            </div>
+            <h3 class="font-bold text-white mb-3 flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400"><i class="fas fa-cogs text-purple-400"></i> Quick Actions</h3>
+            <div class="space-y-2">
+              <button onclick="runAgentNow()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-play"></i> Run News Digest Now</button>
+              <button onclick="sendProgramNotifications()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-graduation-cap"></i> Send Program Notifications</button>
+              <button onclick="cleanupData()" class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-red-500/30"><i class="fas fa-trash-alt"></i> Cleanup Old Articles</button>
+            </div>
+            <div class="mt-3 space-y-1 text-xs" id="configInfo"></div>
           </div>
         </div>
       </div>
