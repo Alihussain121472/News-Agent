@@ -125,6 +125,7 @@ class NewsDatabase:
         conn.commit()
         conn.close()
         logger.info(f'Database initialized at {self.db_path}')
+        self.seed_default_programs()
 
     # ── News articles ──────────────────────────────────────────────────────────
 
@@ -484,6 +485,62 @@ class NewsDatabase:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
         cursor.execute('UPDATE student_programs SET is_active=0 WHERE id=?', (program_id,))
         affected = cursor.rowcount; conn.commit(); conn.close(); return affected > 0
+
+    def seed_default_programs(self) -> None:
+        """Seed real-world student programs if the table is empty."""
+        conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM student_programs')
+        if cursor.fetchone()[0] == 0:
+            programs = [
+                {
+                    'title': 'Google Developer Student Clubs (GDSC)',
+                    'company': 'Google',
+                    'description': 'University-based community groups for students interested in Google developer technologies. Gain leadership and technical skills.',
+                    'registration_url': 'https://developers.google.com/community/gdsc',
+                    'category': 'program',
+                    'launch_date': f'{datetime.now().year}-08-15'
+                },
+                {
+                    'title': 'Google Summer of Code (GSoC)',
+                    'company': 'Google',
+                    'description': 'A global, online program focused on bringing new contributors into open source software development.',
+                    'registration_url': 'https://summerofcode.withgoogle.com/',
+                    'category': 'internship',
+                    'launch_date': f'{datetime.now().year + 1}-03-01'
+                },
+                {
+                    'title': 'Microsoft Imagine Cup',
+                    'company': 'Microsoft',
+                    'description': 'Global student technology competition focused on finding solutions to real-world problems using Microsoft technologies.',
+                    'registration_url': 'https://imaginecup.microsoft.com/',
+                    'category': 'competition',
+                    'launch_date': f'{datetime.now().year}-10-01'
+                },
+                {
+                    'title': 'AWS Academy & Educate',
+                    'company': 'Amazon',
+                    'description': 'Provides students with resources for building skills in the cloud, including free training and AWS credits.',
+                    'registration_url': 'https://aws.amazon.com/education/awseducate/',
+                    'category': 'certification',
+                    'launch_date': f'{datetime.now().year}-09-01'
+                },
+                {
+                    'title': 'NASA L\'SPACE Academy',
+                    'company': 'NASA',
+                    'description': 'Free, online, interactive program for STEM students to gain project-based experience in space exploration.',
+                    'registration_url': 'https://www.lspace.asu.edu/',
+                    'category': 'program',
+                    'launch_date': f'{datetime.now().year}-08-20'
+                }
+            ]
+            for p in programs:
+                cursor.execute('''INSERT INTO student_programs
+                    (title,company,description,registration_url,launch_date,category)
+                    VALUES (?,?,?,?,?,?)''',
+                    (p['title'], p['company'], p['description'], p['registration_url'], p['launch_date'], p['category']))
+            conn.commit()
+            logger.info("Seeded default student programs.")
+        conn.close()
 
     # ── Contact messages ───────────────────────────────────────────────────────
 

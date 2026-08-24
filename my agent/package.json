@@ -1,0 +1,24 @@
+{
+  "name": "expense-tracker-agent",
+  "version": "1.0.0",
+  "description": "Automated expense tracking with daily Gmail reports",
+  "type": "module",
+  "main": "send-expense-report.js",
+  "scripts": {
+    "send-report": "node send-expense-report.js",
+    "test": "node send-expense-report.js"
+  },
+  "keywords": [
+    "expense",
+    "tracker",
+    "automation",
+    "gmail",
+    "reports"
+  ],
+  "author": "Ali Hussain",
+  "license": "MIT",
+  "dependencies": {
+    "nodemailer": "^6.9.7",
+    "dotenv": "^16.3.1"
+  }
+}

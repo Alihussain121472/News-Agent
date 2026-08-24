@@ -1,0 +1,46 @@
+{
+  "expenses": [
+    {
+      "id": 1,
+      "date": "2026-08-17",
+      "amount": 450,
+      "category": "Food",
+      "description": "Grocery shopping",
+      "paymentMethod": "Credit Card"
+    },
+    {
+      "id": 2,
+      "date": "2026-08-17",
+      "amount": 80,
+      "category": "Transportation",
+      "description": "Uber ride",
+      "paymentMethod": "Cash"
+    },
+    {
+      "id": 3,
+      "date": "2026-08-17",
+      "amount": 1200,
+      "category": "Bills",
+      "description": "Internet bill",
+      "paymentMethod": "Bank Transfer"
+    }
+  ],
+  "categories": [
+    "Food",
+    "Transportation",
+    "Bills",
+    "Entertainment",
+    "Healthcare",
+    "Shopping",
+    "Other"
+  ],
+  "budget": {
+    "Food": 15000,
+    "Transportation": 5000,
+    "Bills": 10000,
+    "Entertainment": 5000,
+    "Healthcare": 5000,
+    "Shopping": 10000,
+    "Other": 5000
+  }
+}

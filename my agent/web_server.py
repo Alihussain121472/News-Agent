@@ -475,17 +475,26 @@ def handle_contact():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    return '''<?xml version="1.0" encoding="UTF-8"?>
+    domain = 'novabrief.tech' if 'novabrief.tech' in request.host_url else request.host_url.strip('/')
+    domain_url = f"https://{domain}" if not domain.startswith('http') else domain
+    return f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url><loc>https://novabrief-web.onrender.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
-<url><loc>https://novabrief-web.onrender.com/privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-<url><loc>https://novabrief-web.onrender.com/terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>{domain_url}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+<url><loc>{domain_url}/privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+<url><loc>{domain_url}/terms</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
 </urlset>''', 200, {'Content-Type': 'application/xml'}
 
 
 @app.route('/robots.txt')
 def robots():
-    return 'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: https://novabrief-web.onrender.com/sitemap.xml', 200, {'Content-Type': 'text/plain'}
+    domain = 'novabrief.tech' if 'novabrief.tech' in request.host_url else request.host_url.strip('/')
+    domain_url = f"https://{domain}" if not domain.startswith('http') else domain
+    return f'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: {domain_url}/sitemap.xml', 200, {'Content-Type': 'text/plain'}
+
+
+@app.route('/ads.txt')
+def adstxt():
+    return 'google.com, pub-1036052096443002, DIRECT, f08c47fec0942fa0', 200, {'Content-Type': 'text/plain'}
 
 
 @app.route('/api/admin/ping-google', methods=['POST'])
@@ -494,7 +503,9 @@ def ping_google():
     """Use REST API in the backend to ping Google to index the website."""
     try:
         import requests
-        sitemap_url = 'https://novabrief-web.onrender.com/sitemap.xml'
+        domain = 'novabrief.tech' if 'novabrief.tech' in request.host_url else request.host_url.strip('/')
+        domain_url = f"https://{domain}" if not domain.startswith('http') else domain
+        sitemap_url = f'{domain_url}/sitemap.xml'
         google_ping_url = f'https://www.google.com/ping?sitemap={sitemap_url}'
         response = requests.get(google_ping_url)
         if response.status_code == 200:
@@ -503,6 +514,14 @@ def ping_google():
             return jsonify({'status': 'error', 'message': f'Failed to ping Google. Status: {response.status_code}'}), 500
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
 
 
 @app.errorhandler(404)

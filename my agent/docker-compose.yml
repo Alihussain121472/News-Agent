@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - NEWSAPI_KEY=${NEWSAPI_KEY}
+      - RECIPIENT_EMAIL=${RECIPIENT_EMAIL}
+      - SECRET_KEY=${SECRET_KEY}
+    volumes:
+      - .:/app
+      - /app/__pycache__
+    command: python web_server.py
+    restart: unless-stopped
