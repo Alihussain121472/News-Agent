@@ -552,8 +552,9 @@ def main() -> None:
             scheduler = BackgroundScheduler()
             scheduler.add_job(run_news_digest, 'cron', hour=8, minute=0, id='ai_morning_brief')
             scheduler.add_job(send_program_notifications, 'cron', hour=9, minute=0, id='program_notifications')
+            scheduler.add_job(generate_daily_seo_blog, 'cron', hour=10, minute=0, id='auto_blog_agent')
             scheduler.start()
-            logger.info('Scheduler started. Daily brief at 8:00 AM, program checks at 9:00 AM.')
+            logger.info('Scheduler started. Daily brief 8AM, Programs 9AM, Auto-Blog 10AM.')
             try:
                 while True:
                     pass
@@ -565,6 +566,58 @@ def main() -> None:
         return
 
     run_news_digest()
+
+
+import random
+import sqlite3
+import re
+
+def generate_daily_seo_blog():
+    db = NewsDatabase()
+    topics = [
+        "The Ultimate Guide to AI Automation for Students",
+        "Top 10 Free Google Certifications to Boost Your Tech Career",
+        "How Generative AI is Changing the Software Engineering Landscape",
+        "Why Every College Student Needs to Learn Python in 2026",
+        "Maximizing Productivity: How to Use AI Tools to Study Faster"
+    ]
+    
+    title = random.choice(topics)
+    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
+    
+    # Generate SEO optimized HTML content
+    content = f'''
+    <p class="mb-4">The tech industry is evolving faster than ever. <strong>{title}</strong> is a topic that is dominating discussions across Silicon Valley and university campuses alike.</p>
+    <h2 class="text-2xl font-bold mt-6 mb-3 text-slate-800">Why This Matters Now</h2>
+    <p class="mb-4">Recent data shows that individuals who leverage these modern tools are 40% more productive than their peers. Whether you are trying to land a prestigious internship or build your own startup, understanding this is critical to your long-term success.</p>
+    <h2 class="text-2xl font-bold mt-6 mb-3 text-slate-800">Actionable Steps to Get Started</h2>
+    <ul class="list-disc pl-5 mb-4 space-y-2">
+        <li><strong>Research:</strong> Spend at least 30 minutes a day reading up on the latest industry trends.</li>
+        <li><strong>Apply:</strong> Use tools like Nova Brief to track essential news and updates.</li>
+        <li><strong>Certify:</strong> Look for free online certifications to prove your knowledge to employers.</li>
+    </ul>
+    <p>By staying ahead of the curve, you guarantee yourself a place in the future of work. Don't wait until the industry passes you by—start building your skills today.</p>
+    '''
+    
+    meta_desc = f"Learn about {title}. Discover how students and professionals are leveraging technology for massive career growth."
+    
+    try:
+        conn = sqlite3.connect(db.db_path)
+        cursor = conn.cursor()
+        
+        # Check if slug exists to prevent duplicates
+        cursor.execute("SELECT id FROM blog_posts WHERE slug=?", (slug,))
+        if cursor.fetchone():
+            conn.close()
+            return
+            
+        cursor.execute('''INSERT INTO blog_posts (title, slug, content, meta_description)
+                          VALUES (?, ?, ?, ?)''', (title, slug, content, meta_desc))
+        conn.commit()
+        conn.close()
+        logger.info(f"Auto-Blogging Agent published new SEO article: {title}")
+    except Exception as e:
+        logger.error(f"Auto-blogging failed: {e}")
 
 
 if __name__ == '__main__':
@@ -601,3 +654,4 @@ def send_password_reset_email(email: str, token: str) -> None:
             server.send_message(msg)
     except Exception as e:
         logger.error(f'Failed to send password reset to {email}: {e}')
+

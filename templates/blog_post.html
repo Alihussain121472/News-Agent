@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }} - Nova Brief</title>
+    <meta name="description" content="{{ post.meta_description }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-slate-200 fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white"><i class="fas fa-bolt"></i></div>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">Nova Brief</span>
+                </a>
+                <div class="flex gap-4">
+                    <a href="/blog" class="text-slate-600 hover:text-blue-600 font-medium text-sm mt-1">All Articles</a>
+                    <a href="/register" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-medium text-sm hover:bg-blue-700 transition">Get Daily Brief</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <article class="max-w-3xl mx-auto px-4 sm:px-6 py-24">
+        <a href="/blog" class="text-blue-600 text-sm font-bold mb-6 inline-block hover:underline"><i class="fas fa-arrow-left mr-1"></i> Back to Blog</a>
+        <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 leading-tight">{{ post.title }}</h1>
+        <p class="text-slate-500 mb-10 pb-6 border-b border-slate-200"><i class="far fa-calendar-alt mr-2"></i> Published on {{ post.published_at[:10] }} &bull; 5 min read</p>
+        
+        <div class="prose prose-lg max-w-none prose-slate">
+            {{ post.content | safe }}
+        </div>
+
+        <!-- Google AdSense Placeholder -->
+        <div class="w-full bg-slate-100 rounded-xl my-12 flex items-center justify-center p-4 text-center min-h-[150px]">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1036052096443002" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </article>
+</body>
+</html>
