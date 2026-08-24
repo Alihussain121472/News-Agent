@@ -1,7 +1,7 @@
 # Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
-from datetime import datetime
+from datetime import datetime, timedelta
 import os, logging, json, threading
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +11,7 @@ load_dotenv()
 # Initialize the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nova-brief-secret-key-2026')
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365 * 10)  # Lifetime session until explicit logout
 
 try:
     from growth_seo_agent.routes import seo_bp
@@ -96,7 +97,10 @@ def _safe_add_recipient(email: str):
 # This is the main homepage route. When someone visits our website, this runs.
 @app.route('/')
 def index():
-    return render_template('index.html')
+    user_email = session.get('user_email')
+    user_name = session.get('user_name')
+    is_user = session.get('role') == 'user'
+    return render_template('index.html', user_email=user_email, user_name=user_name, is_logged_in=is_user)
 
 @app.route('/dashboard')
 @admin_required
@@ -106,7 +110,9 @@ def dashboard():
 @app.route('/user/dashboard')
 @user_required
 def user_dashboard():
-    return render_template('user_dashboard.html')
+    user_email = session.get('user_email')
+    user_name = session.get('user_name') or (user_email.split('@')[0].title() if user_email else 'User')
+    return render_template('user_dashboard.html', user_email=user_email, user_name=user_name)
 
 @app.route('/user/login')
 def user_login_page():
@@ -156,6 +162,7 @@ def register_user_account():
     pwd_hash = generate_password_hash(password) if password and len(password) >= 4 else None
     result = db.create_or_update_user_account(email, name, pwd_hash)
     _safe_add_recipient(email)
+    session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     db.record_user_login(email, 'register')
     db.log_user_activity(email, 'account_created', f'Registered as {name}')
@@ -170,6 +177,7 @@ def register_user_account():
     return jsonify({
         'status': 'success',
         'message': 'Welcome to Nova Brief! Your account is active and your welcome email is on the way.',
+        'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
     })
 
@@ -199,10 +207,16 @@ def login_user_account():
             return jsonify({'status': 'error', 'message': 'Invalid password. You can also sign in with just your email.'}), 401
     
     user_name = user.get('name') or email.split('@')[0].title()
+    session.permanent = True
     session.update({'user_email': user['email'], 'user_name': user_name, 'role': 'user'})
     db.record_user_login(email, 'user_login')
     db.log_user_activity(email, 'login', 'User logged in')
-    return jsonify({'status': 'success', 'message': 'Logged in successfully.', 'redirect': '/user/dashboard'})
+    return jsonify({
+        'status': 'success',
+        'message': 'Logged in successfully.',
+        'user': {'name': user_name, 'email': user['email']},
+        'redirect': '/user/dashboard'
+    })
 
 
 @app.route('/api/auth/admin/login', methods=['POST'])
@@ -212,6 +226,7 @@ def login_admin_account():
     password = p.get('password') or ''
     if email != ADMIN_EMAIL or password != ADMIN_PASSWORD:
         return jsonify({'status': 'error', 'message': 'Invalid admin credentials.'}), 401
+    session.permanent = True
     session.update({'user_email': ADMIN_EMAIL, 'user_name': 'Administrator', 'role': 'admin'})
     db.record_user_login(ADMIN_EMAIL, 'admin_login')
     return jsonify({'status': 'success', 'message': 'Admin login successful.', 'redirect': '/dashboard'})
@@ -219,13 +234,19 @@ def login_admin_account():
 
 @app.route('/api/auth/me')
 def current_session_user():
-    if not session.get('role'):
-        return jsonify({'authenticated': False})
+    role = session.get('role')
+    email = session.get('user_email')
+    if not role or not email:
+        return jsonify({'authenticated': False, 'logged_in': False})
+    
+    user = db.get_user_by_email(email)
+    name = session.get('user_name') or (user.get('name') if user else None) or email.split('@')[0].title()
     return jsonify({
         'authenticated': True,
-        'email': session.get('user_email'),
-        'name': session.get('user_name'),
-        'role': session.get('role')
+        'logged_in': True,
+        'email': email,
+        'name': name,
+        'role': role
     })
 
 
@@ -489,6 +510,7 @@ def subscribe_public():
     _safe_add_recipient(email)
     db.create_or_update_user_account(email, name)
     db.record_user_login(email, 'subscription')
+    session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
     # Fast async dispatch welcome email via worker pool
@@ -502,6 +524,7 @@ def subscribe_public():
         'message': f'Welcome, {name}! You are now subscribed and signed in. Your welcome briefing has been dispatched.',
         'already_registered': False,
         'welcome_email_sent': True,
+        'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
     })
 
@@ -521,6 +544,7 @@ def join_program_alert():
     db.enable_user_program_notifications(email, name)
     db.record_user_login(email, 'program_alert_join')
     db.log_user_activity(email, 'joined_program_alerts', f'Joined alerts for {program_title or "all programs"}')
+    session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
     # Fast async dispatch dedicated program welcome email via worker pool
@@ -534,6 +558,7 @@ def join_program_alert():
         'status': 'success',
         'message': f'Welcome, {name}! You have joined Student Program Alerts. Your welcome email has been sent to {email}.',
         'welcome_email_sent': True,
+        'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
     })
 

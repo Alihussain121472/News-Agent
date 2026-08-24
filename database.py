@@ -1,4 +1,4 @@
-import sqlite3
+﻿import sqlite3
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -118,7 +118,7 @@ class NewsDatabase:
         logger.info(f'Database initialized at {self.db_path}')
         self.seed_default_programs()
 
-    # ── News articles ─────────────────────────────────────────────────────────
+    # â”€â”€ News articles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_news_article(self, article: Dict[str, Any]) -> int:
         conn = sqlite3.connect(self.db_path)
@@ -184,7 +184,7 @@ class NewsDatabase:
         logger.info(f'Cleaned up {deleted} articles')
         return deleted
 
-    # ── Email / agent logs ────────────────────────────────────────────────────
+    # â”€â”€ Email / agent logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def log_email_sent(self, recipient, subject, article_count, status='success', error_message=None):
         conn = sqlite3.connect(self.db_path)
@@ -219,7 +219,7 @@ class NewsDatabase:
         conn.close()
         return rows
 
-    # ── User management ───────────────────────────────────────────────────────
+    # â”€â”€ User management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def register_user(self, email: str, name: str = None) -> bool:
         conn = sqlite3.connect(self.db_path)
@@ -359,7 +359,7 @@ class NewsDatabase:
         conn.close()
         return count
 
-    # ── Visit / login tracking ────────────────────────────────────────────────
+    # â”€â”€ Visit / login tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def record_user_login(self, email: str, source: str = 'portal') -> None:
         conn = sqlite3.connect(self.db_path)
@@ -416,7 +416,7 @@ class NewsDatabase:
         conn.close()
         return rows
 
-    # ── User activity log ─────────────────────────────────────────────────────
+    # â”€â”€ User activity log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def log_user_activity(self, email: str, action: str, detail: str = None, page: str = None) -> None:
         conn = sqlite3.connect(self.db_path)
@@ -511,7 +511,7 @@ class NewsDatabase:
         conn.close()
         return days
 
-    # ── Admin user monitoring ─────────────────────────────────────────────────
+    # â”€â”€ Admin user monitoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_all_users_with_stats(self) -> List[Dict[str, Any]]:
         conn = sqlite3.connect(self.db_path)
@@ -563,7 +563,7 @@ class NewsDatabase:
             'active_programs': active_programs,
         }
 
-    # ── Student programs ──────────────────────────────────────────────────────
+    # â”€â”€ Student programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def add_student_program(self, title: str, company: str, description: str,
                              registration_url: str, deadline: str = None,
@@ -685,7 +685,7 @@ class NewsDatabase:
             logger.info("Seeded default student programs.")
         conn.close()
 
-    # ── Contact messages ──────────────────────────────────────────────────────
+    # â”€â”€ Contact messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def record_contact_message(self, name, email, subject, message) -> int:
         conn = sqlite3.connect(self.db_path)
@@ -708,7 +708,7 @@ class NewsDatabase:
         conn.close()
         return rows
 
-    # ── Digest run tracking ───────────────────────────────────────────────────
+    # â”€â”€ Digest run tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def has_daily_digest_run(self, run_date: Optional[str] = None) -> bool:
         conn = sqlite3.connect(self.db_path)
@@ -728,7 +728,7 @@ class NewsDatabase:
         conn.commit()
         conn.close()
 
-    # ── Statistics ────────────────────────────────────────────────────────────
+    # â”€â”€ Statistics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_statistics(self) -> Dict[str, Any]:
         conn = sqlite3.connect(self.db_path)
@@ -760,3 +760,4 @@ class NewsDatabase:
             'unique_visitors': visitor_stats['unique_visitors'],
             'monthly_visits': visitor_stats['monthly_visits'],
         }
+

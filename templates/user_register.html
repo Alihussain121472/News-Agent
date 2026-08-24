@@ -95,7 +95,12 @@
       msg.textContent = d.message || 'Account ready!';
       msg.classList.remove('hidden');
       if (r.ok && d.status === 'success') {
-        setTimeout(() => window.location.href = d.redirect || '/user/dashboard', 600);
+        const uEmail = document.getElementById('email').value.trim();
+        const uName = document.getElementById('name').value.trim();
+        localStorage.setItem('nova_user_email', uEmail);
+        localStorage.setItem('nova_user_name', uName);
+        localStorage.setItem('nova_logged_in', 'true');
+        setTimeout(() => window.location.href = d.redirect || '/user/dashboard', 400);
       }
     } catch(err) {
       msg.className = 'mt-4 rounded-xl p-3 text-sm font-semibold text-center bg-red-500/20 text-red-300 border border-red-500/30';

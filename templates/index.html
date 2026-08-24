@@ -34,13 +34,37 @@
         </div>
         <span class="text-xl font-bold text-white">Nova Brief</span>
       </div>
-      <div class="hidden md:flex items-center gap-8">
+      <div class="hidden md:flex items-center gap-6">
         <a href="#features" class="text-slate-400 hover:text-white transition text-sm font-medium">Features</a>
         <a href="#programs" class="text-slate-400 hover:text-white transition text-sm font-medium">Programs</a>
         <a href="#faq" class="text-slate-400 hover:text-white transition text-sm font-medium">FAQ</a>
         <a href="#contact" class="text-slate-400 hover:text-white transition text-sm font-medium">Contact</a>
-        <a href="/user/login" class="text-slate-400 hover:text-white transition text-sm font-medium">Sign In</a>
-        <a href="#subscribe" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Get Started</a>
+        
+        <!-- Guest Portion (shown when logged out) -->
+        <div id="navGuestPortion" class="flex items-center gap-4">
+          <a href="/user/login" class="text-slate-300 hover:text-white transition text-sm font-medium">Sign In</a>
+          <a href="#subscribe" class="bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-blue-500/20">Get Started</a>
+        </div>
+
+        <!-- User Portion (shows Name, Email, Avatar & Dashboard until logout) -->
+        <div id="navUserPortion" class="hidden items-center gap-3 bg-slate-800/90 border border-slate-700/70 rounded-2xl px-3 py-1.5 shadow-xl">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xs shadow" id="navAvatar">
+            U
+          </div>
+          <div class="text-left pr-1">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span id="navUserName">User</span>
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            </div>
+            <div class="text-[11px] text-slate-400 truncate max-w-[130px]" id="navUserEmail">user@email.com</div>
+          </div>
+          <a href="/user/dashboard" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition border border-blue-500/30 flex items-center gap-1">
+            <i class="fas fa-th-large text-[10px]"></i> Dashboard
+          </a>
+          <button onclick="handleUserLogout()" class="text-slate-400 hover:text-red-400 text-xs px-1.5 py-1 transition" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
       </div>
       <button id="mobileMenuBtn" class="md:hidden text-slate-400 hover:text-white">
         <i class="fas fa-bars text-xl"></i>
@@ -52,8 +76,21 @@
     <a href="#programs" class="block text-slate-400 hover:text-white py-2 text-sm">Programs</a>
     <a href="#faq" class="block text-slate-400 hover:text-white py-2 text-sm">FAQ</a>
     <a href="#contact" class="block text-slate-400 hover:text-white py-2 text-sm">Contact</a>
-    <a href="/user/login" class="block text-slate-400 hover:text-white py-2 text-sm">Sign In</a>
-    <a href="#subscribe" class="block bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg text-center">Get Started Free</a>
+    <div id="mobileGuestPortion" class="space-y-2 pt-2 border-t border-slate-800">
+      <a href="/user/login" class="block text-slate-300 hover:text-white py-2 text-sm">Sign In</a>
+      <a href="#subscribe" class="block bg-gradient-to-r from-blue-600 to-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-xl text-center shadow">Get Started Free</a>
+    </div>
+    <div id="mobileUserPortion" class="hidden pt-3 border-t border-slate-800 space-y-2">
+      <div class="flex items-center gap-3 p-2 bg-slate-800/80 rounded-xl border border-slate-700">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-xs" id="mobileAvatar">U</div>
+        <div>
+          <div class="text-xs font-bold text-white" id="mobileUserName">User</div>
+          <div class="text-[11px] text-slate-400" id="mobileUserEmail">user@email.com</div>
+        </div>
+      </div>
+      <a href="/user/dashboard" class="block bg-blue-600 text-white text-xs font-bold py-2 text-center rounded-xl">Go to Dashboard</a>
+      <button onclick="handleUserLogout()" class="w-full text-center text-red-400 hover:text-red-300 text-xs py-2">Sign Out</button>
+    </div>
   </div>
 </nav>
 
@@ -540,6 +577,79 @@ async function handleContact(e){
     msg.textContent='Failed to send. Try again.'; msg.classList.remove('hidden');
   }finally{ btn.disabled=false; btn.textContent='Send Message'; }
 }
+
+// User session persistence & Navbar sync (keeps user name & email visible for lifetime until logout)
+async function syncUserNavbar(){
+  const guestBox = document.getElementById('navGuestPortion');
+  const userBox = document.getElementById('navUserPortion');
+  const mobileGuest = document.getElementById('mobileGuestPortion');
+  const mobileUser = document.getElementById('mobileUserPortion');
+  
+  let user = null;
+  const srvEmail = "{{ user_email or '' }}";
+  const srvName = "{{ user_name or '' }}";
+
+  if (srvEmail && srvEmail !== 'None') {
+    user = { email: srvEmail, name: srvName || srvEmail.split('@')[0] };
+    localStorage.setItem('nova_user_email', srvEmail);
+    if (srvName && srvName !== 'None') localStorage.setItem('nova_user_name', srvName);
+    localStorage.setItem('nova_logged_in', 'true');
+  } else {
+    const localEmail = localStorage.getItem('nova_user_email');
+    const localName = localStorage.getItem('nova_user_name');
+    if (localEmail && localStorage.getItem('nova_logged_in') === 'true') {
+      user = { email: localEmail, name: localName || localEmail.split('@')[0] };
+    }
+  }
+
+  // Verify in background with API
+  try {
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+    if (data.authenticated || data.logged_in) {
+      user = { email: data.email, name: data.name };
+      localStorage.setItem('nova_user_email', data.email);
+      localStorage.setItem('nova_user_name', data.name);
+      localStorage.setItem('nova_logged_in', 'true');
+    } else if (res.status === 401 && !srvEmail) {
+      user = null;
+      localStorage.removeItem('nova_logged_in');
+    }
+  } catch(e){}
+
+  if (user && user.email) {
+    const initial = (user.name || user.email).charAt(0).toUpperCase();
+    const displayName = user.name || user.email.split('@')[0];
+    if (document.getElementById('navAvatar')) document.getElementById('navAvatar').textContent = initial;
+    if (document.getElementById('navUserName')) document.getElementById('navUserName').textContent = displayName;
+    if (document.getElementById('navUserEmail')) document.getElementById('navUserEmail').textContent = user.email;
+    if (document.getElementById('mobileAvatar')) document.getElementById('mobileAvatar').textContent = initial;
+    if (document.getElementById('mobileUserName')) document.getElementById('mobileUserName').textContent = displayName;
+    if (document.getElementById('mobileUserEmail')) document.getElementById('mobileUserEmail').textContent = user.email;
+
+    if (guestBox) guestBox.classList.add('hidden');
+    if (userBox) { userBox.classList.remove('hidden'); userBox.classList.add('flex'); }
+    if (mobileGuest) mobileGuest.classList.add('hidden');
+    if (mobileUser) mobileUser.classList.remove('hidden');
+  } else {
+    if (guestBox) guestBox.classList.remove('hidden');
+    if (userBox) { userBox.classList.add('hidden'); userBox.classList.remove('flex'); }
+    if (mobileGuest) mobileGuest.classList.remove('hidden');
+    if (mobileUser) mobileUser.classList.add('hidden');
+  }
+}
+
+async function handleUserLogout(){
+  try {
+    await fetch('/api/auth/logout', {method: 'POST'});
+  } catch(e){}
+  localStorage.removeItem('nova_user_email');
+  localStorage.removeItem('nova_user_name');
+  localStorage.removeItem('nova_logged_in');
+  window.location.href = '/';
+}
+
+document.addEventListener('DOMContentLoaded', syncUserNavbar);
 </script>
 </body>
 </html>
