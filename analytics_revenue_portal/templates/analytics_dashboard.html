@@ -9,31 +9,31 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <p class="text-sm font-medium text-slate-500">Total Visitors</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">12,485</h3>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ total_visitors }}</h3>
       </div>
       <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
         <i class="fas fa-users"></i>
       </div>
     </div>
     <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 14.5%</span>
-      <span class="text-slate-400 ml-2">vs last month</span>
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
+      <span class="text-slate-400 ml-2">tracked by DB</span>
     </div>
   </div>
 
   <div class="kpi-card">
     <div class="flex justify-between items-start mb-4">
       <div>
-        <p class="text-sm font-medium text-slate-500">Organic Traffic</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">8,230</h3>
+        <p class="text-sm font-medium text-slate-500">Registered Users</p>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ total_users }}</h3>
       </div>
       <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
         <i class="fas fa-search"></i>
       </div>
     </div>
     <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 22.1%</span>
-      <span class="text-slate-400 ml-2">vs last month</span>
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
+      <span class="text-slate-400 ml-2">tracked by DB</span>
     </div>
   </div>
 
@@ -41,15 +41,15 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <p class="text-sm font-medium text-slate-500">Total Leads</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">452</h3>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ leads }}</h3>
       </div>
       <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
         <i class="fas fa-envelope-open-text"></i>
       </div>
     </div>
     <div class="flex items-center text-sm">
-      <span class="badge badge-red flex items-center gap-1"><i class="fas fa-arrow-down"></i> 3.2%</span>
-      <span class="text-slate-400 ml-2">vs last month</span>
+      <span class="badge badge-red flex items-center gap-1"><i class="fas fa-arrow-down"></i> Live Data</span>
+      <span class="text-slate-400 ml-2">tracked by DB</span>
     </div>
   </div>
 
@@ -64,8 +64,8 @@
       </div>
     </div>
     <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 8.4%</span>
-      <span class="text-slate-400 ml-2">vs last month</span>
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
+      <span class="text-slate-400 ml-2">tracked by DB</span>
     </div>
   </div>
 </div>
@@ -97,7 +97,7 @@
       </div>
     </div>
     <h4 class="font-semibold text-blue-200 mb-2 text-sm uppercase tracking-wider">AI Priority Recommendation</h4>
-    <p class="text-slate-300 text-sm leading-relaxed mb-4">Your organic traffic is growing rapidly, but your conversion rate has dropped. Focus on improving the calls-to-action on your top 5 landing pages.</p>
+    <p class="text-slate-300 text-sm leading-relaxed mb-4">Your Registered Users is growing rapidly, but your conversion rate has dropped. Focus on improving the calls-to-action on your top 5 landing pages.</p>
     <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition">View Action Plan</button>
   </div>
 </div>
@@ -105,15 +105,15 @@
 
 {% block scripts %}
 <script>
-  const ctx = document.getElementById('mainChart').getContext('2d');
-  new Chart(ctx, {
+    const ctx = document.getElementById('mainChart').getContext('2d');
+  const mainChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['1', '5', '10', '15', '20', '25', '30'],
+      labels: [],
       datasets: [
         {
-          label: 'Traffic',
-          data: [500, 800, 1200, 1100, 1500, 1900, 2200],
+          label: 'Website Visits',
+          data: [],
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',
           borderWidth: 2,
@@ -122,7 +122,7 @@
         },
         {
           label: 'Revenue ($)',
-          data: [200, 300, 450, 400, 600, 800, 950],
+          data: [],
           borderColor: '#10b981',
           backgroundColor: 'rgba(16, 185, 129, 0.0)',
           borderWidth: 2,
@@ -141,5 +141,17 @@
       }
     }
   });
+
+  // Fetch true live data from the server
+  fetch('/analytics/api/stats')
+    .then(res => res.json())
+    .then(data => {
+      mainChart.data.labels = data.labels;
+      mainChart.data.datasets[0].data = data.traffic;
+      mainChart.data.datasets[1].data = data.revenue;
+      mainChart.update();
+    });
 </script>
 {% endblock %}
+
+

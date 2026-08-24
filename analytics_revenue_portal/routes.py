@@ -1,38 +1,79 @@
 ﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 from functools import wraps
-import json
+from database import NewsDatabase
+import sqlite3
+from datetime import datetime, timedelta
 
 analytics_bp = Blueprint('analytics', __name__, template_folder='templates')
 
-def user_required(f):
+def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not session.get('user_email'):
-            return redirect(url_for('user_login_page'))
+        if session.get('role') != 'admin':
+            return redirect(url_for('admin_login_page'))
         return f(*args, **kwargs)
     return decorated_function
 
 @analytics_bp.route('/dashboard')
-@user_required
+@admin_required
 def dashboard():
-    return render_template('analytics_dashboard.html')
+    db = NewsDatabase()
+    
+    # Real data from database
+    total_users = db.get_user_count()
+    visitor_stats = db.get_visitor_stats()
+    total_visitors = visitor_stats.get('total_visits', 0)
+    monthly_visitors = visitor_stats.get('monthly_visits', 0)
+    
+    # Leads (contact messages)
+    leads = len(db.get_contact_messages(limit=10000))
+    
+    return render_template('analytics_dashboard.html', 
+        total_visitors=total_visitors,
+        monthly_visitors=monthly_visitors,
+        total_users=total_users,
+        leads=leads,
+        revenue=0.00
+    )
 
 @analytics_bp.route('/revenue')
-@user_required
+@admin_required
 def revenue():
     return render_template('analytics_revenue.html')
 
 @analytics_bp.route('/reports')
-@user_required
+@admin_required
 def reports():
     return render_template('analytics_reports.html')
 
 @analytics_bp.route('/api/stats')
-@user_required
+@admin_required
 def get_stats():
-    # Return mock stats for the charts
+    # Return true historical data for charts
+    db = NewsDatabase()
+    conn = sqlite3.connect(db.db_path)
+    cursor = conn.cursor()
+    
+    # Traffic last 7 days
+    labels = []
+    traffic_data = []
+    revenue_data = []
+    
+    for i in range(6, -1, -1):
+        d = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
+        labels.append(d)
+        
+        cursor.execute("SELECT COUNT(*) FROM site_visits WHERE date(visit_time) = ?", (d,))
+        t = cursor.fetchone()[0]
+        traffic_data.append(t)
+        
+        # Revenue is zero for now
+        revenue_data.append(0)
+        
+    conn.close()
+    
     return jsonify({
-        'traffic': {'today': 1250, 'growth': 12},
-        'revenue': {'today': 340.50, 'growth': 8},
-        'leads': {'today': 45, 'growth': 5}
+        'labels': labels,
+        'traffic': traffic_data,
+        'revenue': revenue_data
     })
