@@ -1,3 +1,4 @@
+# Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime
@@ -7,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
 load_dotenv()
+# Initialize the Flask application
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nova-brief-secret-key-2026')
 
@@ -31,6 +33,7 @@ ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or 'NovaBriefAdmin2026!'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+# Connect to our local SQLite database (where all user data is stored)
 db = NewsDatabase()
 
 RECIPIENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'recipients.json')
@@ -41,7 +44,7 @@ if not os.path.exists(RECIPIENTS_FILE):
     except Exception: pass
 
 
-# ── Auth Helpers ──────────────────────────────────────────────────────────────
+# â”€â”€ Auth Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def role_required(required_role: str):
     def decorator(func):
@@ -88,8 +91,9 @@ def _safe_add_recipient(email: str):
             json.dump(data, f, indent=2)
 
 
-# ── Page Routes ───────────────────────────────────────────────────────────────
+# â”€â”€ Page Routes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+# This is the main homepage route. When someone visits our website, this runs.
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -135,8 +139,9 @@ def cookies():
     return render_template('cookies.html')
 
 
-# ── Auth API ──────────────────────────────────────────────────────────────────
+# â”€â”€ Auth API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+# Handle new user registrations. We receive their email and password here.
 @app.route('/api/auth/register', methods=['POST'])
 def register_user_account():
     p = request.get_json(silent=True) or request.form.to_dict()
@@ -169,6 +174,7 @@ def register_user_account():
     })
 
 
+# Handle user login. We check if the password matches the one in our database.
 @app.route('/api/auth/login', methods=['POST'])
 def login_user_account():
     p = request.get_json(silent=True) or request.form.to_dict()
@@ -233,7 +239,7 @@ def logout_account():
     return jsonify({'status': 'success', 'redirect': '/'})
 
 
-# ── User Dashboard API ────────────────────────────────────────────────────────
+# â”€â”€ User Dashboard API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/user/overview')
 @user_required
@@ -283,7 +289,7 @@ def get_user_weekly_summary():
     return jsonify(db.get_user_weekly_summary(email))
 
 
-# ── Admin Dashboard API ───────────────────────────────────────────────────────
+# â”€â”€ Admin Dashboard API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/statistics')
 def get_statistics():
@@ -468,7 +474,7 @@ def get_config():
     })
 
 
-# ── Public Subscribe & Contact ────────────────────────────────────────────────
+# â”€â”€ Public Subscribe & Contact â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @app.route('/api/subscribe', methods=['POST'])
 def subscribe_public():
@@ -500,6 +506,38 @@ def subscribe_public():
     })
 
 
+@app.route('/api/programs/join-alert', methods=['POST'])
+def join_program_alert():
+    p = request.get_json(silent=True) or request.form.to_dict()
+    email = (p.get('email') or '').strip().lower()
+    name = (p.get('name') or '').strip()
+    program_title = (p.get('program_title') or p.get('program') or '').strip()
+    if not email or '@' not in email:
+        return jsonify({'status': 'error', 'message': 'Please enter a valid email address.'}), 400
+    if not name:
+        name = email.split('@')[0].replace('.', ' ').title()
+    
+    _safe_add_recipient(email)
+    db.enable_user_program_notifications(email, name)
+    db.record_user_login(email, 'program_alert_join')
+    db.log_user_activity(email, 'joined_program_alerts', f'Joined alerts for {program_title or "all programs"}')
+    session.update({'user_email': email, 'user_name': name, 'role': 'user'})
+    
+    # Asynchronously dispatch dedicated program welcome email
+    try:
+        from ai_news_agent import send_program_welcome_email
+        threading.Thread(target=send_program_welcome_email, args=(email, name, program_title), daemon=True).start()
+    except Exception as e:
+        logger.error(f'Error sending program welcome email: {e}')
+        
+    return jsonify({
+        'status': 'success',
+        'message': f'Welcome, {name}! You have joined Student Program Alerts. We have sent a welcome email to {email}.',
+        'welcome_email_sent': True,
+        'redirect': '/user/dashboard'
+    })
+
+
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():
     data = request.get_json() or {}
@@ -520,8 +558,9 @@ def handle_contact():
         return jsonify({'status': 'error', 'message': 'Failed to process your message.'}), 500
 
 
-# ── SEO & Search Engine Endpoints ─────────────────────────────────────────────
+# â”€â”€ SEO & Search Engine Endpoints â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+# Provide a sitemap for Google and other search engines to discover our pages.
 @app.route('/sitemap.xml')
 def sitemap():
     domain = 'https://novabrief-web.onrender.com'
@@ -580,7 +619,9 @@ def server_error(e):
     return render_template('index.html'), 500
 
 
+# This starts the web server so people can access the website on the internet.
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print(f'\n{"="*60}\nNova Brief — running at http://0.0.0.0:{port}\n{"="*60}\n')
+    print(f'\n{"="*60}\nNova Brief â€” running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
