@@ -1,0 +1,15 @@
+﻿{% extends "base_saas.html" %}
+{% block title %}Campaigns - Nova OS{% endblock %}
+{% block page_title %}Marketing Campaigns{% endblock %}
+{% block page_subtitle %}Track the ROI of your social efforts.{% endblock %}
+{% block content %}
+<div class="kpi-card mb-8">
+  <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+    <h3 class="font-bold text-slate-900">Active Campaigns</h3>
+    <button class="bg-slate-900 text-white px-4 py-2 text-sm rounded-lg hover:bg-slate-800"><i class="fas fa-plus mr-1"></i> New Campaign</button>
+  </div>
+  <div class="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center">
+    <p class="text-slate-500 text-sm">No active campaigns. Create one to start tracking attribution.</p>
+  </div>
+</div>
+{% endblock %}

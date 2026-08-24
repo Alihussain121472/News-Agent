@@ -1,0 +1,43 @@
+﻿{% extends "base_saas.html" %}
+{% block title %}SEO Agent - Nova OS{% endblock %}
+{% block page_title %}SEO & Growth Agent{% endblock %}
+{% block page_subtitle %}Your automated SEO auditor and traffic builder.{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="kpi-card text-center">
+    <div class="relative w-32 h-32 mx-auto mb-4">
+      <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+        <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        <path class="text-emerald-500" stroke-dasharray="82, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+      </svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <span class="text-3xl font-bold text-slate-900">82</span>
+        <span class="text-[10px] uppercase font-bold text-slate-400">Score</span>
+      </div>
+    </div>
+    <h3 class="font-bold text-slate-900 mb-1">SEO Health Score</h3>
+    <p class="text-xs text-emerald-600 font-semibold"><i class="fas fa-check-circle"></i> Good Standing</p>
+  </div>
+
+  <div class="kpi-card md:col-span-2">
+    <h3 class="font-bold text-slate-900 mb-4">AI SEO Recommendations</h3>
+    <div class="space-y-4">
+      <div class="p-4 bg-red-50 border border-red-100 rounded-lg flex gap-4">
+        <div class="text-red-500 mt-0.5"><i class="fas fa-exclamation-triangle"></i></div>
+        <div>
+          <h4 class="text-sm font-bold text-red-900 mb-1">Missing Meta Descriptions</h4>
+          <p class="text-sm text-red-700">4 of your top 10 pages are missing meta descriptions, which hurts click-through rate.</p>
+        </div>
+      </div>
+      <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg flex gap-4">
+        <div class="text-blue-500 mt-0.5"><i class="fas fa-lightbulb"></i></div>
+        <div>
+          <h4 class="text-sm font-bold text-blue-900 mb-1">Content Gap Discovered</h4>
+          <p class="text-sm text-blue-700">Your page on "AI Tools" has high traffic but low search visibility for "AI automation". Consider adding a section about automation.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

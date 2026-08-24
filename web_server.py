@@ -10,6 +10,15 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nova-brief-secret-key-2026')
 
+from growth_seo_agent.routes import seo_bp
+from social_media_agent.routes import social_bp
+from analytics_revenue_portal.routes import analytics_bp
+
+app.register_blueprint(seo_bp, url_prefix='/seo')
+app.register_blueprint(social_bp, url_prefix='/social')
+app.register_blueprint(analytics_bp, url_prefix='/analytics')
+
+
 ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or 'admin@novabrief.local').strip().lower()
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or 'NovaBriefAdmin2026!'
 
@@ -83,8 +92,8 @@ def dashboard():
 @app.route('/user/dashboard')
 @user_required
 def user_dashboard():
-    return render_template('user_dashboard.html',
-        user_name=session.get('user_name'), user_email=session.get('user_email'))
+    # Redirect legacy dashboard to the new SaaS OS Dashboard
+    return redirect(url_for('analytics.dashboard'))
 
 @app.route('/user/login')
 def user_login_page():
@@ -541,5 +550,6 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f'\n{"="*60}\nNova Brief â€” running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 

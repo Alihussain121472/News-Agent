@@ -1,4 +1,4 @@
-import sqlite3
+﻿import sqlite3
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -127,7 +127,7 @@ class NewsDatabase:
         logger.info(f'Database initialized at {self.db_path}')
         self.seed_default_programs()
 
-    # ── News articles ──────────────────────────────────────────────────────────
+    # â”€â”€ News articles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_news_article(self, article: Dict[str, Any]) -> int:
         conn = sqlite3.connect(self.db_path)
@@ -178,7 +178,7 @@ class NewsDatabase:
         deleted = cursor.rowcount; conn.commit(); conn.close()
         logger.info(f'Cleaned up {deleted} articles'); return deleted
 
-    # ── Email / agent logs ─────────────────────────────────────────────────────
+    # â”€â”€ Email / agent logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def log_email_sent(self, recipient, subject, article_count, status='success', error_message=None):
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -201,7 +201,7 @@ class NewsDatabase:
         cursor.execute('SELECT * FROM agent_status ORDER BY status_time DESC LIMIT ?', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]; conn.close(); return rows
 
-    # ── User management ────────────────────────────────────────────────────────
+    # â”€â”€ User management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def register_user(self, email: str, name: str = None) -> bool:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -289,7 +289,7 @@ class NewsDatabase:
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
         count = cursor.fetchone()[0]; conn.close(); return count
 
-    # ── Visit / login tracking ─────────────────────────────────────────────────
+    # â”€â”€ Visit / login tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def record_user_login(self, email: str, source: str = 'portal') -> None:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -330,7 +330,7 @@ class NewsDatabase:
             ORDER BY event_time DESC LIMIT ?''', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]; conn.close(); return rows
 
-    # ── Feature 2: User activity log ───────────────────────────────────────────
+    # â”€â”€ Feature 2: User activity log â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def log_user_activity(self, email: str, action: str, detail: str = None, page: str = None) -> None:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -405,7 +405,7 @@ class NewsDatabase:
         conn.close()
         return days
 
-    # ── Feature 3: Admin user monitoring ──────────────────────────────────────
+    # â”€â”€ Feature 3: Admin user monitoring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_all_users_with_stats(self) -> List[Dict[str, Any]]:
         conn = sqlite3.connect(self.db_path); conn.row_factory = sqlite3.Row; cursor = conn.cursor()
@@ -443,7 +443,7 @@ class NewsDatabase:
             'active_programs': active_programs,
         }
 
-    # ── Feature 1: Student programs ────────────────────────────────────────────
+    # â”€â”€ Feature 1: Student programs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def add_student_program(self, title: str, company: str, description: str,
                              registration_url: str, deadline: str = None,
@@ -542,7 +542,7 @@ class NewsDatabase:
             logger.info("Seeded default student programs.")
         conn.close()
 
-    # ── Contact messages ───────────────────────────────────────────────────────
+    # â”€â”€ Contact messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def record_contact_message(self, name, email, subject, message) -> int:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -557,7 +557,7 @@ class NewsDatabase:
             cursor.execute('SELECT * FROM contact_messages ORDER BY submitted_at DESC LIMIT ?', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]; conn.close(); return rows
 
-    # ── Digest run tracking ────────────────────────────────────────────────────
+    # â”€â”€ Digest run tracking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def has_daily_digest_run(self, run_date: Optional[str] = None) -> bool:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -572,7 +572,7 @@ class NewsDatabase:
                        (run_date, recipient_count, success_count, article_count, status))
         conn.commit(); conn.close()
 
-    # ── Statistics ─────────────────────────────────────────────────────────────
+    # â”€â”€ Statistics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def get_statistics(self) -> Dict[str, Any]:
         conn = sqlite3.connect(self.db_path); cursor = conn.cursor()
@@ -597,3 +597,4 @@ class NewsDatabase:
             'unique_visitors': visitor_stats['unique_visitors'],
             'monthly_visits': visitor_stats['monthly_visits'],
         }
+

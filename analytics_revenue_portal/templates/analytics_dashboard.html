@@ -1,0 +1,145 @@
+﻿{% extends "base_saas.html" %}
+{% block title %}Analytics & Growth - Nova OS{% endblock %}
+{% block page_title %}Analytics Dashboard{% endblock %}
+{% block page_subtitle %}Your website growth, traffic, and revenue at a glance.{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="kpi-card">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <p class="text-sm font-medium text-slate-500">Total Visitors</p>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">12,485</h3>
+      </div>
+      <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+        <i class="fas fa-users"></i>
+      </div>
+    </div>
+    <div class="flex items-center text-sm">
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 14.5%</span>
+      <span class="text-slate-400 ml-2">vs last month</span>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <p class="text-sm font-medium text-slate-500">Organic Traffic</p>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">8,230</h3>
+      </div>
+      <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+        <i class="fas fa-search"></i>
+      </div>
+    </div>
+    <div class="flex items-center text-sm">
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 22.1%</span>
+      <span class="text-slate-400 ml-2">vs last month</span>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <p class="text-sm font-medium text-slate-500">Total Leads</p>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">452</h3>
+      </div>
+      <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+        <i class="fas fa-envelope-open-text"></i>
+      </div>
+    </div>
+    <div class="flex items-center text-sm">
+      <span class="badge badge-red flex items-center gap-1"><i class="fas fa-arrow-down"></i> 3.2%</span>
+      <span class="text-slate-400 ml-2">vs last month</span>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <p class="text-sm font-medium text-slate-500">Total Revenue</p>
+        <h3 class="text-2xl font-bold text-slate-900 mt-1">$4,820.50</h3>
+      </div>
+      <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+        <i class="fas fa-dollar-sign"></i>
+      </div>
+    </div>
+    <div class="flex items-center text-sm">
+      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> 8.4%</span>
+      <span class="text-slate-400 ml-2">vs last month</span>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <div class="kpi-card lg:col-span-2">
+    <div class="flex justify-between items-center mb-6">
+      <h3 class="font-bold text-slate-900">Traffic vs Revenue History</h3>
+      <select class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
+        <option>Last 30 Days</option>
+        <option>Last 3 Months</option>
+        <option>This Year</option>
+      </select>
+    </div>
+    <canvas id="mainChart" height="250"></canvas>
+  </div>
+  
+  <div class="kpi-card bg-gradient-to-br from-slate-900 to-blue-900 text-white border-none shadow-xl">
+    <h3 class="font-bold text-white mb-6 flex items-center gap-2">
+      <i class="fas fa-robot text-blue-400"></i> AI Growth Score
+    </h3>
+    <div class="flex items-center justify-center mb-8">
+      <div class="relative w-32 h-32 flex items-center justify-center">
+        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+          <path class="text-slate-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+          <path class="text-blue-400" stroke-dasharray="87, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+        </svg>
+        <div class="absolute text-3xl font-bold text-white">87</div>
+      </div>
+    </div>
+    <h4 class="font-semibold text-blue-200 mb-2 text-sm uppercase tracking-wider">AI Priority Recommendation</h4>
+    <p class="text-slate-300 text-sm leading-relaxed mb-4">Your organic traffic is growing rapidly, but your conversion rate has dropped. Focus on improving the calls-to-action on your top 5 landing pages.</p>
+    <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition">View Action Plan</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['1', '5', '10', '15', '20', '25', '30'],
+      datasets: [
+        {
+          label: 'Traffic',
+          data: [500, 800, 1200, 1100, 1500, 1900, 2200],
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Revenue ($)',
+          data: [200, 300, 450, 400, 600, 800, 950],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.0)',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y: { beginAtZero: true, grid: { borderDash: [2, 4], color: '#e2e8f0' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+{% endblock %}
