@@ -622,7 +622,8 @@ def server_error(e):
 # This starts the web server so people can access the website on the internet.
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print(f'\n{"="*60}\nNova Brief Ã¢â‚¬â€ running at http://0.0.0.0:{port}\n{"="*60}\n')
+    print(f'\n{"="*60}\nNova Brief - running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
