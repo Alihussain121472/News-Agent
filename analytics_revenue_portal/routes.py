@@ -77,3 +77,10 @@ def get_stats():
         'traffic': traffic_data,
         'revenue': revenue_data
     })
+
+@analytics_bp.route('/messages')
+@admin_required
+def messages():
+    db = NewsDatabase()
+    all_messages = db.get_contact_messages(limit=100)
+    return render_template('messages.html', messages=all_messages)

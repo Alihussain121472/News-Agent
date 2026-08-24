@@ -1,0 +1,49 @@
+﻿{% extends "base_saas.html" %}
+{% block title %}User Inbox - Nova OS{% endblock %}
+{% block page_title %}User Inbox & Complaints{% endblock %}
+{% block page_subtitle %}Read and manage messages submitted through the website contact form.{% endblock %}
+
+{% block content %}
+<div class="kpi-card mb-8 p-0 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm text-slate-500">
+      <thead class="bg-slate-50 text-slate-700 uppercase border-b border-slate-200">
+        <tr>
+          <th class="px-6 py-4">Date</th>
+          <th class="px-6 py-4">User</th>
+          <th class="px-6 py-4">Subject</th>
+          <th class="px-6 py-4">Message / Complaint</th>
+          <th class="px-6 py-4">Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for msg in messages %}
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-6 py-4 whitespace-nowrap">{{ msg.submitted_at[:16] }}</td>
+          <td class="px-6 py-4">
+            <div class="font-bold text-slate-900">{{ msg.name }}</div>
+            <div class="text-xs text-blue-600">{{ msg.email }}</div>
+          </td>
+          <td class="px-6 py-4 font-medium text-slate-700">{{ msg.subject }}</td>
+          <td class="px-6 py-4 text-slate-600 max-w-md truncate" title="{{ msg.message }}">{{ msg.message }}</td>
+          <td class="px-6 py-4">
+            {% if msg.status == 'new' %}
+              <span class="badge badge-red">Unread</span>
+            {% else %}
+              <span class="badge badge-green">Resolved</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+            <i class="fas fa-inbox text-4xl text-slate-300 mb-3"></i>
+            <p>Your inbox is empty. No complaints or messages yet!</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
