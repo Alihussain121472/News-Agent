@@ -21,10 +21,44 @@ def dashboard():
 def calendar():
     return render_template('social_calendar.html')
 
+def init_social_db():
+    db = NewsDatabase()
+    import sqlite3
+    conn = sqlite3.connect(db.db_path)
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS social_campaigns (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT, status TEXT, platform TEXT, clicks INTEGER DEFAULT 0, leads INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS social_posts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        campaign_id INTEGER, platform TEXT, post_content TEXT, scheduled_time TIMESTAMP, status TEXT)''')
+    conn.commit()
+    conn.close()
+
+init_social_db()
+
 @social_bp.route('/campaigns')
 @admin_required
 def campaigns():
-    return render_template('social_campaigns.html')
+    db = NewsDatabase()
+    import sqlite3
+    conn = sqlite3.connect(db.db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM social_campaigns")
+    camps = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    
+    total_campaigns = len(camps)
+    total_clicks = sum(c.get('clicks', 0) for c in camps)
+    total_leads = sum(c.get('leads', 0) for c in camps)
+    
+    return render_template('social_campaigns.html', 
+        campaigns=camps, 
+        total_campaigns=total_campaigns,
+        total_clicks=total_clicks,
+        total_leads=total_leads
+    )
 
 
 import random
@@ -79,3 +113,4 @@ def get_posts():
         return jsonify({'posts': posts})
     except Exception:
         return jsonify({'posts': []})
+

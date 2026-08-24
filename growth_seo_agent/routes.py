@@ -16,10 +16,32 @@ def admin_required(f):
 def dashboard():
     return render_template('seo_dashboard.html')
 
+def init_seo_db():
+    db = NewsDatabase()
+    import sqlite3
+    conn = sqlite3.connect(db.db_path)
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS keyword_tracking (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        keyword TEXT, position INTEGER, change INTEGER, volume INTEGER)''')
+    conn.commit()
+    conn.close()
+
+init_seo_db()
+
 @seo_bp.route('/keywords')
 @admin_required
 def keywords():
-    return render_template('seo_keywords.html')
+    db = NewsDatabase()
+    import sqlite3
+    conn = sqlite3.connect(db.db_path)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM keyword_tracking")
+    kws = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return render_template('seo_keywords.html', keywords=kws)
+
 
 @seo_bp.route('/content')
 @admin_required
@@ -60,3 +82,4 @@ def generate_content():
     </div>
     '''
     return jsonify({'status': 'success', 'html': html_output})
+

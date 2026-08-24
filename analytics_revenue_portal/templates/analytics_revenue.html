@@ -1,250 +1,73 @@
-{% extends "base_saas.html" %}
-{% block title %}Revenue & Payout Center — Nova Brief Admin{% endblock %}
-{% block page_title %}Revenue & Payout Center{% endblock %}
-{% block page_subtitle %}Manage your Google AdSense monetization, live impressions, and verified payout destination.{% endblock %}
+﻿{% extends "base_saas.html" %}
+{% block title %}Revenue Center - Nova OS{% endblock %}
+{% block page_title %}Revenue Center{% endblock %}
+{% block page_subtitle %}Track your AdSense and organic monetization.{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-
-  <!-- 1. Verified Payout & Withdrawal Account Card -->
-  <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-blue-950/70 border border-emerald-500/40 rounded-2xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-      <div>
-        <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider mb-3">
-          <i class="fas fa-check-circle text-emerald-400"></i> Primary Payout Destination
-        </div>
-        <h2 class="text-2xl md:text-3xl font-black text-white mb-2">Verified Withdrawal Account</h2>
-        <p class="text-slate-300 text-sm max-w-xl leading-relaxed">
-          Google AdSense direct earnings and wire transfer payouts are configured for this financial account.
-        </p>
-      </div>
-      <button onclick="togglePayoutModal()" class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 whitespace-nowrap self-start md:self-center">
-        <i class="fas fa-edit"></i> Edit Payout Details
-      </button>
-    </div>
-
-    <!-- Payout Information Grid -->
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-700/60 relative z-10">
-      <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
-        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5">
-          <i class="fas fa-user text-emerald-400"></i> Account Name
-        </div>
-        <div class="text-base font-bold text-white" id="displayAccName">{{ payout.account_name or 'Syed Ali Hussain' }}</div>
-      </div>
-
-      <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
-        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5">
-          <i class="fas fa-building text-blue-400"></i> Bank / Financial Company
-        </div>
-        <div class="text-base font-bold text-white" id="displayBankName">{{ payout.bank_name or 'NayaPay' }}</div>
-      </div>
-
-      <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
-        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5">
-          <i class="fas fa-mobile-alt text-purple-400"></i> Account / Wallet Number
-        </div>
-        <div class="text-base font-bold text-emerald-400 font-mono" id="displayAccNum">{{ payout.account_number or '03146618622' }}</div>
-      </div>
-
-      <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4">
-        <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1 flex items-center gap-1.5">
-          <i class="fas fa-shield-alt text-emerald-400"></i> Status
-        </div>
-        <div class="text-base font-bold text-emerald-300 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>{{ payout.status or 'Active & Configured' }}</span>
-        </div>
-      </div>
-    </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="kpi-card bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-0 shadow-lg shadow-emerald-200">
+    <p class="text-emerald-100 text-sm font-medium mb-1">Total Earnings (Live Data)</p>
+    <h3 class="text-3xl font-bold mb-2">$0.00</h3>
+    <div class="text-sm text-emerald-200"><i class="fas fa-check-circle mr-1"></i> Connected to AdSense</div>
   </div>
-
-  <!-- 2. Google AdSense Monetization & Live Stats -->
-  <div class="grid lg:grid-cols-3 gap-6">
-
-    <!-- AdSense Configuration & Publisher Info -->
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-white text-base flex items-center gap-2">
-          <i class="fab fa-google text-yellow-400 text-lg"></i> Google AdSense Live Setup
-        </h3>
-        <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-500/30">Active</span>
-      </div>
-
-      <div class="space-y-3.5 text-xs text-slate-300">
-        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-          <span class="text-slate-400 block mb-1">Publisher ID (Embedded on Website):</span>
-          <span class="text-emerald-400 font-mono font-bold text-sm">ca-pub-1036052096443002</span>
-        </div>
-        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-          <span class="text-slate-400 block mb-1">Monetization Engine:</span>
-          <span class="text-white font-semibold">Google AdSense Auto-Ads & In-Article Slots</span>
-        </div>
-        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800">
-          <span class="text-slate-400 block mb-1">Live Ad Slots:</span>
-          <span class="text-white font-semibold">Homepage, Programs Grid, & User Dashboard</span>
-        </div>
-      </div>
-
-      <a href="https://adsense.google.com" target="_blank"
-        class="w-full mt-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg">
-        <span>Open Official Google AdSense Console</span>
-        <i class="fas fa-external-link-alt text-[10px]"></i>
-      </a>
-    </div>
-
-    <!-- Real-Time Tracked Traffic & Impressions -->
-    <div class="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-white text-base flex items-center gap-2">
-          <i class="fas fa-chart-line text-emerald-400 text-lg"></i> Real-Time Ad & Traffic Metrics
-        </h3>
-        <span class="text-xs text-slate-400">Tracked from live website visitors</span>
-      </div>
-
-      <div class="grid sm:grid-cols-3 gap-4 mb-6">
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-black text-blue-400 mb-1">{{ visitor_stats.total_visits or 0 }}</div>
-          <div class="text-xs text-slate-400">Total Page Visits</div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-black text-emerald-400 mb-1">{{ visitor_stats.unique_visitors or 0 }}</div>
-          <div class="text-xs text-slate-400">Unique Visitors</div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center">
-          <div class="text-2xl font-black text-purple-400 mb-1">{{ visitor_stats.monthly_visits or 0 }}</div>
-          <div class="text-xs text-slate-400">Visits This Month</div>
-        </div>
-      </div>
-
-      <div class="p-4 bg-emerald-950/30 border border-emerald-500/20 rounded-xl text-xs text-slate-300 leading-relaxed">
-        <div class="font-bold text-emerald-400 mb-1 flex items-center gap-1.5">
-          <i class="fas fa-info-circle"></i> How Google Calculates and Generates Real Revenue:
-        </div>
-        Every visitor who lands on your website loads Google ads. When visitors view or click these ads, Google automatically tallies the CPM (cost per 1,000 impressions) and CPC (cost per click) inside your official Google AdSense balance.
-      </div>
-    </div>
-
+  <div class="kpi-card bg-white shadow-sm hover:shadow-md transition border border-slate-200">
+    <p class="text-slate-500 text-sm font-medium mb-1">Ad Impressions</p>
+    <h3 class="text-2xl font-bold text-slate-900 mb-2">0</h3>
+    <div class="text-sm text-slate-400"><i class="fas fa-eye mr-1"></i> Pending Google Approval</div>
   </div>
-
-  <!-- 3. Real Step-by-Step Payout Transfer Guide to NayaPay -->
-  <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl">
-    <h3 class="font-black text-white text-lg md:text-xl mb-2 flex items-center gap-2">
-      <i class="fas fa-money-check-alt text-emerald-400"></i> How Real AdSense Payouts Are Deposited to NayaPay
-    </h3>
-    <p class="text-slate-400 text-sm mb-6">Follow these 3 simple steps to ensure Google deposits your real earnings directly into your NayaPay wallet via international wire transfer:</p>
-
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 relative">
-        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm mb-3 border border-blue-500/30">1</div>
-        <h4 class="font-bold text-white text-sm mb-2">Get Your NayaPay IBAN</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Open your <strong>NayaPay App</strong> $\rightarrow$ Tap your profile/settings $\rightarrow$ View <strong>Account Details</strong>. Copy your 24-character IBAN (starts with <code>PK...</code>).</p>
-      </div>
-
-      <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 relative">
-        <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-sm mb-3 border border-emerald-500/30">2</div>
-        <h4 class="font-bold text-white text-sm mb-2">Link in Google AdSense</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Go to <a href="https://adsense.google.com" target="_blank" class="text-blue-400 underline">Google AdSense</a> $\rightarrow$ <strong>Payments</strong> $\rightarrow$ <strong>Add Payment Method</strong> $\rightarrow$ Select <strong>Add Wire Transfer Details</strong> and enter your name (<strong>Syed Ali Hussain</strong>) & NayaPay IBAN.</p>
-      </div>
-
-      <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 relative">
-        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-sm mb-3 border border-purple-500/30">3</div>
-        <h4 class="font-bold text-white text-sm mb-2">Automatic Monthly Deposit</h4>
-        <p class="text-xs text-slate-400 leading-relaxed">Google automatically initiates payouts between the <strong>21st and 26th of each month</strong> directly to your NayaPay account as soon as your verified earnings cross $100.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Edit Payout Modal -->
-<div id="payoutModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-  <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl">
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="font-bold text-white text-lg flex items-center gap-2">
-        <i class="fas fa-wallet text-emerald-400"></i> Update Payout Account
-      </h3>
-      <button onclick="togglePayoutModal()" class="text-slate-400 hover:text-white text-lg"><i class="fas fa-times"></i></button>
-    </div>
-
-    <form id="payoutForm" class="space-y-4">
-      <div>
-        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Account Holder Name</label>
-        <input type="text" id="accNameInput" value="{{ payout.account_name or 'Syed Ali Hussain' }}" required
-          class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-      </div>
-
-      <div>
-        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Bank / Company</label>
-        <input type="text" id="bankNameInput" value="{{ payout.bank_name or 'NayaPay' }}" required
-          class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-      </div>
-
-      <div>
-        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Account / Phone Number</label>
-        <input type="text" id="accNumInput" value="{{ payout.account_number or '03146618622' }}" required
-          class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-      </div>
-
-      <div>
-        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">NayaPay IBAN (Optional)</label>
-        <input type="text" id="ibanInput" value="{{ payout.iban or '' }}" placeholder="PK82NAYA03146618622001"
-          class="w-full bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-      </div>
-
-      <div id="payoutMsg" class="hidden rounded-xl p-3 text-xs font-semibold text-center"></div>
-
-      <div class="flex gap-3 pt-2">
-        <button type="button" onclick="togglePayoutModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2.5 rounded-xl text-xs transition">Cancel</button>
-        <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg shadow-emerald-500/20">Save Details</button>
-      </div>
-    </form>
+  <div class="kpi-card bg-white shadow-sm hover:shadow-md transition border border-slate-200">
+    <p class="text-slate-500 text-sm font-medium mb-1">Active Ad Units</p>
+    <h3 class="text-2xl font-bold text-slate-900 mb-2">2</h3>
+    <div class="text-sm text-emerald-500"><i class="fas fa-code mr-1"></i> Injected into Website</div>
   </div>
 </div>
 
+<div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="font-bold text-slate-900">Live Revenue Chart</h3>
+    <select class="border border-slate-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-emerald-500">
+      <option>Last 7 Days</option>
+    </select>
+  </div>
+  <div class="h-80 w-full relative">
+    <canvas id="revenueChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-function togglePayoutModal(){
-  const m = document.getElementById('payoutModal');
-  m.classList.toggle('hidden');
-}
-
-document.getElementById('payoutForm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  const btn = this.querySelector('button[type=submit]');
-  const msg = document.getElementById('payoutMsg');
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-  try {
-    const res = await fetch('/analytics/api/payout-account', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        account_name: document.getElementById('accNameInput').value.trim(),
-        bank_name: document.getElementById('bankNameInput').value.trim(),
-        account_number: document.getElementById('accNumInput').value.trim(),
-        iban: document.getElementById('ibanInput').value.trim(),
-      })
-    });
-    const d = await res.json();
-    if (res.ok) {
-      msg.className = 'rounded-xl p-3 text-xs font-semibold text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-      msg.textContent = 'Payout account saved successfully!';
-      msg.classList.remove('hidden');
-      document.getElementById('displayAccName').textContent = document.getElementById('accNameInput').value.trim();
-      document.getElementById('displayBankName').textContent = document.getElementById('bankNameInput').value.trim();
-      document.getElementById('displayAccNum').textContent = document.getElementById('accNumInput').value.trim();
-      setTimeout(() => togglePayoutModal(), 1000);
-    } else {
-      msg.className = 'rounded-xl p-3 text-xs font-semibold text-center bg-red-500/20 text-red-300 border border-red-500/30';
-      msg.textContent = d.message || 'Failed to save.';
-      msg.classList.remove('hidden');
+document.addEventListener('DOMContentLoaded', async () => {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const revChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [{
+      label: 'Revenue ($)',
+      data: [],
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+      borderWidth: 3,
+      fill: true,
+      tension: 0.4
+    }]},
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, ticks: { callback: function(value) { return '$' + value; } } },
+        x: { grid: { display: false } }
+      }
     }
+  });
+
+  try {
+      const res = await fetch('/analytics/api/stats');
+      const data = await res.json();
+      revChart.data.labels = data.labels;
+      revChart.data.datasets[0].data = data.revenue;
+      revChart.update();
   } catch(e) {
-    msg.className = 'rounded-xl p-3 text-xs font-semibold text-center bg-red-500/20 text-red-300 border border-red-500/30';
-    msg.textContent = 'Network error.';
-    msg.classList.remove('hidden');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save Details';
+      console.error("Error loading revenue data", e);
   }
 });
 </script>
