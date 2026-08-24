@@ -1,4 +1,4 @@
-import os, sys, json, logging, smtplib
+﻿import os, sys, json, logging, smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -193,7 +193,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
           <!-- Header Banner -->
           <tr>
             <td style="background:linear-gradient(135deg,#1e3a8a,#2563eb,#059669);padding:36px 32px;text-align:left;">
-              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#93c5fd;margin-bottom:8px;">â˜… Official Welcome</div>
+              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#93c5fd;margin-bottom:8px;">Ã¢Ëœâ€¦ Official Welcome</div>
               <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;line-height:1.2;">Welcome to Nova Brief</h1>
               <p style="margin:8px 0 0 0;font-size:14px;color:#dbeafe;">{today}</p>
             </td>
@@ -208,13 +208,13 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
               <div style="background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:10px;padding:20px;margin:24px 0;">
                 <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:12px;">What you will receive:</div>
                 <div style="margin-bottom:10px;">
-                  <strong style="color:#60a5fa;">âš¡ Daily AI Briefing (8:00 AM):</strong> Top 5 AI breakthroughs summarized with actionable analysis and what it means for the future.
+                  <strong style="color:#60a5fa;">Ã¢Å¡Â¡ Daily AI Briefing (8:00 AM):</strong> Top 5 AI breakthroughs summarized with actionable analysis and what it means for the future.
                 </div>
                 <div style="margin-bottom:10px;">
-                  <strong style="color:#34d399;">ðŸŽ“ Early Student Program Alerts:</strong> Early notifications for Google Student Facilitator, Google Arcade, Microsoft Fabric, Amazon AWS, NASA, and Deloitte programs with direct 1-click registration links before launch.
+                  <strong style="color:#34d399;">Ã°Å¸Å½â€œ Early Student Program Alerts:</strong> Early notifications for Google Student Facilitator, Google Arcade, Microsoft Fabric, Amazon AWS, NASA, and Deloitte programs with direct 1-click registration links before launch.
                 </div>
                 <div>
-                  <strong style="color:#c084fc;">ðŸ“Š Personal User Dashboard:</strong> Real-time activity log, article search, and program application tracker.
+                  <strong style="color:#c084fc;">Ã°Å¸â€œÅ  Personal User Dashboard:</strong> Real-time activity log, article search, and program application tracker.
                 </div>
               </div>
 
@@ -222,20 +222,20 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
               <div style="text-align:center;margin:32px 0 24px 0;">
                 <a href="https://novabrief-web.onrender.com/user/dashboard"
                    style="display:inline-block;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#ffffff;padding:15px 36px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 10px 25px rgba(37,99,235,0.35);">
-                  Open My Dashboard â†’
+                  Open My Dashboard Ã¢â€ â€™
                 </a>
               </div>
 
               <div style="background-color:#0b1120;border:1px solid #1e293b;border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;text-align:center;">
-                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> â€” Seamless access enabled.
+                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> Ã¢â‚¬â€ Seamless access enabled.
               </div>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
             <td style="background-color:#0b1120;border-top:1px solid #1e293b;padding:20px 32px;text-align:center;font-size:12px;color:#64748b;">
-              <p style="margin:0 0 4px 0;">Nova Brief â€” Automated AI Intelligence & Student Career Opportunities</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Visit Website</a> &nbsp;â€¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;â€¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
+              <p style="margin:0 0 4px 0;">Nova Brief Ã¢â‚¬â€ Automated AI Intelligence & Student Career Opportunities</p>
+              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Visit Website</a> &nbsp;Ã¢â‚¬Â¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;Ã¢â‚¬Â¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
             </td>
           </tr>
         </table>
@@ -247,7 +247,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
 
 
 def send_welcome_email(to_email: str, name: str = None) -> bool:
-    return send_email(to_email, 'Welcome to Nova Brief â€” Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
+    return send_email(to_email, 'Welcome to Nova Brief Ã¢â‚¬â€ Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
 
 
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
@@ -266,7 +266,7 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
           <!-- Header Banner -->
           <tr>
             <td style="background:linear-gradient(135deg,#065f46,#10b981,#0284c7);padding:36px 32px;text-align:left;">
-              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#a7f3d0;margin-bottom:8px;">ðŸŽ“ Student Network Alert</div>
+              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#a7f3d0;margin-bottom:8px;">Ã°Å¸Å½â€œ Student Network Alert</div>
               <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;line-height:1.2;">Program Alerts Activated!</h1>
               <p style="margin:8px 0 0 0;font-size:14px;color:#d1fae5;">{today}</p>
             </td>
@@ -281,13 +281,13 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
               <div style="background-color:#1e293b;border-left:4px solid #10b981;border-radius:10px;padding:20px;margin:24px 0;">
                 <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:12px;">How this helps your career & applications:</div>
                 <div style="margin-bottom:10px;">
-                  <strong style="color:#34d399;">ðŸš€ Early Preparation Alerts:</strong> We alert you at least 7 days before program launches so you can prepare your resume, portfolio, and required materials.
+                  <strong style="color:#34d399;">Ã°Å¸Å¡â‚¬ Early Preparation Alerts:</strong> We alert you at least 7 days before program launches so you can prepare your resume, portfolio, and required materials.
                 </div>
                 <div style="margin-bottom:10px;">
-                  <strong style="color:#60a5fa;">ðŸ”— Direct Registration Links:</strong> When registrations open, we deliver direct 1-click links to Google Student Facilitator, Google Arcade, Microsoft Fabric/AI, Amazon AWS Educate, NASA, and Deloitte portals.
+                  <strong style="color:#60a5fa;">Ã°Å¸â€â€” Direct Registration Links:</strong> When registrations open, we deliver direct 1-click links to Google Student Facilitator, Google Arcade, Microsoft Fabric/AI, Amazon AWS Educate, NASA, and Deloitte portals.
                 </div>
                 <div>
-                  <strong style="color:#f59e0b;">âš¡ Free Daily AI Digest:</strong> Plus 5 daily AI news stories delivered at 8:00 AM.
+                  <strong style="color:#f59e0b;">Ã¢Å¡Â¡ Free Daily AI Digest:</strong> Plus 5 daily AI news stories delivered at 8:00 AM.
                 </div>
               </div>
 
@@ -295,20 +295,20 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
               <div style="text-align:center;margin:32px 0 24px 0;">
                 <a href="https://novabrief-web.onrender.com/user/dashboard"
                    style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#ffffff;padding:15px 36px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 10px 25px rgba(16,185,129,0.35);">
-                  Explore Open Programs in Dashboard â†’
+                  Explore Open Programs in Dashboard Ã¢â€ â€™
                 </a>
               </div>
 
               <div style="background-color:#0b1120;border:1px solid #1e293b;border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;text-align:center;">
-                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> â€” Your student alert subscription is active.
+                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> Ã¢â‚¬â€ Your student alert subscription is active.
               </div>
             </td>
           </tr>
           <!-- Footer -->
           <tr>
             <td style="background-color:#0b1120;border-top:1px solid #1e293b;padding:20px 32px;text-align:center;font-size:12px;color:#64748b;">
-              <p style="margin:0 0 4px 0;">Nova Brief â€” Automated AI Intelligence & Student Career Opportunities</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#10b981;text-decoration:none;">Visit Website</a> &nbsp;â€¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;â€¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
+              <p style="margin:0 0 4px 0;">Nova Brief Ã¢â‚¬â€ Automated AI Intelligence & Student Career Opportunities</p>
+              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#10b981;text-decoration:none;">Visit Website</a> &nbsp;Ã¢â‚¬Â¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;Ã¢â‚¬Â¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
             </td>
           </tr>
         </table>
@@ -320,7 +320,7 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
 
 
 def send_program_welcome_email(to_email: str, name: str = None, program_title: str = None) -> bool:
-    subject = f"ðŸŽ“ Welcome to Student Program Alerts â€” Nova Brief" if not program_title else f"ðŸŽ“ Program Alert Confirmation: {program_title}"
+    subject = f"Ã°Å¸Å½â€œ Welcome to Student Program Alerts Ã¢â‚¬â€ Nova Brief" if not program_title else f"Ã°Å¸Å½â€œ Program Alert Confirmation: {program_title}"
     return send_email(to_email, subject, format_program_welcome_email(to_email, name, program_title))
 
 
@@ -333,7 +333,7 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     if not news_items:
         return f"""<html><body style="font-family:Arial,sans-serif;background:#f5f7fb;padding:20px;">
 <div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;">
-  <h2>AI Morning Brief â€” {today}</h2>
+  <h2>AI Morning Brief Ã¢â‚¬â€ {today}</h2>
   <div style="padding:18px;background:#fff3cd;border-left:5px solid #f59e0b;border-radius:8px;color:#7c4a00;">
     No AI news could be fetched right now.
   </div></div></body></html>"""
@@ -341,12 +341,12 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     items_html = ''.join(f"""
     <div style="margin:18px 0;padding:18px;background:#f8fafc;border-left:5px solid #2563eb;border-radius:8px;">
       <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:8px;">{i}. {item['title']}</div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">{item['source']} â€¢ {item['published']}</div>
+      <div style="font-size:12px;color:#64748b;margin-bottom:10px;">{item['source']} Ã¢â‚¬Â¢ {item['published']}</div>
       <div style="font-size:14px;color:#334155;margin-bottom:8px;"><strong>Summary:</strong> {item['summary']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:6px;"><strong>Why it matters:</strong> {item['why_important']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:6px;"><strong>What could change:</strong> {item['future_change']}</div>
       <div style="font-size:13px;color:#334155;margin-bottom:8px;"><strong>Why you should care:</strong> {item['why_care']}</div>
-      <a href="{item['url']}" style="color:#2563eb;font-size:12px;font-weight:600;text-decoration:none;">Read article â†’</a>
+      <a href="{item['url']}" style="color:#2563eb;font-size:12px;font-weight:600;text-decoration:none;">Read article Ã¢â€ â€™</a>
     </div>""" for i, item in enumerate(news_items, 1))
 
     return f"""<html><body style="font-family:Arial,sans-serif;background:#eef4ff;color:#1f2937;padding:20px;">
@@ -356,7 +356,7 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     <p style="margin:0;font-size:14px;opacity:.9;">{today}</p>
   </div>
   <div style="font-size:14px;color:#475569;margin-bottom:20px;line-height:1.6;">
-    Here are today's most important AI developments â€” each one brief, important, and tied to what it could mean for the future.
+    Here are today's most important AI developments Ã¢â‚¬â€ each one brief, important, and tied to what it could mean for the future.
   </div>
   {items_html}
   <div style="margin-top:22px;padding-top:18px;border-top:1px solid #e5e7eb;font-size:13px;color:#475569;">
@@ -374,9 +374,9 @@ def format_program_email(program: Dict[str, Any]) -> str:
     return f"""<html><body style="font-family:Arial,sans-serif;background:#f0fdf4;color:#1f2937;padding:24px;">
 <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(0,0,0,.08);">
   <div style="background:linear-gradient(135deg,#065f46,#10b981);color:#fff;padding:22px;border-radius:12px;margin-bottom:18px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:6px;">ðŸŽ“ Student Program Alert</div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:6px;">Ã°Å¸Å½â€œ Student Program Alert</div>
     <h1 style="margin:0 0 8px;font-size:26px;">{program.get('title', 'New Program')}</h1>
-    <p style="margin:0;font-size:14px;opacity:.9;">by <strong>{program.get('company', 'Company')}</strong> â€¢ {today}</p>
+    <p style="margin:0;font-size:14px;opacity:.9;">by <strong>{program.get('company', 'Company')}</strong> Ã¢â‚¬Â¢ {today}</p>
   </div>
   <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">A new opportunity has opened for students. Here's everything you need to know:</p>
   <div style="background:#f0fdf4;border-left:5px solid #10b981;border-radius:10px;padding:16px;margin:0 0 20px;font-size:14px;line-height:1.8;color:#134e4a;">
@@ -391,7 +391,7 @@ def format_program_email(program: Dict[str, Any]) -> str:
        style="display:inline-block;background:linear-gradient(135deg,#065f46,#10b981);color:#fff;
               padding:16px 36px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;
               box-shadow:0 8px 20px rgba(16,185,129,.35);">
-      ðŸš€ Register Now â†’
+      Ã°Å¸Å¡â‚¬ Register Now Ã¢â€ â€™
     </a>
   </div>
   <p style="font-size:13px;color:#6b7280;text-align:center;margin-top:20px;">
@@ -409,7 +409,7 @@ def send_contact_notification_email(name: str, email: str, subject: str, message
     html = f"""<html><body style="font-family:Arial,sans-serif;background:#f4f7ff;padding:24px;">
 <div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;">
   <div style="background:linear-gradient(135deg,#111827,#2563eb);color:#fff;padding:18px 22px;border-radius:12px;margin-bottom:18px;">
-    <h2 style="margin:0 0 4px;">Nova Brief â€” Contact Form</h2><p style="margin:0;font-size:13px;opacity:.85;">{today}</p>
+    <h2 style="margin:0 0 4px;">Nova Brief Ã¢â‚¬â€ Contact Form</h2><p style="margin:0;font-size:13px;opacity:.85;">{today}</p>
   </div>
   <table style="width:100%;border-collapse:collapse;font-size:15px;">
     <tr><td style="padding:8px 0;color:#64748b;width:110px;">From</td><td style="font-weight:600;">{name}</td></tr>
@@ -436,7 +436,7 @@ def send_program_notifications() -> int:
 
     sent_count = 0
     for program in programs:
-        subject = f"ðŸŽ“ New Program Alert: {program['title']} by {program['company']}"
+        subject = f"Ã°Å¸Å½â€œ New Program Alert: {program['title']} by {program['company']}"
         html = format_program_email(program)
         for email in subscribers:
             if send_email(email, subject, html):
@@ -543,7 +543,7 @@ def main() -> None:
     if args.test_email:
         to = get_env_value('RECIPIENT_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
         if to:
-            send_email(to, 'Nova Brief - Test Email', '<html><body><h2>âœ… Test Email</h2><p>Your Nova Brief agent is working correctly.</p></body></html>')
+            send_email(to, 'Nova Brief - Test Email', '<html><body><h2>Ã¢Å“â€¦ Test Email</h2><p>Your Nova Brief agent is working correctly.</p></body></html>')
         return
 
     if args.schedule:
@@ -570,3 +570,34 @@ def main() -> None:
 if __name__ == '__main__':
     main()
 
+
+def send_password_reset_email(email: str, token: str) -> None:
+    sender_email = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
+    sender_password = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_PASSWORD')
+    if not sender_email or not sender_password:
+        return
+    reset_link = f'https://novabrief-web.onrender.com/user/reset-password/{token}'
+    subject = "Password Reset Request - Nova Brief"
+    html = f'''
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h2>Reset Your Password</h2>
+        <p>We received a request to reset your password for your Nova Brief account.</p>
+        <p>Click the link below to set a new password. This link will expire in 1 hour.</p>
+        <p><a href="{reset_link}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:#fff; text-decoration:none; border-radius:5px;">Reset Password</a></p>
+        <p>If you didn't request this, you can safely ignore this email.</p>
+      </body>
+    </html>
+    '''
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"Nova Brief <{sender_email}>"
+        msg['To'] = email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(html, 'html'))
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+    except Exception as e:
+        logger.error(f'Failed to send password reset to {email}: {e}')

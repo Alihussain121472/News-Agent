@@ -761,3 +761,30 @@ class NewsDatabase:
             'monthly_visits': visitor_stats['monthly_visits'],
         }
 
+
+    def set_password_reset_token(self, email: str, token: str, expiry: str) -> bool:
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''UPDATE registered_users SET reset_token = ?, reset_expiry = ? WHERE email = ?''', (token, expiry, email))
+            conn.commit()
+            success = cursor.rowcount > 0
+            conn.close()
+            return success
+        except Exception: return False
+
+    def verify_and_clear_reset_token(self, token: str, new_password_hash: str) -> bool:
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT email, reset_expiry FROM registered_users WHERE reset_token = ?''', (token,))
+            row = cursor.fetchone()
+            if not row: return False
+            email, expiry = row
+            if datetime.now() > datetime.strptime(expiry, '%Y-%m-%d %H:%M:%S'):
+                return False
+            cursor.execute('''UPDATE registered_users SET password_hash = ?, reset_token = NULL, reset_expiry = NULL WHERE email = ?''', (new_password_hash, email))
+            conn.commit()
+            conn.close()
+            return True
+        except Exception: return False
