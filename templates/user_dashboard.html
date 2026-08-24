@@ -1,8 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Dashboard — Nova Brief</title>
+  
+  <meta name="description" content="Nova Brief is the ultimate AI News Agent and Growth platform for students and tech enthusiasts. Get daily updates on AI, tech programs, and exclusive certifications.">
+  <meta name="keywords" content="AI News, Tech News, Student Programs, Google Certifications, Microsoft Student, AI Automation, Tech Opportunities">
+  <title>My Dashboard â€” Nova Brief</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/css/tailwind.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -244,7 +247,7 @@ async function loadOverview(){
     document.getElementById('overviewArticles').innerHTML = arts.length ? arts.map(a=>`
       <div class="bg-dark-800/60 rounded-xl p-3 border border-slate-700/50 hover:border-blue-500/30 transition">
         <div class="text-sm font-semibold text-white leading-snug mb-1">${a.title||'Untitled'}</div>
-        <div class="text-xs text-slate-500">${a.source||''} · ${relTime(a.fetched_at)}</div>
+        <div class="text-xs text-slate-500">${a.source||''} Â· ${relTime(a.fetched_at)}</div>
       </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-4">No articles yet.</div>';
 
     const progs = (overviewData.programs||[]).slice(0,4);
@@ -318,7 +321,7 @@ function renderArticles(arts){
         <h4 class="text-sm font-bold text-white leading-snug">${a.title||'Untitled'}</h4>
         ${a.url&&a.url!=='#'?`<a href="${a.url}" target="_blank" class="flex-shrink-0 text-xs text-blue-400 hover:text-blue-300 transition"><i class="fas fa-external-link-alt"></i></a>`:''}
       </div>
-      <div class="text-xs text-slate-500 mb-2">${a.source||'Unknown'} · ${relTime(a.fetched_at)}</div>
+      <div class="text-xs text-slate-500 mb-2">${a.source||'Unknown'} Â· ${relTime(a.fetched_at)}</div>
       <p class="text-xs text-slate-400 leading-relaxed mb-3">${(a.summary||'').substring(0,200)}${(a.summary||'').length>200?'...':''}</p>
       ${a.why_important?`<div class="text-xs text-slate-500"><span class="text-blue-400 font-semibold">Why it matters:</span> ${a.why_important}</div>`:''}
     </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-8">No articles yet.</div>';
@@ -485,4 +488,5 @@ loadOverview();
 </script>
 </body>
 </html>
+
 
