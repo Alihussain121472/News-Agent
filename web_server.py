@@ -30,7 +30,7 @@ except Exception: pass
 
 
 ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or 'admin@novabrief.local').strip().lower()
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or 'NovaBriefAdmin2026!'
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or 'Alihussain110#'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -690,6 +690,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f'\n{"="*60}\nNova Brief - running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
 
