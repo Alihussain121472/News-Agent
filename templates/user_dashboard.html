@@ -126,8 +126,16 @@
       <!-- PROGRAMS TAB -->
       <div id="tab-programs" class="hidden">
         <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs</h3>
-          <p class="text-slate-400 text-sm mb-6">You receive email alerts for all programs below before they launch — with direct registration links.</p>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
+            <div>
+              <h3 class="font-bold text-white flex items-center gap-2 text-lg"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs & Early Alerts</h3>
+              <p class="text-slate-400 text-xs mt-1">You will receive early preparation alerts & 1-click registration links directly to your inbox.</p>
+            </div>
+            <button onclick="resendProgramWelcomeEmail(this)" class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+              <i class="fas fa-paper-plane"></i> Send Program Welcome Email
+            </button>
+          </div>
+          <div id="programEmailMsg" class="hidden rounded-xl p-3 text-xs font-semibold mb-4 text-center"></div>
           <div id="programsList" class="grid md:grid-cols-2 gap-4"></div>
         </div>
       </div>
@@ -341,6 +349,32 @@ async function loadPrograms(){
         <i class="fas fa-rocket"></i> Register Now
       </a>`:'<div class="text-xs text-slate-600 text-center">Registration link coming soon</div>'}
     </div>`).join('') : '<div class="col-span-2 text-slate-500 text-sm text-center py-8">No programs available yet. You will receive email alerts when new programs are added.</div>';
+}
+
+async function resendProgramWelcomeEmail(btn){
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
+  const msg = document.getElementById('programEmailMsg');
+  try {
+    const r = await fetch('/api/programs/join-alert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: USER_EMAIL, name: USER_NAME})
+    });
+    const d = await r.json();
+    msg.className = 'rounded-xl p-3 text-xs font-semibold mb-4 text-center ' + (r.ok ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30');
+    msg.textContent = d.message || 'Program welcome email sent!';
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 6000);
+  } catch(e) {
+    msg.className = 'rounded-xl p-3 text-xs font-semibold mb-4 text-center bg-red-500/20 text-red-300 border border-red-500/30';
+    msg.textContent = 'Failed to send. Please try again.';
+    msg.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
 }
 
 // Load progress
