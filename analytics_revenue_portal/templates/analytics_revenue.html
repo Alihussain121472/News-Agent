@@ -6,9 +6,9 @@
 {% block content %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
   <div class="kpi-card bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-0 shadow-lg shadow-emerald-200">
-    <p class="text-emerald-100 text-sm font-medium mb-1">Total Earnings (Live Data)</p>
+    <p class="text-emerald-100 text-sm font-medium mb-1">Total Earnings</p>
     <h3 class="text-3xl font-bold mb-2">$0.00</h3>
-    <div class="text-sm text-emerald-200"><i class="fas fa-check-circle mr-1"></i> Connected to AdSense</div>
+    <div class="text-sm text-emerald-200" id="adsense-status"><i class="fas fa-exclamation-triangle mr-1"></i> API Disconnected</div>
   </div>
   <div class="kpi-card bg-white shadow-sm hover:shadow-md transition border border-slate-200">
     <p class="text-slate-500 text-sm font-medium mb-1">Ad Impressions</p>
@@ -22,6 +22,24 @@
   </div>
 </div>
 
+<div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-8">
+  <h3 class="font-bold text-slate-900 mb-4"><i class="fas fa-plug text-blue-600 mr-2"></i> Connect Google AdSense API</h3>
+  <p class="text-sm text-slate-600 mb-4">To pull live revenue data directly from Google into this dashboard, you need to link your AdSense account securely via API credentials.</p>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">AdSense Publisher ID</label>
+        <input type="text" value="pub-1036052096443002" disabled class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-500 mb-4">
+    </div>
+    <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Google Cloud Service Account JSON</label>
+        <input type="password" placeholder="Paste entire JSON credential here..." class="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:border-blue-500 outline-none mb-4">
+    </div>
+  </div>
+  <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition" onclick="alert('Google Cloud API configuration required. Please generate a Service Account Key in Google Cloud Platform first.')">Connect & Sync Data</button>
+</div>
+
+<!-- (Chart code follows below) -->
 <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
   <div class="flex justify-between items-center mb-6">
     <h3 class="font-bold text-slate-900">Live Revenue Chart</h3>
