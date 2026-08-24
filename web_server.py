@@ -1,4 +1,4 @@
-﻿# Import Flask and necessary libraries to build the web server
+# Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime, timedelta
@@ -686,10 +686,29 @@ def server_error(e):
 
 
 # This starts the web server so people can access the website on the internet.
+# Also starts the background scheduler for daily news digest emails.
+
+def start_background_scheduler():
+    """Start APScheduler to run daily news digest and program notifications automatically."""
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        from ai_news_agent import run_news_digest, send_program_notifications
+        scheduler = BackgroundScheduler(daemon=True)
+        scheduler.add_job(run_news_digest, 'cron', hour=8, minute=0, id='daily_news_digest', replace_existing=True)
+        scheduler.add_job(send_program_notifications, 'cron', hour=9, minute=0, id='daily_program_check', replace_existing=True)
+        scheduler.start()
+        logger.info('Background scheduler started: News digest at 8:00 AM, Program notifications at 9:00 AM (server time).')
+    except Exception as e:
+        logger.error(f'Could not start background scheduler: {e}')
+
+# Start scheduler when the app module is loaded (works with both gunicorn and direct run)
+start_background_scheduler()
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     print(f'\n{"="*60}\nNova Brief - running at http://0.0.0.0:{port}\n{"="*60}\n')
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
 
