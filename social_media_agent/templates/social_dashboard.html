@@ -1,7 +1,7 @@
 ﻿{% extends "base_saas.html" %}
-{% block title %}Social Media Agent - Nova OS{% endblock %}
-{% block page_title %}Social Media Manager{% endblock %}
-{% block page_subtitle %}Automate and track your social presence.{% endblock %}
+{% block title %}Social Media Agent - Nova OS
+{% block page_title %}Social Media Manager
+{% block page_subtitle %}Automate and track your social presence.
 
 {% block content %}
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -63,4 +63,76 @@
     </div>
   </div>
 </div>
+
+
+<div class="flex justify-between items-center mb-6 mt-12 border-t pt-8">
+  <h2 class="text-2xl font-bold text-slate-900">AI Social Media Agent</h2>
+  <button id="gen-social-btn" onclick="generateSocialPosts()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm"><i class="fas fa-robot mr-2"></i> Auto-Generate Drafts</button>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="md:col-span-2 space-y-4" id="posts-container">
+    <div class="text-center p-8 text-slate-500 bg-white border border-slate-200 rounded-xl">Loading posts...</div>
+  </div>
+  
+  <div class="space-y-6">
+    <div class="kpi-card bg-slate-900 text-white border-0">
+      <h3 class="font-bold text-white mb-2">Agent Status</h3>
+      <div class="flex items-center text-emerald-400 text-sm font-medium mb-4">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></div> Online & Active
+      </div>
+      <p class="text-sm text-slate-400">Your AI Agent is ready to draft highly-engaging posts for Twitter and LinkedIn using big-tech marketing formulas.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function loadPosts() {
+    const container = document.getElementById('posts-container');
+    try {
+        const res = await fetch('/social/api/posts');
+        const data = await res.json();
+        
+        if (data.posts && data.posts.length > 0) {
+            container.innerHTML = data.posts.map(p => 
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm transition hover:shadow-md">
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="badge  font-bold">
+                            <i class="fab fa- mr-1"></i> 
+                        </span>
+                        <span class="badge bg-yellow-100 text-yellow-800">Draft</span>
+                    </div>
+                    <p class="text-slate-800 whitespace-pre-line text-sm leading-relaxed mb-4"> + p.post_content + </p>
+                    <div class="flex gap-2">
+                        <button class="text-xs bg-slate-900 text-white px-3 py-1.5 rounded hover:bg-slate-800 transition">Approve & Publish</button>
+                    </div>
+                </div>
+            ).join('');
+        } else {
+            container.innerHTML = '<div class="text-center p-8 text-slate-500 bg-white border border-slate-200 rounded-xl"><i class="fas fa-inbox text-3xl mb-3 text-slate-300 block"></i>No posts drafted yet. Click Auto-Generate Drafts.</div>';
+        }
+    } catch(e) {
+        container.innerHTML = '<div class="text-center p-8 text-red-500 bg-white border border-slate-200 rounded-xl">Error loading posts.</div>';
+    }
+}
+
+async function generateSocialPosts() {
+    const btn = document.getElementById('gen-social-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Working...';
+    btn.disabled = true;
+    try {
+        const res = await fetch('/social/api/generate-posts', {method: 'POST'});
+        const data = await res.json();
+        alert(data.message);
+        await loadPosts();
+    } catch(e) {
+        alert("Error generating posts.");
+    } finally {
+        btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Auto-Generate Drafts';
+        btn.disabled = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadPosts);
+</script>
 {% endblock %}
