@@ -1,4 +1,4 @@
-﻿import os, sys, json, logging, smtplib
+import os, sys, json, logging, smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -131,38 +131,52 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
         return fetch_news_from_rss(limit)
 
 
-# A generic function to send emails using a Gmail account.
+import concurrent.futures
+
+EMAIL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10, thread_name_prefix='email_worker')
+
+
+# A high-speed function to send emails using Gmail SMTP (Port 587 STARTTLS primary, Port 465 SSL fallback).
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     from_email = get_env_value('GMAIL_USER', 'EMAIL_USER')
     password = get_env_value('GMAIL_APP_PASSWORD', 'EMAIL_APP_PASSWORD')
     if not from_email or not password:
         logger.error('Gmail credentials missing in environment.')
         return False
+
+    clean_pwd = password.replace(' ', '').replace('-', '').strip()
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
     msg['From'] = f"Nova Brief <{from_email}>"
     msg['To'] = to_email
     msg.attach(MIMEText(html_content, 'html'))
     
-    # Try Port 465 SSL first, then fallback to Port 587 STARTTLS
+    # Try Port 587 STARTTLS first (fastest and standard for cloud deployments)
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=12) as s:
-            s.login(from_email, password)
+        with smtplib.SMTP('smtp.gmail.com', 587, timeout=5) as s:
+            s.ehlo()
+            s.starttls()
+            s.ehlo()
+            s.login(from_email, clean_pwd)
             s.send_message(msg)
-        logger.info(f'Email successfully sent to {to_email} via SSL (port 465)')
+        logger.info(f'Email delivered instantly to {to_email} via STARTTLS (port 587)')
         return True
     except Exception as e1:
-        logger.warning(f'SMTP SSL 465 failed ({e1}), trying STARTTLS on port 587...')
+        logger.warning(f'STARTTLS 587 failed ({e1}), falling back to SSL port 465...')
         try:
-            with smtplib.SMTP('smtp.gmail.com', 587, timeout=12) as s:
-                s.starttls()
-                s.login(from_email, password)
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=5) as s:
+                s.login(from_email, clean_pwd)
                 s.send_message(msg)
-            logger.info(f'Email successfully sent to {to_email} via STARTTLS (port 587)')
+            logger.info(f'Email delivered to {to_email} via SSL (port 465)')
             return True
         except Exception as e2:
-            logger.error(f'Email delivery failed to {to_email}: SSL: {e1} | TLS: {e2}')
+            logger.error(f'Email delivery failed to {to_email}: TLS: {e1} | SSL: {e2}')
             return False
+
+
+def dispatch_email_async(to_email: str, subject: str, html_content: str):
+    """Submits email send task to the dedicated worker pool for 0ms web latency."""
+    return EMAIL_EXECUTOR.submit(send_email, to_email, subject, html_content)
 
 
 def format_welcome_email(subscriber_email: str, name: str = None) -> str:

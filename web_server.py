@@ -1,4 +1,4 @@
-﻿# Import Flask and necessary libraries to build the web server
+# Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime
@@ -160,16 +160,16 @@ def register_user_account():
     db.record_user_login(email, 'register')
     db.log_user_activity(email, 'account_created', f'Registered as {name}')
     
-    # Asynchronously dispatch welcome email
+    # Fast async dispatch welcome email via worker pool
     try:
-        from ai_news_agent import send_welcome_email
-        threading.Thread(target=send_welcome_email, args=(email, name), daemon=True).start()
+        from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
+        EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
     except Exception as e:
         logger.error(f'Error triggering welcome email: {e}')
         
     return jsonify({
         'status': 'success',
-        'message': 'Welcome to Nova Brief! Your account is active and a welcome email is on the way.',
+        'message': 'Welcome to Nova Brief! Your account is active and your welcome email is on the way.',
         'redirect': '/user/dashboard'
     })
 
@@ -191,8 +191,8 @@ def login_user_account():
         _safe_add_recipient(email)
         user = db.get_user_by_email(email)
         try:
-            from ai_news_agent import send_welcome_email
-            threading.Thread(target=send_welcome_email, args=(email, name), daemon=True).start()
+            from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
+            EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
         except Exception: pass
     elif user.get('password_hash') and password:
         if not check_password_hash(user['password_hash'], password):
@@ -491,15 +491,15 @@ def subscribe_public():
     db.record_user_login(email, 'subscription')
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
-    # Asynchronously dispatch welcome email
+    # Fast async dispatch welcome email via worker pool
     try:
-        from ai_news_agent import send_welcome_email
-        threading.Thread(target=send_welcome_email, args=(email, name), daemon=True).start()
+        from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
+        EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
     except Exception: pass
     
     return jsonify({
         'status': 'success',
-        'message': f'Welcome, {name}! You are now subscribed and signed in. Check your inbox for the welcome briefing.',
+        'message': f'Welcome, {name}! You are now subscribed and signed in. Your welcome briefing has been dispatched.',
         'already_registered': False,
         'welcome_email_sent': True,
         'redirect': '/user/dashboard'
@@ -523,16 +523,16 @@ def join_program_alert():
     db.log_user_activity(email, 'joined_program_alerts', f'Joined alerts for {program_title or "all programs"}')
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
-    # Asynchronously dispatch dedicated program welcome email
+    # Fast async dispatch dedicated program welcome email via worker pool
     try:
-        from ai_news_agent import send_program_welcome_email
-        threading.Thread(target=send_program_welcome_email, args=(email, name, program_title), daemon=True).start()
+        from ai_news_agent import send_program_welcome_email, EMAIL_EXECUTOR
+        EMAIL_EXECUTOR.submit(send_program_welcome_email, email, name, program_title)
     except Exception as e:
         logger.error(f'Error sending program welcome email: {e}')
         
     return jsonify({
         'status': 'success',
-        'message': f'Welcome, {name}! You have joined Student Program Alerts. We have sent a welcome email to {email}.',
+        'message': f'Welcome, {name}! You have joined Student Program Alerts. Your welcome email has been sent to {email}.',
         'welcome_email_sent': True,
         'redirect': '/user/dashboard'
     })
