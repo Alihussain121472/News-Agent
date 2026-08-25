@@ -727,7 +727,7 @@ class NewsDatabase:
         conn.close()
         return msg_id
 
-        def get_unread_message_count(self) -> int:
+    def get_unread_message_count(self) -> int:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM contact_messages WHERE status='new'")
@@ -922,5 +922,6 @@ class NewsDatabase:
             'today_clicks': today_clicks,
             'today_traffic': today_traffic,
         }
+
 
 
