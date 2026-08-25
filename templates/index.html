@@ -678,7 +678,7 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
             <div id="botMessages" class="p-4 h-64 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
                 <div class="flex gap-2 max-w-[85%]">
                     <div class="w-6 h-6 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600"><i class="fas fa-robot text-[10px]"></i></div>
-                    <div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm">Hello! I am the Nova AI Assistant. Do you have any questions about our tech alerts or programs?</div>
+                    <div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-black shadow-sm">Hello! I am the Nova AI Assistant. Do you have any questions about our tech alerts or programs?</div>
                 </div>
             </div>
             <!-- Input -->
@@ -705,10 +705,10 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
             const msgDiv = document.createElement('div');
             if (isUser) {
                 msgDiv.className = 'flex gap-2 max-w-[85%] self-end flex-row-reverse';
-                msgDiv.innerHTML = '<div class="bg-blue-600 p-2.5 rounded-2xl rounded-tr-sm text-white shadow-sm">' + text + '</div>';
+                msgDiv.innerHTML = '<div class="bg-blue-600 p-2.5 rounded-2xl rounded-tr-sm text-black shadow-sm">' + text + '</div>';
             } else {
                 msgDiv.className = 'flex gap-2 max-w-[85%]';
-                msgDiv.innerHTML = '<div class="w-6 h-6 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600"><i class="fas fa-robot text-[10px]"></i></div><div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm">' + text + '</div>';
+                msgDiv.innerHTML = '<div class="w-6 h-6 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600"><i class="fas fa-robot text-[10px]"></i></div><div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-black shadow-sm">' + text + '</div>';
             }
             container.appendChild(msgDiv);
             container.scrollTop = container.scrollHeight;
@@ -752,6 +752,7 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
     </script>
 </body>
 </html>
+
 
 
 
