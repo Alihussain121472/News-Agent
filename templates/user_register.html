@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -62,7 +62,7 @@
 
         <button type="submit"
           class="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm mt-2">
-          <span>Create Account & Get Welcome Briefing</span>
+          <span>Create Account</span>
           <i class="fas fa-arrow-right text-xs"></i>
         </button>
       </form>
@@ -95,7 +95,7 @@
       });
       const d = await r.json();
       msg.className = 'mt-4 rounded-xl p-3 text-sm font-semibold text-center ' + (r.ok && d.status === 'success' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30');
-      msg.textContent = d.message || 'Account ready!';
+      msg.textContent = d.message || 'Account already exists!';
       msg.classList.remove('hidden');
       if (r.ok && d.status === 'success') {
         const uEmail = document.getElementById('email').value.trim();
@@ -111,7 +111,7 @@
       msg.classList.remove('hidden');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span>Create Account & Get Welcome Briefing</span><i class="fas fa-arrow-right text-xs ml-2"></i>';
+      btn.innerHTML = '<span>Create Account</span><i class="fas fa-arrow-right text-xs ml-2"></i>';
     }
   });
   </script>

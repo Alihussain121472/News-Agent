@@ -1,4 +1,4 @@
-﻿# Import Flask and necessary libraries to build the web server
+# Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime, timedelta
@@ -173,10 +173,10 @@ def register_user_account():
         EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
     except Exception as e:
         logger.error(f'Error triggering welcome email: {e}')
-        
+    message_text = 'Account already exists! You can now log in.' if result == 'updated' else 'Welcome to Nova Brief! Your account is active and your welcome email is on the way.'
     return jsonify({
         'status': 'success',
-        'message': 'Welcome to Nova Brief! Your account is active and your welcome email is on the way.',
+        'message': message_text,
         'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
     })
