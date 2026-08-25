@@ -434,6 +434,30 @@ def get_contact_messages():
     limit = request.args.get('limit', 50, type=int)
     return jsonify(db.get_contact_messages(limit=limit))
 
+@app.route('/api/admin/contact-messages/<int:msg_id>', methods=['DELETE'])
+@admin_required
+def delete_contact_message_endpoint(msg_id):
+    try:
+        db.delete_contact_message(msg_id)
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/chat/history', methods=['GET', 'DELETE'])
+def handle_chat_history():
+    user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+    if request.method == 'DELETE':
+        try:
+            db.clear_chatbot_history(user_id)
+            return jsonify({'status': 'success'})
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': str(e)}), 500
+    else:
+        try:
+            return jsonify({'history': db.get_chatbot_history(user_id)})
+        except Exception as e:
+            return jsonify({'history': []})
+
 
 @app.route('/api/recipients')
 @admin_required
@@ -596,13 +620,10 @@ def handle_ai_chat():
             response = model.generate_content(prompt)
             reply = response.text
             
-            # Log the chat in the admin inbox (Memory for Admin)
-            db.record_contact_message(
-                name="Chatbot Session", 
-                email="bot_memory@novabrief.local", 
-                subject="Chatbot AI Conversation Log", 
-                message=f"User said: {user_msg}\n\nAI replied: {reply}"
-            )
+            # Save to dedicated chatbot history (no longer in contact inbox)
+            user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+            db.record_chatbot_history(user_id=user_id, user_message=user_msg, bot_reply=reply)
+            
             return jsonify({'reply': reply})
     except Exception as e:
         pass
@@ -653,7 +674,6 @@ def handle_ai_chat():
     # 5. Technical Support
     elif any(w in lower for w in [' not working ', ' error ', ' bug ', ' password ', ' reset ', ' help ']):
         reply = "I understand you need technical support. I have logged your request for our team to review. You can also reach out to us directly via the contact form on the homepage."
-        db.record_contact_message("Chatbot User", "support@novabrief.local", "Tech Support Request", user_msg)
         return jsonify({'reply': reply})
         
     # 6. Acknowledgments, Agreements & Farewells
@@ -671,17 +691,11 @@ def handle_ai_chat():
     # 8. Unmatched / Complex Queries (Escalation)
     else:
         reply = "I am a specialized assistant focused on Nova Brief's tech programs and news alerts, so I may not have the answer to that. Please feel free to ask me about our email digests, how to join, or the latest AI news! You can also use the contact form to reach our team."
-        # Save to admin inbox
-        db.record_contact_message("Chatbot User", "user@novabrief.local", "Chatbot Escalate", user_msg)
+        # Removed escalation save to keep inbox clean
 
-    # Save to admin inbox (Memory for Admin)
-    if reply and not reply.startswith("That is a very insightful"):
-        db.record_contact_message(
-            name="Chatbot Session", 
-            email="bot_memory@novabrief.local", 
-            subject="Chatbot Advanced Logic Log", 
-            message=f"User said: {user_msg}\n\nAI replied: {reply}"
-        )
+    # Save to dedicated chatbot history (no longer in contact inbox)
+    user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+    db.record_chatbot_history(user_id=user_id, user_message=user_msg, bot_reply=reply)
         
     return jsonify({'reply': reply})
 
