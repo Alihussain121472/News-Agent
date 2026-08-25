@@ -822,7 +822,7 @@ def server_error(e):
     logger.error(f'Server error: {e}')
     if request.path.startswith('/api/'):
         return jsonify({'error': 'Internal server error'}), 500
-    return render_template('index.html'), 500
+    return render_template('500.html'), 500
 
 
 # -- Blog Routes ---------------------------------------------------------------
@@ -907,5 +907,6 @@ start_background_scheduler()
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
