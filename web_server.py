@@ -1,4 +1,4 @@
-﻿# Import Flask and necessary libraries to build the web server
+# Import Flask and necessary libraries to build the web server
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime, timedelta
@@ -606,9 +606,9 @@ def handle_ai_chat():
             return jsonify({'reply': reply})
     except Exception as e:
         pass
-        
-        # Advanced Fallback AI Logic (Simulated Training)
-            import re
+
+    # Advanced Fallback AI Logic (Simulated Training)
+    import re
     lower = " " + re.sub(r'[^\w\s]', '', user_msg.lower()) + " "
     reply = ""
     
@@ -808,37 +808,7 @@ def server_error(e):
     return render_template('index.html'), 500
 
 
-# This starts the web server so people can access the website on the internet.
-# Also starts the background scheduler for daily news digest emails.
-
-def start_background_scheduler():
-    """Start APScheduler to run daily news digest and program notifications automatically."""
-    try:
-        from apscheduler.schedulers.background import BackgroundScheduler
-        from ai_news_agent import run_news_digest, send_program_notifications
-        scheduler = BackgroundScheduler(daemon=True)
-        scheduler.add_job(run_news_digest, 'cron', hour=8, minute=0, id='daily_news_digest', replace_existing=True)
-        scheduler.add_job(send_program_notifications, 'cron', hour=9, minute=0, id='daily_program_check', replace_existing=True)
-        scheduler.start()
-        logger.info('Background scheduler started: News digest at 8:00 AM, Program notifications at 9:00 AM (server time).')
-    except Exception as e:
-        logger.error(f'Could not start background scheduler: {e}')
-
-# Start scheduler when the app module is loaded (works with both gunicorn and direct run)
-start_background_scheduler()
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    print(f'\n{"="*60}\nNova Brief - running at http://0.0.0.0:{port}\n{"="*60}\n')
-    app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
-
-
-
-
-
-
-
-
+# -- Blog Routes ---------------------------------------------------------------
 
 @app.route('/blog')
 def blog_index():
@@ -846,8 +816,11 @@ def blog_index():
     conn = sqlite3.connect(db.db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM blog_posts ORDER BY published_at DESC")
-    posts = [dict(row) for row in cursor.fetchall()]
+    try:
+        cursor.execute("SELECT * FROM blog_posts ORDER BY published_at DESC")
+        posts = [dict(row) for row in cursor.fetchall()]
+    except Exception:
+        posts = []
     conn.close()
     return render_template('blog_list.html', posts=posts)
 
@@ -857,18 +830,61 @@ def blog_post(slug):
     conn = sqlite3.connect(db.db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM blog_posts WHERE slug=?", (slug,))
-    row = cursor.fetchone()
+    try:
+        cursor.execute("SELECT * FROM blog_posts WHERE slug=?", (slug,))
+        row = cursor.fetchone()
+    except Exception:
+        row = None
     conn.close()
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
 
 
+# -- Background Scheduler -----------------------------------------------------
+
+_scheduler_started = False
+
+def _safe_run_news_digest():
+    try:
+        from ai_news_agent import run_news_digest
+        run_news_digest()
+    except Exception as e:
+        logger.error(f'Scheduled news digest failed: {e}')
+
+def _safe_send_program_notifications():
+    try:
+        from ai_news_agent import send_program_notifications
+        send_program_notifications()
+    except Exception as e:
+        logger.error(f'Scheduled program notifications failed: {e}')
+
+def start_background_scheduler():
+    global _scheduler_started
+    if _scheduler_started:
+        return
+    _scheduler_started = True
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        scheduler = BackgroundScheduler(daemon=True)
+        scheduler.add_job(
+            _safe_run_news_digest, 'cron', hour=8, minute=0,
+            id='daily_news_digest', replace_existing=True, misfire_grace_time=3600
+        )
+        scheduler.add_job(
+            _safe_send_program_notifications, 'cron', hour=9, minute=0,
+            id='daily_program_check', replace_existing=True, misfire_grace_time=3600
+        )
+        scheduler.start()
+        logger.info('Scheduler started: News digest 8:00 AM UTC, Program notifications 9:00 AM UTC.')
+    except Exception as e:
+        logger.error(f'Could not start background scheduler: {e}')
+
+start_background_scheduler()
 
 
+# -- Entry Point ---------------------------------------------------------------
 
-
-
-
-
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)

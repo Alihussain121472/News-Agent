@@ -1,4 +1,4 @@
-﻿import os, sys, json, logging, smtplib
+import os, sys, json, logging, smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -11,7 +11,7 @@ from database import NewsDatabase
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('ai_news_agent.log', encoding='utf-8'), logging.StreamHandler()]
+    handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 load_dotenv()
