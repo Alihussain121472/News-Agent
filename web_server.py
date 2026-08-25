@@ -607,27 +607,54 @@ def handle_ai_chat():
     except Exception as e:
         pass
         
-    # Fallback to Advanced Professional Logic if Gemini is not configured or fails
+        # Advanced Fallback AI Logic (Simulated Training)
     lower = user_msg.lower()
     reply = ""
     
-    if any(w in lower for w in ['cost', 'price', 'free', 'pay']):
-        reply = "Nova Brief is absolutely 100% free for all students. We utilize Google AdSense for monetization, meaning you will never be charged for our premium program alerts or daily news digests."
-    elif any(w in lower for w in ['subscribe', 'join', 'register', 'sign up']):
-        reply = "You can join our network by entering your email at the top of the homepage. You will instantly receive a welcome email and begin receiving our exclusive daily tech alerts."
-    elif any(w in lower for w in ['program', 'internship', 'google', 'microsoft']):
-        reply = "We continuously scan for prestigious opportunities from tech giants like Google, Apple, Meta, IBM, and NASA. Subscribing gives you direct, 1-click registration links the moment these programs launch."
+    # 1. Identity & Capability
+    if any(w in lower for w in ['who are you', 'what are you', 'your name', 'human or ai', 'are you a bot']):
+        reply = "I am the Nova AI Assistant, a highly advanced digital concierge trained specifically to help you navigate the Nova Brief ecosystem. How can I assist you today?"
+    elif any(w in lower for w in ['what do you do', 'how can you help', 'what is nova brief', 'about you', 'features']):
+        reply = "Nova Brief is an elite tech platform. We provide two main services: 1) A daily morning digest of the most critical AI and tech news. 2) Instant 1-click registration alerts for prestigious student programs at companies like Google, Microsoft, Meta, and NASA."
+    
+    # 2. Pricing & Monetization
+    elif any(w in lower for w in ['cost', 'price', 'free', 'pay', 'premium', 'subscription fee']):
+        reply = "I am pleased to inform you that Nova Brief is 100% free for all students and professionals. We generate revenue exclusively through Google AdSense, ensuring our premium alerts remain accessible to everyone without charge."
+    
+    # 3. Subscribing & Account
+    elif any(w in lower for w in ['subscribe', 'join', 'register', 'sign up', 'create account', 'how to start']):
+        reply = "Joining is seamless. Simply enter your email address in the 'Join Alerts' box on our homepage. You will instantly receive a welcome email, and your daily tech and program alerts will begin immediately."
+    elif any(w in lower for w in ['login', 'sign in', 'dashboard', 'my account']):
+        reply = "You can access your secure User Dashboard by clicking the 'Sign In' link at the bottom of the page. From there, you can manage your email preferences and view active programs."
+    
+    # 4. Programs & Internships
+    elif any(w in lower for w in ['program', 'internship', 'google', 'microsoft', 'nasa', 'opportunities', 'jobs', 'apply']):
+        reply = "We continuously monitor and aggregate opportunities from top-tier organizations including Google, Apple, Meta, IBM, Deloitte, and NASA. When a new program launches, we send our subscribers direct, 1-click registration links so they can apply ahead of the competition."
+    
+    # 5. Technical Support
+    elif any(w in lower for w in ['not working', 'error', 'bug', 'password', 'reset', 'help']):
+        reply = "I understand you need technical support. I have securely logged your issue in our Admin Inbox. Our engineering team will review it immediately. You can also email supportnovabrief@gmail.com directly."
+        db.record_contact_message("Chatbot User", "support@novabrief.local", "Tech Support Request", user_msg)
+        return jsonify({'reply': reply})
+        
+    # 6. Greetings & Politeness
+    elif any(w in lower for w in ['hello', 'hi', 'hey', 'greetings', 'morning', 'afternoon']):
+        reply = "Hello! Welcome to Nova Brief. I am the Nova AI Assistant. How can I accelerate your tech career today?"
+    elif any(w in lower for w in ['thanks', 'thank you', 'awesome', 'great', 'cool']):
+        reply = "You are very welcome! If you have any more questions about Nova Brief, I am always here to help."
+        
+    # 7. Unmatched / Complex Queries (Escalation)
     else:
-        reply = "That is an excellent question. I have securely forwarded your inquiry directly to our human Administrative Team. They will review it shortly in the Nova OS Inbox and reach out to you."
+        reply = "That is a very insightful question. Because it requires a highly specific answer, I have instantly forwarded your message directly to our human Executive Team. They will review it in the Nova OS Secure Inbox and reach out to you."
         # Save to admin inbox
         db.record_contact_message("Chatbot User", "user@novabrief.local", "Chatbot Escalate", user_msg)
 
     # Save to admin inbox (Memory for Admin)
-    if reply and not reply.startswith("That is an"):
+    if reply and not reply.startswith("That is a very insightful"):
         db.record_contact_message(
             name="Chatbot Session", 
             email="bot_memory@novabrief.local", 
-            subject="Chatbot Rule-Based Conversation Log", 
+            subject="Chatbot Advanced Logic Log", 
             message=f"User said: {user_msg}\n\nAI replied: {reply}"
         )
         
@@ -810,6 +837,7 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
 
 
 
