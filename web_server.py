@@ -608,38 +608,45 @@ def handle_ai_chat():
         pass
         
         # Advanced Fallback AI Logic (Simulated Training)
-    lower = user_msg.lower()
+            import re
+    lower = " " + re.sub(r'[^\w\s]', '', user_msg.lower()) + " "
     reply = ""
     
     # 1. Identity & Capability
-    if any(w in lower for w in ['who are you', 'what are you', 'your name', 'human or ai', 'are you a bot']):
+    if any(w in lower for w in [' who ', ' what are you ', ' name ', ' human ', ' ai ', ' bot ']):
         reply = "I am the Nova AI Assistant, a highly advanced digital concierge trained specifically to help you navigate the Nova Brief ecosystem. How can I assist you today?"
-    elif any(w in lower for w in ['what do you do', 'how can you help', 'what is nova brief', 'about you', 'features']):
+    elif any(w in lower for w in [' what do you do ', ' features ', ' about you ']):
         reply = "Nova Brief is an elite tech platform. We provide two main services: 1) A daily morning digest of the most critical AI and tech news. 2) Instant 1-click registration alerts for prestigious student programs at companies like Google, Microsoft, Meta, and NASA."
     
     # 3. Subscribing & Account
-    elif any(w in lower for w in ['subscribe', 'join', 'register', 'sign up', 'create account', 'how to start']):
+    elif any(w in lower for w in [' subscribe ', ' join ', ' register ', ' sign up ', ' account ']):
         reply = "Joining is seamless. Simply enter your email address in the 'Join Alerts' box on our homepage. You will instantly receive a welcome email, and your daily tech and program alerts will begin immediately."
-    elif any(w in lower for w in ['login', 'sign in', 'dashboard', 'my account']):
+    elif any(w in lower for w in [' login ', ' sign in ', ' dashboard ']):
         reply = "You can access your secure User Dashboard by clicking the 'Sign In' link at the bottom of the page. From there, you can manage your email preferences and view active programs."
     
     # 4. Programs & Internships
-    elif any(w in lower for w in ['program', 'internship', 'google', 'microsoft', 'nasa', 'opportunities', 'jobs', 'apply']):
+    elif any(w in lower for w in [' program', ' internship', ' google ', ' microsoft ', ' nasa ', ' opportunit', ' job', ' apply']):
         reply = "We continuously monitor and aggregate opportunities from top-tier organizations including Google, Apple, Meta, IBM, Deloitte, and NASA. When a new program launches, we send our subscribers direct, 1-click registration links so they can apply ahead of the competition."
     
     # 5. Technical Support
-    elif any(w in lower for w in ['not working', 'error', 'bug', 'password', 'reset', 'help']):
+    elif any(w in lower for w in [' not working ', ' error ', ' bug ', ' password ', ' reset ', ' help ']):
         reply = "I understand you need technical support. I have securely logged your issue in our Admin Inbox. Our engineering team will review it immediately. You can also email supportnovabrief@gmail.com directly."
         db.record_contact_message("Chatbot User", "support@novabrief.local", "Tech Support Request", user_msg)
         return jsonify({'reply': reply})
         
-    # 6. Greetings & Politeness
-    elif any(w in lower for w in ['hello', 'hi', 'hey', 'greetings', 'morning', 'afternoon']):
-        reply = "Hello! Welcome to Nova Brief. I am the Nova AI Assistant. How can I accelerate your tech career today?"
-    elif any(w in lower for w in ['thanks', 'thank you', 'awesome', 'great', 'cool']):
+    # 6. Acknowledgments, Agreements & Farewells
+    elif any(w in lower for w in [' ok ', ' okay ', ' got it ', ' understood ', ' makes sense ', ' good ', ' nice ', ' perfect ', ' sure ']):
+        reply = "Excellent. Is there anything else you would like to know about our platform or student programs?"
+    elif any(w in lower for w in [' bye ', ' goodbye ', ' see you ', ' farewell ']):
+        reply = "Goodbye! Thank you for chatting with Nova Brief. Have a wonderful day!"
+    elif any(w in lower for w in [' thanks', ' thank you', ' awesome ', ' great ', ' cool ', ' appreciate ']):
         reply = "You are very welcome! If you have any more questions about Nova Brief, I am always here to help."
+    
+    # 7. Greetings
+    elif any(w in lower for w in [' hello ', ' hi ', ' hey ', ' greetings ', ' morning ', ' afternoon ', ' evening ']):
+        reply = "Hello! Welcome to Nova Brief. I am the Nova AI Assistant. How can I accelerate your tech career today?"
         
-    # 7. Unmatched / Complex Queries (Escalation)
+    # 8. Unmatched / Complex Queries (Escalation)
     else:
         reply = "That is a very insightful question. Because it requires a highly specific answer, I have instantly forwarded your message directly to our human Executive Team. They will review it in the Nova OS Secure Inbox and reach out to you."
         # Save to admin inbox
@@ -833,6 +840,9 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
+
+
 
 
 
