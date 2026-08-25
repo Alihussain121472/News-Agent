@@ -139,3 +139,11 @@ def notifications():
 def unread_count():
     db = NewsDatabase()
     return jsonify({'count': db.get_unread_message_count()})
+
+@analytics_bp.route('/api/messages/<int:msg_id>/read', methods=['POST'])
+@admin_required
+def mark_msg_read(msg_id):
+    db = NewsDatabase()
+    db.mark_message_read(msg_id)
+    return jsonify({'status': 'success'})
+
