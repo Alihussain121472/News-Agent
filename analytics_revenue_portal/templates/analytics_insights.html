@@ -1,0 +1,22 @@
+﻿{% extends "base_saas.html" %}
+{% block title %}AI Insights - Nova OS{% endblock %}
+{% block page_title %}AI Insights{% endblock %}
+{% block page_subtitle %}Your automated AI business analyst.{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <div class="kpi-card bg-gradient-to-br from-slate-900 to-blue-900 text-white border-none shadow-xl">
+    <h3 class="font-bold text-white mb-6 flex items-center gap-2">
+      <i class="fas fa-robot text-blue-400"></i> AI Priority Recommendation
+    </h3>
+    <p class="text-slate-300 text-sm leading-relaxed mb-4">Your website traffic is steady, but your organic reach is slightly underperforming. The AI recommends generating 2 more SEO articles this week targeting the keyword "student automation tools" to capture more search volume.</p>
+    <a href="/seo/content" class="w-full inline-block text-center bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition">Go to Content Generator</a>
+  </div>
+  <div class="kpi-card bg-white border border-slate-200">
+    <h3 class="font-bold text-slate-900 mb-6 flex items-center gap-2">
+      <i class="fas fa-lightbulb text-amber-500"></i> Revenue Opportunity
+    </h3>
+    <p class="text-slate-600 text-sm leading-relaxed mb-4">You have 0 active social media campaigns. Running a campaign on LinkedIn has a 45% higher conversion rate for your target audience.</p>
+    <a href="/social/campaigns" class="w-full inline-block text-center bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition">Create Campaign</a>
+  </div>
+</div>
+{% endblock %}

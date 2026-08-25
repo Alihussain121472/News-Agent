@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify
+﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 from functools import wraps
 from database import NewsDatabase
 import sqlite3
@@ -118,3 +118,18 @@ def messages():
     db = NewsDatabase()
     all_messages = db.get_contact_messages(limit=100)
     return render_template('messages.html', messages=all_messages)
+
+@analytics_bp.route('/insights')
+@admin_required
+def insights():
+    return render_template('analytics_insights.html')
+
+@analytics_bp.route('/settings')
+@admin_required
+def settings():
+    return render_template('analytics_settings.html')
+
+@analytics_bp.route('/notifications')
+@admin_required
+def notifications():
+    return render_template('analytics_notifications.html')
