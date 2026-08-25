@@ -881,7 +881,7 @@ def start_background_scheduler():
         from apscheduler.schedulers.background import BackgroundScheduler
         scheduler = BackgroundScheduler(daemon=True)
         scheduler.add_job(
-            _safe_run_news_digest, 'cron', hour=9, minute=0,
+            _safe_run_news_digest, 'cron', hour=10, minute=0,
             id='daily_news_digest', replace_existing=True, misfire_grace_time=3600
         )
         scheduler.add_job(
@@ -889,7 +889,7 @@ def start_background_scheduler():
             id='daily_program_check', replace_existing=True, misfire_grace_time=3600
         )
         scheduler.start()
-        logger.info('Scheduler started: News digest 9:00 AM UTC (2 PM PKT), Program notifications 10:00 AM UTC (3 PM PKT).')
+        logger.info('Scheduler started: News digest 10:00 AM UTC (3 PM PKT), Program notifications 10:00 AM UTC (3 PM PKT).')
     except Exception as e:
         logger.error(f'Could not start background scheduler: {e}')
 
