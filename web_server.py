@@ -30,7 +30,7 @@ except Exception: pass
 
 
 ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or 'admin@novabrief.local').strip().lower()
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or 'Alihussain110#'
+ADMIN_PASSWORD = 'Alihussain110#'
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -740,4 +740,5 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
 
