@@ -1,4 +1,6 @@
-﻿import sqlite3
+﻿import psycopg2
+import psycopg2.extras
+import os
 import json
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
@@ -23,80 +25,80 @@ class NewsDatabase:
                 logger.info(f'Added missing column {column_name} to {table_name}')
 
     def init_database(self):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS news_articles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL, summary TEXT, source TEXT, url TEXT,
             published TEXT, fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             why_important TEXT, future_change TEXT, why_care TEXT,
-            sent_in_email BOOLEAN DEFAULT 1)''')
+            sent_in_email BOOLEAN DEFAULT TRUE)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS email_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             recipient TEXT NOT NULL, subject TEXT, article_count INTEGER,
             status TEXT DEFAULT 'success', error_message TEXT)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS agent_status (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             status_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             event_type TEXT NOT NULL, message TEXT, details TEXT)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS registered_users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             email TEXT UNIQUE NOT NULL, name TEXT,
             registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            is_active BOOLEAN DEFAULT 1, total_emails_received INTEGER DEFAULT 0,
+            is_active BOOLEAN DEFAULT TRUE, total_emails_received INTEGER DEFAULT 0,
             last_email_sent TIMESTAMP, last_login_at TIMESTAMP,
             login_count INTEGER DEFAULT 0, password_hash TEXT,
-            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT 1)''')
+            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS site_visits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             visit_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             page TEXT NOT NULL, ip_address TEXT, user_agent TEXT, email TEXT)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_login_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             email TEXT NOT NULL, source TEXT DEFAULT 'portal')''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS contact_messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL, email TEXT NOT NULL, subject TEXT NOT NULL,
             message TEXT NOT NULL, status TEXT DEFAULT 'new')''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS daily_digest_runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             run_date DATE NOT NULL, executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             recipient_count INTEGER DEFAULT 0, success_count INTEGER DEFAULT 0,
             article_count INTEGER DEFAULT 0, status TEXT DEFAULT 'success')''')
 
         # Feature 1: Student programs table
         cursor.execute('''CREATE TABLE IF NOT EXISTS student_programs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL, company TEXT NOT NULL, description TEXT,
             registration_url TEXT, deadline DATE, launch_date DATE,
-            category TEXT DEFAULT 'program', is_active BOOLEAN DEFAULT 1,
+            category TEXT DEFAULT 'program', is_active BOOLEAN DEFAULT TRUE,
             notified_at TIMESTAMP, notify_before_days INTEGER DEFAULT 7,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
         # Feature 2: User activity log
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_activity_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             email TEXT NOT NULL, action TEXT NOT NULL, detail TEXT, page TEXT,
             logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
 
         # Feature 3: Admin notes on users
         cursor.execute('''CREATE TABLE IF NOT EXISTS admin_user_notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             email TEXT NOT NULL, note TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS blog_posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             slug TEXT UNIQUE NOT NULL,
             content TEXT NOT NULL,
@@ -106,7 +108,7 @@ class NewsDatabase:
 
         # Feature 4: Payout and bank account settings
         cursor.execute('''CREATE TABLE IF NOT EXISTS payout_accounts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             account_name TEXT NOT NULL,
             account_number TEXT NOT NULL,
             bank_name TEXT NOT NULL,
@@ -118,7 +120,7 @@ class NewsDatabase:
 
         # Feature 5: Real-time Ad & Impression Tracking
         cursor.execute('''CREATE TABLE IF NOT EXISTS ad_interactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             event_type TEXT NOT NULL, -- 'impression', 'click', 'view'
             page TEXT,
             ip_address TEXT,
@@ -127,7 +129,7 @@ class NewsDatabase:
 
         # Feature 6: Chatbot specific history
         cursor.execute('''CREATE TABLE IF NOT EXISTS chatbot_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             user_id TEXT,
             user_message TEXT,
             bot_reply TEXT,
@@ -136,7 +138,7 @@ class NewsDatabase:
         self._ensure_table_columns(conn, 'registered_users', [
             'last_login_at TIMESTAMP', 'login_count INTEGER DEFAULT 0',
             'password_hash TEXT', 'role TEXT DEFAULT "user"',
-            'program_notifications BOOLEAN DEFAULT 1'])
+            'program_notifications BOOLEAN DEFAULT TRUE'])
         self._ensure_table_columns(conn, 'student_programs', [
             'notified_at TIMESTAMP', 'notify_before_days INTEGER DEFAULT 7'])
 
@@ -160,11 +162,11 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ News articles ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def save_news_article(self, article: Dict[str, Any]) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO news_articles
             (title,summary,source,url,published,why_important,future_change,why_care,sent_in_email)
-            VALUES (?,?,?,?,?,?,?,?,?)''', (
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (
             article.get('title', ''), article.get('summary', ''),
             article.get('source', ''), article.get('url', ''),
             article.get('published', ''), article.get('why_important', ''),
@@ -181,42 +183,39 @@ class NewsDatabase:
         return count
 
     def get_recent_articles(self, limit: int = 50, days: int = None) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         if days:
             cutoff = (datetime.now() - timedelta(days=days)).isoformat()
-            cursor.execute('SELECT * FROM news_articles WHERE fetched_at >= ? ORDER BY fetched_at DESC LIMIT ?', (cutoff, limit))
+            cursor.execute('SELECT * FROM news_articles WHERE fetched_at >= %s ORDER BY fetched_at DESC LIMIT %s', (cutoff, limit))
         else:
-            cursor.execute('SELECT * FROM news_articles ORDER BY fetched_at DESC LIMIT ?', (limit,))
+            cursor.execute('SELECT * FROM news_articles ORDER BY fetched_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def get_articles_by_date_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM news_articles WHERE fetched_at BETWEEN ? AND ? ORDER BY fetched_at DESC', (start_date, end_date))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM news_articles WHERE fetched_at BETWEEN %s AND %s ORDER BY fetched_at DESC', (start_date, end_date))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def search_articles(self, query: str, limit: int = 50) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         p = f'%{query}%'
-        cursor.execute('SELECT * FROM news_articles WHERE title LIKE ? OR summary LIKE ? ORDER BY fetched_at DESC LIMIT ?', (p, p, limit))
+        cursor.execute('SELECT * FROM news_articles WHERE title LIKE %s OR summary LIKE %s ORDER BY fetched_at DESC LIMIT %s', (p, p, limit))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def cleanup_old_articles(self, months: int = 3) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cutoff = (datetime.now() - timedelta(days=months * 30)).isoformat()
-        cursor.execute('DELETE FROM news_articles WHERE fetched_at < ?', (cutoff,))
+        cursor.execute('DELETE FROM news_articles WHERE fetched_at < %s', (cutoff,))
         deleted = cursor.rowcount
         conn.commit()
         conn.close()
@@ -226,34 +225,32 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Email / agent logs ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def log_email_sent(self, recipient, subject, article_count, status='success', error_message=None):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO email_logs (recipient,subject,article_count,status,error_message) VALUES (?,?,?,?,?)',
+        cursor.execute('INSERT INTO email_logs (recipient,subject,article_count,status,error_message) VALUES (%s,%s,%s,%s,%s)',
                        (recipient, subject, article_count, status, error_message))
         conn.commit()
         conn.close()
 
     def log_agent_event(self, event_type: str, message: str, details: str = None):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO agent_status (event_type,message,details) VALUES (?,?,?)', (event_type, message, details))
+        cursor.execute('INSERT INTO agent_status (event_type,message,details) VALUES (%s,%s,%s)', (event_type, message, details))
         conn.commit()
         conn.close()
 
     def get_email_logs(self, limit: int = 100) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM email_logs ORDER BY sent_at DESC LIMIT ?', (limit,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM email_logs ORDER BY sent_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def get_agent_logs(self, limit: int = 100) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM agent_status ORDER BY status_time DESC LIMIT ?', (limit,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM agent_status ORDER BY status_time DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
@@ -261,35 +258,34 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ User management ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def register_user(self, email: str, name: str = None) -> bool:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role) VALUES (?,?,1,'user')", (email, name))
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role) VALUES (%s,%s,1,'user')", (email, name))
             conn.commit()
             logger.info(f'New user registered: {email}')
             return True
-        except sqlite3.IntegrityError:
+        except psycopg2.IntegrityError:
             return False
         finally:
             conn.close()
 
     def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM registered_users WHERE email = ? LIMIT 1', (email.strip().lower(),))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM registered_users WHERE email = %s LIMIT 1', (email.strip().lower(),))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
 
     def create_or_update_user_account(self, email: str, name: str = None, password_hash: str = None) -> str:
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('SELECT id, name, password_hash FROM registered_users WHERE email = ? LIMIT 1', (normalized,))
+        cursor.execute('SELECT id, name, password_hash FROM registered_users WHERE email = %s LIMIT 1', (normalized,))
         existing = cursor.fetchone()
         if not existing:
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,password_hash) VALUES (?,?,1,'user',?)",
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,password_hash) VALUES (%s,%s,1,'user',%s)",
                            (normalized, name, password_hash))
             conn.commit()
             conn.close()
@@ -297,7 +293,7 @@ class NewsDatabase:
         user_id, existing_name, existing_hash = existing
         final_name = name if name else existing_name
         final_hash = password_hash if password_hash else existing_hash
-        cursor.execute('UPDATE registered_users SET name=?, password_hash=?, role="user", is_active=1 WHERE id=?',
+        cursor.execute('UPDATE registered_users SET name=%s, password_hash=%s, role="user", is_active=1 WHERE id=%s',
                        (final_name, final_hash, user_id))
         conn.commit()
         conn.close()
@@ -305,16 +301,15 @@ class NewsDatabase:
 
     def get_user_dashboard_summary(self, email: str) -> Dict[str, Any]:
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM registered_users WHERE email = ? LIMIT 1', (normalized,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM registered_users WHERE email = %s LIMIT 1', (normalized,))
         row = cursor.fetchone()
         if not row:
             conn.close()
             return {'registered': False, 'total_emails_received': 0, 'login_count': 0,
                     'last_email_sent': None, 'last_login_at': None, 'member_since': None, 'is_active': False}
-        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email = ?', (normalized,))
+        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email = %s', (normalized,))
         login_events = cursor.fetchone()[0]
         u = dict(row)
         conn.close()
@@ -330,7 +325,7 @@ class NewsDatabase:
         }
 
     def get_all_active_users(self) -> List[str]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT email FROM registered_users WHERE is_active = 1 ORDER BY registered_at ASC')
         emails = [r[0] for r in cursor.fetchall()]
@@ -339,7 +334,7 @@ class NewsDatabase:
 
     def get_program_subscribers(self) -> List[str]:
         """Users who want program notifications."""
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT email FROM registered_users WHERE is_active=1 AND COALESCE(program_notifications,1)=1')
         emails = [r[0] for r in cursor.fetchall()]
@@ -349,49 +344,48 @@ class NewsDatabase:
     def enable_user_program_notifications(self, email: str, name: str = None) -> bool:
         """Ensure user exists, is active, and has program notifications enabled."""
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('SELECT id, name FROM registered_users WHERE email = ? LIMIT 1', (normalized,))
+        cursor.execute('SELECT id, name FROM registered_users WHERE email = %s LIMIT 1', (normalized,))
         row = cursor.fetchone()
         if not row:
             final_name = name or normalized.split('@')[0].replace('.', ' ').title()
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,program_notifications) VALUES (?,?,1,'user',1)",
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,program_notifications) VALUES (%s,%s,1,'user',1)",
                            (normalized, final_name))
         else:
             final_name = name if name else row[1]
-            cursor.execute("UPDATE registered_users SET name=?, is_active=1, program_notifications=1 WHERE email=?",
+            cursor.execute("UPDATE registered_users SET name=%s, is_active=1, program_notifications=1 WHERE email=%s",
                            (final_name, normalized))
         conn.commit()
         conn.close()
         return True
 
     def update_user_email_sent(self, email: str):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('UPDATE registered_users SET last_email_sent=CURRENT_TIMESTAMP, total_emails_received=total_emails_received+1 WHERE email=?', (email,))
+        cursor.execute('UPDATE registered_users SET last_email_sent=CURRENT_TIMESTAMP, total_emails_received=total_emails_received+1 WHERE email=%s', (email,))
         conn.commit()
         conn.close()
 
     def deactivate_user(self, email: str) -> bool:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('UPDATE registered_users SET is_active=0 WHERE email=?', (email,))
+        cursor.execute('UPDATE registered_users SET is_active=0 WHERE email=%s', (email,))
         affected = cursor.rowcount
         conn.commit()
         conn.close()
         return affected > 0
 
     def get_registered_users(self, limit: int = 100) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM registered_users ORDER BY registered_at DESC LIMIT ?', (limit,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM registered_users ORDER BY registered_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def get_user_count(self) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
         count = cursor.fetchone()[0]
@@ -401,43 +395,43 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Visit / login tracking ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def record_user_login(self, email: str, source: str = 'portal') -> None:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO user_login_events (email,source) VALUES (?,?)', (email.strip().lower(), source))
-        cursor.execute('UPDATE registered_users SET last_login_at=CURRENT_TIMESTAMP, login_count=COALESCE(login_count,0)+1 WHERE email=?',
+        cursor.execute('INSERT INTO user_login_events (email,source) VALUES (%s,%s)', (email.strip().lower(), source))
+        cursor.execute('UPDATE registered_users SET last_login_at=CURRENT_TIMESTAMP, login_count=COALESCE(login_count,0)+1 WHERE email=%s',
                        (email.strip().lower(),))
         conn.commit()
         conn.close()
 
     def record_site_visit(self, page: str, ip_address: str = None, user_agent: str = None, email: str = None) -> None:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO site_visits (page,ip_address,user_agent,email) VALUES (?,?,?,?)',
+        cursor.execute('INSERT INTO site_visits (page,ip_address,user_agent,email) VALUES (%s,%s,%s,%s)',
                        (page or '/', ip_address or 'unknown', (user_agent or '')[:250],
                         email.strip().lower() if email else None))
         conn.commit()
         conn.close()
 
     def get_visitor_stats(self) -> Dict[str, int]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute('SELECT COUNT(*) FROM site_visits')
         total = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(DISTINCT ip_address) FROM site_visits')
         unique = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM site_visits WHERE visit_time >= ?', (month_start,))
+        cursor.execute('SELECT COUNT(*) FROM site_visits WHERE visit_time >= %s', (month_start,))
         monthly = cursor.fetchone()[0]
         conn.close()
         return {'total_visits': total, 'unique_visitors': unique, 'monthly_visits': monthly}
 
     def get_monthly_login_stats(self) -> Dict[str, int]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
-        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE login_time >= ?', (month_start,))
+        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE login_time >= %s', (month_start,))
         monthly = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(DISTINCT email) FROM user_login_events WHERE login_time >= ?', (month_start,))
+        cursor.execute('SELECT COUNT(DISTINCT email) FROM user_login_events WHERE login_time >= %s', (month_start,))
         users = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
         active = cursor.fetchone()[0]
@@ -445,9 +439,8 @@ class NewsDatabase:
         return {'monthly_logins': monthly, 'users_this_month': users, 'active_users': active}
 
     def get_recent_user_activity(self, limit: int = 10) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT email, source AS action, login_time AS event_time FROM user_login_events
             UNION ALL SELECT email, 'signup' AS action, registered_at AS event_time FROM registered_users
             ORDER BY event_time DESC LIMIT ?''', (limit,))
@@ -458,18 +451,17 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ User activity log ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def log_user_activity(self, email: str, action: str, detail: str = None, page: str = None) -> None:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO user_activity_log (email,action,detail,page) VALUES (?,?,?,?)',
+        cursor.execute('INSERT INTO user_activity_log (email,action,detail,page) VALUES (%s,%s,%s,%s)',
                        (email.strip().lower(), action, detail, page))
         conn.commit()
         conn.close()
 
     def get_user_activity_log(self, email: str, limit: int = 100) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM user_activity_log WHERE email=? ORDER BY logged_at DESC LIMIT ?',
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM user_activity_log WHERE email=%s ORDER BY logged_at DESC LIMIT %s',
                        (email.strip().lower(), limit))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
@@ -477,23 +469,23 @@ class NewsDatabase:
 
     def get_user_activity_stats(self, email: str) -> Dict[str, Any]:
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
         week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
-        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=?', (normalized,))
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s', (normalized,))
         total = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
         today_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)>=?', (normalized, week_ago))
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)>=%s', (normalized, week_ago))
         week_count = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(DISTINCT date(logged_at)) FROM user_activity_log WHERE email=?', (normalized,))
+        cursor.execute('SELECT COUNT(DISTINCT date(logged_at)) FROM user_activity_log WHERE email=%s', (normalized,))
         active_days = cursor.fetchone()[0]
-        cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=? GROUP BY action ORDER BY cnt DESC LIMIT 5', (normalized,))
+        cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=%s GROUP BY action ORDER BY cnt DESC LIMIT 5', (normalized,))
         top_actions = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
-        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE recipient=? AND status="success"', (normalized,))
+        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE recipient=%s AND status="success"', (normalized,))
         emails_received = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=?', (normalized,))
+        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=%s', (normalized,))
         total_logins = cursor.fetchone()[0]
         conn.close()
         return {
@@ -505,24 +497,24 @@ class NewsDatabase:
     def get_user_daily_progress(self, email: str) -> Dict[str, Any]:
         """Get detailed daily progress for the user dashboard tracking feature."""
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
         total_today = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action='page_visit'", (normalized, today))
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action='page_visit'", (normalized, today))
         pages_today = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action IN ('articles_view','dashboard_view')", (normalized, today))
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action IN ('articles_view','dashboard_view')", (normalized, today))
         reads_today = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=? AND action='programs_view'", (normalized, today))
+        cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action='programs_view'", (normalized, today))
         programs_today = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM user_login_events WHERE email=? AND date(login_time)=?", (normalized, today))
+        cursor.execute("SELECT COUNT(*) FROM user_login_events WHERE email=%s AND date(login_time)=%s", (normalized, today))
         logins_today = cursor.fetchone()[0]
-        cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=? AND date(logged_at)=? GROUP BY action ORDER BY cnt DESC', (normalized, today))
+        cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=%s AND date(logged_at)=%s GROUP BY action ORDER BY cnt DESC', (normalized, today))
         today_breakdown = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
-        cursor.execute('SELECT MIN(logged_at) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        cursor.execute('SELECT MIN(logged_at) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
         first_action = cursor.fetchone()[0]
-        cursor.execute('SELECT MAX(logged_at) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, today))
+        cursor.execute('SELECT MAX(logged_at) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
         last_action = cursor.fetchone()[0]
         conn.close()
         return {
@@ -536,14 +528,14 @@ class NewsDatabase:
     def get_user_weekly_summary(self, email: str) -> List[Dict[str, Any]]:
         """Get per-day activity counts for the last 7 days for chart display."""
         normalized = email.strip().lower()
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         days = []
         for i in range(6, -1, -1):
             d = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
-            cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=? AND date(logged_at)=?', (normalized, d))
+            cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, d))
             count = cursor.fetchone()[0]
-            cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=? AND date(login_time)=?', (normalized, d))
+            cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=%s AND date(login_time)=%s', (normalized, d))
             logins = cursor.fetchone()[0]
             day_label = (datetime.now() - timedelta(days=i)).strftime('%a')
             days.append({'date': d, 'label': day_label, 'actions': count, 'logins': logins})
@@ -553,9 +545,8 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Admin user monitoring ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def get_all_users_with_stats(self) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT u.*,
             (SELECT COUNT(*) FROM user_login_events l WHERE l.email=u.email) AS login_events,
             (SELECT COUNT(*) FROM user_activity_log a WHERE a.email=u.email) AS activity_count,
@@ -566,64 +557,62 @@ class NewsDatabase:
         return rows
 
     def get_user_full_activity(self, email: str, limit: int = 200) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''
-            SELECT action, detail, page, logged_at AS event_time, 'activity' AS source FROM user_activity_log WHERE email=?
+            SELECT action, detail, page, logged_at AS event_time, 'activity' AS source FROM user_activity_log WHERE email=%s
             UNION ALL
-            SELECT source AS action, NULL AS detail, NULL AS page, login_time AS event_time, 'login' AS source FROM user_login_events WHERE email=?
+            SELECT source AS action, NULL AS detail, NULL AS page, login_time AS event_time, 'login' AS source FROM user_login_events WHERE email=%s
             UNION ALL
-            SELECT 'email_received' AS action, subject AS detail, NULL AS page, sent_at AS event_time, 'email' AS source FROM email_logs WHERE recipient=? AND status='success'
+            SELECT 'email_received' AS action, subject AS detail, NULL AS page, sent_at AS event_time, 'email' AS source FROM email_logs WHERE recipient=%s AND status='success'
             ORDER BY event_time DESC LIMIT ?''', (email, email, email, limit))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def delete_contact_message(self, msg_id: int):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM contact_messages WHERE id=?", (msg_id,))
+        cursor.execute("DELETE FROM contact_messages WHERE id=%s", (msg_id,))
         conn.commit()
         conn.close()
 
     def record_chatbot_history(self, user_id: str, user_message: str, bot_reply: str):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO chatbot_history (user_id, user_message, bot_reply)
-                          VALUES (?, ?, ?)''', (user_id, user_message, bot_reply))
+                          VALUES (%s, %s, %s)''', (user_id, user_message, bot_reply))
         conn.commit()
         conn.close()
 
     def get_chatbot_history(self, user_id: str, limit: int = 50) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM chatbot_history WHERE user_id=? ORDER BY created_at DESC LIMIT ?", (user_id, limit))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM chatbot_history WHERE user_id=%s ORDER BY created_at DESC LIMIT %s", (user_id, limit))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         # Reverse to get chronological order for chat UI
         return rows[::-1]
         
     def clear_chatbot_history(self, user_id: str):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM chatbot_history WHERE user_id=?", (user_id,))
+        cursor.execute("DELETE FROM chatbot_history WHERE user_id=%s", (user_id,))
         conn.commit()
         conn.close()
 
     def get_admin_dashboard_stats(self) -> Dict[str, Any]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
         week_ago = (datetime.now() - timedelta(days=7)).isoformat()
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
         active_users = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE date(registered_at)=?', (today,))
+        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE date(registered_at)=%s', (today,))
         new_today = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE date(login_time)=?', (today,))
+        cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE date(login_time)=%s', (today,))
         logins_today = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE logged_at >= ?', (week_ago,))
+        cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE logged_at >= %s', (week_ago,))
         week_activity = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM student_programs WHERE is_active=1')
         active_programs = cursor.fetchone()[0]
@@ -640,11 +629,11 @@ class NewsDatabase:
                              registration_url: str, deadline: str = None,
                              launch_date: str = None, category: str = 'program',
                              notify_before_days: int = 7) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO student_programs
             (title,company,description,registration_url,deadline,launch_date,category,notify_before_days)
-            VALUES (?,?,?,?,?,?,?,?)''',
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''',
             (title, company, description, registration_url, deadline, launch_date, category, notify_before_days))
         prog_id = cursor.lastrowid
         conn.commit()
@@ -653,28 +642,25 @@ class NewsDatabase:
         return prog_id
 
     def get_active_programs(self, limit: int = 50) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM student_programs WHERE is_active=1 ORDER BY created_at DESC LIMIT ?', (limit,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM student_programs WHERE is_active=1 ORDER BY created_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def get_all_programs(self, limit: int = 100) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute('SELECT * FROM student_programs ORDER BY created_at DESC LIMIT ?', (limit,))
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('SELECT * FROM student_programs ORDER BY created_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
     def get_programs_to_notify(self) -> List[Dict[str, Any]]:
         """Programs whose launch_date is within notify_before_days and haven't been notified yet."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT * FROM student_programs
             WHERE is_active=1 AND notified_at IS NULL AND launch_date IS NOT NULL
             AND date(launch_date) <= date('now', '+' || notify_before_days || ' days')
@@ -684,16 +670,16 @@ class NewsDatabase:
         return rows
 
     def mark_program_notified(self, program_id: int) -> None:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('UPDATE student_programs SET notified_at=CURRENT_TIMESTAMP WHERE id=?', (program_id,))
+        cursor.execute('UPDATE student_programs SET notified_at=CURRENT_TIMESTAMP WHERE id=%s', (program_id,))
         conn.commit()
         conn.close()
 
     def delete_program(self, program_id: int) -> bool:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('UPDATE student_programs SET is_active=0 WHERE id=?', (program_id,))
+        cursor.execute('UPDATE student_programs SET is_active=0 WHERE id=%s', (program_id,))
         affected = cursor.rowcount
         conn.commit()
         conn.close()
@@ -701,7 +687,7 @@ class NewsDatabase:
 
     def seed_default_programs(self) -> None:
         """Seed real-world student programs if the table is empty."""
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM student_programs')
         if cursor.fetchone()[0] == 0:
@@ -750,7 +736,7 @@ class NewsDatabase:
             for p in programs:
                 cursor.execute('''INSERT INTO student_programs
                     (title,company,description,registration_url,launch_date,category)
-                    VALUES (?,?,?,?,?,?)''',
+                    VALUES (%s,%s,%s,%s,%s,%s)''',
                     (p['title'], p['company'], p['description'], p['registration_url'], p['launch_date'], p['category']))
             conn.commit()
             logger.info("Seeded default student programs.")
@@ -759,16 +745,16 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Contact messages ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def record_contact_message(self, name, email, subject, message) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO contact_messages (name,email,subject,message) VALUES (?,?,?,?)', (name, email, subject, message))
+        cursor.execute('INSERT INTO contact_messages (name,email,subject,message) VALUES (%s,%s,%s,%s)', (name, email, subject, message))
         conn.commit()
         msg_id = cursor.lastrowid
         conn.close()
         return msg_id
 
     def get_unread_message_count(self) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM contact_messages WHERE status='new'")
         count = cursor.fetchone()[0]
@@ -776,20 +762,19 @@ class NewsDatabase:
         return count
 
     def mark_message_read(self, msg_id: int):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute("UPDATE contact_messages SET status='read' WHERE id=?", (msg_id,))
+        cursor.execute("UPDATE contact_messages SET status='read' WHERE id=%s", (msg_id,))
         conn.commit()
         conn.close()
 
     def get_contact_messages(self, limit: int = 100, status: str = None) -> List[Dict[str, Any]]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         if status:
-            cursor.execute('SELECT * FROM contact_messages WHERE status=? ORDER BY submitted_at DESC LIMIT ?', (status, limit))
+            cursor.execute('SELECT * FROM contact_messages WHERE status=%s ORDER BY submitted_at DESC LIMIT %s', (status, limit))
         else:
-            cursor.execute('SELECT * FROM contact_messages ORDER BY submitted_at DESC LIMIT ?', (limit,))
+            cursor.execute('SELECT * FROM contact_messages ORDER BY submitted_at DESC LIMIT %s', (limit,))
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
@@ -797,19 +782,19 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Digest run tracking ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def has_daily_digest_run(self, run_date: Optional[str] = None) -> bool:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         date_key = run_date or datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('SELECT 1 FROM daily_digest_runs WHERE run_date=? LIMIT 1', (date_key,))
+        cursor.execute('SELECT 1 FROM daily_digest_runs WHERE run_date=%s LIMIT 1', (date_key,))
         exists = cursor.fetchone() is not None
         conn.close()
         return exists
 
     def record_daily_digest_run(self, recipient_count, success_count, article_count, status='success') -> None:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         run_date = datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('INSERT INTO daily_digest_runs (run_date,recipient_count,success_count,article_count,status) VALUES (?,?,?,?,?)',
+        cursor.execute('INSERT INTO daily_digest_runs (run_date,recipient_count,success_count,article_count,status) VALUES (%s,%s,%s,%s,%s)',
                        (run_date, recipient_count, success_count, article_count, status))
         conn.commit()
         conn.close()
@@ -817,13 +802,13 @@ class NewsDatabase:
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Statistics ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 
     def get_statistics(self) -> Dict[str, Any]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM news_articles')
         total_articles = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= ?', ((datetime.now()-timedelta(days=7)).isoformat(),))
+        cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= %s', ((datetime.now()-timedelta(days=7)).isoformat(),))
         week = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= ?', ((datetime.now()-timedelta(days=30)).isoformat(),))
+        cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= %s', ((datetime.now()-timedelta(days=30)).isoformat(),))
         month = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM email_logs')
         total_emails = cursor.fetchone()[0]
@@ -850,9 +835,9 @@ class NewsDatabase:
 
     def set_password_reset_token(self, email: str, token: str, expiry: str) -> bool:
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = psycopg2.connect(os.getenv('DATABASE_URL'))
             cursor = conn.cursor()
-            cursor.execute('''UPDATE registered_users SET reset_token = ?, reset_expiry = ? WHERE email = ?''', (token, expiry, email))
+            cursor.execute('''UPDATE registered_users SET reset_token = %s, reset_expiry = %s WHERE email = %s''', (token, expiry, email))
             conn.commit()
             success = cursor.rowcount > 0
             conn.close()
@@ -861,15 +846,15 @@ class NewsDatabase:
 
     def verify_and_clear_reset_token(self, token: str, new_password_hash: str) -> bool:
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = psycopg2.connect(os.getenv('DATABASE_URL'))
             cursor = conn.cursor()
-            cursor.execute('''SELECT email, reset_expiry FROM registered_users WHERE reset_token = ?''', (token,))
+            cursor.execute('''SELECT email, reset_expiry FROM registered_users WHERE reset_token = %s''', (token,))
             row = cursor.fetchone()
             if not row: return False
             email, expiry = row
             if datetime.now() > datetime.strptime(expiry, '%Y-%m-%d %H:%M:%S'):
                 return False
-            cursor.execute('''UPDATE registered_users SET password_hash = ?, reset_token = NULL, reset_expiry = NULL WHERE email = ?''', (new_password_hash, email))
+            cursor.execute('''UPDATE registered_users SET password_hash = %s, reset_token = NULL, reset_expiry = NULL WHERE email = %s''', (new_password_hash, email))
             conn.commit()
             conn.close()
             return True
@@ -878,12 +863,12 @@ class NewsDatabase:
     # Ã¢â€â‚¬Ã¢â€â‚¬ Payout & Bank Account Management Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     def seed_default_payout_account(self):
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM payout_accounts')
         if cursor.fetchone()[0] == 0:
             cursor.execute('''INSERT INTO payout_accounts (account_name, account_number, bank_name, payout_method, status)
-                VALUES (?, ?, ?, ?, ?)''', (
+                VALUES (%s, %s, %s, %s, %s)''', (
                 'Syed Ali Hussain',
                 '03146618622',
                 'NayaPay',
@@ -895,9 +880,8 @@ class NewsDatabase:
         conn.close()
 
     def get_payout_account(self) -> Dict[str, Any]:
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM payout_accounts ORDER BY id ASC LIMIT 1')
         row = cursor.fetchone()
         conn.close()
@@ -913,17 +897,17 @@ class NewsDatabase:
         }
 
     def update_payout_account(self, account_name: str, account_number: str, bank_name: str, iban: str = None) -> bool:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('SELECT id FROM payout_accounts ORDER BY id ASC LIMIT 1')
         row = cursor.fetchone()
         if row:
             cursor.execute('''UPDATE payout_accounts 
-                SET account_name=?, account_number=?, bank_name=?, iban=?, updated_at=CURRENT_TIMESTAMP 
-                WHERE id=?''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip(), row[0]))
+                SET account_name=%s, account_number=%s, bank_name=%s, iban=%s, updated_at=CURRENT_TIMESTAMP 
+                WHERE id=%s''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip(), row[0]))
         else:
             cursor.execute('''INSERT INTO payout_accounts (account_name, account_number, bank_name, iban, status)
-                VALUES (?,?,?,?,'Active & Configured')''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip()))
+                VALUES (%s,%s,%s,%s,'Active & Configured')''', (account_name.strip(), account_number.strip(), bank_name.strip(), (iban or '').strip()))
         conn.commit()
         conn.close()
         return True
@@ -931,9 +915,9 @@ class NewsDatabase:
     # Ã¢â€â‚¬Ã¢â€â‚¬ Real AdSense & Click/Impression Tracking Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
 
     def log_ad_event(self, event_type: str, page: str = None, ip_address: str = None, detail: str = None) -> int:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO ad_interactions (event_type, page, ip_address, detail) VALUES (?,?,?,?)',
+        cursor.execute('INSERT INTO ad_interactions (event_type, page, ip_address, detail) VALUES (%s,%s,%s,%s)',
                        (event_type or 'view', (page or '/')[:100], (ip_address or '')[:50], (detail or '')[:200]))
         conn.commit()
         event_id = cursor.lastrowid
@@ -941,22 +925,22 @@ class NewsDatabase:
         return event_id
 
     def get_ad_stats(self) -> Dict[str, Any]:
-        conn = sqlite3.connect(self.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
         month_start = datetime.now().replace(day=1).strftime('%Y-%m-%d')
 
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression'")
         total_impressions = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression' AND date(created_at)=?", (today,))
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression' AND date(created_at)=%s", (today,))
         today_impressions = cursor.fetchone()[0]
 
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click'")
         total_clicks = cursor.fetchone()[0]
-        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click' AND date(created_at)=?", (today,))
+        cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click' AND date(created_at)=%s", (today,))
         today_clicks = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM site_visits WHERE date(visit_time)=?", (today,))
+        cursor.execute("SELECT COUNT(*) FROM site_visits WHERE date(visit_time)=%s", (today,))
         today_traffic = cursor.fetchone()[0]
 
         conn.close()

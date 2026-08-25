@@ -569,7 +569,9 @@ def main() -> None:
 
 
 import random
-import sqlite3
+import psycopg2
+import psycopg2.extras
+import os
 import re
 
 def generate_daily_seo_blog():
@@ -602,17 +604,17 @@ def generate_daily_seo_blog():
     meta_desc = f"Learn about {title}. Discover how students and professionals are leveraging technology for massive career growth."
     
     try:
-        conn = sqlite3.connect(db.db_path)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         
         # Check if slug exists to prevent duplicates
-        cursor.execute("SELECT id FROM blog_posts WHERE slug=?", (slug,))
+        cursor.execute("SELECT id FROM blog_posts WHERE slug=%s", (slug,))
         if cursor.fetchone():
             conn.close()
             return
             
         cursor.execute('''INSERT INTO blog_posts (title, slug, content, meta_description)
-                          VALUES (?, ?, ?, ?)''', (title, slug, content, meta_desc))
+                          VALUES (%s, %s, %s, %s)''', (title, slug, content, meta_desc))
         conn.commit()
         conn.close()
         logger.info(f"Auto-Blogging Agent published new SEO article: {title}")

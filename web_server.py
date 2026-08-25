@@ -825,10 +825,11 @@ def server_error(e):
 
 @app.route('/blog')
 def blog_index():
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    import psycopg2
+    import psycopg2.extras
+    import os
+    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
         cursor.execute("SELECT * FROM blog_posts ORDER BY published_at DESC")
         posts = [dict(row) for row in cursor.fetchall()]
@@ -839,12 +840,13 @@ def blog_index():
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
+    import psycopg2
+    import psycopg2.extras
+    import os
+    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
-        cursor.execute("SELECT * FROM blog_posts WHERE slug=?", (slug,))
+        cursor.execute("SELECT * FROM blog_posts WHERE slug=%s", (slug,))
         row = cursor.fetchone()
     except Exception:
         row = None

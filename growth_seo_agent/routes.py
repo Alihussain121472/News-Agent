@@ -21,11 +21,13 @@ def dashboard():
 def init_seo_db():
     try:
         db = NewsDatabase()
-        import sqlite3
-        conn = sqlite3.connect(db.db_path)
+        import psycopg2
+        import psycopg2.extras
+        import os
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS keyword_tracking (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             keyword TEXT, position INTEGER, change INTEGER, volume INTEGER)''')
         conn.commit()
         conn.close()
@@ -39,10 +41,11 @@ init_seo_db()
 def keywords():
     try:
         db = NewsDatabase()
-        import sqlite3
-        conn = sqlite3.connect(db.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        import psycopg2
+        import psycopg2.extras
+        import os
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT * FROM keyword_tracking")
         kws = [dict(row) for row in cursor.fetchall()]
         conn.close()
