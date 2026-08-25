@@ -24,7 +24,10 @@ class NewsDatabase:
                 cursor.execute(f'ALTER TABLE {table_name} ADD COLUMN {column}')
                 logger.info(f'Added missing column {column_name} to {table_name}')
 
-    def init_database(self):
+        def init_database(self):
+        if not self.conn:
+            logging.error('Skipping DB init because connection is down.')
+            return
         conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         cursor = conn.cursor()
 
@@ -953,6 +956,8 @@ class NewsDatabase:
             'today_clicks': today_clicks,
             'today_traffic': today_traffic,
         }
+
+
 
 
 
