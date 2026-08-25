@@ -12,7 +12,7 @@ class DummyDictCursor:
 
 class DummyCursor:
     def execute(self, *args, **kwargs): pass
-    def fetchone(self): return (0,)
+    def fetchone(self): return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     def fetchall(self): return []
     @property
     def rowcount(self): return 0
@@ -325,7 +325,7 @@ class NewsDatabase:
             conn.commit()
             conn.close()
             return 'created'
-        user_id, existing_name, existing_hash = existing
+        user_id, existing_name, existing_hash = existing[:3] if len(existing) >= 3 else (0, None, None)
         final_name = name if name else existing_name
         final_hash = password_hash if password_hash else existing_hash
         cursor.execute('UPDATE registered_users SET name=%s, password_hash=%s, role="user", is_active=1 WHERE id=%s',

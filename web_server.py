@@ -206,15 +206,18 @@ def login_user_account():
         if not check_password_hash(user['password_hash'], password):
             return jsonify({'status': 'error', 'message': 'Invalid password. You can also sign in with just your email.'}), 401
     
-    user_name = user.get('name') or email.split('@')[0].title()
+    user_name = email.split('@')[0].title()
+    if user:
+        user_name = user.get('name') or user_name
+        
     session.permanent = True
-    session.update({'user_email': user['email'], 'user_name': user_name, 'role': 'user'})
+    session.update({'user_email': user['email'] if user else email, 'user_name': user_name, 'role': 'user'})
     db.record_user_login(email, 'user_login')
     db.log_user_activity(email, 'login', 'User logged in')
     return jsonify({
         'status': 'success',
         'message': 'Logged in successfully.',
-        'user': {'name': user_name, 'email': user['email']},
+        'user': {'name': user_name, 'email': user['email'] if user else email},
         'redirect': '/user/dashboard'
     })
 
