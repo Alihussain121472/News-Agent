@@ -584,9 +584,9 @@ def handle_ai_chat():
             model = genai.GenerativeModel('gemini-pro')
             
             # Build prompt with system context
-            prompt = "You are the Nova AI Assistant, an ultra-professional, intelligent AI representing Nova Brief. "
+            prompt = "You are the Nova AI Assistant, a professional, helpful, and friendly customer support AI for Nova Brief. "
             prompt += "Nova Brief is a free platform that tracks student tech programs (Google, Microsoft, IBM, Meta, Apple, NASA) and sends daily tech news via email. "
-            prompt += "You are talking to a user on the website. Be incredibly helpful, concise, and professional.\n\n"
+            prompt += "You are talking to a user on the website. Be concise, polite, and directly answer their questions without being overly dramatic.\n\n"
             prompt += "Chat History:\n"
             for h in history[-4:]:  # Last 4 messages for context
                 role = "User" if h.get('role') == 'user' else "Nova AI"
@@ -614,19 +614,19 @@ def handle_ai_chat():
     
     # 1. Identity & Capability
     if any(w in lower for w in [' who ', ' what are you ', ' name ', ' human ', ' ai ', ' bot ']):
-        reply = "I am the Nova AI Assistant, a highly advanced digital concierge trained specifically to help you navigate the Nova Brief ecosystem. How can I assist you today?"
+        reply = "I am the Nova AI Assistant, designed to help you navigate the Nova Brief platform. How can I assist you today?"
     elif any(w in lower for w in [' what do you do ', ' features ', ' about you ']):
-        reply = "Nova Brief is an elite tech platform. We provide two main services: 1) A daily morning digest of the most critical AI and tech news. 2) Instant 1-click registration alerts for prestigious student programs at companies like Google, Microsoft, Meta, and NASA."
+        reply = "Nova Brief is a dedicated platform for tech enthusiasts and students. We offer two main services: 1) A daily morning digest of critical AI and tech news. 2) Instant alerts for prestigious student programs at top companies like Google, Microsoft, Meta, and NASA."
     
     # 3. Subscribing & Account
     elif any(w in lower for w in [' subscribe ', ' join ', ' register ', ' sign up ', ' account ']):
-        reply = "Joining is seamless. Simply enter your email address in the 'Join Alerts' box on our homepage. You will instantly receive a welcome email, and your daily tech and program alerts will begin immediately."
+        reply = "Joining is easy and free! Simply enter your email address in the 'Join Alerts' box on our homepage. You will receive a welcome email immediately, and your daily tech and program alerts will begin shortly after."
     elif any(w in lower for w in [' login ', ' sign in ', ' dashboard ']):
-        reply = "You can access your secure User Dashboard by clicking the 'Sign In' link at the bottom of the page. From there, you can manage your email preferences and view active programs."
+        reply = "You can access your secure User Dashboard by clicking the 'Sign In' link at the bottom of the page. From there, you can manage your preferences and view active programs."
     
-        # 4. Programs & Internships
+    # 4. Programs & Internships
     elif any(w in lower for w in [' program', ' internship', ' google ', ' microsoft ', ' nasa ', ' opportunit', ' job', ' apply']):
-        reply = "We continuously monitor and aggregate opportunities from top-tier organizations including Google, Apple, Meta, IBM, Deloitte, and NASA. When a new program launches, we send our subscribers direct, 1-click registration links so they can apply ahead of the competition."
+        reply = "We continuously monitor opportunities from top organizations including Google, Apple, Meta, IBM, and NASA. When a new program launches, we send our subscribers direct registration links so they can apply immediately."
         
     # 4.5. News & AI Updates
     elif any(w in lower for w in [' news ', ' latest ', ' today ', ' update ', ' artificial intelligence ', ' ai ']):
@@ -634,44 +634,43 @@ def handle_ai_chat():
             try:
                 articles = db.get_recent_articles(limit=2)
                 if articles:
-                    reply = "Here are the most critical AI and Tech headlines from today:<br><br>"
+                    reply = "Here are a few of the top AI and Tech headlines from today:<br><br>"
                     for idx, a in enumerate(articles, 1):
                         title = a.get('title', 'Unknown Title')
-                        summary = a.get('summary', 'Detailed summary is exclusively available to our subscribed members.')
-                        # Truncate summary if too long
+                        summary = a.get('summary', 'Detailed summary available to subscribers.')
                         if len(summary) > 200:
                             summary = summary[:197] + "..."
                         reply += f"<strong>{idx}. {title}</strong><br>"
                         reply += f"<em>Summary:</em> {summary}<br><br>"
-                    reply += "If you subscribe, you will receive our full, comprehensive AI briefings directly in your secure inbox."
+                    reply += "To receive our full, comprehensive AI briefings, simply subscribe on the homepage."
                 else:
-                    reply = "Our automated intelligence scanners are currently aggregating today's top stories. Please check back shortly, or subscribe to receive our morning digest."
+                    reply = "Our system is currently aggregating today's top stories. Please check back shortly, or subscribe to receive our morning digest directly."
             except Exception as e:
-                reply = "Our intelligence feeds are currently updating. Please check back shortly."
+                reply = "Our news feeds are currently updating. Please check back shortly."
         else:
             reply = "Nova Brief specializes in Artificial Intelligence news and tech industry alerts. We track everything from major AI model updates to enterprise tech launches."
     
     # 5. Technical Support
     elif any(w in lower for w in [' not working ', ' error ', ' bug ', ' password ', ' reset ', ' help ']):
-        reply = "I understand you need technical support. I have securely logged your issue in our Admin Inbox. Our engineering team will review it immediately. You can also email supportnovabrief@gmail.com directly."
+        reply = "I understand you need technical support. I have logged your request for our team to review. You can also reach out to us directly via the contact form on the homepage."
         db.record_contact_message("Chatbot User", "support@novabrief.local", "Tech Support Request", user_msg)
         return jsonify({'reply': reply})
         
     # 6. Acknowledgments, Agreements & Farewells
     elif any(w in lower for w in [' ok ', ' okay ', ' got it ', ' understood ', ' makes sense ', ' good ', ' nice ', ' perfect ', ' sure ']):
-        reply = "Excellent. Is there anything else you would like to know about our platform or student programs?"
+        reply = "Great! Please let me know if you have any other questions about Nova Brief."
     elif any(w in lower for w in [' bye ', ' goodbye ', ' see you ', ' farewell ']):
-        reply = "Goodbye! Thank you for chatting with Nova Brief. Have a wonderful day!"
+        reply = "Goodbye! Thank you for visiting Nova Brief. Have a wonderful day!"
     elif any(w in lower for w in [' thanks', ' thank you', ' awesome ', ' great ', ' cool ', ' appreciate ']):
-        reply = "You are very welcome! If you have any more questions about Nova Brief, I am always here to help."
+        reply = "You are very welcome! I am always here if you need further assistance."
     
     # 7. Greetings
     elif any(w in lower for w in [' hello ', ' hi ', ' hey ', ' greetings ', ' morning ', ' afternoon ', ' evening ']):
-        reply = "Hello! Welcome to Nova Brief. I am the Nova AI Assistant. How can I accelerate your tech career today?"
+        reply = "Hello! Welcome to Nova Brief. I'm the Nova Assistant. How can I help you today?"
         
     # 8. Unmatched / Complex Queries (Escalation)
     else:
-        reply = "That is a very insightful question. Because it requires a highly specific answer, I have instantly forwarded your message directly to our human Executive Team. They will review it in the Nova OS Secure Inbox and reach out to you."
+        reply = "I am a specialized assistant focused on Nova Brief's tech programs and news alerts, so I may not have the answer to that. Please feel free to ask me about our email digests, how to join, or the latest AI news! You can also use the contact form to reach our team."
         # Save to admin inbox
         db.record_contact_message("Chatbot User", "user@novabrief.local", "Chatbot Escalate", user_msg)
 
