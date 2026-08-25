@@ -1,5 +1,7 @@
-﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
 from functools import wraps
+from database import NewsDatabase
+import os
 
 seo_bp = Blueprint('seo', __name__, template_folder='templates')
 
@@ -17,29 +19,35 @@ def dashboard():
     return render_template('seo_dashboard.html')
 
 def init_seo_db():
-    db = NewsDatabase()
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS keyword_tracking (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        keyword TEXT, position INTEGER, change INTEGER, volume INTEGER)''')
-    conn.commit()
-    conn.close()
+    try:
+        db = NewsDatabase()
+        import sqlite3
+        conn = sqlite3.connect(db.db_path)
+        cursor = conn.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS keyword_tracking (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            keyword TEXT, position INTEGER, change INTEGER, volume INTEGER)''')
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
 
 init_seo_db()
 
 @seo_bp.route('/keywords')
 @admin_required
 def keywords():
-    db = NewsDatabase()
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM keyword_tracking")
-    kws = [dict(row) for row in cursor.fetchall()]
-    conn.close()
+    try:
+        db = NewsDatabase()
+        import sqlite3
+        conn = sqlite3.connect(db.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM keyword_tracking")
+        kws = [dict(row) for row in cursor.fetchall()]
+        conn.close()
+    except Exception:
+        kws = []
     return render_template('seo_keywords.html', keywords=kws)
 
 
@@ -53,33 +61,55 @@ def content_assistant():
 @admin_required
 def generate_content():
     data = request.get_json() or {}
-    keyword = (data.get('keyword') or 'AI Technology').title()
+    keyword = (data.get('keyword') or 'AI Technology').strip()
     
-    # Generate an SEO Optimized Outline and Article
-    html_output = f'''
-    <div class="text-left space-y-6">
-        <div>
-            <h2 class="text-xl font-bold text-slate-900 border-b pb-2">SEO Optimized Outline: {keyword}</h2>
-            <ul class="list-disc pl-5 mt-4 space-y-2 text-slate-700">
-                <li><strong>H1:</strong> The Ultimate Guide to {keyword} in 2026</li>
-                <li><strong>H2:</strong> What is {keyword}?</li>
-                <li><strong>H2:</strong> Top 5 Benefits of Implementing {keyword}</li>
-                <li><strong>H2:</strong> How Students Can Leverage {keyword} for Career Growth</li>
-                <li><strong>H2:</strong> Future Trends and Predictions</li>
-                <li><strong>H3:</strong> Key Takeaways & Actionable Steps</li>
-            </ul>
-        </div>
+    api_key = os.getenv('GEMINI_API_KEY')
+    if not api_key:
+        return jsonify({'status': 'error', 'html': 'Gemini API key is missing. Please configure it in your environment variables.'})
+
+    try:
+        import google.generativeai as genai
+        import markdown
         
-        <div>
-            <h2 class="text-xl font-bold text-slate-900 border-b pb-2 mt-8">Draft Article: The Ultimate Guide to {keyword}</h2>
-            <div class="mt-4 text-slate-700 leading-relaxed space-y-4">
-                <p><strong>Meta Description:</strong> Discover the complete guide to {keyword}. Learn the benefits, future trends, and how to leverage it for incredible career growth today.</p>
-                <p>The landscape of technology is evolving at an unprecedented rate, and at the center of this revolution is <strong>{keyword}</strong>. Whether you are a student exploring new career paths, a professional seeking to optimize your workflows, or a tech enthusiast, understanding {keyword} is no longer optional—it is essential.</p>
-                <p>Implementing {keyword} brings a multitude of benefits, from extreme productivity boosts to unlocking entirely new avenues of creativity. Research indicates that early adopters of these systems experience a 40% increase in output efficiency. For students in particular, mastering this topic provides a massive competitive advantage in the modern job market.</p>
-                <p><em>(This is an AI-generated SEO draft. You can copy this into your CMS and expand upon the H2 sections to easily rank on Google.)</em></p>
-            </div>
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-pro')
+        
+        prompt = f"""
+You are an elite, highly experienced SEO Agent and Content Strategist. Your goal is to take a website to the top of Google search results and drive massive organic traffic. 
+
+The user wants to target the following topic/keyword: "{keyword}"
+
+Please generate a comprehensive, highly optimized SEO strategy in markdown format. 
+Structure your response exactly like this:
+
+### 🎯 Primary & Secondary Keywords
+List the absolute best primary keyword and 5 high-converting, low-competition secondary/long-tail keywords related to the topic. Explain briefly why these keywords will rank easily.
+
+### 📝 SEO Meta Tags
+Provide a compelling Meta Title (under 60 characters) and Meta Description (under 160 characters) engineered for a high Click-Through Rate (CTR).
+
+### 📑 Optimized Content Outline
+Provide an H1, H2, and H3 structure for an article that will outrank competitors.
+
+### ✍️ Draft Article (Intro & First Section)
+Write the first 2-3 paragraphs of the article. Use NLP-friendly terms, keep sentences concise, and make it highly engaging to reduce bounce rate.
+
+Do not include any generic filler text, just the highly professional SEO output.
+"""
+        response = model.generate_content(prompt)
+        
+        # Convert markdown to HTML for the dashboard
+        html_output = markdown.markdown(response.text)
+        
+        # Wrap it in Tailwind styling so it looks beautiful on the admin dashboard
+        styled_html = f'''
+        <div class="text-left space-y-4 text-slate-700 prose prose-slate max-w-none">
+            {html_output.replace('h3', 'h3 class="text-lg font-bold text-slate-800 mt-6 border-b pb-1"').replace('h2', 'h2 class="text-xl font-bold text-blue-700 mt-8 mb-2"').replace('p', 'p class="leading-relaxed mb-4"').replace('ul', 'ul class="list-disc pl-5 space-y-1 mb-4"')}
         </div>
-    </div>
-    '''
-    return jsonify({'status': 'success', 'html': html_output})
+        '''
+        
+        return jsonify({'status': 'success', 'html': styled_html})
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'html': f'<div class="text-red-500 font-bold">Error generating SEO content: {str(e)}</div>'})
 

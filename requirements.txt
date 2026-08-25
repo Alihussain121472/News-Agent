@@ -7,3 +7,4 @@ gunicorn==22.0.0
 Werkzeug==3.0.4
 
 google-generativeai==0.4.1
+Markdown==3.6
