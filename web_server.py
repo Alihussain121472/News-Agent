@@ -617,10 +617,6 @@ def handle_ai_chat():
     elif any(w in lower for w in ['what do you do', 'how can you help', 'what is nova brief', 'about you', 'features']):
         reply = "Nova Brief is an elite tech platform. We provide two main services: 1) A daily morning digest of the most critical AI and tech news. 2) Instant 1-click registration alerts for prestigious student programs at companies like Google, Microsoft, Meta, and NASA."
     
-    # 2. Pricing & Monetization
-    elif any(w in lower for w in ['cost', 'price', 'free', 'pay', 'premium', 'subscription fee']):
-        reply = "I am pleased to inform you that Nova Brief is 100% free for all students and professionals. We generate revenue exclusively through Google AdSense, ensuring our premium alerts remain accessible to everyone without charge."
-    
     # 3. Subscribing & Account
     elif any(w in lower for w in ['subscribe', 'join', 'register', 'sign up', 'create account', 'how to start']):
         reply = "Joining is seamless. Simply enter your email address in the 'Join Alerts' box on our homepage. You will instantly receive a welcome email, and your daily tech and program alerts will begin immediately."
@@ -837,6 +833,7 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
 
 
 
