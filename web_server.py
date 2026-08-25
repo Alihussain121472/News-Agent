@@ -563,6 +563,76 @@ def join_program_alert():
     })
 
 
+
+@app.route('/api/chat', methods=['POST'])
+def handle_ai_chat():
+    data = request.get_json() or {}
+    user_msg = data.get('message', '').strip()
+    history = data.get('history', [])
+    
+    if not user_msg:
+        return jsonify({'reply': 'How can I help you today?'})
+        
+    try:
+        # Try to use Gemini if API key exists
+        import google.generativeai as genai
+        import os
+        
+        api_key = os.getenv('GEMINI_API_KEY')
+        if api_key:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-pro')
+            
+            # Build prompt with system context
+            prompt = "You are the Nova AI Assistant, an ultra-professional, intelligent AI representing Nova Brief. "
+            prompt += "Nova Brief is a free platform that tracks student tech programs (Google, Microsoft, IBM, Meta, Apple, NASA) and sends daily tech news via email. "
+            prompt += "You are talking to a user on the website. Be incredibly helpful, concise, and professional.\n\n"
+            prompt += "Chat History:\n"
+            for h in history[-4:]:  # Last 4 messages for context
+                role = "User" if h.get('role') == 'user' else "Nova AI"
+                prompt += f"{role}: {h.get('text')}\n"
+            prompt += f"User: {user_msg}\nNova AI:"
+            
+            response = model.generate_content(prompt)
+            reply = response.text
+            
+            # Log the chat in the admin inbox (Memory for Admin)
+            db.record_contact_message(
+                name="Chatbot Session", 
+                email="bot_memory@novabrief.local", 
+                subject="Chatbot AI Conversation Log", 
+                message=f"User said: {user_msg}\n\nAI replied: {reply}"
+            )
+            return jsonify({'reply': reply})
+    except Exception as e:
+        pass
+        
+    # Fallback to Advanced Professional Logic if Gemini is not configured or fails
+    lower = user_msg.lower()
+    reply = ""
+    
+    if any(w in lower for w in ['cost', 'price', 'free', 'pay']):
+        reply = "Nova Brief is absolutely 100% free for all students. We utilize Google AdSense for monetization, meaning you will never be charged for our premium program alerts or daily news digests."
+    elif any(w in lower for w in ['subscribe', 'join', 'register', 'sign up']):
+        reply = "You can join our network by entering your email at the top of the homepage. You will instantly receive a welcome email and begin receiving our exclusive daily tech alerts."
+    elif any(w in lower for w in ['program', 'internship', 'google', 'microsoft']):
+        reply = "We continuously scan for prestigious opportunities from tech giants like Google, Apple, Meta, IBM, and NASA. Subscribing gives you direct, 1-click registration links the moment these programs launch."
+    else:
+        reply = "That is an excellent question. I have securely forwarded your inquiry directly to our human Administrative Team. They will review it shortly in the Nova OS Inbox and reach out to you."
+        # Save to admin inbox
+        db.record_contact_message("Chatbot User", "user@novabrief.local", "Chatbot Escalate", user_msg)
+
+    # Save to admin inbox (Memory for Admin)
+    if reply and not reply.startswith("That is an"):
+        db.record_contact_message(
+            name="Chatbot Session", 
+            email="bot_memory@novabrief.local", 
+            subject="Chatbot Rule-Based Conversation Log", 
+            message=f"User said: {user_msg}\n\nAI replied: {reply}"
+        )
+        
+    return jsonify({'reply': reply})
+
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():
     data = request.get_json() or {}
@@ -740,5 +810,6 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
 
 
