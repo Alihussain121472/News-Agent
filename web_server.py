@@ -624,9 +624,32 @@ def handle_ai_chat():
     elif any(w in lower for w in [' login ', ' sign in ', ' dashboard ']):
         reply = "You can access your secure User Dashboard by clicking the 'Sign In' link at the bottom of the page. From there, you can manage your email preferences and view active programs."
     
-    # 4. Programs & Internships
+        # 4. Programs & Internships
     elif any(w in lower for w in [' program', ' internship', ' google ', ' microsoft ', ' nasa ', ' opportunit', ' job', ' apply']):
         reply = "We continuously monitor and aggregate opportunities from top-tier organizations including Google, Apple, Meta, IBM, Deloitte, and NASA. When a new program launches, we send our subscribers direct, 1-click registration links so they can apply ahead of the competition."
+        
+    # 4.5. News & AI Updates
+    elif any(w in lower for w in [' news ', ' latest ', ' today ', ' update ', ' artificial intelligence ', ' ai ']):
+        if any(w in lower for w in [' news ', ' latest ', ' today ', ' update ']):
+            try:
+                articles = db.get_recent_articles(limit=2)
+                if articles:
+                    reply = "Here are the most critical AI and Tech headlines from today:<br><br>"
+                    for idx, a in enumerate(articles, 1):
+                        title = a.get('title', 'Unknown Title')
+                        summary = a.get('summary', 'Detailed summary is exclusively available to our subscribed members.')
+                        # Truncate summary if too long
+                        if len(summary) > 200:
+                            summary = summary[:197] + "..."
+                        reply += f"<strong>{idx}. {title}</strong><br>"
+                        reply += f"<em>Summary:</em> {summary}<br><br>"
+                    reply += "If you subscribe, you will receive our full, comprehensive AI briefings directly in your secure inbox."
+                else:
+                    reply = "Our automated intelligence scanners are currently aggregating today's top stories. Please check back shortly, or subscribe to receive our morning digest."
+            except Exception as e:
+                reply = "Our intelligence feeds are currently updating. Please check back shortly."
+        else:
+            reply = "Nova Brief specializes in Artificial Intelligence news and tech industry alerts. We track everything from major AI model updates to enterprise tech launches."
     
     # 5. Technical Support
     elif any(w in lower for w in [' not working ', ' error ', ' bug ', ' password ', ' reset ', ' help ']):
@@ -840,6 +863,7 @@ def blog_post(slug):
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
+
 
 
 
