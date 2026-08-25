@@ -55,7 +55,7 @@
       <a href="/analytics/revenue" class="nav-item"><i class="fas fa-dollar-sign"></i> Revenue</a>
       <a href="/analytics/dashboard" class="nav-item"><i class="fas fa-chart-pie"></i> Analytics</a>
       <a href="/analytics/insights" class="nav-item"><i class="fas fa-robot text-blue-500"></i> AI Insights</a>
-      <a href="/analytics/reports" class="nav-item"><i class="fas fa-file-invoice"></i> Reports</a>`n      <a href="/analytics/messages" class="nav-item"><i class="fas fa-inbox"></i> Inbox & Complaints</a>
+      <a href="/analytics/reports" class="nav-item"><i class="fas fa-file-invoice"></i> Reports</a>`n      <a href="/analytics/messages" class="nav-item relative"><i class="fas fa-inbox"></i> Inbox & Complaints <span id="inbox-badge" class="hidden absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm shadow-red-500/50"></span></a>
       <a href="/analytics/notifications" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
       <a href="/analytics/settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
     </nav>
@@ -96,8 +96,22 @@
   </main>
 
   {% block scripts %}{% endblock %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/analytics/api/unread-count');
+      const data = await res.json();
+      if (data.count > 0) {
+        const badge = document.getElementById('inbox-badge');
+        badge.textContent = data.count > 9 ? '9+' : data.count;
+        badge.classList.remove('hidden');
+      }
+    } catch (e) {}
+  });
+</script>
 </body>
 </html>
+
 
 
 

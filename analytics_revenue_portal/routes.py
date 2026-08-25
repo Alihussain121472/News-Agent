@@ -133,3 +133,9 @@ def settings():
 @admin_required
 def notifications():
     return render_template('analytics_notifications.html')
+
+@analytics_bp.route('/api/unread-count')
+@admin_required
+def unread_count():
+    db = NewsDatabase()
+    return jsonify({'count': db.get_unread_message_count()})

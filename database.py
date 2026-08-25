@@ -727,6 +727,14 @@ class NewsDatabase:
         conn.close()
         return msg_id
 
+        def get_unread_message_count(self) -> int:
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM contact_messages WHERE status='new'")
+        count = cursor.fetchone()[0]
+        conn.close()
+        return count
+
     def get_contact_messages(self, limit: int = 100, status: str = None) -> List[Dict[str, Any]]:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -914,4 +922,5 @@ class NewsDatabase:
             'today_clicks': today_clicks,
             'today_traffic': today_traffic,
         }
+
 

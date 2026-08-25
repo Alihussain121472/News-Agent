@@ -652,8 +652,101 @@ async function handleUserLogout(){
 
 document.addEventListener('DOMContentLoaded', syncUserNavbar);
 </script>
+    <!-- NovaBot Floating Chat UI -->
+    <div id="novaBotContainer" class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <!-- Chat Window -->
+        <div id="novaBotWindow" class="hidden w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl mb-4 overflow-hidden flex flex-col transition-all origin-bottom-right">
+            <!-- Header -->
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fas fa-robot text-sm"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">Nova AI Assistant</h4>
+                        <p class="text-[10px] text-blue-200">Online & Ready</p>
+                    </div>
+                </div>
+                <button onclick="toggleBot()" class="text-white hover:text-blue-200 transition"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Messages -->
+            <div id="botMessages" class="p-4 h-64 overflow-y-auto bg-slate-50 flex flex-col gap-3 text-sm">
+                <div class="flex gap-2 max-w-[85%]">
+                    <div class="w-6 h-6 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600"><i class="fas fa-robot text-[10px]"></i></div>
+                    <div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm">Hello! I am the Nova AI Assistant. Do you have any questions about our tech alerts or programs?</div>
+                </div>
+            </div>
+            <!-- Input -->
+            <div class="p-3 border-t border-slate-200 bg-white flex gap-2">
+                <input type="text" id="botInput" placeholder="Ask a question..." class="flex-1 bg-slate-100 border-none rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="if(event.key==='Enter') sendBotMessage()">
+                <button onclick="sendBotMessage()" class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center transition"><i class="fas fa-paper-plane text-xs"></i></button>
+            </div>
+        </div>
+        
+        <!-- Toggle Button -->
+        <button id="novaBotToggle" onclick="toggleBot()" class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 transition transform hover:scale-105">
+            <i class="fas fa-comment-dots text-xl"></i>
+        </button>
+    </div>
+
+    <script>
+        function toggleBot() {
+            const win = document.getElementById('novaBotWindow');
+            win.classList.toggle('hidden');
+        }
+
+        function appendMessage(text, isUser=false) {
+            const container = document.getElementById('botMessages');
+            const msgDiv = document.createElement('div');
+            if (isUser) {
+                msgDiv.className = 'flex gap-2 max-w-[85%] self-end flex-row-reverse';
+                msgDiv.innerHTML = <div class="bg-blue-600 p-2.5 rounded-2xl rounded-tr-sm text-white shadow-sm"> + text + </div>;
+            } else {
+                msgDiv.className = 'flex gap-2 max-w-[85%]';
+                msgDiv.innerHTML = <div class="w-6 h-6 bg-blue-100 rounded-full flex-shrink-0 flex items-center justify-center text-blue-600"><i class="fas fa-robot text-[10px]"></i></div>
+                                    <div class="bg-white border border-slate-200 p-2.5 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm"> + text + </div>;
+            }
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendBotMessage() {
+            const input = document.getElementById('botInput');
+            const text = input.value.trim();
+            if(!text) return;
+            
+            input.value = '';
+            appendMessage(text, true);
+
+            // Simple AI Logic
+            const lower = text.toLowerCase();
+            setTimeout(async () => {
+                if (lower.includes('cost') || lower.includes('price') || lower.includes('free')) {
+                    appendMessage("Nova Brief is 100% free for students! We monetize via Google AdSense so you never have to pay.");
+                } else if (lower.includes('subscribe') || lower.includes('join') || lower.includes('register')) {
+                    appendMessage("You can subscribe by entering your email at the top of the page. You'll get instant welcome emails and daily tech alerts!");
+                } else if (lower.includes('program') || lower.includes('internship')) {
+                    appendMessage("We scan programs from Google, Apple, Meta, and IBM. When you subscribe, you get direct 1-click registration links.");
+                } else {
+                    // Send to admin inbox
+                    appendMessage("That's a great question! I'm forwarding your message directly to our human Admin team right now. They will review it in the Nova OS Inbox!");
+                    try {
+                        await fetch('/api/contact', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                name: 'Chatbot User',
+                                email: 'chatbot@novabrief.local',
+                                subject: 'Chatbot Inquiry',
+                                message: text
+                            })
+                        });
+                    } catch(e) {}
+                }
+            }, 800);
+        }
+    </script>
 </body>
 </html>
+
 
 
 
