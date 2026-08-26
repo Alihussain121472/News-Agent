@@ -791,6 +791,21 @@ class NewsDatabase:
         conn.close()
         return count
 
+        def get_contact_message(self, msg_id: int):
+        conn = safe_connect()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("SELECT * FROM contact_messages WHERE id=%s", (msg_id,))
+        row = to_dict(cursor.fetchone())
+        conn.close()
+        return row
+
+    def mark_message_replied(self, msg_id: int):
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE contact_messages SET status='replied' WHERE id=%s", (msg_id,))
+        conn.commit()
+        conn.close()
+
     def mark_message_read(self, msg_id: int):
         conn = safe_connect()
         cursor = conn.cursor()
