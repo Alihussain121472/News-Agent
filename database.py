@@ -1,4 +1,4 @@
-﻿import psycopg2
+import psycopg2
 import psycopg2.extras
 
 class DummyDictCursor:
@@ -10,29 +10,10 @@ class DummyDictCursor:
     @property
     def lastrowid(self): return 0
 
-class DummyCursor:
-    def execute(self, *args, **kwargs): pass
-    def fetchone(self): return (0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    def fetchall(self): return []
-    @property
-    def rowcount(self): return 0
-    @property
-    def lastrowid(self): return 0
 
-class DummyConnection:
-    def cursor(self, *args, **kwargs):
-        if 'cursor_factory' in kwargs:
-            return DummyDictCursor()
-        return DummyCursor()
-    def commit(self): pass
-    def close(self): pass
 
 def safe_connect():
-    try:
-        return psycopg2.connect(os.getenv('DATABASE_URL'), connect_timeout=3)
-    except Exception as e:
-        logger.error(f"DB Connection failed: {e}")
-        return DummyConnection()
+    return psycopg2.connect(os.getenv('DATABASE_URL'))
 import os
 import json
 from datetime import datetime, timedelta
@@ -89,7 +70,7 @@ class NewsDatabase:
             is_active BOOLEAN DEFAULT TRUE, total_emails_received INTEGER DEFAULT 0,
             last_email_sent TIMESTAMP, last_login_at TIMESTAMP,
             login_count INTEGER DEFAULT 0, password_hash TEXT,
-            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE, is_active BOOLEAN DEFAULT TRUE)''')
+            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS site_visits (
             id SERIAL PRIMARY KEY,
@@ -329,7 +310,7 @@ class NewsDatabase:
         user_id, existing_name, existing_hash = existing[:3] if len(existing) >= 3 else (0, None, None)
         final_name = name if name else existing_name
         final_hash = password_hash if password_hash else existing_hash
-        cursor.execute('UPDATE registered_users SET name=%s, password_hash=%s, role="user", is_active=TRUE WHERE id=%s',
+        cursor.execute("UPDATE registered_users SET name=%s, password_hash=%s, role='user', is_active=TRUE WHERE id=%s",
                        (final_name, final_hash, user_id))
         conn.commit()
         conn.close()
