@@ -115,6 +115,11 @@ def index():
 def dashboard():
     return redirect(url_for('analytics.dashboard'))
 
+@app.route('/admin/dashboard')
+def legacy_admin_dashboard():
+    return redirect(url_for('analytics.dashboard'))
+
+
 @app.route('/user/dashboard')
 @user_required
 def user_dashboard():

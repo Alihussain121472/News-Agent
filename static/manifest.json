@@ -2,7 +2,7 @@
     "name": "Nova OS Admin",
     "short_name": "Nova OS",
     "description": "AI SaaS Administrative Portal",
-    "start_url": "/admin/dashboard",
+    "start_url": "/analytics/dashboard",
     "display": "standalone",
     "background_color": "#0f172a",
     "theme_color": "#6366f1",
