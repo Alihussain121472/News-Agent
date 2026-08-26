@@ -17,6 +17,15 @@ def safe_connect():
 import os
 import json
 from datetime import datetime, timedelta
+
+def to_dict(row):
+    if row is None: return None
+    d = dict(row)
+    for k, v in d.items():
+        if isinstance(v, datetime):
+            d[k] = str(v)
+    return d
+
 from typing import List, Dict, Any, Optional
 import logging
 
@@ -207,7 +216,7 @@ class NewsDatabase:
             cursor.execute('SELECT * FROM news_articles WHERE fetched_at >= %s ORDER BY fetched_at DESC LIMIT %s', (cutoff, limit))
         else:
             cursor.execute('SELECT * FROM news_articles ORDER BY fetched_at DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -215,7 +224,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM news_articles WHERE fetched_at BETWEEN %s AND %s ORDER BY fetched_at DESC', (start_date, end_date))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -224,7 +233,7 @@ class NewsDatabase:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         p = f'%{query}%'
         cursor.execute('SELECT * FROM news_articles WHERE title LIKE %s OR summary LIKE %s ORDER BY fetched_at DESC LIMIT %s', (p, p, limit))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -260,7 +269,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM email_logs ORDER BY sent_at DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -268,7 +277,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM agent_status ORDER BY status_time DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -293,7 +302,7 @@ class NewsDatabase:
         cursor.execute('SELECT * FROM registered_users WHERE email = %s LIMIT 1', (email.strip().lower(),))
         row = cursor.fetchone()
         conn.close()
-        return dict(row) if row else None
+        return to_dict(row) if row else None
 
     def create_or_update_user_account(self, email: str, name: str = None, password_hash: str = None) -> str:
         normalized = email.strip().lower()
@@ -328,7 +337,7 @@ class NewsDatabase:
                     'last_email_sent': None, 'last_login_at': None, 'member_since': None, 'is_active': False}
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email = %s', (normalized,))
         login_events = cursor.fetchone()[0]
-        u = dict(row)
+        u = to_dict(row)
         conn.close()
         return {
             'registered': True,
@@ -397,7 +406,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM registered_users ORDER BY registered_at DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -461,7 +470,7 @@ class NewsDatabase:
         cursor.execute('''SELECT email, source AS action, login_time AS event_time FROM user_login_events
             UNION ALL SELECT email, 'signup' AS action, registered_at AS event_time FROM registered_users
             ORDER BY event_time DESC LIMIT ?''', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -480,7 +489,7 @@ class NewsDatabase:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM user_activity_log WHERE email=%s ORDER BY logged_at DESC LIMIT %s',
                        (email.strip().lower(), limit))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -569,7 +578,7 @@ class NewsDatabase:
             (SELECT COUNT(*) FROM user_activity_log a WHERE a.email=u.email) AS activity_count,
             (SELECT COUNT(*) FROM email_logs e WHERE e.recipient=u.email AND e.status="success") AS emails_received
             FROM registered_users u ORDER BY u.registered_at DESC''')
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -583,7 +592,7 @@ class NewsDatabase:
             UNION ALL
             SELECT 'email_received' AS action, subject AS detail, NULL AS page, sent_at AS event_time, 'email' AS source FROM email_logs WHERE recipient=%s AND status='success'
             ORDER BY event_time DESC LIMIT ?''', (email, email, email, limit))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -606,7 +615,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT * FROM chatbot_history WHERE user_id=%s ORDER BY created_at DESC LIMIT %s", (user_id, limit))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         # Reverse to get chronological order for chat UI
         return rows[::-1]
@@ -674,7 +683,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('SELECT * FROM student_programs ORDER BY created_at DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -686,7 +695,7 @@ class NewsDatabase:
             WHERE is_active=TRUE AND notified_at IS NULL AND launch_date IS NOT NULL
             AND date(launch_date) <= date('now', '+' || notify_before_days || ' days')
             AND date(launch_date) >= CURRENT_DATE''')
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -796,7 +805,7 @@ class NewsDatabase:
             cursor.execute('SELECT * FROM contact_messages WHERE status=%s ORDER BY submitted_at DESC LIMIT %s', (status, limit))
         else:
             cursor.execute('SELECT * FROM contact_messages ORDER BY submitted_at DESC LIMIT %s', (limit,))
-        rows = [dict(r) for r in cursor.fetchall()]
+        rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
 
@@ -907,7 +916,7 @@ class NewsDatabase:
         row = cursor.fetchone()
         conn.close()
         if row:
-            return dict(row)
+            return to_dict(row)
         return {
             'account_name': 'Syed Ali Hussain',
             'account_number': '03146618622',
