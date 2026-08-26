@@ -170,11 +170,11 @@ def reply_msg(msg_id):
     </body></html>"""
     
     success = send_email(msg['email'], subject, html)
+    db.mark_message_replied(msg_id, reply_text)
     if success:
-        db.mark_message_replied(msg_id)
-        return jsonify({'status': 'success'})
+        return jsonify({'status': 'success', 'message': 'Reply sent and saved to history!'})
     else:
-        return jsonify({'status': 'error', 'message': 'Failed to send email. Check SMTP settings.'}), 500
+        return jsonify({'status': 'success', 'message': 'Reply saved to history, but email failed to send (Check SMTP).'})
 
 def mark_msg_read(msg_id):
     db = NewsDatabase()

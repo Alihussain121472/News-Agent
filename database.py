@@ -799,10 +799,13 @@ class NewsDatabase:
         conn.close()
         return row
 
-    def mark_message_replied(self, msg_id: int):
+    def mark_message_replied(self, msg_id: int, reply_text: str = None):
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute("UPDATE contact_messages SET status='replied' WHERE id=%s", (msg_id,))
+        if reply_text:
+            cursor.execute("UPDATE contact_messages SET status='replied', admin_reply=%s, replied_at=CURRENT_TIMESTAMP WHERE id=%s", (reply_text, msg_id))
+        else:
+            cursor.execute("UPDATE contact_messages SET status='replied' WHERE id=%s", (msg_id,))
         conn.commit()
         conn.close()
 

@@ -24,7 +24,7 @@
         <div class="flex-1 overflow-y-auto" id="message-list">
             {% for msg in messages %}
             <div class="msg-item p-4 border-b border-slate-100 cursor-pointer hover:bg-blue-50 transition relative {% if msg.status == 'new' %}bg-white border-l-4 border-l-blue-600{% else %}bg-slate-50 opacity-80{% endif %}" 
-                 onclick="openMessage({{ msg.id }}, '{{ msg.name|e }}', '{{ msg.email|e }}', '{{ msg.subject|e }}', '{{ msg.submitted_at|e }}', this)"
+                 onclick="openMessage({{ msg.id }}, '{{ msg.name|e }}', '{{ msg.email|e }}', '{{ msg.subject|e }}', '{{ msg.submitted_at|e }}', '{{ msg.admin_reply|default('')|e }}', '{{ msg.replied_at|default('')|e }}', this)"
                  data-id="{{ msg.id }}"
                  data-content="{{ msg.message|e }}"
                  data-subject="{{ msg.subject|e }}">
@@ -78,7 +78,18 @@
                 Message content goes here...
             </div>
             
-            <div class="mt-8 pt-6 border-t border-slate-100">
+            <div class="mt-8 pt-6 border-t border-slate-100" id="reply-history-section" style="display: none;">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Reply History</h4>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-bold text-sm text-blue-900">Nova Admin</span>
+                        <span class="text-[10px] text-blue-400 font-semibold" id="view-reply-date"></span>
+                    </div>
+                    <div class="text-sm text-blue-800 whitespace-pre-wrap" id="view-reply-text"></div>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-100" id="reply-action-section">
                 <div id="reply-container" class="hidden flex-col gap-3">
                     <textarea id="reply-text" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 resize-none" placeholder="Type your reply to this user..."></textarea>
                     <div class="flex items-center gap-2">
@@ -156,7 +167,7 @@ function filterMsgs(type, btn) {
     document.getElementById('total-msgs').textContent = count + ' Total';
 }
 
-function openMessage(id, name, email, subject, date, element) {
+function openMessage(id, name, email, subject, date, replyText, replyDate, element) {
     // Hide empty state
     currentMessageId = id;
     document.getElementById('empty-state').style.display = 'none';
@@ -172,6 +183,16 @@ function openMessage(id, name, email, subject, date, element) {
     // Get full content from data attribute to preserve formatting
     const content = element.getAttribute('data-content');
     document.getElementById('view-body').textContent = content;
+    
+    if (replyText) {
+        document.getElementById('reply-history-section').style.display = 'block';
+        document.getElementById('view-reply-text').textContent = replyText;
+        document.getElementById('view-reply-date').textContent = replyDate.substring(0,16);
+        document.getElementById('reply-action-section').style.display = 'none';
+    } else {
+        document.getElementById('reply-history-section').style.display = 'none';
+        document.getElementById('reply-action-section').style.display = 'block';
+    }
     
     // Mark as active in UI
     document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('bg-blue-100'));
