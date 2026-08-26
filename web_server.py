@@ -103,6 +103,8 @@ def _safe_add_recipient(email: str):
 # This is the main homepage route. When someone visits our website, this runs.
 @app.route('/')
 def index():
+    if session.get('role') == 'admin':
+        return redirect(url_for('analytics.dashboard'))
     user_email = session.get('user_email')
     user_name = session.get('user_name')
     is_user = session.get('role') == 'user'
