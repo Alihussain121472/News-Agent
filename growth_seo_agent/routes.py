@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
+﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify, request
 from functools import wraps
 from database import NewsDatabase
 import os
@@ -18,49 +18,12 @@ def admin_required(f):
 def dashboard():
     return render_template('seo_dashboard.html')
 
-def init_seo_db():
-    try:
-        db = NewsDatabase()
-        import psycopg2
-        import psycopg2.extras
-        import os
-        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-        cursor = conn.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS keyword_tracking (
-            id SERIAL PRIMARY KEY,
-            keyword TEXT, position INTEGER, change INTEGER, volume INTEGER)''')
-        conn.commit()
-        conn.close()
-    except Exception:
-        pass
-
-init_seo_db()
-
-@seo_bp.route('/keywords')
-@admin_required
-def keywords():
-    try:
-        db = NewsDatabase()
-        import psycopg2
-        import psycopg2.extras
-        import os
-        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute("SELECT * FROM keyword_tracking")
-        kws = [dict(row) for row in cursor.fetchall()]
-        conn.close()
-    except Exception:
-        kws = []
-    return render_template('seo_keywords.html', keywords=kws)
-
-
 @seo_bp.route('/content')
 @admin_required
-def content_assistant():
-    return render_template('seo_content.html')
+def content_studio():
+    return render_template('content_studio.html')
 
-
-@seo_bp.route('/api/generate', methods=['POST'])
+@seo_bp.route('/generate_content', methods=['POST'])
 @admin_required
 def generate_content():
     data = request.get_json() or {}
@@ -77,8 +40,7 @@ def generate_content():
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-pro')
         
-        
-You are an elite, highly experienced SEO Agent and Content Strategist for 'Nova Brief' (a tech, AI, and student program alert platform).
+        prompt = f\"\"\"You are an elite, highly experienced SEO Agent and Content Strategist for 'Nova Brief' (a tech, AI, and student program alert platform).
 Your primary goal is to help Nova Brief outrank competitors (especially 'Novobrief') on Google, and ensure Nova Brief appears in the top 5 search results with its official logo and rich snippets.
 
 The user wants to target the following topic/keyword: "{keyword}"
@@ -94,28 +56,22 @@ List the absolute best primary keyword and 5 high-converting, low-competition se
 ### 📝 Title Tag & Meta Description
 Provide the exact, click-optimized <title> and <meta name="description"> HTML tags the user should use on their website.
 
-### 🖼️ Schema & Logo Visibility Strategy
+### 🌐 Schema & Logo Visibility Strategy
 Explain in 2 sentences how the user can force Google to show their Logo in search results (hint: Schema.org Organization markup and Google Search Console indexing).
 
-### ✍️ Content Strategy
+### 💡 Content Strategy
 Suggest 3 specific, high-value blog post titles that will drive massive targeted traffic to Nova Brief.
 
 Do not include any generic filler text, just the highly professional SEO output.
-"""
+\"\"\"
         response = model.generate_content(prompt)
-        
-        # Convert markdown to HTML for the dashboard
         html_output = markdown.markdown(response.text)
-        
-        # Wrap it in Tailwind styling so it looks beautiful on the admin dashboard
         styled_html = f'''
         <div class="text-left space-y-4 text-slate-700 prose prose-slate max-w-none">
-            {html_output.replace('h3', 'h3 class="text-lg font-bold text-slate-800 mt-6 border-b pb-1"').replace('h2', 'h2 class="text-xl font-bold text-blue-700 mt-8 mb-2"').replace('p', 'p class="leading-relaxed mb-4"').replace('ul', 'ul class="list-disc pl-5 space-y-1 mb-4"')}
+            {{html_output.replace('h3', 'h3 class="text-lg font-bold text-slate-800 mt-6 border-b pb-1"').replace('h2', 'h2 class="text-xl font-bold text-blue-700 mt-8 mb-2"').replace('p', 'p class="leading-relaxed mb-4"').replace('ul', 'ul class="list-disc pl-5 space-y-1 mb-4"')}}
         </div>
         '''
-        
         return jsonify({'status': 'success', 'html': styled_html})
         
     except Exception as e:
-        return jsonify({'status': 'error', 'html': f'<div class="text-red-500 font-bold">Error generating SEO content: {str(e)}</div>'})
-
+        return jsonify({'status': 'error', 'html': f'<div class="text-red-500 font-bold">Error generating SEO content: {{str(e)}}</div>'})
