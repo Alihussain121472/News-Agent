@@ -89,7 +89,7 @@ class NewsDatabase:
             is_active BOOLEAN DEFAULT TRUE, total_emails_received INTEGER DEFAULT 0,
             last_email_sent TIMESTAMP, last_login_at TIMESTAMP,
             login_count INTEGER DEFAULT 0, password_hash TEXT,
-            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE)''')
+            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE, is_active BOOLEAN DEFAULT TRUE)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS site_visits (
             id SERIAL PRIMARY KEY,
@@ -321,7 +321,7 @@ class NewsDatabase:
         cursor.execute('SELECT id, name, password_hash FROM registered_users WHERE email = %s LIMIT 1', (normalized,))
         existing = cursor.fetchone()
         if not existing:
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,password_hash) VALUES (%s,%s,1,'user',%s)",
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,password_hash) VALUES (%s,%s,TRUE,'user',%s)",
                            (normalized, name, password_hash))
             conn.commit()
             conn.close()
@@ -329,7 +329,7 @@ class NewsDatabase:
         user_id, existing_name, existing_hash = existing[:3] if len(existing) >= 3 else (0, None, None)
         final_name = name if name else existing_name
         final_hash = password_hash if password_hash else existing_hash
-        cursor.execute('UPDATE registered_users SET name=%s, password_hash=%s, role="user", is_active=1 WHERE id=%s',
+        cursor.execute('UPDATE registered_users SET name=%s, password_hash=%s, role="user", is_active=TRUE WHERE id=%s',
                        (final_name, final_hash, user_id))
         conn.commit()
         conn.close()
@@ -372,7 +372,7 @@ class NewsDatabase:
         """Users who want program notifications."""
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('SELECT email FROM registered_users WHERE is_active=1 AND COALESCE(program_notifications,1)=1')
+        cursor.execute('SELECT email FROM registered_users WHERE is_active=TRUE AND COALESCE(program_notifications,1)=1')
         emails = [r[0] for r in cursor.fetchall()]
         conn.close()
         return emails
@@ -390,7 +390,7 @@ class NewsDatabase:
                            (normalized, final_name))
         else:
             final_name = name if name else row[1]
-            cursor.execute("UPDATE registered_users SET name=%s, is_active=1, program_notifications=1 WHERE email=%s",
+            cursor.execute("UPDATE registered_users SET name=%s, is_active=TRUE, program_notifications=1 WHERE email=%s",
                            (final_name, normalized))
         conn.commit()
         conn.close()
@@ -406,7 +406,7 @@ class NewsDatabase:
     def deactivate_user(self, email: str) -> bool:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('UPDATE registered_users SET is_active=0 WHERE email=%s', (email,))
+        cursor.execute('UPDATE registered_users SET is_active=FALSE WHERE email=%s', (email,))
         affected = cursor.rowcount
         conn.commit()
         conn.close()
@@ -423,7 +423,7 @@ class NewsDatabase:
     def get_user_count(self) -> int:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
+        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
         count = cursor.fetchone()[0]
         conn.close()
         return count
@@ -469,7 +469,7 @@ class NewsDatabase:
         monthly = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(DISTINCT email) FROM user_login_events WHERE login_time >= %s', (month_start,))
         users = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
+        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
         active = cursor.fetchone()[0]
         conn.close()
         return {'monthly_logins': monthly, 'users_this_month': users, 'active_users': active}
@@ -642,7 +642,7 @@ class NewsDatabase:
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
         week_ago = (datetime.now() - timedelta(days=7)).isoformat()
-        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=1')
+        cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
         active_users = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE date(registered_at)=%s', (today,))
         new_today = cursor.fetchone()[0]
@@ -650,7 +650,7 @@ class NewsDatabase:
         logins_today = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE logged_at >= %s', (week_ago,))
         week_activity = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM student_programs WHERE is_active=1')
+        cursor.execute('SELECT COUNT(*) FROM student_programs WHERE is_active=TRUE')
         active_programs = cursor.fetchone()[0]
         conn.close()
         return {
@@ -702,9 +702,9 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT * FROM student_programs
-            WHERE is_active=1 AND notified_at IS NULL AND launch_date IS NOT NULL
+            WHERE is_active=TRUE AND notified_at IS NULL AND launch_date IS NOT NULL
             AND date(launch_date) <= date('now', '+' || notify_before_days || ' days')
-            AND date(launch_date) >= date('now')''')
+            AND date(launch_date) >= CURRENT_DATE''')
         rows = [dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
@@ -719,7 +719,7 @@ class NewsDatabase:
     def delete_program(self, program_id: int) -> bool:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('UPDATE student_programs SET is_active=0 WHERE id=%s', (program_id,))
+        cursor.execute('UPDATE student_programs SET is_active=FALSE WHERE id=%s', (program_id,))
         affected = cursor.rowcount
         conn.commit()
         conn.close()
