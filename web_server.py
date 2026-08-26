@@ -6,6 +6,7 @@ import os, logging, json, threading
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
+import ai_news_agent  # Pre-warm the massive google.generativeai import at boot time for 0ms latency later
 
 load_dotenv()
 # Initialize the Flask application

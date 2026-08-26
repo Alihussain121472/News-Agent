@@ -151,26 +151,26 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
     msg['To'] = to_email
     msg.attach(MIMEText(html_content, 'html'))
     
-    # Try Port 587 STARTTLS first (fastest and standard for cloud deployments)
+    # Try Port 465 SSL first (implicit SSL has lower latency and is less likely to be blocked)
     try:
-        with smtplib.SMTP('smtp.gmail.com', 587, timeout=5) as s:
-            s.ehlo()
-            s.starttls()
-            s.ehlo()
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=5) as s:
             s.login(from_email, clean_pwd)
             s.send_message(msg)
-        logger.info(f'Email delivered instantly to {to_email} via STARTTLS (port 587)')
+        logger.info(f'Email delivered instantly to {to_email} via SSL (port 465)')
         return True
     except Exception as e1:
-        logger.warning(f'STARTTLS 587 failed ({e1}), falling back to SSL port 465...')
+        logger.warning(f'SSL 465 failed ({e1}), falling back to STARTTLS port 587...')
         try:
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=5) as s:
+            with smtplib.SMTP('smtp.gmail.com', 587, timeout=5) as s:
+                s.ehlo()
+                s.starttls()
+                s.ehlo()
                 s.login(from_email, clean_pwd)
                 s.send_message(msg)
-            logger.info(f'Email delivered to {to_email} via SSL (port 465)')
+            logger.info(f'Email delivered to {to_email} via STARTTLS (port 587)')
             return True
         except Exception as e2:
-            logger.error(f'Email delivery failed to {to_email}: TLS: {e1} | SSL: {e2}')
+            logger.error(f'Email delivery failed to {to_email}: SSL: {e1} | TLS: {e2}')
             return False
 
 
