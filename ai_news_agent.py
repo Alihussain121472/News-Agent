@@ -139,7 +139,7 @@ EMAIL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10, thread_na
 # A high-speed function to send emails using Gmail SMTP (Port 587 STARTTLS primary, Port 465 SSL fallback).
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     from_email = get_env_value('GMAIL_USER', 'EMAIL_USER')
-    password = get_env_value('GMAIL_APP_PASSWORD', 'EMAIL_APP_PASSWORD')
+    password = get_env_value('GMAIL_APP_PASSWORD', 'EMAIL_APP_PASSWORD', 'EMAIL_PASS')
     if not from_email or not password:
         logger.error('Gmail credentials missing in environment.')
         return False
