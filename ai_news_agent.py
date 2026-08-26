@@ -1,4 +1,4 @@
-﻿import os, sys, json, logging, smtplib
+import os, sys, json, logging, smtplib
 from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -465,6 +465,16 @@ def get_recipients() -> List[str]:
 
 
 # The main agent function. It finds news, formats it, and emails all subscribers.
+
+def fetch_latest_news_hourly() -> int:
+    logger.info('Starting hourly news fetch...')
+    db = NewsDatabase()
+    news_items = search_ai_news(limit=5)
+    if news_items:
+        db.save_news_batch(news_items)
+        db.log_agent_event('hourly_fetch', f'Fetched and saved {len(news_items)} new articles')
+        return len(news_items)
+    return 0
 def run_news_digest() -> bool:
     logger.info('=' * 60)
     logger.info('Starting AI morning briefing...')

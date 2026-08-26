@@ -880,6 +880,13 @@ def _safe_run_news_digest():
     except Exception as e:
         logger.error(f'Scheduled news digest failed: {e}')
 
+def _safe_fetch_hourly():
+    try:
+        from ai_news_agent import fetch_latest_news_hourly
+        fetch_latest_news_hourly()
+    except Exception as e:
+        logger.error(f'Scheduled hourly fetch failed: {e}')
+
 def _safe_send_program_notifications():
     try:
         from ai_news_agent import send_program_notifications
@@ -895,6 +902,10 @@ def start_background_scheduler():
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         scheduler = BackgroundScheduler(daemon=True)
+        scheduler.add_job(
+            _safe_fetch_hourly, 'cron', minute=0,
+            id='hourly_news_fetch', replace_existing=True, misfire_grace_time=1800
+        )
         scheduler.add_job(
             _safe_run_news_digest, 'cron', hour=10, minute=0,
             id='daily_news_digest', replace_existing=True, misfire_grace_time=3600
