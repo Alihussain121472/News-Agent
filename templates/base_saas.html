@@ -7,97 +7,144 @@
   <title>{% block title %}Nova OS{% endblock %}</title>
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <link rel="stylesheet" href="/static/css/tailwind.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-    .sidebar { width: 260px; height: 100vh; position: fixed; border-right: 1px solid #e2e8f0; background: #ffffff; overflow-y: auto; }
-    .main-content { margin-left: 260px; min-height: 100vh; padding: 2rem; }
+    body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+    
+    /* Sleek Dark Sidebar */
+    .sidebar { width: 280px; height: 100vh; position: fixed; background: #0b1121; overflow-y: auto; z-index: 50; box-shadow: 4px 0 24px rgba(0,0,0,0.05); }
+    .main-content { margin-left: 280px; min-height: 100vh; padding: 2.5rem 3rem; }
+    
     @media (max-width: 768px) {
-        .sidebar { transform: translateX(-100%); transition: transform 0.3s; z-index: 50; }
+        .sidebar { transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .sidebar.open { transform: translateX(0); }
-        .main-content { margin-left: 0; padding: 1rem; }
+        .main-content { margin-left: 0; padding: 1.5rem; }
     }
-    .nav-item { display: flex; align-items: center; padding: 0.6rem 1rem; color: #475569; border-radius: 0.5rem; margin-bottom: 0.2rem; font-weight: 500; font-size: 0.9rem; transition: all 0.2s; text-decoration: none; }
-    .nav-item i { width: 20px; text-align: center; margin-right: 12px; font-size: 1rem; }
-    .nav-item:hover { background-color: #f1f5f9; color: #0f172a; }
-    .nav-item.active { background-color: #eff6ff; color: #2563eb; }
-    .kpi-card { background: white; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-    .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-    .badge-green { background: #dcfce7; color: #166534; }
-    .badge-red { background: #fee2e2; color: #991b1b; }
+    
+    /* Navigation Items */
+    .nav-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; font-weight: 700; padding: 1.5rem 1.5rem 0.5rem 1.5rem; }
+    .nav-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: #94a3b8; font-weight: 500; font-size: 0.95rem; transition: all 0.2s ease; text-decoration: none; border-left: 3px solid transparent; }
+    .nav-item i { width: 22px; text-align: center; margin-right: 14px; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s; }
+    
+    .nav-item:hover { background-color: rgba(255,255,255,0.03); color: #f8fafc; }
+    .nav-item:hover i { opacity: 1; color: #60a5fa; }
+    
+    .nav-item.active { background-color: rgba(37, 99, 235, 0.1); color: #ffffff; border-left-color: #3b82f6; }
+    .nav-item.active i { opacity: 1; color: #3b82f6; }
+    
+    /* Top Header */
+    .top-header { background: transparent; padding-bottom: 2rem; }
+    
+    /* Standardized Cards */
+    .kpi-card { background: white; border-radius: 16px; padding: 1.75rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02); border: 1px solid #f1f5f9; transition: transform 0.2s, box-shadow 0.2s; }
+    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02); }
+    
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.025em; }
+    .badge-green { background: #ecfdf5; color: #059669; }
+    .badge-red { background: #fef2f2; color: #dc2626; }
+    
+    /* Custom Scrollbar */
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background-color: #1e293b; border-radius: 10px; }
   </style>
   <link rel="manifest" href="/static/manifest.json">
 </head>
-<body class="text-slate-800">
+<body class="text-slate-800 antialiased">
 
   <!-- Mobile Header -->
-  <div class="md:hidden flex items-center justify-between bg-white border-b border-slate-200 p-4 sticky top-0 z-40">
-    <div class="flex items-center gap-2 font-bold text-lg"><i class="fas fa-bolt text-blue-600"></i> Nova OS</div>
-    <button onclick="document.querySelector('.sidebar').classList.toggle('open')" class="text-slate-300 text-xl"><i class="fas fa-bars"></i></button>
+  <div class="md:hidden flex items-center justify-between bg-white border-b border-slate-200 p-4 sticky top-0 z-40 shadow-sm">
+    <div class="flex items-center gap-2 font-bold text-xl tracking-tight text-slate-900"><i class="fas fa-bolt text-blue-600"></i> Nova OS</div>
+    <button onclick="document.querySelector('.sidebar').classList.toggle('open')" class="text-slate-500 hover:text-slate-900 text-xl transition"><i class="fas fa-bars"></i></button>
   </div>
 
   <!-- Sidebar -->
-  <aside class="sidebar flex flex-col p-4">
-    <div class="flex items-center gap-3 px-2 mb-6 mt-2 hidden md:flex">
-      <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold"><i class="fas fa-bolt"></i></div>
-      <h1 class="font-bold text-xl text-white tracking-tight">Nova OS</h1>
+  <aside class="sidebar flex flex-col py-6">
+    <!-- Brand -->
+    <div class="flex items-center gap-4 px-6 mb-8 mt-2 hidden md:flex">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 flex items-center justify-center text-white font-bold text-lg"><i class="fas fa-bolt"></i></div>
+      <h1 class="font-extrabold text-2xl text-white tracking-tight">Nova OS</h1>
     </div>
     
-    <nav class="flex-1">
+    <nav class="flex-1 mt-2">
+      <div class="nav-label">Core</div>
       <a href="/analytics/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
-      <a href="/" target="_blank" class="nav-item"><i class="fas fa-globe"></i> Website <i class="fas fa-external-link-alt ml-2 text-xs opacity-50"></i></a>
-      <a href="/seo/dashboard" class="nav-item"><i class="fas fa-search"></i> SEO</a>
-      <a href="/seo/content" class="nav-item"><i class="fas fa-pen-nib"></i> Content</a>
-      <a href="/analytics/dashboard" class="nav-item"><i class="fas fa-chart-line"></i> Traffic</a>
+      <a href="/" target="_blank" class="nav-item"><i class="fas fa-globe"></i> Live Website <i class="fas fa-external-link-alt ml-auto text-[10px] opacity-40"></i></a>
+      
+      <div class="nav-label">Growth & SEO</div>
+      <a href="/seo/dashboard" class="nav-item"><i class="fas fa-search"></i> SEO Performance</a>
+      <a href="/seo/content" class="nav-item"><i class="fas fa-pen-nib"></i> Content Studio</a>
       <a href="/social/dashboard" class="nav-item"><i class="fas fa-hashtag"></i> Social Media</a>
       <a href="/social/campaigns" class="nav-item"><i class="fas fa-bullhorn"></i> Campaigns</a>
-      <a href="/analytics/revenue" class="nav-item"><i class="fas fa-dollar-sign"></i> Revenue</a>
-      <a href="/analytics/dashboard" class="nav-item"><i class="fas fa-chart-pie"></i> Analytics</a>
-      <a href="/analytics/insights" class="nav-item"><i class="fas fa-robot text-blue-500"></i> AI Insights</a>
-      <a href="/analytics/reports" class="nav-item"><i class="fas fa-file-invoice"></i> Reports</a>`n      <a href="/analytics/messages" class="nav-item relative"><i class="fas fa-inbox"></i> Inbox & Complaints <span id="inbox-badge" class="hidden absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm shadow-red-500/50"></span></a>
+      
+      <div class="nav-label">Data & Insights</div>
+      <a href="/analytics/revenue" class="nav-item"><i class="fas fa-dollar-sign text-emerald-400"></i> Revenue</a>
+      <a href="/analytics/insights" class="nav-item"><i class="fas fa-robot text-blue-400"></i> AI Insights</a>
+      <a href="/analytics/reports" class="nav-item"><i class="fas fa-file-invoice"></i> Reports</a>
+      
+      <div class="nav-label">Communications</div>
+      <a href="/analytics/messages" class="nav-item relative"><i class="fas fa-inbox text-purple-400"></i> Inbox & Complaints <span id="inbox-badge" class="hidden absolute right-6 top-1/2 -translate-y-1/2 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md shadow-red-500/20"></span></a>
       <a href="/analytics/notifications" class="nav-item"><i class="fas fa-bell"></i> Notifications</a>
-      <a href="/analytics/settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
     </nav>
     
-    <div class="mt-4 pt-4 border-t border-slate-800">
-      <a href="/user/dashboard" class="nav-item"><i class="fas fa-user-circle"></i> Profile Settings</a>
-      <a href="/api/auth/logout" class="nav-item text-red-400 hover:bg-red-500/10 hover:text-red-300"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <div class="mt-8 pt-6 border-t border-slate-800/50 px-2">
+      <a href="/analytics/settings" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+      <a href="/user/dashboard" class="nav-item"><i class="fas fa-user-circle"></i> Profile</a>
+      <a href="/api/auth/logout" class="nav-item hover:bg-red-500/10 hover:text-red-400 hover:border-red-500 mt-2"><i class="fas fa-sign-out-alt text-red-400"></i> Logout</a>
     </div>
   </aside>
 
   <!-- Main Content -->
-  <main class="main-content">
-    <header class="flex justify-between items-center mb-8 hidden md:flex">
+  <main class="main-content flex flex-col">
+    <!-- Top Header -->
+    <header class="top-header flex justify-between items-end hidden md:flex shrink-0">
       <div>
-        <h2 class="text-2xl font-bold text-slate-900">{% block page_title %}Dashboard{% endblock %}</h2>
-        <p class="text-sm text-slate-500 mt-1">{% block page_subtitle %}Welcome back to your operating system.{% endblock %}</p>
+        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">{% block page_title %}Dashboard{% endblock %}</h2>
+        <p class="text-sm font-medium text-slate-500 mt-2">{% block page_subtitle %}Welcome back to your operating system.{% endblock %}</p>
       </div>
-      <div class="flex items-center gap-4">
-        <button class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 shadow-sm relative">
+      <div class="flex items-center gap-6">
+        <button class="w-11 h-11 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:shadow-md transition-all relative">
           <i class="fas fa-bell"></i>
           <span class="absolute top-0 right-0 w-3 h-3 bg-red-500 border-2 border-white rounded-full"></span>
         </button>
-        <div class="flex items-center gap-3 pl-4 border-l border-slate-200">
-          <img src="https://ui-avatars.com/api/?name=User&background=eff6ff&color=2563eb" class="w-10 h-10 rounded-full border border-slate-200">
-          <div class="text-sm">
-            <p class="font-semibold text-slate-900">My Business</p>
-            <p class="text-slate-500 text-xs">Pro Plan</p>
+        <div class="flex items-center gap-4 pl-6 border-l border-slate-200 cursor-pointer group">
+          <div class="text-right">
+            <p class="font-bold text-sm text-slate-900 group-hover:text-blue-600 transition">My Business</p>
+            <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Pro Plan</p>
+          </div>
+          <div class="w-11 h-11 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 border border-blue-200 text-blue-700 flex items-center justify-center font-bold shadow-sm">
+            MB
           </div>
         </div>
       </div>
     </header>
     
-    <div class="md:hidden mb-6">
-      <h2 class="text-xl font-bold text-slate-900">{% block page_title_mobile %}{% endblock %}</h2>
+    <div class="md:hidden mb-6 mt-2">
+      <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">{% block page_title_mobile %}{% endblock %}</h2>
     </div>
 
-    {% block content %}{% endblock %}
+    <!-- Page Content -->
+    <div class="flex-1 w-full max-w-[1600px] mx-auto">
+      {% block content %}{% endblock %}
+    </div>
   </main>
 
   {% block scripts %}{% endblock %}
 <script>
+  // Dynamic Active State for Sidebar
+  document.addEventListener("DOMContentLoaded", function() {
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('.nav-item').forEach(item => {
+          if (item.getAttribute('href') === currentPath) {
+              item.classList.add('active');
+          } else {
+              item.classList.remove('active');
+          }
+      });
+  });
+
   document.addEventListener('DOMContentLoaded', async () => {
     try {
       const res = await fetch('/analytics/api/unread-count');
@@ -112,9 +159,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
