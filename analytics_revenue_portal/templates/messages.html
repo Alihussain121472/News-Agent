@@ -1,118 +1,161 @@
 ﻿{% extends "base_saas.html" %}
-{% block title %}User Inbox - Nova OS{% endblock %}
+{% block title %}Support Inbox - Nova OS{% endblock %}
 {% block page_title %}Inbox & Complaints{% endblock %}
-{% block page_subtitle %}Manage user support tickets and AI Chatbot logs.{% endblock %}
+{% block page_subtitle %}Manage user support tickets, feedback, and AI Chatbot logs.{% endblock %}
 
 {% block content %}
-<div class="h-[75vh] flex rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+<div class="h-[82vh] max-w-[1400px] mx-auto flex rounded-3xl border border-slate-200 overflow-hidden bg-white shadow-2xl shadow-slate-200/50">
     
     <!-- Left Column: Message List -->
-    <div class="w-1/3 border-r border-slate-200 bg-slate-50 flex flex-col h-full">
-        <div class="p-4 border-b border-slate-200 bg-white">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-slate-800">Inbox & Complaints</h3>
-                <span class="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded-md" id="total-msgs">{{ messages|length }} Total</span>
+    <div class="w-[380px] min-w-[380px] border-r border-slate-200 bg-slate-50/50 flex flex-col h-full">
+        <!-- Header & Filters -->
+        <div class="p-5 border-b border-slate-200 bg-white shadow-sm z-10 relative">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fas fa-inbox text-blue-500"></i> Support Inbox
+                </h3>
+                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100" id="total-msgs">{{ messages|length }}</span>
             </div>
-            <div class="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-                <button onclick="filterMsgs('All', this)" class="filter-btn bg-slate-800 text-white text-[10px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap transition">All</button>
-                <button onclick="filterMsgs('Support', this)" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap transition">Support</button>
-                <button onclick="filterMsgs('Feedback', this)" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap transition">Feedback</button>
-                <button onclick="filterMsgs('Suggestion', this)" class="filter-btn bg-slate-100 hover:bg-slate-200 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-full whitespace-nowrap transition">Suggestions</button>
+            
+            <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+                <button onclick="filterMsgs('All', this)" class="filter-btn bg-slate-900 text-white shadow-md text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105">All</button>
+                <button onclick="filterMsgs('Support', this)" class="filter-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105 hover:text-slate-900">Support</button>
+                <button onclick="filterMsgs('Feedback', this)" class="filter-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105 hover:text-slate-900">Feedback</button>
+                <button onclick="filterMsgs('Suggestion', this)" class="filter-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105 hover:text-slate-900">Suggestions</button>
             </div>
         </div>
         
-        <div class="flex-1 overflow-y-auto" id="message-list">
+        <!-- List -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar" id="message-list">
             {% for msg in messages %}
-            <div class="msg-item p-4 border-b border-slate-100 cursor-pointer hover:bg-blue-50 transition relative {% if msg.status == 'new' %}bg-white border-l-4 border-l-blue-600{% else %}bg-slate-50 opacity-80{% endif %}" 
-                 onclick="openMessage({{ msg.id }}, '{{ msg.name|e }}', '{{ msg.email|e }}', '{{ msg.subject|e }}', '{{ msg.submitted_at|e }}', '{{ msg.admin_reply|default('')|e }}', '{{ msg.replied_at|default('')|e }}', this)"
+            <div class="msg-item p-5 border-b border-slate-100 cursor-pointer hover:bg-blue-50/50 transition-all duration-200 relative group {% if msg.status == 'new' %}bg-white border-l-4 border-l-blue-500{% else %}bg-transparent opacity-90{% endif %}" 
+                 onclick="openMessage({{ msg.id }}, '{{ msg.name|e }}', '{{ msg.email|e }}', '{{ msg.subject|e }}', '{{ msg.submitted_at|e }}', '{{ msg.admin_reply|default('')|e|replace('\n', '\\n') }}', '{{ msg.replied_at|default('')|e }}', this)"
                  data-id="{{ msg.id }}"
                  data-content="{{ msg.message|e }}"
                  data-subject="{{ msg.subject|e }}">
                  
-                <div class="flex justify-between items-start mb-1">
-                    <span class="font-bold text-sm {% if msg.status == 'new' %}text-slate-900{% else %}text-slate-700{% endif %} truncate">{{ msg.name }}</span>
-                    <span class="text-[10px] text-slate-400 whitespace-nowrap ml-2">{{ msg.submitted_at[5:16] }}</span>
+                <div class="flex justify-between items-start mb-1.5">
+                    <span class="font-bold text-sm {% if msg.status == 'new' %}text-slate-900{% else %}text-slate-700{% endif %} truncate pr-2">{{ msg.name }}</span>
+                    <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">{{ msg.submitted_at[5:16] }}</span>
                 </div>
-                <div class="text-xs font-semibold text-slate-800 truncate mb-1">{{ msg.subject }}</div>
-                <div class="text-xs text-slate-500 truncate">{{ msg.message[:60] }}...</div>
+                <div class="text-xs font-semibold {% if msg.status == 'new' %}text-blue-600{% else %}text-slate-600{% endif %} truncate mb-1.5 flex items-center gap-1.5">
+                    {% if 'Support' in msg.subject %} <i class="fas fa-life-ring text-[10px]"></i>
+                    {% elif 'Feedback' in msg.subject %} <i class="fas fa-comment-dots text-[10px]"></i>
+                    {% elif 'Suggestion' in msg.subject %} <i class="fas fa-lightbulb text-[10px]"></i>
+                    {% else %} <i class="fas fa-envelope text-[10px]"></i> {% endif %}
+                    {{ msg.subject }}
+                </div>
+                <div class="text-xs text-slate-500 truncate leading-relaxed">{{ msg.message[:60] }}...</div>
                 
                 {% if msg.status == 'new' %}
-                <div class="absolute top-4 right-4 w-2 h-2 bg-blue-600 rounded-full unread-dot"></div>
+                <div class="absolute top-5 right-5 w-2 h-2 bg-blue-500 rounded-full unread-dot shadow-sm shadow-blue-500/50 animate-pulse"></div>
+                {% elif msg.status == 'replied' %}
+                <div class="absolute top-5 right-5 text-[10px] text-emerald-500"><i class="fas fa-reply-all"></i></div>
                 {% endif %}
             </div>
             {% else %}
-            <div class="p-8 text-center text-slate-400">
-                <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
-                <p class="text-sm">Your inbox is empty.</p>
+            <div class="p-10 flex flex-col items-center justify-center text-center h-full opacity-50">
+                <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-inbox text-2xl text-slate-400"></i>
+                </div>
+                <h4 class="font-bold text-slate-700">Inbox Zero</h4>
+                <p class="text-xs text-slate-500 mt-1">You're all caught up!</p>
             </div>
             {% endfor %}
         </div>
     </div>
     
     <!-- Right Column: Message View -->
-    <div class="w-2/3 bg-white flex flex-col h-full relative" id="message-view-container">
+    <div class="flex-1 bg-slate-50 flex flex-col h-full relative" id="message-view-container">
         <!-- Empty State -->
-        <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-slate-400 bg-slate-50">
-            <i class="fas fa-envelope-open-text text-5xl mb-4 opacity-20"></i>
-            <p>Select a message to read</p>
+        <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 transition-all">
+            <div class="w-24 h-24 mb-6 relative">
+                <div class="absolute inset-0 bg-blue-100 rounded-full animate-ping opacity-20"></div>
+                <div class="relative bg-white w-full h-full rounded-full flex items-center justify-center shadow-sm border border-slate-100">
+                    <i class="fas fa-paper-plane text-3xl text-blue-400 ml-[-4px] mt-[4px]"></i>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-700 mb-2">No Message Selected</h3>
+            <p class="text-sm text-slate-500 max-w-xs text-center">Click on any conversation from the list on the left to read and reply.</p>
         </div>
         
         <!-- Active View -->
-        <div id="active-view" class="hidden flex-col h-full">
-        <div class="p-6 border-b border-slate-100 flex justify-between items-start">
-            <div>
-                <h2 id="view-subject" class="text-xl font-bold text-slate-900 mb-2">Subject</h2>
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg" id="view-avatar">A</div>
+        <div id="active-view" class="hidden flex-col h-full bg-slate-50">
+            <!-- Header -->
+            <div class="px-8 py-6 bg-white border-b border-slate-200 shadow-sm z-10 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md" id="view-avatar">A</div>
                     <div>
-                        <div class="font-bold text-sm text-slate-900" id="view-name">Sender Name</div>
-                        <div class="text-xs text-slate-500" id="view-email">sender@email.com</div>
+                        <h2 id="view-subject" class="text-lg font-extrabold text-slate-900 leading-tight">Subject</h2>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="font-bold text-sm text-slate-700" id="view-name">Sender Name</span>
+                            <span class="text-xs text-slate-400">&bull;</span>
+                            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded" id="view-email">sender@email.com</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="text-xs text-slate-400" id="view-date">Date</div>
-        </div>
-        
-        <div class="p-6 flex-1 overflow-y-auto">
-            <div class="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap" id="view-body">
-                Message content goes here...
+                <div class="text-xs font-semibold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100" id="view-date">Date</div>
             </div>
             
-            <div class="mt-8 pt-6 border-t border-slate-100" id="reply-history-section" style="display: none;">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Reply History</h4>
-                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-bold text-sm text-blue-900">Nova Admin</span>
-                        <span class="text-[10px] text-blue-400 font-semibold" id="view-reply-date"></span>
+            <!-- Conversation Thread -->
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                
+                <!-- Original Message -->
+                <div class="mb-8 flex flex-col items-start max-w-3xl">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-2">Original Message</span>
+                    <div class="bg-white p-6 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 text-sm text-slate-700 leading-relaxed whitespace-pre-wrap w-full" id="view-body">
+                        Message content goes here...
                     </div>
-                    <div class="text-sm text-blue-800 whitespace-pre-wrap" id="view-reply-text"></div>
                 </div>
+                
+                <!-- Reply History Section -->
+                <div id="reply-history-section" style="display: none;" class="flex flex-col items-end max-w-3xl ml-auto mb-8">
+                    <span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-2 mr-2 flex items-center gap-1">
+                        <i class="fas fa-check-double"></i> Replied by Nova Admin <span id="view-reply-date" class="ml-1 text-slate-400"></span>
+                    </span>
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-6 rounded-2xl rounded-tr-sm shadow-md text-sm text-white leading-relaxed whitespace-pre-wrap w-full border border-blue-500" id="view-reply-text">
+                        Reply content...
+                    </div>
+                </div>
+                
             </div>
             
-            <div class="mt-8 pt-6 border-t border-slate-100" id="reply-action-section">
-                <div id="reply-container" class="hidden flex-col gap-3">
-                    <textarea id="reply-text" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 resize-none" placeholder="Type your reply to this user..."></textarea>
-                    <div class="flex items-center gap-2">
-                        <button id="send-reply-btn" onclick="sendReply()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2">
-                            <i class="fas fa-paper-plane"></i> Send Reply
-                        </button>
-                        <button onclick="document.getElementById('reply-container').classList.add('hidden'); document.getElementById('reply-btn-wrapper').classList.remove('hidden');" class="text-slate-500 hover:text-slate-700 text-sm font-semibold px-3 py-2 transition">Cancel</button>
-                    </div>
-                </div>
-                <div id="reply-btn-wrapper">
-                    <button class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2" onclick="document.getElementById('reply-container').classList.remove('hidden'); document.getElementById('reply-btn-wrapper').classList.add('hidden');">
-                        <i class="fas fa-reply"></i> Reply to User
+            <!-- Reply Action Area -->
+            <div class="p-6 bg-white border-t border-slate-200 shrink-0" id="reply-action-section">
+                <div id="reply-btn-wrapper" class="flex justify-center">
+                    <button class="w-full max-w-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-600 hover:text-blue-600 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 group" onclick="document.getElementById('reply-container').classList.remove('hidden'); document.getElementById('reply-btn-wrapper').classList.add('hidden'); document.getElementById('reply-text').focus();">
+                        <i class="fas fa-reply group-hover:-translate-x-1 transition-transform"></i> Click here to write a reply
                     </button>
                 </div>
+                
+                <div id="reply-container" class="hidden flex-col gap-3 max-w-4xl mx-auto">
+                    <div class="relative">
+                        <textarea id="reply-text" rows="5" class="w-full bg-white border-2 border-slate-200 rounded-xl p-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none shadow-sm" placeholder="Write your response to the user..."></textarea>
+                    </div>
+                    <div class="flex items-center justify-end gap-3">
+                        <button onclick="document.getElementById('reply-container').classList.add('hidden'); document.getElementById('reply-btn-wrapper').classList.remove('hidden');" class="text-slate-500 hover:text-slate-800 text-sm font-bold px-4 py-2 rounded-lg transition-colors">Cancel</button>
+                        <button id="send-reply-btn" onclick="sendReply()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-blue-500/30 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+                            <i class="fas fa-paper-plane"></i> Send Reply
+                        </button>
+                    </div>
+                </div>
             </div>
+            
         </div>
     </div>
 </div>
-</div>
+
+<style>
+/* Custom Scrollbar for a cleaner SaaS look */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
 
 <script>
 let currentMessageId = null;
-
 
 async function sendReply() {
     const btn = document.getElementById('send-reply-btn');
@@ -130,16 +173,32 @@ async function sendReply() {
         });
         
         const data = await response.json();
-        if(response.ok) {
-            alert('Reply sent successfully!');
+        
+        if (response.ok) {
+            // Instantly update the UI to show the reply without reloading
             document.getElementById('reply-text').value = '';
             document.getElementById('reply-container').classList.add('hidden');
             document.getElementById('reply-btn-wrapper').classList.remove('hidden');
+            
+            // Show history block
+            document.getElementById('reply-history-section').style.display = 'flex';
+            document.getElementById('view-reply-text').textContent = text;
+            const now = new Date();
+            document.getElementById('view-reply-date').textContent = "Just now";
+            document.getElementById('reply-action-section').style.display = 'none';
+            
+            // Show toast/alert
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-2xl font-bold text-sm flex items-center gap-2 z-50 animate-bounce';
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> ' + (data.message || 'Reply Saved!');
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+            
         } else {
             alert('Failed to send reply: ' + data.message);
         }
     } catch (e) {
-        alert('An error occurred.');
+        alert('An error occurred while connecting to the server.');
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reply';
@@ -149,11 +208,9 @@ async function sendReply() {
 
 function filterMsgs(type, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('bg-slate-800', 'text-white');
-        b.classList.add('bg-slate-100', 'text-slate-600');
+        b.className = 'filter-btn bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105 hover:text-slate-900';
     });
-    btn.classList.remove('bg-slate-100', 'text-slate-600');
-    btn.classList.add('bg-slate-800', 'text-white');
+    btn.className = 'filter-btn bg-slate-900 text-white shadow-md text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap transition-all duration-200 hover:scale-105';
     
     let count = 0;
     document.querySelectorAll('.msg-item').forEach(el => {
@@ -164,14 +221,23 @@ function filterMsgs(type, btn) {
             el.style.display = 'none';
         }
     });
-    document.getElementById('total-msgs').textContent = count + ' Total';
+    document.getElementById('total-msgs').textContent = count;
 }
 
 function openMessage(id, name, email, subject, date, replyText, replyDate, element) {
-    // Hide empty state
     currentMessageId = id;
-    document.getElementById('empty-state').style.display = 'none';
-    document.getElementById('active-view').style.display = 'flex';
+    
+    // Smooth transition
+    const emptyState = document.getElementById('empty-state');
+    if(emptyState.style.display !== 'none') {
+        emptyState.style.opacity = '0';
+        setTimeout(() => {
+            emptyState.style.display = 'none';
+            document.getElementById('active-view').style.display = 'flex';
+        }, 150);
+    } else {
+        document.getElementById('active-view').style.display = 'flex';
+    }
     
     // Populate data
     document.getElementById('view-subject').textContent = subject;
@@ -180,14 +246,14 @@ function openMessage(id, name, email, subject, date, replyText, replyDate, eleme
     document.getElementById('view-date').textContent = date;
     document.getElementById('view-avatar').textContent = name.charAt(0).toUpperCase();
     
-    // Get full content from data attribute to preserve formatting
+    // Get full content from data attribute
     const content = element.getAttribute('data-content');
     document.getElementById('view-body').textContent = content;
     
-    if (replyText) {
-        document.getElementById('reply-history-section').style.display = 'block';
+    if (replyText && replyText !== "None" && replyText.trim() !== "") {
+        document.getElementById('reply-history-section').style.display = 'flex';
         document.getElementById('view-reply-text').textContent = replyText;
-        document.getElementById('view-reply-date').textContent = replyDate.substring(0,16);
+        document.getElementById('view-reply-date').textContent = " - " + replyDate.substring(0,16);
         document.getElementById('reply-action-section').style.display = 'none';
     } else {
         document.getElementById('reply-history-section').style.display = 'none';
@@ -195,28 +261,17 @@ function openMessage(id, name, email, subject, date, replyText, replyDate, eleme
     }
     
     // Mark as active in UI
-    document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('bg-blue-100'));
-    element.classList.add('bg-blue-100');
+    document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('bg-blue-100', 'border-l-4', 'border-blue-600', 'pl-3'));
+    element.classList.add('bg-blue-100', 'border-l-4', 'border-blue-600', 'pl-3');
     
     // Mark as read visually
-    element.classList.remove('bg-white', 'border-l-4', 'border-l-blue-600');
-    element.classList.add('bg-slate-50', 'opacity-80');
+    element.classList.remove('bg-white', 'border-l-4', 'border-l-blue-500');
+    element.classList.add('bg-transparent', 'opacity-90');
     const dot = element.querySelector('.unread-dot');
     if (dot) dot.remove();
     
     // Send read receipt to backend
     fetch('/analytics/api/messages/' + id + '/read', { method: 'POST' });
-    
-    // Optionally update the sidebar notification badge counter
-    const badge = document.getElementById('inbox-badge');
-    if(badge && badge.textContent) {
-        let count = parseInt(badge.textContent);
-        if(count > 0) {
-            count--;
-            badge.textContent = count;
-            if(count === 0) badge.classList.add('hidden');
-        }
-    }
 }
 </script>
 {% endblock %}
