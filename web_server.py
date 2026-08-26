@@ -10,6 +10,11 @@ from dotenv import load_dotenv
 load_dotenv()
 # Initialize the Flask application
 app = Flask(__name__)
+
+@app.route('/googleae48116c49ed7429.html')
+def google_verification():
+    return 'google-site-verification: googleae48116c49ed7429.html'
+
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nova-brief-secret-key-2026')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365 * 10)  # Lifetime session until explicit logout
 
