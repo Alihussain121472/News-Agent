@@ -1,6 +1,13 @@
 import psycopg2
 import psycopg2.extras
 
+
+def _fetch_val(cursor):
+    row = cursor.fetchone()
+    if not row: return 0
+    if hasattr(row, 'values'): return list(row.values())[0]
+    return row[0]
+
 class DummyDictCursor:
     def execute(self, *args, **kwargs): pass
     def fetchone(self): return None
@@ -365,7 +372,7 @@ class NewsDatabase:
             return {'registered': False, 'total_emails_received': 0, 'login_count': 0,
                     'last_email_sent': None, 'last_login_at': None, 'member_since': None, 'is_active': False}
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email = %s', (normalized,))
-        login_events = cursor.fetchone()[0]
+        login_events = _fetch_val(cursor)
         u = to_dict(row)
         conn.close()
         return {
@@ -443,7 +450,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
-        count = cursor.fetchone()[0]
+        count = _fetch_val(cursor)
         conn.close()
         return count
 
@@ -472,11 +479,11 @@ class NewsDatabase:
         cursor = conn.cursor()
         month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute('SELECT COUNT(*) FROM site_visits')
-        total = cursor.fetchone()[0]
+        total = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(DISTINCT ip_address) FROM site_visits')
-        unique = cursor.fetchone()[0]
+        unique = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM site_visits WHERE visit_time >= %s', (month_start,))
-        monthly = cursor.fetchone()[0]
+        monthly = _fetch_val(cursor)
         conn.close()
         return {'total_visits': total, 'unique_visitors': unique, 'monthly_visits': monthly}
 
@@ -485,11 +492,11 @@ class NewsDatabase:
         cursor = conn.cursor()
         month_start = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE login_time >= %s', (month_start,))
-        monthly = cursor.fetchone()[0]
+        monthly = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(DISTINCT email) FROM user_login_events WHERE login_time >= %s', (month_start,))
-        users = cursor.fetchone()[0]
+        users = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
-        active = cursor.fetchone()[0]
+        active = _fetch_val(cursor)
         conn.close()
         return {'monthly_logins': monthly, 'users_this_month': users, 'active_users': active}
 
@@ -529,19 +536,19 @@ class NewsDatabase:
         today = datetime.now().strftime('%Y-%m-%d')
         week_ago = (datetime.now() - timedelta(days=7)).strftime('%Y-%m-%d')
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s', (normalized,))
-        total = cursor.fetchone()[0]
+        total = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
-        today_count = cursor.fetchone()[0]
+        today_count = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)>=%s', (normalized, week_ago))
-        week_count = cursor.fetchone()[0]
+        week_count = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(DISTINCT date(logged_at)) FROM user_activity_log WHERE email=%s', (normalized,))
-        active_days = cursor.fetchone()[0]
+        active_days = _fetch_val(cursor)
         cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=%s GROUP BY action ORDER BY cnt DESC LIMIT 5', (normalized,))
         top_actions = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
         cursor.execute("SELECT COUNT(*) FROM email_logs WHERE recipient=%s AND status='success'", (normalized,))
-        emails_received = cursor.fetchone()[0]
+        emails_received = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=%s', (normalized,))
-        total_logins = cursor.fetchone()[0]
+        total_logins = _fetch_val(cursor)
         conn.close()
         return {
             'total_actions': total, 'today_actions': today_count, 'week_actions': week_count,
@@ -556,21 +563,21 @@ class NewsDatabase:
         cursor = conn.cursor()
         today = datetime.now().strftime('%Y-%m-%d')
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
-        total_today = cursor.fetchone()[0]
+        total_today = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action='page_visit'", (normalized, today))
-        pages_today = cursor.fetchone()[0]
+        pages_today = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action IN ('articles_view','dashboard_view')", (normalized, today))
-        reads_today = cursor.fetchone()[0]
+        reads_today = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s AND action='programs_view'", (normalized, today))
-        programs_today = cursor.fetchone()[0]
+        programs_today = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM user_login_events WHERE email=%s AND date(login_time)=%s", (normalized, today))
-        logins_today = cursor.fetchone()[0]
+        logins_today = _fetch_val(cursor)
         cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=%s AND date(logged_at)=%s GROUP BY action ORDER BY cnt DESC', (normalized, today))
         today_breakdown = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
         cursor.execute('SELECT MIN(logged_at) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
-        first_action = cursor.fetchone()[0]
+        first_action = _fetch_val(cursor)
         cursor.execute('SELECT MAX(logged_at) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, today))
-        last_action = cursor.fetchone()[0]
+        last_action = _fetch_val(cursor)
         conn.close()
         return {
             'total_actions': total_today, 'pages_visited': pages_today,
@@ -589,9 +596,9 @@ class NewsDatabase:
         for i in range(6, -1, -1):
             d = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
             cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE email=%s AND date(logged_at)=%s', (normalized, d))
-            count = cursor.fetchone()[0]
+            count = _fetch_val(cursor)
             cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=%s AND date(login_time)=%s', (normalized, d))
-            logins = cursor.fetchone()[0]
+            logins = _fetch_val(cursor)
             day_label = (datetime.now() - timedelta(days=i)).strftime('%a')
             days.append({'date': d, 'label': day_label, 'actions': count, 'logins': logins})
         conn.close()
@@ -662,15 +669,15 @@ class NewsDatabase:
         today = datetime.now().strftime('%Y-%m-%d')
         week_ago = (datetime.now() - timedelta(days=7)).isoformat()
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE is_active=TRUE')
-        active_users = cursor.fetchone()[0]
+        active_users = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM registered_users WHERE date(registered_at)=%s', (today,))
-        new_today = cursor.fetchone()[0]
+        new_today = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE date(login_time)=%s', (today,))
-        logins_today = cursor.fetchone()[0]
+        logins_today = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM user_activity_log WHERE logged_at >= %s', (week_ago,))
-        week_activity = cursor.fetchone()[0]
+        week_activity = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM student_programs WHERE is_active=TRUE')
-        active_programs = cursor.fetchone()[0]
+        active_programs = _fetch_val(cursor)
         conn.close()
         return {
             'active_users': active_users, 'new_users_today': new_today,
@@ -749,7 +756,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM student_programs')
-        if cursor.fetchone()[0] == 0:
+        if _fetch_val(cursor) == 0:
             programs = [
                 {
                     'title': 'Google Developer Student Clubs (GDSC)',
@@ -816,7 +823,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM contact_messages WHERE status='new'")
-        count = cursor.fetchone()[0]
+        count = _fetch_val(cursor)
         conn.close()
         return count
 
@@ -882,15 +889,15 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM news_articles')
-        total_articles = cursor.fetchone()[0]
+        total_articles = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= %s', ((datetime.now()-timedelta(days=7)).isoformat(),))
-        week = cursor.fetchone()[0]
+        week = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM news_articles WHERE fetched_at >= %s', ((datetime.now()-timedelta(days=30)).isoformat(),))
-        month = cursor.fetchone()[0]
+        month = _fetch_val(cursor)
         cursor.execute('SELECT COUNT(*) FROM email_logs')
-        total_emails = cursor.fetchone()[0]
+        total_emails = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM email_logs WHERE status='success'")
-        success_emails = cursor.fetchone()[0]
+        success_emails = _fetch_val(cursor)
         cursor.execute('SELECT sent_at FROM email_logs ORDER BY sent_at DESC LIMIT 1')
         last_e = cursor.fetchone()
         login_stats = self.get_monthly_login_stats()
@@ -943,7 +950,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         cursor.execute('SELECT COUNT(*) FROM payout_accounts')
-        if cursor.fetchone()[0] == 0:
+        if _fetch_val(cursor) == 0:
             cursor.execute('''INSERT INTO payout_accounts (account_name, account_number, bank_name, payout_method, status)
                 VALUES (%s, %s, %s, %s, %s)''', (
                 'Syed Ali Hussain',
@@ -1008,17 +1015,17 @@ class NewsDatabase:
         month_start = datetime.now().replace(day=1).strftime('%Y-%m-%d')
 
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression'")
-        total_impressions = cursor.fetchone()[0]
+        total_impressions = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='impression' AND date(created_at)=%s", (today,))
-        today_impressions = cursor.fetchone()[0]
+        today_impressions = _fetch_val(cursor)
 
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click'")
-        total_clicks = cursor.fetchone()[0]
+        total_clicks = _fetch_val(cursor)
         cursor.execute("SELECT COUNT(*) FROM ad_interactions WHERE event_type='click' AND date(created_at)=%s", (today,))
-        today_clicks = cursor.fetchone()[0]
+        today_clicks = _fetch_val(cursor)
 
         cursor.execute("SELECT COUNT(*) FROM site_visits WHERE date(visit_time)=%s", (today,))
-        today_traffic = cursor.fetchone()[0]
+        today_traffic = _fetch_val(cursor)
 
         conn.close()
         return {
