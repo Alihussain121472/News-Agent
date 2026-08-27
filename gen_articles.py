@@ -51,8 +51,8 @@ cursor = conn.cursor()
 
 for a in articles:
     print(f"Generating: {a['title']}")
-    response = model.generate_content(a['prompt'])
-    html_content = markdown.markdown(response.text)
+    content = generate_with_llama(a['prompt'])
+    html_content = markdown.markdown(content)
     
     # Styled HTML wrapper
     final_html = f'''
