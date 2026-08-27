@@ -839,7 +839,11 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         if reply_text:
-            cursor.execute("UPDATE contact_messages SET status='replied', admin_reply=%s, replied_at=CURRENT_TIMESTAMP WHERE id=%s", (reply_text, msg_id))
+            cursor.execute("UPDATE contact_messages SET status='replied', admin_reply = CASE WHEN admin_reply IS NULL OR admin_reply = '' THEN %s ELSE admin_reply || '
+
+---
+
+' || %s END, replied_at=CURRENT_TIMESTAMP WHERE id=%s", (reply_text, reply_text, msg_id))
         else:
             cursor.execute("UPDATE contact_messages SET status='replied' WHERE id=%s", (msg_id,))
         conn.commit()

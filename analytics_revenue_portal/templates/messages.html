@@ -124,7 +124,7 @@
             <div class="p-6 bg-white border-t border-slate-200 shrink-0" id="reply-action-section">
                 <div id="reply-btn-wrapper" class="flex justify-center">
                     <button class="w-full max-w-lg bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-200 text-slate-600 hover:text-blue-600 py-3 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 group" onclick="document.getElementById('reply-container').classList.remove('hidden'); document.getElementById('reply-btn-wrapper').classList.add('hidden'); document.getElementById('reply-text').focus();">
-                        <i class="fas fa-reply group-hover:-translate-x-1 transition-transform"></i> Click here to write a reply
+                        <i class="fas fa-reply group-hover:-translate-x-1 transition-transform"></i> Write a reply
                     </button>
                 </div>
                 
@@ -181,11 +181,16 @@ async function sendReply() {
             document.getElementById('reply-btn-wrapper').classList.remove('hidden');
             
             // Show history block
-            document.getElementById('reply-history-section').style.display = 'flex';
-            document.getElementById('view-reply-text').textContent = text;
-            const now = new Date();
+            const historySec = document.getElementById('reply-history-section');
+            const viewText = document.getElementById('view-reply-text');
+            if (historySec.style.display === 'none') {
+                viewText.textContent = text;
+            } else {
+                viewText.textContent += '\n\n---\n\n' + text;
+            }
+            historySec.style.display = 'flex';
             document.getElementById('view-reply-date').textContent = "Just now";
-            document.getElementById('reply-action-section').style.display = 'none';
+            document.getElementById('reply-action-section').style.display = 'block';
             
             // Show toast/alert
             const toast = document.createElement('div');
@@ -254,7 +259,7 @@ function openMessage(id, name, email, subject, date, replyText, replyDate, eleme
         document.getElementById('reply-history-section').style.display = 'flex';
         document.getElementById('view-reply-text').textContent = replyText;
         document.getElementById('view-reply-date').textContent = " - " + replyDate.substring(0,16);
-        document.getElementById('reply-action-section').style.display = 'none';
+        document.getElementById('reply-action-section').style.display = 'block';
     } else {
         document.getElementById('reply-history-section').style.display = 'none';
         document.getElementById('reply-action-section').style.display = 'block';
