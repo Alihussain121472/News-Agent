@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, session, redirect, url_for, jsonify
+﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 from functools import wraps
+from database import NewsDatabase, safe_connect
+import psycopg2.extras
 
 social_bp = Blueprint('social', __name__, template_folder='templates')
 
@@ -16,38 +18,18 @@ def admin_required(f):
 def dashboard():
     return render_template('social_dashboard.html')
 
-@social_bp.route('/calendar')
-@admin_required
-def calendar():
-    return render_template('social_calendar.html')
-
-def init_social_db():
-    db = NewsDatabase()
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS social_campaigns (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT, status TEXT, platform TEXT, clicks INTEGER DEFAULT 0, leads INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
-    cursor.execute('''CREATE TABLE IF NOT EXISTS social_posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        campaign_id INTEGER, platform TEXT, post_content TEXT, scheduled_time TIMESTAMP, status TEXT)''')
-    conn.commit()
-    conn.close()
-
-init_social_db()
-
 @social_bp.route('/campaigns')
 @admin_required
 def campaigns():
-    db = NewsDatabase()
-    import sqlite3
-    conn = sqlite3.connect(db.db_path)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM social_campaigns")
-    camps = [dict(row) for row in cursor.fetchall()]
-    conn.close()
+    conn = safe_connect()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        cursor.execute("SELECT * FROM social_campaigns")
+        camps = [dict(row) for row in cursor.fetchall()]
+    except Exception:
+        camps = []
+    finally:
+        conn.close()
     
     total_campaigns = len(camps)
     total_clicks = sum(c.get('clicks', 0) for c in camps)
@@ -60,6 +42,22 @@ def campaigns():
         total_leads=total_leads
     )
 
+def init_social_db():
+    conn = safe_connect()
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS social_campaigns (
+        id SERIAL PRIMARY KEY,
+        name TEXT, status TEXT, platform TEXT, clicks INTEGER DEFAULT 0, leads INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    cursor.execute('''CREATE TABLE IF NOT EXISTS social_posts (
+        id SERIAL PRIMARY KEY,
+        campaign_id INTEGER, platform TEXT, post_content TEXT, scheduled_time TIMESTAMP, status TEXT)''')
+    conn.commit()
+    conn.close()
+
+try:
+    init_social_db()
+except Exception as e:
+    pass
 
 import random
 
@@ -69,9 +67,9 @@ def generate_social_posts():
     db = NewsDatabase()
     
     try:
-        import google.generativeai as genai
+        
         import os
-        api_key = os.getenv('GEMINI_API_KEY')
+        
         
         # Get recent news to base the tweets on
         recent_news = db.get_recent_articles(limit=3)
@@ -80,10 +78,10 @@ def generate_social_posts():
             for article in recent_news:
                 news_context += f"- {article.get('title')}: {article.get('summary')}\n"
                 
-        if api_key:
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-pro')
-            
+        # Use Groq Llama 3.3 API
+        groq_api_key = os.getenv('GROQ_API_KEY')
+        if groq_api_key:
+            import requests
             prompt = """You are an expert Social Media Manager for 'Nova Brief', a top-tier tech platform that provides daily AI news and alerts for prestigious student programs (Google, Microsoft, NASA).
             Your goal is to increase our Twitter reach, engagement, and conversion rate.
             Write 3 highly engaging, viral-style Twitter posts. 
@@ -96,10 +94,23 @@ def generate_social_posts():
             """ + news_context + """
             Format your response strictly as 3 posts separated by '|||'. Do not include post numbers or extra text.
             """
-            
-            response = model.generate_content(prompt)
-            raw_posts = response.text.split('|||')
-            posts = [p.strip() for p in raw_posts if p.strip()]
+            headers = {
+                "Authorization": f"Bearer {groq_api_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": [{"role": "system", "content": prompt}],
+                "temperature": 0.7,
+                "max_tokens": 500
+            }
+            response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+            if response.status_code == 200:
+                reply_text = response.json()['choices'][0]['message']['content']
+                raw_posts = reply_text.split('|||')
+                posts = [p.strip() for p in raw_posts if p.strip()]
+            else:
+                posts = []
         else:
             # Fallback if no API key
             posts = [
@@ -109,14 +120,13 @@ def generate_social_posts():
             ]
             
         generated = 0
-        import sqlite3
-        conn = sqlite3.connect(db.db_path)
+        conn = safe_connect()
         cursor = conn.cursor()
         
         for post_content in posts[:3]:
             try:
                 cursor.execute('''INSERT INTO social_posts (campaign_id, platform, post_content, scheduled_time, status)
-                                  VALUES (?, ?, ?, datetime('now', '+1 day'), ?)''',
+                                  VALUES (%s, %s, %s, CURRENT_TIMESTAMP + INTERVAL '1 day', %s)''',
                                (1, 'Twitter', post_content, 'draft'))
                 generated += 1
             except Exception:
@@ -133,12 +143,9 @@ def generate_social_posts():
 @social_bp.route('/api/posts')
 @admin_required
 def get_posts():
-    db = NewsDatabase()
-    import sqlite3
     try:
-        conn = sqlite3.connect(db.db_path)
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+        conn = safe_connect()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("SELECT * FROM social_posts ORDER BY id DESC LIMIT 10")
         posts = [dict(row) for row in cursor.fetchall()]
         conn.close()

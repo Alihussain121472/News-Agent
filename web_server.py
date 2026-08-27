@@ -6,7 +6,7 @@ import os, logging, json, threading
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
-import ai_news_agent  # Pre-warm the massive google.generativeai import at boot time for 0ms latency later
+import ai_news_agent
 
 load_dotenv()
 # Initialize the Flask application
@@ -633,7 +633,7 @@ def handle_ai_chat():
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "llama3-8b-8192",
+                "model": "llama-3.3-70b-versatile",
                 "messages": [{"role": "system", "content": prompt}],
                 "temperature": 0.7,
                 "max_tokens": 150
