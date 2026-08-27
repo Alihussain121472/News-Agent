@@ -192,7 +192,7 @@ class NewsDatabase:
 
         self._ensure_table_columns(conn, 'registered_users', [
             'last_login_at TIMESTAMP', 'login_count INTEGER DEFAULT 0',
-            'password_hash TEXT', 'role TEXT DEFAULT "user"',
+            'password_hash TEXT', 'role TEXT DEFAULT 'user'',
             'program_notifications BOOLEAN DEFAULT TRUE'])
         self._ensure_table_columns(conn, 'student_programs', [
             'notified_at TIMESTAMP', 'notify_before_days INTEGER DEFAULT 7'])
@@ -538,7 +538,7 @@ class NewsDatabase:
         active_days = cursor.fetchone()[0]
         cursor.execute('SELECT action, COUNT(*) as cnt FROM user_activity_log WHERE email=%s GROUP BY action ORDER BY cnt DESC LIMIT 5', (normalized,))
         top_actions = [{'action': r[0], 'count': r[1]} for r in cursor.fetchall()]
-        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE recipient=%s AND status="success"', (normalized,))
+        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE recipient=%s AND status='success'', (normalized,))
         emails_received = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM user_login_events WHERE email=%s', (normalized,))
         total_logins = cursor.fetchone()[0]
@@ -605,7 +605,7 @@ class NewsDatabase:
         cursor.execute('''SELECT u.*,
             (SELECT COUNT(*) FROM user_login_events l WHERE l.email=u.email) AS login_events,
             (SELECT COUNT(*) FROM user_activity_log a WHERE a.email=u.email) AS activity_count,
-            (SELECT COUNT(*) FROM email_logs e WHERE e.recipient=u.email AND e.status="success") AS emails_received
+            (SELECT COUNT(*) FROM email_logs e WHERE e.recipient=u.email AND e.status='success') AS emails_received
             FROM registered_users u ORDER BY u.registered_at DESC''')
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
@@ -889,7 +889,7 @@ class NewsDatabase:
         month = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM email_logs')
         total_emails = cursor.fetchone()[0]
-        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE status="success"')
+        cursor.execute('SELECT COUNT(*) FROM email_logs WHERE status='success'')
         success_emails = cursor.fetchone()[0]
         cursor.execute('SELECT sent_at FROM email_logs ORDER BY sent_at DESC LIMIT 1')
         last_e = cursor.fetchone()
