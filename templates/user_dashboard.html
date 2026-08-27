@@ -91,14 +91,13 @@
 
       <!-- OVERVIEW TAB -->
       <div id="tab-overview">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsGrid"></div>
         <div class="grid lg:grid-cols-2 gap-6">
           <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> Latest Articles</h3>
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> World Top Tech Articles</h3>
             <div id="overviewArticles" class="space-y-3"></div>
           </div>
           <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Open Programs</h3>
+            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Applied Programs</h3>
             <div id="overviewPrograms" class="space-y-3"></div>
           </div>
         </div>
@@ -220,30 +219,14 @@ async function loadOverview(){
     overviewData = await r.json();
     const s = overviewData.summary||{};
 
-    document.getElementById('statsGrid').innerHTML = `
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-blue-400 mb-1">${s.total_emails_received||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Received</div>
-      </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-3xl font-black text-emerald-400 mb-1">${s.login_count||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Total Logins</div>
-      </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-lg font-bold text-purple-400 mb-1">${s.last_email_sent ? relTime(s.last_email_sent) : 'N/A'}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-clock mr-1"></i>Last Email</div>
-      </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <div class="text-lg font-bold mb-1 ${s.is_active?'text-emerald-400':'text-red-400'}">${s.is_active?'Active':'Inactive'}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-user-check mr-1"></i>Status</div>
-      </div>`;
+    
 
     const arts = (overviewData.articles||[]).slice(0,5);
     document.getElementById('overviewArticles').innerHTML = arts.length ? arts.map(a=>`
       <div class="bg-dark-800/60 rounded-xl p-3 border border-slate-700/50 hover:border-blue-500/30 transition">
         <div class="text-sm font-semibold text-white leading-snug mb-1">${a.title||'Untitled'}</div>
         <div class="text-xs text-slate-500">${a.source||''} · ${relTime(a.fetched_at)}</div>
-      </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-4">No articles yet.</div>';
+      </div>`).join('') : '<div class=\"text-slate-500 text-sm text-center py-6\">No articles fetched yet. System updates hourly.</div>';
 
     const progs = (overviewData.programs||[]).slice(0,4);
     document.getElementById('overviewPrograms').innerHTML = progs.length ? progs.map(p=>`
@@ -254,7 +237,7 @@ async function loadOverview(){
         </div>
         ${p.deadline?`<div class="text-xs text-orange-400"><i class="fas fa-calendar mr-1"></i>Deadline: ${p.deadline}</div>`:''}
         ${p.registration_url?`<a href="${p.registration_url}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 transition mt-1 block"><i class="fas fa-external-link-alt mr-1"></i>Register Now</a>`:''}
-      </div>`).join('') : '<div class="text-slate-500 text-sm text-center py-4">No programs yet. Admin will add soon.</div>';
+      </div>`).join('') : `<div class=\"text-slate-500 text-sm text-center py-6\"><p class=\"mb-3\">You didn't apply in any program yet.</p><a href=\"/#programs\" class=\"inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-lg hover:bg-emerald-500/30 transition text-xs font-bold\">Apply to a Program &rarr;</a></div>`;
   }catch(e){ console.error(e); }
 }
 
