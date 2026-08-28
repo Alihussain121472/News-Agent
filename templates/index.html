@@ -212,39 +212,9 @@
               <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)] mr-2 animate-[pulse_2s_ease-in-out_infinite]"></span>Active
             </span>
           </div>
-          <div class="space-y-3">
-            <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700/50">
-              <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fas fa-robot text-blue-400 text-xs"></i>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-white">AI Morning Brief</div>
-                  <div class="text-xs text-slate-500">5 top AI stories - 8:00 AM daily</div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-slate-800/60 rounded-xl p-4 border border-emerald-500/20">
-              <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fas fa-graduation-cap text-emerald-400 text-xs"></i>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-white">Program Alert</div>
-                  <div class="text-xs text-slate-500">Google Student Facilitator - Register </div>
-                </div>
-              </div>
-            </div>
-            <div class="bg-slate-800/60 rounded-xl p-4 border border-purple-500/20">
-              <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fas fa-star text-purple-400 text-xs"></i>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-white">Microsoft Fabric Program</div>
-                  <div class="text-xs text-slate-500">Early alert sent 7 days before launch</div>
-                </div>
-              </div>
+          <div class="space-y-3" id="heroLiveFeedContainer">
+            <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700/50 text-center animate-pulse">
+              <div class="text-sm text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching live intel...</div>
             </div>
           </div>
         </div>
@@ -262,48 +232,42 @@
       <p class="text-slate-400 text-lg max-w-2xl mx-auto">One subscription. Daily AI news plus early access to the best student programs from top companies worldwide.</p>
     </div>
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      <a href="/user/dashboard" class="block bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-500/50">
         <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-robot text-blue-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">AI News Daily</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">5 curated AI stories every morning at 8 AM with summaries, why it matters, and what could change.</p>
-      </div>
-      <div class="bg-slate-900/70 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      </a>
+      <a href="#programs" class="block bg-slate-900/70 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-emerald-500/50">
         <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-graduation-cap text-emerald-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">Student Program Alerts</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">Early alerts for Google, Microsoft, Amazon, NASA, Deloitte programs - with direct registration links before they go live.</p>
-      </div>
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      </a>
+      <a href="/user/dashboard" class="block bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-purple-500/50">
         <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-chart-line text-purple-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">Activity Tracking</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">Your personal dashboard tracks every email received, program alert, login, and daily reading progress.</p>
-      </div>
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      </a>
+      <a href="#programs" class="block bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-orange-500/50">
         <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-clock text-orange-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">Always Early</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">We notify you 7 days before a program launches so you have time to prepare your application.</p>
-      </div>
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      </a>
+      <a href="#subscribe" class="block bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-pink-500/50">
         <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-shield-alt text-pink-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">Privacy First</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">Your data stays private. No spam, no selling your email. Unsubscribe instantly at any time.</p>
-      </div>
-      <div class="bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)]">
+      </a>
+      <a href="/user/dashboard" class="block bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-2xl p-6 transition-all duration-300 ease-in-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-cyan-500/50">
         <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4">
           <i class="fas fa-mobile-alt text-cyan-400 text-xl"></i>
         </div>
         <h3 class="text-lg font-bold text-white mb-2">Mobile Ready</h3>
-        <p class="text-slate-400 text-sm leading-relaxed">Emails and dashboards designed beautifully for every screen - phone, tablet, or desktop.</p>
-      </div>
+      </a>
     </div>
   </div>
 </section>
@@ -959,6 +923,39 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
         // Initialize history on load
         document.addEventListener('DOMContentLoaded', loadInitialChatHistory);
     </script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const res = await fetch('/api/articles?limit=3');
+      const data = await res.json();
+      const container = document.getElementById('heroLiveFeedContainer');
+      if (data && data.length > 0) {
+        container.innerHTML = '';
+        data.slice(0,3).forEach((item, index) => {
+          let icon = 'fa-robot'; let color = 'blue';
+          if(index === 1) { icon = 'fa-graduation-cap'; color = 'emerald'; }
+          if(index === 2) { icon = 'fa-star'; color = 'purple'; }
+          
+          container.innerHTML += 
+            <a href="/user/dashboard" class="block bg-slate-800/60 rounded-xl p-4 border border--500/20 hover:bg-slate-700 transition">
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg--500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <i class="fas  text--400 text-xs"></i>
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white line-clamp-1"></div>
+                  <div class="text-xs text-slate-500"></div>
+                </div>
+              </div>
+            </a>
+          ;
+        });
+      }
+    } catch(err) {
+      console.error('Failed to load feed', err);
+    }
+  });
+</script>
 </body>
 
 
