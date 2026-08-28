@@ -491,21 +491,38 @@ def run_news_digest() -> bool:
         db.log_agent_event('error', 'No recipient emails configured')
         return False
 
-    news_items = search_ai_news(limit=5)
+    news_items = search_ai_news(limit=25)
     if news_items:
         db.save_news_batch(news_items)
 
-    html = format_news_email(news_items)
     subject = f'AI Morning Brief - {datetime.now().strftime("%B %d, %Y")}'
     success_count = 0
 
     for to_email in recipients:
+        # Personalize for this user
+        prefs = db.get_user_preferences(to_email)
+        pref_keywords = (prefs.get('companies', '') + ' ' + prefs.get('fields', '')).lower().split()
+        
+        user_news = news_items[:]
+        if pref_keywords:
+            def score(a):
+                s = 0
+                text = (a.get('title', '') + ' ' + a.get('summary', '')).lower()
+                for k in pref_keywords:
+                    if len(k) > 2 and k in text:
+                        s += 1
+                return s
+            user_news.sort(key=score, reverse=True)
+            
+        top_news = user_news[:5]
+        html = format_news_email(top_news)
+        
         if send_email(to_email, subject, html):
             success_count += 1
-            db.log_email_sent(to_email, subject, len(news_items), 'success')
+            db.log_email_sent(to_email, subject, len(top_news), 'success')
             db.update_user_email_sent(to_email)
         else:
-            db.log_email_sent(to_email, subject, len(news_items), 'failed', 'Email sending failed')
+            db.log_email_sent(to_email, subject, len(top_news), 'failed', 'Email sending failed')
 
     db.record_daily_digest_run(len(recipients), success_count, len(news_items),
                                 'success' if success_count > 0 else 'failed')
@@ -519,6 +536,9 @@ def run_news_digest() -> bool:
         logger.error(f'Program notification error: {e}')
 
     db.cleanup_old_articles(months=3)
+    try:
+        db.cleanup_saved_articles(days=30)
+    except Exception: pass
     db.log_agent_event('email_sent', f'Sent to {success_count}/{len(recipients)} recipients')
     logger.info('=' * 60)
     return success_count > 0

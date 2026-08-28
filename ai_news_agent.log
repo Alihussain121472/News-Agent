@@ -400,3 +400,5 @@
 2026-08-18 17:26:35,032 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:35] "GET /user/register HTTP/1.1" 200 -
 2026-08-18 17:26:35,105 - INFO - 127.0.0.1 - - [18/Aug/2026 17:26:35] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
 2026-08-18 19:50:01,906 - INFO - Database initialized at news_history.db
+2026-08-25 09:01:14,407 - WARNING - STARTTLS 587 failed ((535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482c9b69cf5sm9890484f8f.6 - gsmtp')), falling back to SSL port 465...
+2026-08-25 09:01:17,462 - ERROR - Email delivery failed to test@example.com: TLS: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-482c9b69cf5sm9890484f8f.6 - gsmtp') | SSL: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 5b1f17b1804b1-499d6071bafsm10373555e9.2 - gsmtp')
