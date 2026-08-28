@@ -71,7 +71,7 @@ def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
 
 # Fetch latest AI news articles from Google News RSS feed as a backup source.
 def fetch_news_from_rss(limit: int = 5) -> List[Dict[str, Any]]:
-    rss_url = 'https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning+OR+generative+AI+OR+LLM+OR+AI+policy+OR+AI+safety&hl=en-US&gl=US&ceid=US:en'
+    rss_url = 'https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=en-US&gl=US&ceid=US:en'
     try:
         feed = feedparser.parse(rss_url)
         entries = feed.get('entries', [])
@@ -100,9 +100,8 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
     if not api_key or api_key.lower() in {'your_newsapi_key_here', 'placeholder'}:
         return fetch_news_from_rss(limit)
     try:
-        resp = requests.get('https://newsapi.org/v2/everything', params={
-            'q': 'artificial intelligence OR machine learning OR generative AI OR ChatGPT OR LLM OR AI policy OR AI safety',
-            'sortBy': 'publishedAt',
+        resp = requests.get('https://newsapi.org/v2/top-headlines', params={
+            'category': 'technology',
             'language': 'en',
             'pageSize': limit,
             'apiKey': api_key
