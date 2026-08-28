@@ -817,7 +817,7 @@ def handle_ai_chat():
 
 
 @app.route('/api/summarize', methods=['POST'])
-@login_required
+@user_required
 def summarize_article():
     data = request.json or {}
     url = data.get('url')
