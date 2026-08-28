@@ -291,6 +291,40 @@ def get_user_overview():
     })
 
 
+
+
+# -- Preferences & Memory Vault --
+
+@app.route('/api/user/preferences', methods=['GET', 'POST'])
+@user_required
+def manage_user_preferences():
+    email = session.get('user_email')
+    if request.method == 'POST':
+        data = request.get_json()
+        companies = data.get('companies', '')
+        fields = data.get('fields', '')
+        db.save_user_preferences(email, companies, fields)
+        return jsonify({'status': 'success'})
+    return jsonify(db.get_user_preferences(email))
+
+@app.route('/api/user/saved-articles', methods=['GET'])
+@user_required
+def get_user_saved_articles():
+    email = session.get('user_email')
+    return jsonify(db.get_saved_articles(email))
+
+@app.route('/api/user/saved-articles/<int:article_id>', methods=['POST', 'DELETE'])
+@user_required
+def manage_saved_article(article_id):
+    email = session.get('user_email')
+    if request.method == 'POST':
+        db.save_article(email, article_id)
+        return jsonify({'status': 'success', 'message': 'Article saved.'})
+    elif request.method == 'DELETE':
+        db.delete_saved_article(email, article_id)
+        return jsonify({'status': 'success', 'message': 'Article removed.'})
+
+
 @app.route('/api/user/activity')
 @user_required
 def get_user_activity_log():
@@ -427,7 +461,29 @@ def trigger_program_notifications():
 @app.route('/api/articles')
 def get_articles():
     limit = request.args.get('limit', 20, type=int)
-    return jsonify(db.get_recent_articles(limit=limit))
+    target_date = request.args.get('date')
+    user_email = session.get('user_email')
+    
+    if target_date:
+        articles = db.get_articles_by_date(target_date, limit=limit)
+    else:
+        articles = db.get_recent_articles(limit=limit)
+        
+    # Personalized sorting if email is provided
+    if user_email and not target_date:
+        prefs = db.get_user_preferences(user_email)
+        pref_keywords = (prefs.get('companies', '') + ' ' + prefs.get('fields', '')).lower().split()
+        if pref_keywords:
+            def score(a):
+                s = 0
+                text = (a.get('title', '') + ' ' + a.get('summary', '')).lower()
+                for k in pref_keywords:
+                    if len(k) > 2 and k in text:
+                        s += 1
+                return s
+            articles.sort(key=score, reverse=True)
+            
+    return jsonify(articles)
 
 
 @app.route('/api/email-logs')
@@ -604,6 +660,46 @@ def join_program_alert():
 
 
 
+
+@app.route('/api/summarize-news', methods=['POST'])
+def summarize_news():
+    data = request.get_json() or {}
+    articles = data.get('articles', [])
+    if not articles:
+        return jsonify({'status': 'error', 'message': 'No articles selected.'}), 400
+
+    import os
+    import requests
+    groq_api_key = os.getenv('GROQ_API_KEY')
+    if not groq_api_key:
+        return jsonify({'status': 'error', 'message': 'AI Summarization is currently unavailable (Missing API Key).'}), 503
+
+    prompt = "You are a professional Tech News Summarizer for Nova Brief. Read the following selected tech news articles and provide a highly readable, cohesive executive summary. Group similar topics if necessary. Use markdown bullet points and bold text for emphasis. Do not include introductory fluff, just deliver the professional summary.\n\n"
+    for i, a in enumerate(articles, 1):
+        prompt += f"Article {i}: {a.get('title')}\nSummary: {a.get('summary')}\n\n"
+
+    try:
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": "Please generate the professional summary now."}
+            ],
+            "temperature": 0.5,
+            "max_tokens": 1024
+        }
+        resp = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=20)
+        resp.raise_for_status()
+        reply = resp.json()['choices'][0]['message']['content']
+        return jsonify({'status': 'success', 'summary': reply})
+    except Exception as e:
+        logger.error(f'Summarization error: {e}')
+        return jsonify({'status': 'error', 'message': 'Failed to generate summary.'}), 500
+
 @app.route('/api/chat', methods=['POST'])
 def handle_ai_chat():
     data = request.get_json() or {}
@@ -718,6 +814,66 @@ def handle_ai_chat():
     db.record_chatbot_history(user_id=user_id, user_message=user_msg, bot_reply=reply)
         
     return jsonify({'reply': reply})
+
+
+@app.route('/api/summarize', methods=['POST'])
+@login_required
+def summarize_article():
+    data = request.json or {}
+    url = data.get('url')
+    if not url or url == '#':
+        return jsonify({'status': 'error', 'message': 'Invalid URL provided.'}), 400
+
+    try:
+        import requests
+        from bs4 import BeautifulSoup
+        import os
+        
+        # Scrape the article text
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.raise_for_status()
+        
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        paragraphs = soup.find_all('p')
+        text = ' '.join([p.get_text(strip=True) for p in paragraphs])
+        
+        if len(text) < 100:
+            return jsonify({'status': 'error', 'message': 'Could not extract enough readable text from this article.'}), 400
+            
+        # Truncate text to avoid token limits (approx 3000 words)
+        text = text[:15000]
+        
+        # Send to Groq Llama 3
+        api_key = os.environ.get('GROQ_API_KEY')
+        if not api_key:
+            return jsonify({'status': 'error', 'message': 'AI Summarization is currently disabled (API Key missing).'}), 500
+            
+        groq_resp = requests.post(
+            'https://api.groq.com/openai/v1/chat/completions',
+            headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
+            json={
+                'model': 'llama-3.3-70b-versatile',
+                'messages': [
+                    {'role': 'system', 'content': 'You are an expert technology analyst. Provide a quick, highly readable summary of the provided article in 3 to 4 bullet points. Focus on the most important takeaways. Do not include introductory fluff.'},
+                    {'role': 'user', 'content': f'Summarize this article:\n\n{text}'}
+                ],
+                'temperature': 0.3,
+                'max_tokens': 500
+            },
+            timeout=20
+        )
+        groq_resp.raise_for_status()
+        summary = groq_resp.json()['choices'][0]['message']['content']
+        
+        # Record activity
+        db.record_activity(session.get('user_email'), 'summarizer_used', f'Summarized article: {url}')
+        
+        return jsonify({'status': 'success', 'summary': summary})
+        
+    except Exception as e:
+        logger.error(f"Summarizer error: {e}")
+        return jsonify({'status': 'error', 'message': 'Failed to summarize the article. The website might be blocking automated access.'}), 500
 
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():

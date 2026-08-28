@@ -6,11 +6,229 @@
   <meta name="description" content="Nova Brief is the ultimate AI News Agent and Growth platform for students and tech enthusiasts. Get daily updates on AI, tech programs, and exclusive certifications.">
   <meta name="keywords" content="AI News, Tech News, Student Programs, Google Certifications, Microsoft Student, AI Automation, Tech Opportunities">
   <title>My Dashboard - Nova Brief</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+function handleCheckbox() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  const dock = document.getElementById('summarizeDock');
+  const count = document.getElementById('selCount');
+  
+  if (checkboxes.length > 0) {
+    count.innerText = checkboxes.length;
+    dock.classList.remove('hidden');
+    dock.classList.add('translate-y-0', 'opacity-100');
+  } else {
+    dock.classList.add('hidden');
+  }
+}
+
+async function summarizeSelected() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  if (checkboxes.length === 0) return;
+  
+  const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
+  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  
+  const btn = document.getElementById('sumBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/summarize-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: selectedArticles })
+    });
+    const data = await res.json();
+    
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    
+    if (data.status === 'success') {
+      const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    } else {
+      alert('Failed to summarize: ' + data.message);
+    }
+  } catch(err) {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    alert('An error occurred during summarization.');
+  }
+}
+
+function closeSummaryModal() {
+  document.getElementById('summaryModal').classList.add('hidden');
+  document.querySelectorAll('.news-checkbox').forEach(c => c.checked = false);
+  handleCheckbox();
+}
+
+
+// Run AI Summarizer
+async function runSummarizer() {
+  const selectUrl = document.getElementById('summarizeSelect').value;
+  const inputUrl = document.getElementById('summarizeUrl').value.trim();
+  const url = inputUrl || selectUrl;
+  
+  if(!url || !url.startsWith('http')) {
+    alert('Please select an article or enter a valid URL.');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSummarize');
+  const resultContainer = document.getElementById('summaryResultContainer');
+  const resultContent = document.getElementById('summaryContent');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70');
+  
+  try {
+    const r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    const data = await r.json();
+    
+    resultContainer.classList.remove('hidden');
+    if(data.status === 'success') {
+      // Format bullet points properly with Tailwind HTML
+      let html = data.summary.replace(/\n/g, '<br>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em class="text-slate-300">$1</em>');
+      resultContent.innerHTML = html;
+      resultContent.classList.remove('border-red-500/50', 'text-red-400');
+    } else {
+      resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> ${data.message}`;
+      resultContent.classList.add('border-red-500/50', 'text-red-400');
+    }
+  } catch(e) {
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Network error. Please try again.`;
+  } finally {
+    btn.innerHTML = '<i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary';
+    btn.disabled = false;
+    btn.classList.remove('opacity-70');
+    resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
+</script>
+
   <link rel="stylesheet" href="/static/css/tailwind.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous">
+function handleCheckbox() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  const dock = document.getElementById('summarizeDock');
+  const count = document.getElementById('selCount');
+  
+  if (checkboxes.length > 0) {
+    count.innerText = checkboxes.length;
+    dock.classList.remove('hidden');
+    dock.classList.add('translate-y-0', 'opacity-100');
+  } else {
+    dock.classList.add('hidden');
+  }
+}
+
+async function summarizeSelected() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  if (checkboxes.length === 0) return;
+  
+  const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
+  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  
+  const btn = document.getElementById('sumBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/summarize-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: selectedArticles })
+    });
+    const data = await res.json();
+    
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    
+    if (data.status === 'success') {
+      const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    } else {
+      alert('Failed to summarize: ' + data.message);
+    }
+  } catch(err) {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    alert('An error occurred during summarization.');
+  }
+}
+
+function closeSummaryModal() {
+  document.getElementById('summaryModal').classList.add('hidden');
+  document.querySelectorAll('.news-checkbox').forEach(c => c.checked = false);
+  handleCheckbox();
+}
+
+
+// Run AI Summarizer
+async function runSummarizer() {
+  const selectUrl = document.getElementById('summarizeSelect').value;
+  const inputUrl = document.getElementById('summarizeUrl').value.trim();
+  const url = inputUrl || selectUrl;
+  
+  if(!url || !url.startsWith('http')) {
+    alert('Please select an article or enter a valid URL.');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSummarize');
+  const resultContainer = document.getElementById('summaryResultContainer');
+  const resultContent = document.getElementById('summaryContent');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70');
+  
+  try {
+    const r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    const data = await r.json();
+    
+    resultContainer.classList.remove('hidden');
+    if(data.status === 'success') {
+      // Format bullet points properly with Tailwind HTML
+      let html = data.summary.replace(/\n/g, '<br>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em class="text-slate-300">$1</em>');
+      resultContent.innerHTML = html;
+      resultContent.classList.remove('border-red-500/50', 'text-red-400');
+    } else {
+      resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> ${data.message}`;
+      resultContent.classList.add('border-red-500/50', 'text-red-400');
+    }
+  } catch(e) {
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Network error. Please try again.`;
+  } finally {
+    btn.innerHTML = '<i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary';
+    btn.disabled = false;
+    btn.classList.remove('opacity-70');
+    resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
+</script>
+
   <style>
     body{background:linear-gradient(180deg,#020817 0%,#0f172a 100%);min-height:100vh;}
     .glass{background:rgba(15,23,42,0.7);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,0.15);}
@@ -127,6 +345,43 @@
         <div id="articlesList" class="space-y-8 pb-12"></div>
       </div>
 
+            <!-- SUMMARIZER TAB -->
+      <div id="tab-summarizer" class="hidden max-w-3xl mx-auto w-full">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700/50">
+          <h2 class="text-2xl font-black text-white flex items-center gap-3"><i class="fas fa-magic text-blue-400"></i> AI Article Summarizer</h2>
+        </div>
+        
+        <div class="glass rounded-2xl p-6 mb-8">
+          <p class="text-slate-400 text-sm mb-6">Select a recent tech article from the feed, or paste any URL below to generate a quick, readable summary instantly.</p>
+          
+          <div class="mb-5">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">1. Select a Recent Article</label>
+            <select id="summarizeSelect" class="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition appearance-none">
+              <option value="">-- Choose an article to summarize --</option>
+            </select>
+          </div>
+          
+          <div class="text-center text-slate-600 text-xs font-bold uppercase tracking-widest my-4">OR</div>
+          
+          <div class="mb-6">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">2. Paste Any Article URL</label>
+            <input type="url" id="summarizeUrl" placeholder="https://techcrunch.com/..." class="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+          </div>
+          
+          <button id="btnSummarize" onclick="runSummarizer()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2">
+            <i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary
+          </button>
+        </div>
+        
+        <!-- Result Box -->
+        <div id="summaryResultContainer" class="hidden">
+          <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Summary Result</h3>
+          <div id="summaryContent" class="glass rounded-2xl p-6 text-slate-200 text-sm leading-relaxed prose prose-invert prose-blue max-w-none">
+            <!-- Summary appears here -->
+          </div>
+        </div>
+      </div>
+
       <!-- PROGRAMS TAB -->
       <div id="tab-programs" class="hidden">
         <div class="glass rounded-2xl p-5">
@@ -191,7 +446,7 @@ const init = (USER_NAME||'U').charAt(0).toUpperCase();
 document.getElementById('avatarInitial').textContent = init;
 
 function switchTab(name){
-  ['overview','activity','articles','programs','progress'].forEach(t=>{
+  ['overview','activity','articles','programs','progress','summarizer'].forEach(t=>{
     document.getElementById('tab-'+t).classList.add('hidden');
     const n = document.getElementById('nav-'+t);
     if(n){ n.classList.remove('active'); }
@@ -286,15 +541,34 @@ async function loadActivity(){
 }
 
 // Load articles
+
 async function loadArticles(){
   const r = await fetch('/api/articles?limit=50');
   allArticles = await r.json();
   renderArticles(allArticles);
+  
+  // Populate Summarizer Dropdown
+  const select = document.getElementById('summarizeSelect');
+  if(select && allArticles.length > 0) {
+    select.innerHTML = '<option value="">-- Choose an article to summarize --</option>';
+    allArticles.forEach(a => {
+      if(a.url && a.url !== '#') {
+        const opt = document.createElement('option');
+        opt.value = a.url;
+        opt.textContent = a.title.substring(0, 80) + (a.title.length > 80 ? '...' : '');
+        select.appendChild(opt);
+      }
+    });
+  }
 }
+
 
 function renderArticles(arts){
   document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
-    <article class="group bg-transparent transition">
+    <article class="group bg-transparent transition relative">
+        <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
+          <input type="checkbox" onchange="handleCheckbox()" value="${a.id}" class="news-checkbox w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer">
+        </label>
       <div class="flex items-center gap-2 mb-2">
         <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 font-bold border border-slate-700">
           <i class="fas fa-robot"></i>
@@ -484,7 +758,140 @@ if (USER_EMAIL) {
 }
 
 loadOverview();
+
+function handleCheckbox() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  const dock = document.getElementById('summarizeDock');
+  const count = document.getElementById('selCount');
+  
+  if (checkboxes.length > 0) {
+    count.innerText = checkboxes.length;
+    dock.classList.remove('hidden');
+    dock.classList.add('translate-y-0', 'opacity-100');
+  } else {
+    dock.classList.add('hidden');
+  }
+}
+
+async function summarizeSelected() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  if (checkboxes.length === 0) return;
+  
+  const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
+  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  
+  const btn = document.getElementById('sumBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/summarize-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: selectedArticles })
+    });
+    const data = await res.json();
+    
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    
+    if (data.status === 'success') {
+      const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    } else {
+      alert('Failed to summarize: ' + data.message);
+    }
+  } catch(err) {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    alert('An error occurred during summarization.');
+  }
+}
+
+function closeSummaryModal() {
+  document.getElementById('summaryModal').classList.add('hidden');
+  document.querySelectorAll('.news-checkbox').forEach(c => c.checked = false);
+  handleCheckbox();
+}
+
+
+// Run AI Summarizer
+async function runSummarizer() {
+  const selectUrl = document.getElementById('summarizeSelect').value;
+  const inputUrl = document.getElementById('summarizeUrl').value.trim();
+  const url = inputUrl || selectUrl;
+  
+  if(!url || !url.startsWith('http')) {
+    alert('Please select an article or enter a valid URL.');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSummarize');
+  const resultContainer = document.getElementById('summaryResultContainer');
+  const resultContent = document.getElementById('summaryContent');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70');
+  
+  try {
+    const r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    const data = await r.json();
+    
+    resultContainer.classList.remove('hidden');
+    if(data.status === 'success') {
+      // Format bullet points properly with Tailwind HTML
+      let html = data.summary.replace(/\n/g, '<br>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em class="text-slate-300">$1</em>');
+      resultContent.innerHTML = html;
+      resultContent.classList.remove('border-red-500/50', 'text-red-400');
+    } else {
+      resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> ${data.message}`;
+      resultContent.classList.add('border-red-500/50', 'text-red-400');
+    }
+  } catch(e) {
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Network error. Please try again.`;
+  } finally {
+    btn.innerHTML = '<i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary';
+    btn.disabled = false;
+    btn.classList.remove('opacity-70');
+    resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
 </script>
+
+
+  <!-- Summarize Dock -->
+  <div id="summarizeDock" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900/90 backdrop-blur-xl border border-blue-500/30 rounded-full px-6 py-3 shadow-2xl flex items-center gap-6 hidden z-50 transition-all duration-300">
+    <span class="text-sm font-bold text-white"><span id="selCount" class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full mr-1">0</span> Selected</span>
+    <button onclick="summarizeSelected()" id="sumBtn" class="bg-gradient-to-r from-blue-600 to-emerald-500 hover:opacity-90 text-white font-bold py-1.5 px-4 rounded-full text-sm flex items-center gap-2 transition shadow-lg">
+      <i class="fas fa-magic"></i> Summarize Now
+    </button>
+  </div>
+
+  <!-- Summary Modal -->
+  <div id="summaryModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col transform transition-all">
+      <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-white flex items-center gap-3"><i class="fas fa-bolt text-yellow-400"></i> AI Executive Summary</h3>
+        <button onclick="closeSummaryModal()" class="text-slate-500 hover:text-slate-300 transition text-xl">&times;</button>
+      </div>
+      <div id="summaryContent" class="p-6 overflow-y-auto flex-1 prose prose-invert prose-blue max-w-none text-slate-300 leading-relaxed text-sm">
+      </div>
+      <div class="p-4 border-t border-slate-800 text-center">
+        <button onclick="closeSummaryModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 px-6 rounded-xl transition">Close</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
 

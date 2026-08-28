@@ -7,3 +7,4 @@ gunicorn==22.0.0
 Werkzeug==3.0.4
 Markdown==3.6
 psycopg2-binary
+beautifulsoup4==4.12.3
