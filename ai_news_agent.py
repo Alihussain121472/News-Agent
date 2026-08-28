@@ -185,57 +185,41 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
     return f"""<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
-<body style="margin:0;padding:0;background-color:#0b1120;font-family:'Inter',Arial,Helvetica,sans-serif;color:#e2e8f0;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b1120;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="100%" style="max-width:620px;background-color:#0f172a;border:1px solid #1e293b;border-radius:18px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.4);">
-          <!-- Header Banner -->
+        <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
-            <td style="background:linear-gradient(135deg,#1e3a8a,#2563eb,#059669);padding:36px 32px;text-align:left;">
-              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#93c5fd;margin-bottom:8px;">⭐ Official Welcome</div>
-              <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;line-height:1.2;">Welcome to Nova Brief</h1>
-              <p style="margin:8px 0 0 0;font-size:14px;color:#dbeafe;">{today}</p>
-            </td>
-          </tr>
-          <!-- Body Content -->
-          <tr>
-            <td style="padding:32px;line-height:1.7;color:#cbd5e1;font-size:15px;">
-              <p style="font-size:17px;font-weight:700;color:#ffffff;margin-top:0;">{greeting}</p>
-              <p>Your account is fully active! You are now subscribed to receive curated <strong>daily AI intelligence</strong> and <strong>exclusive student program alerts</strong> delivered directly to your inbox.</p>
+            <td style="padding:40px;text-align:left;">
+              <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;color:#111827;">Welcome to Nova Brief</h1>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your account has been successfully verified and activated. You are now subscribed to receive our enterprise-grade daily AI intelligence briefings and elite student program alerts.</p>
               
-              <!-- What to expect Box -->
-              <div style="background-color:#1e293b;border-left:4px solid #3b82f6;border-radius:10px;padding:20px;margin:24px 0;">
-                <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:12px;">What you will receive:</div>
-                <div style="margin-bottom:10px;">
-                  <strong style="color:#60a5fa;">ÃƒÂ¢Ã…Â¡Ã‚Â¡ Daily AI Briefing (8:00 AM):</strong> Top 5 AI breakthroughs summarized with actionable analysis and what it means for the future.
+              <div style="background-color:#f3f4f6;border-radius:6px;padding:24px;margin-bottom:24px;">
+                <h2 style="margin:0 0 16px 0;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">What to Expect</h2>
+                <div style="margin-bottom:16px;font-size:14px;color:#4b5563;line-height:1.5;">
+                  <strong style="color:#111827;">Daily AI Briefing (8:00 AM)</strong><br>
+                  The top 5 AI industry developments summarized with actionable analysis on market impact.
                 </div>
-                <div style="margin-bottom:10px;">
-                  <strong style="color:#34d399;">ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“ Early Student Program Alerts:</strong> Early notifications for Google Student Facilitator, Google Arcade, Microsoft Fabric, Amazon AWS, NASA, and Deloitte programs with direct 1-click registration links before launch.
+                <div style="margin-bottom:16px;font-size:14px;color:#4b5563;line-height:1.5;">
+                  <strong style="color:#111827;">Early Program Alerts</strong><br>
+                  Advance notifications for Google, Microsoft, AWS, and Meta student programs with direct application links.
                 </div>
-                <div>
-                  <strong style="color:#c084fc;">ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  Personal User Dashboard:</strong> Real-time activity log, article search, and program application tracker.
+                <div style="font-size:14px;color:#4b5563;line-height:1.5;">
+                  <strong style="color:#111827;">Intelligence Dashboard</strong><br>
+                  Access your personal portal to track applications, monitor activity, and search global tech news.
                 </div>
               </div>
-
-              <!-- CTA Button -->
-              <div style="text-align:center;margin:32px 0 24px 0;">
-                <a href="https://novabrief-web.onrender.com/user/dashboard"
-                   style="display:inline-block;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#ffffff;padding:15px 36px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 10px 25px rgba(37,99,235,0.35);">
-                  Open My Dashboard ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢
-                </a>
-              </div>
-
-              <div style="background-color:#0b1120;border:1px solid #1e293b;border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;text-align:center;">
-                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Seamless access enabled.
+              
+              <div style="text-align:center;margin:32px 0;">
+                <a href="https://novabrief-web.onrender.com/user/dashboard" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Dashboard</a>
               </div>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
-            <td style="background-color:#0b1120;border-top:1px solid #1e293b;padding:20px 32px;text-align:center;font-size:12px;color:#64748b;">
-              <p style="margin:0 0 4px 0;">Nova Brief ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Automated AI Intelligence & Student Career Opportunities</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Visit Website</a> &nbsp;ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
+            <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
+              <p style="margin:0 0 8px 0;">Nova Brief &bull; Professional AI Intelligence</p>
+              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://novabrief-web.onrender.com/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
             </td>
           </tr>
         </table>
@@ -251,64 +235,34 @@ def send_welcome_email(to_email: str, name: str = None) -> bool:
 
 
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
-    today = datetime.now().strftime('%A, %B %d, %Y')
-    greeting = f"Hello {name}," if name else "Hello Student,"
-    highlight_text = f"You signed up for alerts regarding <strong>{program_title}</strong> and all major tech student programs." if program_title else "You are now officially enrolled to receive early student program alerts."
-
+    greeting = f"Hello {name}," if name else "Hello,"
+    prog_text = f"specifically for <strong>{program_title}</strong> and other elite programs" if program_title else "for elite student programs"
     return f"""<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
-<body style="margin:0;padding:0;background-color:#0b1120;font-family:'Inter',Arial,Helvetica,sans-serif;color:#e2e8f0;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0b1120;padding:32px 16px;">
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="100%" style="max-width:620px;background-color:#0f172a;border:1px solid #1e293b;border-radius:18px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.4);">
-          <!-- Header Banner -->
+        <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
-            <td style="background:linear-gradient(135deg,#065f46,#10b981,#0284c7);padding:36px 32px;text-align:left;">
-              <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#a7f3d0;margin-bottom:8px;">🎓 Student Network Alert</div>
-              <h1 style="margin:0;font-size:28px;font-weight:900;color:#ffffff;line-height:1.2;">Program Alerts Activated!</h1>
-              <p style="margin:8px 0 0 0;font-size:14px;color:#d1fae5;">{today}</p>
-            </td>
-          </tr>
-          <!-- Body Content -->
-          <tr>
-            <td style="padding:32px;line-height:1.7;color:#cbd5e1;font-size:15px;">
-              <p style="font-size:17px;font-weight:700;color:#ffffff;margin-top:0;">{greeting}</p>
-              <p>{highlight_text}</p>
+            <td style="padding:40px;text-align:left;">
+              <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;color:#111827;">Alert Registration Confirmed</h1>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your alert configuration has been successfully provisioned {prog_text}. You will now receive priority notifications before these applications officially open to the public.</p>
               
-              <!-- Student Benefits Box -->
-              <div style="background-color:#1e293b;border-left:4px solid #10b981;border-radius:10px;padding:20px;margin:24px 0;">
-                <div style="font-size:14px;font-weight:700;color:#ffffff;margin-bottom:12px;">How this helps your career & applications:</div>
-                <div style="margin-bottom:10px;">
-                  <strong style="color:#34d399;">ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬ Early Preparation Alerts:</strong> We alert you at least 7 days before program launches so you can prepare your resume, portfolio, and required materials.
-                </div>
-                <div style="margin-bottom:10px;">
-                  <strong style="color:#60a5fa;">ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬â€ Direct Registration Links:</strong> When registrations open, we deliver direct 1-click links to Google Student Facilitator, Google Arcade, Microsoft Fabric/AI, Amazon AWS Educate, NASA, and Deloitte portals.
-                </div>
-                <div>
-                  <strong style="color:#f59e0b;">ÃƒÂ¢Ã…Â¡Ã‚Â¡ Free Daily AI Digest:</strong> Plus 5 daily AI news stories delivered at 8:00 AM.
-                </div>
+              <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:16px;margin-bottom:24px;color:#166534;font-size:14px;line-height:1.5;">
+                <strong>Status: Active</strong><br>Your email ({subscriber_email}) is secured in our priority notification queue.
               </div>
-
-              <!-- CTA Button -->
-              <div style="text-align:center;margin:32px 0 24px 0;">
-                <a href="https://novabrief-web.onrender.com/user/dashboard"
-                   style="display:inline-block;background:linear-gradient(135deg,#059669,#10b981);color:#ffffff;padding:15px 36px;border-radius:12px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 10px 25px rgba(16,185,129,0.35);">
-                  Explore Open Programs in Dashboard ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢
-                </a>
-              </div>
-
-              <div style="background-color:#0b1120;border:1px solid #1e293b;border-radius:8px;padding:12px 16px;font-size:13px;color:#94a3b8;text-align:center;">
-                <strong>Registered Email:</strong> <span style="color:#ffffff;">{subscriber_email}</span> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Your student alert subscription is active.
+              
+              <div style="text-align:center;margin:32px 0;">
+                <a href="https://novabrief-web.onrender.com/user/dashboard" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">View Program Dashboard</a>
               </div>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
-            <td style="background-color:#0b1120;border-top:1px solid #1e293b;padding:20px 32px;text-align:center;font-size:12px;color:#64748b;">
-              <p style="margin:0 0 4px 0;">Nova Brief ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Automated AI Intelligence & Student Career Opportunities</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#10b981;text-decoration:none;">Visit Website</a> &nbsp;ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢&nbsp; <a href="https://novabrief-web.onrender.com/privacy" style="color:#64748b;text-decoration:none;">Privacy Policy</a> &nbsp;ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢&nbsp; <a href="https://novabrief-web.onrender.com/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
+            <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
+              <p style="margin:0 0 8px 0;">Nova Brief &bull; Elite Program Alerts</p>
+              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://novabrief-web.onrender.com/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
             </td>
           </tr>
         </table>
@@ -331,12 +285,51 @@ def send_login_email(to_email: str) -> bool:
 def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     today = datetime.now().strftime('%A, %B %d, %Y')
     if not news_items:
-        return f"""<html><body style="font-family:Arial,sans-serif;background:#f5f7fb;padding:20px;">
-<div style="max-width:700px;margin:0 auto;background:#fff;border-radius:12px;padding:24px;">
-  <h2>AI Morning Brief ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â {today}</h2>
-  <div style="padding:18px;background:#fff3cd;border-left:5px solid #f59e0b;border-radius:8px;color:#7c4a00;">
-    No AI news could be fetched right now.
-  </div></div></body></html>"""
+        return f"""<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f6f9fc;padding:40px 20px;"><div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e6ebf1;border-radius:8px;padding:32px;"><h2 style="margin:0 0 16px;font-size:20px;color:#111827;">AI Intelligence Briefing &bull; {today}</h2><div style="padding:16px;background:#fef3c7;border-radius:6px;color:#92400e;font-size:14px;">No significant AI developments detected in the current cycle.</div></div></body></html>"""
+
+    items_html = ''.join(f"""
+    <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #e5e7eb;">
+      <div style="font-size:18px;font-weight:600;color:#111827;margin-bottom:8px;line-height:1.4;">{i}. {item['title']}</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:16px;text-transform:uppercase;letter-spacing:0.05em;">{item['source']} &bull; {item['published']}</div>
+      <div style="font-size:15px;color:#374151;margin-bottom:12px;line-height:1.6;"><strong>Executive Summary:</strong> {item['summary']}</div>
+      <div style="font-size:14px;color:#4b5563;margin-bottom:12px;line-height:1.5;"><strong>Market Impact:</strong> {item['why_important']}</div>
+      <div style="font-size:14px;color:#4b5563;margin-bottom:16px;line-height:1.5;"><strong>Strategic Outlook:</strong> {item['future_change']}</div>
+      <a href="{item['url']}" style="display:inline-block;color:#3b82f6;font-size:14px;font-weight:600;text-decoration:none;">Read Full Report &rarr;</a>
+    </div>""" for i, item in enumerate(news_items, 1))
+
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:640px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <tr>
+            <td style="padding:40px;text-align:left;">
+              <div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Nova Brief Intelligence</div>
+              <h1 style="margin:0 0 8px 0;font-size:28px;font-weight:700;color:#111827;letter-spacing:-0.02em;">AI Market Briefing</h1>
+              <p style="margin:0 0 32px 0;font-size:15px;color:#6b7280;">{today}</p>
+              
+              {items_html}
+              
+              <div style="margin-top:8px;font-size:14px;color:#6b7280;line-height:1.5;text-align:center;">
+                <strong>Strategic Overview:</strong> Artificial intelligence continues to transition from conceptual frameworks to core enterprise infrastructure. Remain informed to maintain strategic advantage.
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#9ca3af;">
+              <p style="margin:0 0 8px 0;">Nova Brief &bull; Proprietary Intelligence Feed</p>
+              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#6b7280;text-decoration:underline;">Dashboard</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:underline;">Privacy</a></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
 
     items_html = ''.join(f"""
     <div style="margin:18px 0;padding:18px;background:#f8fafc;border-left:5px solid #2563eb;border-radius:8px;">
@@ -368,37 +361,45 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
 def format_program_email(program: Dict[str, Any]) -> str:
     """Format student program notification email with direct registration link."""
     today = datetime.now().strftime('%A, %B %d, %Y')
-    deadline_text = f"<strong>Deadline:</strong> {program.get('deadline', 'Check website')}<br>" if program.get('deadline') else ''
-    launch_text = f"<strong>Launch Date:</strong> {program.get('launch_date', 'Soon')}<br>" if program.get('launch_date') else ''
+    deadline_text = f"<strong>Application Deadline:</strong> {program.get('deadline', 'Refer to official portal')}<br>" if program.get('deadline') else ''
+    launch_text = f"<strong>Launch Date:</strong> {program.get('launch_date', 'Imminent')}<br>" if program.get('launch_date') else ''
 
-    return f"""<html><body style="font-family:Arial,sans-serif;background:#f0fdf4;color:#1f2937;padding:24px;">
-<div style="max-width:680px;margin:0 auto;background:#fff;border-radius:16px;padding:28px;box-shadow:0 12px 30px rgba(0,0,0,.08);">
-  <div style="background:linear-gradient(135deg,#065f46,#10b981);color:#fff;padding:22px;border-radius:12px;margin-bottom:18px;">
-    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-bottom:6px;">ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“ Student Program Alert</div>
-    <h1 style="margin:0 0 8px;font-size:26px;">{program.get('title', 'New Program')}</h1>
-    <p style="margin:0;font-size:14px;opacity:.9;">by <strong>{program.get('company', 'Company')}</strong> ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {today}</p>
-  </div>
-  <p style="font-size:16px;line-height:1.7;margin:0 0 16px;">A new opportunity has opened for students. Here's everything you need to know:</p>
-  <div style="background:#f0fdf4;border-left:5px solid #10b981;border-radius:10px;padding:16px;margin:0 0 20px;font-size:14px;line-height:1.8;color:#134e4a;">
-    {deadline_text}
-    {launch_text}
-    <strong>Category:</strong> {program.get('category', 'Program').title()}<br>
-    <strong>Offered by:</strong> {program.get('company', 'Company')}
-  </div>
-  <p style="font-size:15px;line-height:1.7;color:#334155;">{program.get('description', 'Check the registration link for full details.')}</p>
-  <div style="text-align:center;margin:28px 0;">
-    <a href="{program.get('registration_url', '#')}"
-       style="display:inline-block;background:linear-gradient(135deg,#065f46,#10b981);color:#fff;
-              padding:16px 36px;border-radius:12px;font-size:16px;font-weight:700;text-decoration:none;
-              box-shadow:0 8px 20px rgba(16,185,129,.35);">
-      ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬ Register Now ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢
-    </a>
-  </div>
-  <p style="font-size:13px;color:#6b7280;text-align:center;margin-top:20px;">
-    You receive these alerts because you are subscribed to Nova Brief.<br>
-    This email was sent to you before the program launches so you have time to prepare.
-  </p>
-</div></body></html>"""
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <tr>
+            <td style="padding:40px;text-align:left;">
+              <div style="font-size:12px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Priority Application Alert</div>
+              <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:600;color:#111827;">{program.get('title', 'New Program')}</h1>
+              <p style="margin:0 0 24px 0;font-size:15px;color:#6b7280;">Offered by <strong>{program.get('company', 'Corporate Partner')}</strong></p>
+              
+              <div style="background-color:#f9fafb;border-radius:6px;padding:24px;margin-bottom:24px;font-size:15px;color:#374151;line-height:1.6;border:1px solid #e5e7eb;">
+                {launch_text}
+                {deadline_text}
+                <div style="margin-top:16px;"><strong>Program Details:</strong><br>{program.get('description', 'A new elite opportunity has opened for students. Review the official portal for comprehensive details.')}</div>
+              </div>
+              
+              <div style="text-align:center;margin:32px 0;">
+                <a href="{program.get('registration_url', 'https://novabrief-web.onrender.com')}" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Official Application</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
+              <p style="margin:0 0 8px 0;">Nova Brief &bull; Career Intelligence</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
 
 
 def send_contact_notification_email(name: str, email: str, subject: str, message: str) -> bool:
@@ -637,10 +638,36 @@ if __name__ == '__main__':
 
 
 def send_password_reset_email(email: str, token: str) -> None:
-    sender_email = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
-    sender_password = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_PASSWORD')
-    if not sender_email or not sender_password:
-        return
+    reset_url = f"https://novabrief-web.onrender.com/user/reset-password/{token}"
+    subject = "Reset Your Password - Nova Brief"
+    html_content = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
+<body style="margin:0;padding:0;background-color:#f6f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#333333;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f9fc;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <tr>
+            <td style="padding:40px;text-align:left;">
+              <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;color:#111827;">Password Reset Request</h1>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">We received a request to reset the password for your Nova Brief account associated with {email}.</p>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">Click the button below to securely set a new password. This link will expire in 1 hour.</p>
+              
+              <div style="text-align:center;margin:32px 0;">
+                <a href="{reset_url}" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Reset Password</a>
+              </div>
+              
+              <p style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;">If you did not request a password reset, please ignore this email or contact support if you have concerns.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+    send_email(email, subject, html_content)
     reset_link = f'https://novabrief-web.onrender.com/user/reset-password/{token}'
     subject = "Password Reset Request - Nova Brief"
     html = f'''
