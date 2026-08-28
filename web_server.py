@@ -286,7 +286,7 @@ def get_user_overview():
     return jsonify({
         'profile': {'email': email, 'name': session.get('user_name')},
         'summary': db.get_user_dashboard_summary(email),
-        'articles': db.get_recent_articles(limit=8),
+        'articles': db.get_recent_articles(limit=5),
         'programs': db.get_active_programs(limit=6),
     })
 
@@ -673,9 +673,9 @@ def handle_ai_chat():
     elif any(w in lower for w in [' news ', ' latest ', ' today ', ' update ', ' artificial intelligence ', ' ai ']):
         if any(w in lower for w in [' news ', ' latest ', ' today ', ' update ']):
             try:
-                articles = db.get_recent_articles(limit=2)
+                articles = db.get_recent_articles(limit=5)
                 if articles:
-                    reply = "Here are a few of the top AI and Tech headlines from today:<br><br>"
+                    reply = "Here are 5 news of the top AI and Tech headlines from today:<br><br>"
                     for idx, a in enumerate(articles, 1):
                         title = a.get('title', 'Unknown Title')
                         summary = a.get('summary', 'Detailed summary available to subscribers.')
