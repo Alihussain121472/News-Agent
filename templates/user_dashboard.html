@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -859,6 +859,13 @@ if (USER_EMAIL) {
 }
 
 loadOverview();
+
+// Deep-link support: if URL has ?tab=activity, switch to that tab automatically
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+if(tabParam && ['activity','articles','programs','progress','summarizer','memory'].includes(tabParam)) {
+  switchTab(tabParam);
+}
 
 function handleCheckbox() {
   const checkboxes = document.querySelectorAll('.news-checkbox:checked');
