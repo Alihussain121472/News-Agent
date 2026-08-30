@@ -32,9 +32,12 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       continue-on-error: true
     
-    - name: Test database initialization
+    - name: Validate Python source
       run: |
-        python -c "from database import NewsDatabase; db = NewsDatabase('test.db'); print('✓ Database initialized successfully')"
+        # CI has no production DATABASE_URL. Compile the application without
+        # opening an external database connection.
+        python -m compileall -q web_server.py database.py ai_news_agent.py \
+          analytics_revenue_portal growth_seo_agent social_media_agent
     
     - name: Test Flask app
       run: |
