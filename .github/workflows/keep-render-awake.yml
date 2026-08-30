@@ -1,0 +1,45 @@
+name: Keep Nova Brief available
+
+on:
+  schedule:
+    # Render's free web service sleeps after 15 minutes. A lightweight request
+    # every 10 minutes keeps the public site and its crawler rules reachable.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keep-nova-brief-available
+  cancel-in-progress: true
+
+jobs:
+  availability-check:
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    steps:
+      - name: Wake the site and verify crawler access
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 120 \
+            --retry 2 \
+            --retry-delay 10 \
+            --user-agent "NovaBrief-Availability-Monitor/1.0" \
+            --output /dev/null \
+            https://www.novabrief.tech/
+
+          robots="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 30 \
+            https://www.novabrief.tech/robots.txt)"
+
+          grep --fixed-strings "Allow: /" <<< "$robots"
+          echo "Nova Brief is awake and crawler access is enabled."
