@@ -114,7 +114,7 @@
         <!-- Guest Portion (shown when logged out) -->
         <div id="navGuestPortion" class="flex items-center gap-4">
           <a href="/user/login" class="text-slate-300 hover:text-white transition text-sm font-medium">Sign In</a>
-          <a href="#subscribe" class="bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-blue-500/20">Get Started</a>
+          <a href="#subscribe" class="ui-button ui-button--primary ui-button--compact">Get Started</a>
         </div>
 
         <!-- User Portion (shows Name, Email, Avatar & Dashboard until logout) -->
@@ -129,15 +129,15 @@
             </div>
             <div class="text-[11px] text-slate-400 truncate max-w-[130px]" id="navUserEmail">user@email.com</div>
           </div>
-          <a href="/user/dashboard" class="bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 text-xs font-bold px-3 py-1.5 rounded-lg transition border border-blue-500/30 flex items-center gap-1">
+          <a href="/user/dashboard" class="ui-button ui-button--secondary ui-button--compact">
             <i class="fas fa-th-large text-[10px]"></i> Dashboard
           </a>
-          <button onclick="handleUserLogout()" class="text-slate-400 hover:text-red-400 text-xs px-1.5 py-1 transition" title="Logout">
+          <button type="button" onclick="handleUserLogout()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Sign out" title="Sign out">
             <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
       </div>
-      <button id="mobileMenuBtn" class="md:hidden text-slate-400 hover:text-white">
+      <button type="button" id="mobileMenuBtn" class="ui-button ui-button--quiet ui-button--icon md:hidden" aria-label="Open navigation menu" aria-controls="mobileMenu" aria-expanded="false">
         <i class="fas fa-bars text-xl"></i>
       </button>
     </div>
@@ -149,7 +149,7 @@
     <a href="#contact" class="block text-slate-400 hover:text-white py-2 text-sm">Contact</a>
     <div id="mobileGuestPortion" class="space-y-2 pt-2 border-t border-slate-800">
       <a href="/user/login" class="block text-slate-300 hover:text-white py-2 text-sm">Sign In</a>
-      <a href="#subscribe" class="block bg-gradient-to-r from-blue-600 to-emerald-500 text-white text-sm font-semibold px-4 py-2 rounded-xl text-center shadow">Get Started Free</a>
+      <a href="#subscribe" class="ui-button ui-button--primary w-full">Get Started Free</a>
     </div>
     <div id="mobileUserPortion" class="hidden pt-3 border-t border-slate-800 space-y-2">
       <div class="flex items-center gap-3 p-2 bg-slate-800/80 rounded-xl border border-slate-700">
@@ -159,8 +159,8 @@
           <div class="text-[11px] text-slate-400" id="mobileUserEmail">user@email.com</div>
         </div>
       </div>
-      <a href="/user/dashboard" class="block bg-blue-600 text-white text-xs font-bold py-2 text-center rounded-xl">Go to Dashboard</a>
-      <button onclick="handleUserLogout()" class="w-full text-center text-red-400 hover:text-red-300 text-xs py-2">Sign Out</button>
+      <a href="/user/dashboard" class="ui-button ui-button--primary w-full">Go to Dashboard</a>
+      <button type="button" onclick="handleUserLogout()" class="ui-button ui-button--danger w-full">Sign Out</button>
     </div>
   </div>
 </nav>
@@ -195,13 +195,13 @@
           </div>
         </div>
         <div class="flex flex-wrap gap-4 mt-8">
-          <a href="#subscribe" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-black px-10 py-5 rounded-2xl shadow-[0_0_40px_rgba(37,99,235,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_60px_rgba(52,211,153,0.5)] transform animate-bounce">
+          <a href="#subscribe" class="ui-button ui-button--primary ui-button--large">
             <i class="fas fa-bolt text-yellow-300"></i> Get Free Access
           </a>
-          <a href="/user/dashboard" class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md border border-slate-400/30 hover:bg-slate-700 hover:border-slate-300 text-white font-bold px-8 py-5 rounded-2xl shadow-lg transition-all hover:-translate-y-1">
+          <a href="/user/dashboard" class="ui-button ui-button--secondary ui-button--large">
             <i class="fas fa-newspaper text-blue-400"></i> Read Live News
           </a>
-          <a href="/user/register" class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md border border-slate-400/30 hover:bg-slate-700 hover:border-slate-300 text-white font-bold px-8 py-5 rounded-2xl shadow-lg transition-all hover:-translate-y-1">
+          <a href="/user/register" class="ui-button ui-button--secondary ui-button--large">
             <i class="fas fa-user-plus text-emerald-400"></i> Create Account
           </a>
         </div>
@@ -286,7 +286,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">Help Google promote its products on campus and earn certification & exclusive perks.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://developers.google.com/community/gdsc" target="_blank" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://developers.google.com/community/gdsc" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
 
@@ -301,7 +301,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">Microsoft's annual student programs covering AI, cloud, data engineering with certifications.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://mvp.microsoft.com/en-us/studentambassadors" target="_blank" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://mvp.microsoft.com/en-us/studentambassadors" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
 
@@ -316,7 +316,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">AWS programs for students including free cloud training, credits, and career pathways.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://aws.amazon.com/education/awseducate/" target="_blank" class="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://aws.amazon.com/education/awseducate/" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
 
@@ -331,7 +331,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">Immersive tech and engineering internships for underrepresented students.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://www.metacareers.com/students-and-grads/" target="_blank" class="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://www.metacareers.com/students-and-grads/" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
 
@@ -346,7 +346,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">Free learning, credentials, and mentorship in AI, cybersecurity, and cloud computing.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://skillsbuild.org/students" target="_blank" class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://skillsbuild.org/students" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
 
@@ -361,7 +361,7 @@
           <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-grow">Create an original app playground and win exclusive Apple WWDC awards.</p>
           <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-700/50">
             <a href="#subscribe" class="text-xs font-bold text-slate-400 hover:text-white transition">Alert Me <i class="fas fa-bell"></i></a>
-            <a href="https://developer.apple.com/swift-student-challenge/" target="_blank" class="bg-slate-500/20 hover:bg-slate-500/40 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Apply Now <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://developer.apple.com/swift-student-challenge/" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--compact">Apply Now <i class="fas fa-external-link-alt"></i></a>
           </div>
         </div>
       </div>
@@ -374,9 +374,10 @@
       <h3 class="text-xl md:text-2xl font-black text-white mb-2">Get Early Alerts for Google, Microsoft & NASA Programs</h3>
       <p class="text-slate-400 text-sm mb-5">Join the student alert list to get launch preparation tips & direct 1-click registration links delivered to your inbox.</p>
       <form id="programAlertForm" class="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto">
+        <label for="progAlertEmail" class="sr-only">Student email address</label>
         <input type="email" id="progAlertEmail" placeholder="your.student.email@domain.com" required
           class="flex-1 bg-slate-950/90 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 transition"/>
-        <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm whitespace-nowrap shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+        <button type="submit" class="ui-button ui-button--primary whitespace-nowrap">
           <span>Get Alerts</span>
           <i class="fas fa-paper-plane text-xs"></i>
         </button>
@@ -386,7 +387,7 @@
 
     <div class="text-center">
       <p class="text-slate-500 text-sm mb-4">+ NASA, Deloitte, IBM, Meta and many more tracked automatically</p>
-      <a href="#subscribe" class="inline-flex items-center gap-2 bg-slate-900/70 backdrop-blur-md border border-slate-400/15 hover:bg-slate-700/50 text-white font-semibold px-6 py-3 rounded-xl transition">
+      <a href="#subscribe" class="ui-button ui-button--secondary">
         <i class="fas fa-bell"></i> Subscribe to get all program alerts
       </a>
     </div>
@@ -416,11 +417,13 @@
       <h2 class="text-4xl font-black text-white mb-4">Join <span class="bg-gradient-to-br from-blue-400 to-emerald-400 bg-clip-text text-transparent">Nova Brief</span></h2>
       <p class="text-slate-400 text-lg mb-8">Exclusive daily AI intelligence briefings and elite student program alerts. Free forever.</p>
       <form id="subscribeForm" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-4">
+        <label for="subName" class="sr-only">Your name</label>
         <input type="text" id="subName" placeholder="Your Name" required
           class="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+        <label for="subEmail" class="sr-only">Email address</label>
         <input type="email" id="subEmail" placeholder="your@email.com" required
           class="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-3 rounded-xl transition whitespace-nowrap shadow-lg shadow-blue-500/20">
+        <button type="submit" class="ui-button ui-button--primary whitespace-nowrap">
           Subscribe <i class="fas fa-arrow-right ml-1"></i>
         </button>
       </form>
@@ -438,39 +441,39 @@
     </div>
     <div class="space-y-3" id="faqList">
       <div class="faq-item bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-xl overflow-hidden">
-        <button class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)">
+        <button type="button" class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-1">
           <span class="font-semibold text-white text-sm">How often do I receive emails?</span>
           <i class="fas fa-plus text-blue-400 transition-transform"></i>
         </button>
-        <div class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">One AI news digest every morning at 8 AM. Plus program alerts sent ahead of launch - never more than needed.</div>
+        <div id="faq-answer-1" class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">One AI news digest every morning at 8 AM. Plus program alerts sent ahead of launch - never more than needed.</div>
       </div>
       <div class="faq-item bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-xl overflow-hidden">
-        <button class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)">
+        <button type="button" class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-2">
           <span class="font-semibold text-white text-sm">Which companies' programs do you track?</span>
           <i class="fas fa-plus text-blue-400 transition-transform"></i>
         </button>
-        <div class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">Google, Microsoft, Amazon AWS, NASA, Deloitte, IBM, Meta, and many more. New programs are added regularly.</div>
+        <div id="faq-answer-2" class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">Google, Microsoft, Amazon AWS, NASA, Deloitte, IBM, Meta, and many more. New programs are added regularly.</div>
       </div>
       <div class="faq-item bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-xl overflow-hidden">
-        <button class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)">
+        <button type="button" class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-3">
           <span class="font-semibold text-white text-sm">How early do I get the program alerts?</span>
           <i class="fas fa-plus text-blue-400 transition-transform"></i>
         </button>
-        <div class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">At least 7 days before the program launches - giving you time to prepare your application.</div>
+        <div id="faq-answer-3" class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">At least 7 days before the program launches - giving you time to prepare your application.</div>
       </div>
       <div class="faq-item bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-xl overflow-hidden">
-        <button class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)">
+        <button type="button" class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-4">
           <span class="font-semibold text-white text-sm">Is an account required for subscription?</span>
           <i class="fas fa-plus text-blue-400 transition-transform"></i>
         </button>
-        <div class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">No. Enter your email above and you're subscribed. Create an account to access the user dashboard and track your activity.</div>
+        <div id="faq-answer-4" class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">No. Enter your email above and you're subscribed. Create an account to access the user dashboard and track your activity.</div>
       </div>
       <div class="faq-item bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-xl overflow-hidden">
-        <button class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)">
+        <button type="button" class="faq-btn w-full flex items-center justify-between p-5 text-left" onclick="toggleFaq(this)" aria-expanded="false" aria-controls="faq-answer-5">
           <span class="font-semibold text-white text-sm">Can I cancel my subscription?</span>
           <i class="fas fa-plus text-blue-400 transition-transform"></i>
         </button>
-        <div class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">Yes, anytime. One click from any email or through your dashboard settings.</div>
+        <div id="faq-answer-5" class="faq-ans hidden px-5 pb-5 text-slate-400 text-sm leading-relaxed">Yes, anytime. One click from any email or through your dashboard settings.</div>
       </div>
     </div>
   </div>
@@ -499,7 +502,7 @@
             </div>
             <div>
               <div class="text-sm font-bold text-white mb-1">Twitter / X</div>
-              <a href="https://x.com/Syedali6160" target="_blank" class="text-slate-400 hover:text-sky-400 transition text-sm">@Syedali6160</a>
+              <a href="https://x.com/Syedali6160" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-sky-400 transition text-sm">@Syedali6160</a>
             </div>
           </div>
           <div class="flex items-center gap-4 mt-6">
@@ -508,7 +511,7 @@
             </div>
             <div>
               <div class="text-sm font-bold text-white mb-1">LinkedIn</div>
-              <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" class="text-slate-400 hover:text-blue-500 transition text-sm">Ali Hussain</a>
+              <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-blue-500 transition text-sm">Ali Hussain</a>
             </div>
           </div>
           <div class="flex items-center gap-4 mt-6">
@@ -517,19 +520,23 @@
             </div>
             <div>
               <div class="text-sm font-bold text-white mb-1">Nova Brief Updates</div>
-              <a href="https://x.com/Novabrieftech" target="_blank" class="text-slate-400 hover:text-sky-400 transition text-sm">@Novabrieftech</a>
+              <a href="https://x.com/Novabrieftech" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-sky-400 transition text-sm">@Novabrieftech</a>
             </div>
           </div>
       </div>
       <form class="space-y-4" onsubmit="handleContact(event)">
+        <label for="cName" class="sr-only">Your name</label>
         <input type="text" id="cName" placeholder="Your Name" required class="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+        <label for="cEmail" class="sr-only">Email address</label>
         <input type="email" id="cEmail" placeholder="your@email.com" required class="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+        <label for="cSubject" class="sr-only">Subject</label>
         <select id="cSubject" required class="w-full bg-slate-800 border border-slate-700 text-slate-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition">
           <option value="">Select Subject</option>
           <option>Support</option><option>Feedback</option><option>Partnership</option><option>Program Suggestion</option>
         </select>
+        <label for="cMessage" class="sr-only">Message</label>
         <textarea id="cMessage" rows="4" placeholder="Your message..." required class="w-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition">Send Message</button>
+        <button type="submit" class="ui-button ui-button--primary w-full">Send Message</button>
         <div id="contactMsg" class="hidden rounded-xl p-3 text-sm font-semibold text-center"></div>
       </form>
     </div>
@@ -549,12 +556,12 @@
         </div>
         <p class="text-slate-500 text-sm leading-relaxed">Daily AI news + student program alerts from top companies worldwide.</p>
         <div class="flex gap-3 mt-4">
-                      <a href="https://x.com/Syedali6160" target="_blank" class="w-8 h-8 bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-400 transition"><i class="fab fa-twitter text-xs"></i></a>
-            <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" class="w-8 h-8 bg-slate-900/70 backdrop-blur-md border border-slate-400/15 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-600 transition"><i class="fab fa-linkedin text-xs"></i></a>
+          <a href="https://x.com/Syedali6160" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Nova Brief on X"><i class="fab fa-twitter text-xs"></i></a>
+          <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" rel="noopener noreferrer" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Nova Brief on LinkedIn"><i class="fab fa-linkedin text-xs"></i></a>
         </div>
       </div>
       <div>
-        <h5 class="font-bold text-white mb-4 text-sm">Product</h5>
+        <h3 class="font-bold text-white mb-4 text-sm">Product</h3>
         <ul class="space-y-2 text-sm text-slate-500">
           <li><a href="#features" class="hover:text-blue-400 transition">Features</a></li>
           <li><a href="#programs" class="hover:text-blue-400 transition">Programs</a></li>
@@ -562,7 +569,7 @@
         </ul>
       </div>
       <div>
-        <h5 class="font-bold text-white mb-4 text-sm">Account</h5>
+        <h3 class="font-bold text-white mb-4 text-sm">Account</h3>
         <ul class="space-y-2 text-sm text-slate-500">
           <li><a href="/user/register" class="hover:text-blue-400 transition">Register</a></li>
           <li><a href="/user/login" class="hover:text-blue-400 transition">Sign In</a></li>
@@ -570,7 +577,7 @@
         </ul>
       </div>
       <div>
-        <h5 class="font-bold text-white mb-4 text-sm">Legal</h5>
+        <h3 class="font-bold text-white mb-4 text-sm">Legal</h3>
         <ul class="space-y-2 text-sm text-slate-500">
           <li><a href="/privacy" class="hover:text-blue-400 transition">Privacy Policy</a></li>
           <li><a href="/terms" class="hover:text-blue-400 transition">Terms of Service</a></li>
@@ -587,7 +594,11 @@
 <script>
 // Mobile menu
 document.getElementById('mobileMenuBtn').addEventListener('click',()=>{
-  document.getElementById('mobileMenu').classList.toggle('hidden');
+  const button = document.getElementById('mobileMenuBtn');
+  const menu = document.getElementById('mobileMenu');
+  const isOpen = !menu.classList.toggle('hidden');
+  button.setAttribute('aria-expanded', String(isOpen));
+  button.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
 });
 
 // FAQ
@@ -596,8 +607,14 @@ function toggleFaq(btn){
   const icon = btn.querySelector('i');
   const isOpen = !ans.classList.contains('hidden');
   document.querySelectorAll('.faq-ans').forEach(a=>a.classList.add('hidden'));
+  document.querySelectorAll('.faq-btn').forEach(b=>b.setAttribute('aria-expanded','false'));
   document.querySelectorAll('.faq-btn i').forEach(i=>{i.classList.remove('fa-minus','rotate-45');i.classList.add('fa-plus');});
-  if(!isOpen){ ans.classList.remove('hidden'); icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
+  if(!isOpen){
+    ans.classList.remove('hidden');
+    btn.setAttribute('aria-expanded','true');
+    icon.classList.remove('fa-plus');
+    icon.classList.add('fa-minus');
+  }
 }
 
 // Load stats
@@ -623,7 +640,7 @@ document.getElementById('subscribeForm').addEventListener('submit', async e=>{
       body:JSON.stringify({name:document.getElementById('subName').value.trim(), email:document.getElementById('subEmail').value.trim()})});
     const d = await r.json();
     msg.className='rounded-xl p-4 text-sm font-semibold mt-3 '+(r.ok&&d.status!=='error'?'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30':'bg-red-500/20 text-red-300 border border-red-500/30');
-    msg.innerHTML = (d.message||'Subscribed successfully!') + (d.redirect ? `<div class="mt-3"><a href="${d.redirect}" class="inline-block bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-lg transition">Open My Dashboard &rarr;</a></div>` : '');
+    msg.innerHTML = (d.message||'Subscribed successfully!') + (d.redirect ? `<div class="mt-3"><a href="${d.redirect}" class="ui-button ui-button--primary ui-button--compact">Open My Dashboard &rarr;</a></div>` : '');
     msg.classList.remove('hidden');
     if(r.ok&&d.status!=='error') e.target.reset();
   }catch(err){
@@ -641,7 +658,7 @@ if (pForm) {
     const msg = document.getElementById('progAlertMsg');
     const email = document.getElementById('progAlertEmail').value.trim();
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Joining...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Setting up alerts...';
     try {
       const r = await fetch('/api/programs/join-alert', {
         method: 'POST',
@@ -650,7 +667,7 @@ if (pForm) {
       });
       const d = await r.json();
       msg.className = 'mt-3 rounded-xl p-3 text-xs font-semibold text-center ' + (r.ok ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30');
-      msg.innerHTML = (d.message || 'Joined successfully!') + (d.redirect ? `<div class="mt-2"><a href="${d.redirect}" class="inline-block bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-1.5 rounded-lg text-xs transition">Open Student Dashboard &rarr;</a></div>` : '');
+      msg.innerHTML = (d.message || 'Joined successfully!') + (d.redirect ? `<div class="mt-2"><a href="${d.redirect}" class="ui-button ui-button--primary ui-button--compact">Open Student Dashboard &rarr;</a></div>` : '');
       msg.classList.remove('hidden');
       if (r.ok) this.reset();
     } catch(err) {
@@ -770,8 +787,8 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleBotSettings()" class="text-white hover:text-blue-200 transition"><i class="fas fa-cog"></i></button>
-                    <button onclick="toggleBot()" class="text-white hover:text-blue-200 transition"><i class="fas fa-times"></i></button>
+                    <button type="button" onclick="toggleBotSettings()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Open chat settings"><i class="fas fa-cog"></i></button>
+                    <button type="button" onclick="toggleBot()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Close chat"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             
@@ -779,12 +796,12 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
             <div id="botSettingsPanel" class="hidden absolute inset-0 bg-slate-50 z-10 flex flex-col">
                 <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
                     <h4 class="font-bold text-sm"><i class="fas fa-cog mr-2"></i>Bot Settings</h4>
-                    <button onclick="toggleBotSettings()" class="text-white hover:text-blue-200 transition"><i class="fas fa-arrow-left"></i></button>
+                    <button type="button" onclick="toggleBotSettings()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Return to chat"><i class="fas fa-arrow-left"></i></button>
                 </div>
                 <div class="p-5 flex-1 space-y-4">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-2">Data & Privacy</label>
-                        <button onclick="clearChatHistory()" class="w-full bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-sm font-semibold py-2 px-3 rounded-xl transition flex items-center justify-center gap-2">
+                        <button type="button" onclick="clearChatHistory()" class="ui-button ui-button--danger w-full">
                             <i class="fas fa-trash-alt"></i> Delete Chat History
                         </button>
                         <p class="text-[10px] text-slate-500 mt-2 text-center">This will permanently delete your conversation history from the server and this browser.</p>
@@ -798,13 +815,14 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
             </div>
             <!-- Input -->
             <div class="p-3 border-t border-slate-200 bg-white flex gap-2">
+                <label for="botInput" class="sr-only">Message Nova AI Assistant</label>
                 <input type="text" id="botInput" placeholder="Ask a question..." class="flex-1 text-black bg-slate-100 border-none rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" onkeypress="if(event.key==='Enter') sendBotMessage()">
-                <button onclick="sendBotMessage()" class="w-9 h-9 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center justify-center transition"><i class="fas fa-paper-plane text-xs"></i></button>
+                <button type="button" onclick="sendBotMessage()" class="ui-button ui-button--primary ui-button--icon ui-button--compact" aria-label="Send message"><i class="fas fa-paper-plane text-xs"></i></button>
             </div>
         </div>
         
         <!-- Toggle Button -->
-        <button id="novaBotToggle" onclick="toggleBot()" class="w-14 h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-blue-500/30 transition transform hover:scale-105">
+        <button type="button" id="novaBotToggle" onclick="toggleBot()" class="ui-button ui-button--primary ui-button--icon ui-button--large rounded-full" aria-label="Open Nova AI Assistant" aria-controls="novaBotWindow" aria-expanded="false">
             <i class="fas fa-comment-dots text-xl"></i>
         </button>
     </div>
@@ -812,7 +830,10 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
     <script>
         function toggleBot() {
             const win = document.getElementById('novaBotWindow');
-            win.classList.toggle('hidden');
+            const toggle = document.getElementById('novaBotToggle');
+            const isOpen = !win.classList.toggle('hidden');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            toggle.setAttribute('aria-label', isOpen ? 'Close Nova AI Assistant' : 'Open Nova AI Assistant');
         }
         
         function toggleBotSettings() {
@@ -935,23 +956,35 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
       if (data && data.length > 0) {
         container.innerHTML = '';
         data.slice(0,3).forEach((item, index) => {
-          let icon = 'fa-robot'; let color = 'blue';
-          if(index === 1) { icon = 'fa-graduation-cap'; color = 'emerald'; }
-          if(index === 2) { icon = 'fa-star'; color = 'purple'; }
-          
-          container.innerHTML += 
-            <a href="/user/dashboard" class="block bg-slate-800/60 rounded-xl p-4 border border--500/20 hover:bg-slate-700 transition">
-              <div class="flex items-start gap-3">
-                <div class="w-8 h-8 rounded-lg bg--500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <i class="fas  text--400 text-xs"></i>
-                </div>
-                <div>
-                  <div class="text-sm font-semibold text-white line-clamp-1"></div>
-                  <div class="text-xs text-slate-500"></div>
-                </div>
-              </div>
-            </a>
-          ;
+          const styles = [
+            { icon: 'fa-robot', border: 'border-blue-500/20', iconBg: 'bg-blue-500/20', iconText: 'text-blue-400' },
+            { icon: 'fa-graduation-cap', border: 'border-emerald-500/20', iconBg: 'bg-emerald-500/20', iconText: 'text-emerald-400' },
+            { icon: 'fa-star', border: 'border-purple-500/20', iconBg: 'bg-purple-500/20', iconText: 'text-purple-400' }
+          ];
+          const style = styles[index];
+          const card = document.createElement('a');
+          card.href = '/user/dashboard';
+          card.className = `block bg-slate-800/60 rounded-xl p-4 border ${style.border} hover:bg-slate-700 transition`;
+
+          const row = document.createElement('div');
+          row.className = 'flex items-start gap-3';
+          const iconWrap = document.createElement('div');
+          iconWrap.className = `w-8 h-8 rounded-lg ${style.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`;
+          const icon = document.createElement('i');
+          icon.className = `fas ${style.icon} ${style.iconText} text-xs`;
+          iconWrap.appendChild(icon);
+
+          const copy = document.createElement('div');
+          const title = document.createElement('div');
+          title.className = 'text-sm font-semibold text-white line-clamp-1';
+          title.textContent = item.title || 'Latest Nova Brief update';
+          const source = document.createElement('div');
+          source.className = 'text-xs text-slate-500';
+          source.textContent = item.source || 'Nova Brief';
+          copy.append(title, source);
+          row.append(iconWrap, copy);
+          card.appendChild(row);
+          container.appendChild(card);
         });
       }
     } catch(err) {

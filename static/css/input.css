@@ -9,6 +9,14 @@
     --color-secondary: #10b981;
     --color-dark-bg: #0f172a;
     --color-darker-bg: #020817;
+    --color-text-strong: #f8fafc;
+    --color-text: #e2e8f0;
+    --color-text-muted: #aebdd0;
+    --color-brand: #60a5fa;
+    --color-accent: #34d399;
+    --color-danger: #f87171;
+    --color-warning: #fde68a;
+    --color-ink: #0f172a;
   }
   
   body {
@@ -77,4 +85,200 @@ input:focus, textarea:focus, select:focus {
 .btn-primary:hover {
   box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
   transform: translateY(-1px);
+}
+
+/* Nova Brief design system: keep text hierarchy and actions intentionally small. */
+body .text-white,
+body .hover\:text-white:hover {
+  color: var(--color-text-strong);
+}
+
+body.text-slate-200,
+body .text-slate-200,
+body .text-slate-300 {
+  color: var(--color-text);
+}
+
+body .text-slate-400,
+body .text-slate-500,
+body .text-slate-600,
+body .hover\:text-slate-400:hover {
+  color: var(--color-text-muted);
+}
+
+body .text-blue-200,
+body .text-blue-300,
+body .text-blue-400,
+body .text-blue-500,
+body .text-blue-600,
+body .text-cyan-400,
+body .text-indigo-400,
+body .text-purple-400,
+body .text-sky-400,
+body .text-orange-400,
+body .hover\:text-blue-200:hover,
+body .hover\:text-blue-300:hover,
+body .hover\:text-blue-400:hover,
+body .hover\:text-blue-500:hover,
+body .hover\:text-blue-600:hover,
+body .hover\:text-sky-400:hover {
+  color: var(--color-brand);
+}
+
+body .text-emerald-300,
+body .text-emerald-400,
+body .text-green-400,
+body .hover\:text-emerald-300:hover,
+body .hover\:text-emerald-400:hover {
+  color: var(--color-accent);
+}
+
+body .text-red-300,
+body .text-red-400,
+body .text-red-600,
+body .hover\:text-red-300:hover,
+body .hover\:text-red-400:hover {
+  color: var(--color-danger);
+}
+
+body .text-yellow-300 {
+  color: var(--color-warning);
+}
+
+body .text-black,
+body .text-slate-700,
+body .text-slate-950 {
+  color: var(--color-ink);
+}
+
+.ui-button {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  color: var(--color-text-strong);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 180ms ease, background-color 180ms ease,
+    border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+}
+
+.ui-button:hover {
+  transform: translateY(-1px);
+}
+
+.ui-button:focus-visible,
+.faq-btn:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.ui-button--primary {
+  background: linear-gradient(135deg, #2563eb, #0f8a78);
+  border-color: rgba(96, 165, 250, 0.35);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.24);
+}
+
+.ui-button--primary:hover {
+  background: linear-gradient(135deg, #3b82f6, #10a58e);
+  box-shadow: 0 14px 34px rgba(37, 99, 235, 0.32);
+}
+
+.ui-button--secondary {
+  background: rgba(30, 41, 59, 0.78);
+  border-color: rgba(148, 163, 184, 0.32);
+  box-shadow: 0 8px 22px rgba(2, 8, 23, 0.22);
+}
+
+.ui-button--secondary:hover {
+  background: rgba(51, 65, 85, 0.92);
+  border-color: rgba(148, 163, 184, 0.55);
+}
+
+.ui-button--quiet {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-muted);
+  box-shadow: none;
+}
+
+.ui-button--quiet:hover {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--color-text-strong);
+}
+
+.bg-blue-600 .ui-button--quiet {
+  color: var(--color-text-strong);
+}
+
+.ui-button--danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: var(--color-danger);
+  box-shadow: none;
+}
+
+.ui-button--danger:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
+.ui-button--compact {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.ui-button--large {
+  min-height: 3.5rem;
+  padding: 0.9rem 1.75rem;
+  font-size: 1rem;
+}
+
+.ui-button--icon {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+}
+
+.ui-button--icon.ui-button--large {
+  width: 3.5rem;
+  min-width: 3.5rem;
+  height: 3.5rem;
+}
+
+.faq-btn {
+  min-height: 3.5rem;
+  color: var(--color-text-strong);
+  background: transparent;
+  transition: background-color 180ms ease;
+}
+
+.faq-btn:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
