@@ -1,5 +1,6 @@
-import os, sys, json, logging, smtplib
+import os, sys, json, logging, smtplib, ssl
 from datetime import datetime
+from email.utils import formataddr, formatdate, make_msgid, parseaddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import List, Dict, Any
@@ -139,38 +140,55 @@ EMAIL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10, thread_na
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
     from_email = get_env_value('GMAIL_USER', 'EMAIL_USER')
     password = get_env_value('GMAIL_APP_PASSWORD', 'EMAIL_APP_PASSWORD', 'EMAIL_PASS')
+    smtp_host = get_env_value('SMTP_HOST') or 'smtp.gmail.com'
+    smtp_port = int(get_env_value('SMTP_PORT') or '465')
+    sender_name = get_env_value('EMAIL_FROM_NAME') or 'Nova Brief'
+    recipient = parseaddr(to_email or '')[1].strip().lower()
+    sender = parseaddr(from_email or '')[1].strip().lower()
+    if not recipient or '\n' in recipient or '\r' in recipient or '@' not in recipient:
+        logger.error('Refusing to send email to an invalid recipient address.')
+        return False
     if not from_email or not password:
         logger.error('Gmail credentials missing in environment.')
         return False
 
     clean_pwd = password.replace(' ', '').replace('-', '').strip()
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = f"Nova Brief <{from_email}>"
-    msg['To'] = to_email
+    msg['Subject'] = clean_text(subject, 180)
+    msg['From'] = formataddr((sender_name, sender))
+    msg['To'] = recipient
+    msg['Date'] = formatdate(localtime=False)
+    msg['Message-ID'] = make_msgid(domain=sender.split('@')[-1])
+    msg['Reply-To'] = sender
+    msg['List-Unsubscribe'] = f'<mailto:{sender}?subject=Unsubscribe>'
     msg.attach(MIMEText(html_content, 'html', 'utf-8'))
-    
-    # Try Port 465 SSL first (implicit SSL has lower latency and is less likely to be blocked)
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=5) as s:
-            s.login(from_email, clean_pwd)
-            s.send_message(msg)
-        logger.info(f'Email delivered instantly to {to_email} via SSL (port 465)')
-        return True
-    except Exception as e1:
-        logger.warning(f'SSL 465 failed ({e1}), falling back to STARTTLS port 587...')
+
+    context = ssl.create_default_context()
+    ports = [smtp_port]
+    if smtp_host == 'smtp.gmail.com':
+        ports.append(587 if smtp_port == 465 else 465)
+    for port in dict.fromkeys(ports):
         try:
-            with smtplib.SMTP('smtp.gmail.com', 587, timeout=5) as s:
-                s.ehlo()
-                s.starttls()
-                s.ehlo()
-                s.login(from_email, clean_pwd)
+            if port == 465:
+                smtp = smtplib.SMTP_SSL(smtp_host, port, timeout=20, context=context)
+            else:
+                smtp = smtplib.SMTP(smtp_host, port, timeout=20)
+            with smtp as s:
+                if port != 465:
+                    s.ehlo()
+                    s.starttls(context=context)
+                    s.ehlo()
+                s.login(sender, clean_pwd)
                 s.send_message(msg)
-            logger.info(f'Email delivered to {to_email} via STARTTLS (port 587)')
+            logger.info('Email accepted by SMTP for delivery.')
             return True
-        except Exception as e2:
-            logger.error(f'Email delivery failed to {to_email}: SSL: {e1} | TLS: {e2}')
+        except smtplib.SMTPAuthenticationError:
+            logger.error('Email authentication failed. Generate a new app password and update the deployment secret.')
             return False
+        except (smtplib.SMTPException, OSError, ssl.SSLError) as exc:
+            logger.warning('SMTP connection attempt on port %s failed: %s', port, exc.__class__.__name__)
+    logger.error('Email delivery failed on all configured SMTP ports.')
+    return False
 
 
 def dispatch_email_async(to_email: str, subject: str, html_content: str):
@@ -211,14 +229,14 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
               </div>
               
               <div style="text-align:center;margin:32px 0;">
-                <a href="https://novabrief-web.onrender.com/user/dashboard" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Dashboard</a>
+                <a href="https://www.novabrief.tech/user/dashboard" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Dashboard</a>
               </div>
             </td>
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
               <p style="margin:0 0 8px 0;">Nova Brief &bull; Professional AI Intelligence</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://novabrief-web.onrender.com/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
+              <p style="margin:0;"><a href="https://www.novabrief.tech" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://www.novabrief.tech/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://www.novabrief.tech/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
             </td>
           </tr>
         </table>
@@ -230,7 +248,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
 
 
 def send_welcome_email(to_email: str, name: str = None) -> bool:
-    return send_email(to_email, 'Welcome to Nova Brief ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
+    return send_email(to_email, 'Welcome to Nova Brief — Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
 
 
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
@@ -254,14 +272,14 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
               </div>
               
               <div style="text-align:center;margin:32px 0;">
-                <a href="https://novabrief-web.onrender.com/user/dashboard" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">View Program Dashboard</a>
+                <a href="https://www.novabrief.tech/user/dashboard" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">View Program Dashboard</a>
               </div>
             </td>
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
               <p style="margin:0 0 8px 0;">Nova Brief &bull; Elite Program Alerts</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://novabrief-web.onrender.com/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
+              <p style="margin:0;"><a href="https://www.novabrief.tech" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://www.novabrief.tech/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://www.novabrief.tech/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
             </td>
           </tr>
         </table>
@@ -273,8 +291,24 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
 
 
 def send_program_welcome_email(to_email: str, name: str = None, program_title: str = None) -> bool:
-    subject = f"ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“ Welcome to Student Program Alerts ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Nova Brief" if not program_title else f"ÃƒÂ°Ã…Â¸Ã…Â½Ã¢â‚¬Å“ Program Alert Confirmation: {program_title}"
+    subject = 'Welcome to Student Program Alerts — Nova Brief' if not program_title else f'Program Alert Confirmation: {program_title}'
     return send_email(to_email, subject, format_program_welcome_email(to_email, name, program_title))
+
+
+def send_welcome_to_registered_users() -> Dict[str, int]:
+    """Send a welcome message to active registered users and report exact outcomes."""
+    db = NewsDatabase()
+    recipients = db.get_all_active_users()
+    sent = failed = 0
+    for email in recipients:
+        user = db.get_user_by_email(email) or {}
+        if send_welcome_email(email, user.get('name')):
+            sent += 1
+            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+        else:
+            failed += 1
+            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
+    return {'total': len(recipients), 'sent': sent, 'failed': failed}
 
 
 def send_login_email(to_email: str) -> bool:
@@ -553,6 +587,7 @@ def main() -> None:
     parser.add_argument('--test-email', action='store_true')
     parser.add_argument('--preview', action='store_true')
     parser.add_argument('--check-programs', action='store_true')
+    parser.add_argument('--welcome-all', action='store_true')
     args = parser.parse_args()
 
     if args.preview:
@@ -564,6 +599,11 @@ def main() -> None:
     if args.check_programs:
         sent = send_program_notifications()
         print(f'Sent {sent} program notification emails.')
+        return
+
+    if args.welcome_all:
+        result = send_welcome_to_registered_users()
+        print(json.dumps(result))
         return
 
     if args.run_now:

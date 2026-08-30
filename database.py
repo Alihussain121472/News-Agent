@@ -352,6 +352,24 @@ class NewsDatabase:
         conn.close()
         return to_dict(row) if row else None
 
+    def create_user_account(self, email: str, name: str, password_hash: str) -> bool:
+        normalized = email.strip().lower()
+        conn = safe_connect()
+        cursor = conn.cursor()
+        try:
+            cursor.execute('''INSERT INTO registered_users (email, name, is_active, role, password_hash)
+                VALUES (%s, %s, TRUE, 'user', %s)
+                ON CONFLICT (email) DO NOTHING RETURNING id''',
+                (normalized, name, password_hash))
+            created = cursor.fetchone() is not None
+            conn.commit()
+            return created
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
     def create_or_update_user_account(self, email: str, name: str = None, password_hash: str = None) -> str:
         normalized = email.strip().lower()
         conn = safe_connect()
@@ -885,7 +903,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         date_key = run_date or datetime.now().strftime('%Y-%m-%d')
-        cursor.execute('SELECT 1 FROM daily_digest_runs WHERE run_date=%s LIMIT 1', (date_key,))
+        cursor.execute("SELECT 1 FROM daily_digest_runs WHERE run_date=%s AND status='success' LIMIT 1", (date_key,))
         exists = cursor.fetchone() is not None
         conn.close()
         return exists
@@ -945,20 +963,27 @@ class NewsDatabase:
         except Exception: return False
 
     def verify_and_clear_reset_token(self, token: str, new_password_hash: str) -> bool:
+        conn = None
         try:
             conn = safe_connect()
             cursor = conn.cursor()
             cursor.execute('''SELECT email, reset_expiry FROM registered_users WHERE reset_token = %s''', (token,))
             row = cursor.fetchone()
-            if not row: return False
+            if not row:
+                return False
             email, expiry = row
-            if datetime.now() > datetime.strptime(expiry, '%Y-%m-%d %H:%M:%S'):
+            if isinstance(expiry, str):
+                expiry = datetime.strptime(expiry, '%Y-%m-%d %H:%M:%S')
+            if datetime.now() > expiry:
                 return False
             cursor.execute('''UPDATE registered_users SET password_hash = %s, reset_token = NULL, reset_expiry = NULL WHERE email = %s''', (new_password_hash, email))
             conn.commit()
-            conn.close()
             return True
-        except Exception: return False
+        except Exception:
+            return False
+        finally:
+            if conn:
+                conn.close()
 
     # ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Payout & Bank Account Management ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
 

@@ -17,11 +17,18 @@
     <p class="text-slate-500 text-sm font-medium">Leads Generated</p>
     <h3 class="text-3xl font-bold text-slate-900 mt-2">{{ total_leads }}</h3>
   </div>
-  <div class="kpi-card bg-blue-600 text-white shadow-lg shadow-blue-200 border-0 flex flex-col justify-center items-center cursor-pointer hover:bg-blue-700 transition" onclick="alert('Creating new campaign functionality coming soon!')">
+  <button class="kpi-card bg-blue-600 text-white shadow-lg shadow-blue-200 border-0 flex flex-col justify-center items-center cursor-pointer hover:bg-blue-700 transition" onclick="document.getElementById('campaign-form').classList.toggle('hidden')">
     <i class="fas fa-plus-circle text-3xl mb-2 text-blue-200"></i>
     <span class="font-medium">New Campaign</span>
-  </div>
+  </button>
 </div>
+
+<form id="campaign-form" class="hidden bg-white border border-slate-200 rounded-xl p-5 mb-6 grid md:grid-cols-4 gap-3" onsubmit="createCampaign(event)">
+  <input id="campaign-name" required class="border rounded-lg px-3 py-2" placeholder="Campaign name">
+  <select id="campaign-platform" required class="border rounded-lg px-3 py-2"><option value="">Choose platform</option><option>X / Twitter</option><option>LinkedIn</option><option>Facebook</option><option>Instagram</option></select>
+  <select id="campaign-status" class="border rounded-lg px-3 py-2"><option>Active</option><option>Draft</option><option>Paused</option></select>
+  <button class="bg-blue-600 text-white rounded-lg px-4 py-2 font-semibold">Create Campaign</button>
+</form>
 
 <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
   <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
@@ -68,4 +75,16 @@
     </table>
   </div>
 </div>
+<script>
+async function createCampaign(event) {
+  event.preventDefault();
+  const response = await fetch('/social/api/campaigns', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name: document.getElementById('campaign-name').value, platform: document.getElementById('campaign-platform').value, status: document.getElementById('campaign-status').value})
+  });
+  const data = await response.json();
+  if (!response.ok) return alert(data.message || 'Unable to create campaign.');
+  location.reload();
+}
+</script>
 {% endblock %}

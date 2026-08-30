@@ -1,5 +1,6 @@
 ﻿from flask import Blueprint, render_template, session, redirect, url_for, jsonify
 from functools import wraps
+from flask import request
 from database import NewsDatabase, safe_connect
 import psycopg2.extras
 
@@ -41,6 +42,23 @@ def campaigns():
         total_clicks=total_clicks,
         total_leads=total_leads
     )
+
+@social_bp.route('/api/campaigns', methods=['POST'])
+@admin_required
+def create_campaign():
+    data = request.get_json(silent=True) or request.form.to_dict()
+    name = (data.get('name') or '').strip()
+    platform = (data.get('platform') or '').strip()
+    status = (data.get('status') or 'Active').strip()
+    if not name or not platform:
+        return jsonify({'status': 'error', 'message': 'Campaign name and platform are required.'}), 400
+    conn = safe_connect()
+    cursor = conn.cursor()
+    cursor.execute('INSERT INTO social_campaigns (name, status, platform) VALUES (%s, %s, %s) RETURNING id', (name, status, platform))
+    campaign_id = cursor.fetchone()[0]
+    conn.commit()
+    conn.close()
+    return jsonify({'status': 'success', 'message': 'Campaign created.', 'id': campaign_id}), 201
 
 def init_social_db():
     conn = safe_connect()

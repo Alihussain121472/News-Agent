@@ -1,6 +1,8 @@
 # Environment variables - NEVER commit these
 .env
 .env.local
+.env.*
+!.env.example
 
 # Python
 __pycache__/
@@ -61,6 +63,8 @@ desktop.ini
 *.tmp
 *.bak
 .cache/
+.pip-audit-cache/
+.npm-audit-cache/
 .tmp.driveupload/
 
 # Flask

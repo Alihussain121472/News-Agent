@@ -2,41 +2,80 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime, timedelta
-import os, logging, json, threading
+import hashlib, hmac, ipaddress, logging, json, os, re, secrets, socket, threading, time
+from collections import defaultdict, deque
 from functools import wraps
+from urllib.parse import urljoin, urlparse
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import ai_news_agent
 
+load_dotenv('.env.local')
 load_dotenv()
 # Initialize the Flask application
 app = Flask(__name__)
+
+IS_PRODUCTION = os.getenv('FLASK_ENV', 'development').strip().lower() == 'production'
+SECRET_KEY = (os.getenv('SECRET_KEY') or '').strip()
+if IS_PRODUCTION and (len(SECRET_KEY) < 32 or SECRET_KEY == 'nova-brief-secret-key-2026'):
+    raise RuntimeError('A unique SECRET_KEY of at least 32 characters is required in production.')
+if not SECRET_KEY:
+    SECRET_KEY = secrets.token_hex(32)
+
+app.config.update(
+    SECRET_KEY=SECRET_KEY,
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+    SESSION_COOKIE_NAME='novabrief_session',
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=IS_PRODUCTION,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_REFRESH_EACH_REQUEST=True,
+    MAX_CONTENT_LENGTH=1024 * 1024,
+)
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
+    if IS_PRODUCTION:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
+if IS_PRODUCTION:
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
 
 @app.route('/googleae48116c49ed7429.html')
 def google_verification():
     return 'google-site-verification: googleae48116c49ed7429.html'
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'nova-brief-secret-key-2026')
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365 * 10)  # Lifetime session until explicit logout
-
 try:
     from growth_seo_agent.routes import seo_bp
     app.register_blueprint(seo_bp, url_prefix='/seo')
-except Exception: pass
+except Exception:
+    logging.exception('SEO blueprint could not be loaded')
 
 try:
     from social_media_agent.routes import social_bp
     app.register_blueprint(social_bp, url_prefix='/social')
-except Exception: pass
+except Exception:
+    logging.exception('Social blueprint could not be loaded')
 
 try:
     from analytics_revenue_portal.routes import analytics_bp
     app.register_blueprint(analytics_bp, url_prefix='/analytics')
-except Exception: pass
+except Exception:
+    logging.exception('Analytics blueprint could not be loaded')
 
 
-ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or 'admin@novabrief.local').strip().lower()
-ADMIN_PASSWORD = 'Alihussain110#'
+ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or '').strip().lower()
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or ''
+ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH') or ''
+if IS_PRODUCTION and (not ADMIN_EMAIL or not ADMIN_PASSWORD_HASH):
+    raise RuntimeError('ADMIN_EMAIL and ADMIN_PASSWORD_HASH are required in production.')
+if IS_PRODUCTION and ADMIN_PASSWORD:
+    raise RuntimeError('Do not configure plaintext ADMIN_PASSWORD in production; use ADMIN_PASSWORD_HASH.')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -72,6 +111,127 @@ def role_required(required_role: str):
 
 user_required = role_required('user')
 admin_required = role_required('admin')
+
+_EMAIL_PATTERN = re.compile(r'^[^@\s]{1,64}@[^@\s]{1,189}\.[^@\s]{2,63}$')
+_rate_limit_buckets = defaultdict(deque)
+_rate_limit_lock = threading.Lock()
+_dummy_password_hash = generate_password_hash(secrets.token_urlsafe(24))
+
+
+def _valid_email(value: str) -> bool:
+    return bool(value and len(value) <= 254 and _EMAIL_PATTERN.fullmatch(value))
+
+
+def _password_error(password: str):
+    if len(password) < 10:
+        return 'Password must be at least 10 characters.'
+    if len(password) > 128:
+        return 'Password must be 128 characters or fewer.'
+    return None
+
+
+def _rate_limited(scope: str, limit: int, window_seconds: int) -> bool:
+    key = (scope, request.remote_addr or 'unknown')
+    now = time.monotonic()
+    with _rate_limit_lock:
+        bucket = _rate_limit_buckets[key]
+        while bucket and bucket[0] <= now - window_seconds:
+            bucket.popleft()
+        if len(bucket) >= limit:
+            return True
+        bucket.append(now)
+        return False
+
+
+def _clear_rate_limit(scope: str) -> None:
+    key = (scope, request.remote_addr or 'unknown')
+    with _rate_limit_lock:
+        _rate_limit_buckets.pop(key, None)
+
+
+def _same_origin_request() -> bool:
+    source = request.headers.get('Origin') or request.headers.get('Referer')
+    if not source:
+        return not IS_PRODUCTION or app.testing
+    try:
+        return urlparse(source).netloc == urlparse(request.host_url).netloc
+    except ValueError:
+        return False
+
+
+def _chat_user_id() -> str:
+    if session.get('user_id'):
+        return str(session['user_id'])
+    if not session.get('anonymous_chat_id'):
+        session['anonymous_chat_id'] = secrets.token_urlsafe(24)
+    return session['anonymous_chat_id']
+
+
+def _validate_public_http_url(value: str) -> str:
+    parsed = urlparse(value)
+    if parsed.scheme not in {'http', 'https'} or not parsed.hostname or parsed.username or parsed.password:
+        raise ValueError('Only public HTTP or HTTPS URLs are allowed.')
+    try:
+        addresses = {item[4][0] for item in socket.getaddrinfo(parsed.hostname, parsed.port or 443)}
+    except socket.gaierror as exc:
+        raise ValueError('The article hostname could not be resolved.') from exc
+    for address in addresses:
+        ip = ipaddress.ip_address(address)
+        if not ip.is_global:
+            raise ValueError('Private or local network addresses are not allowed.')
+    return value
+
+
+def _fetch_public_article(url: str, headers: dict, max_bytes: int = 2 * 1024 * 1024):
+    import requests
+    current = _validate_public_http_url(url)
+    for _ in range(4):
+        response = requests.get(current, headers=headers, timeout=10, allow_redirects=False, stream=True)
+        if response.is_redirect:
+            location = response.headers.get('Location')
+            response.close()
+            if not location:
+                raise ValueError('Article redirect had no destination.')
+            current = _validate_public_http_url(urljoin(current, location))
+            continue
+        response.raise_for_status()
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        if 'text/html' not in content_type:
+            response.close()
+            raise ValueError('The URL did not return an HTML article.')
+        chunks, total = [], 0
+        for chunk in response.iter_content(chunk_size=65536):
+            total += len(chunk)
+            if total > max_bytes:
+                response.close()
+                raise ValueError('The article response is too large.')
+            chunks.append(chunk)
+        encoding = response.encoding or 'utf-8'
+        response.close()
+        return b''.join(chunks).decode(encoding, errors='replace')
+    raise ValueError('The article redirected too many times.')
+
+
+@app.before_request
+def protect_unsafe_requests():
+    if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'} and not _same_origin_request():
+        if request.path.startswith('/api/'):
+            return jsonify({'status': 'error', 'message': 'Request origin could not be verified.'}), 403
+        return 'Request origin could not be verified.', 403
+    limits = {
+        '/api/auth/register': ('register', 5, 3600),
+        '/api/auth/login': ('login', 10, 900),
+        '/api/auth/admin/login': ('admin-login', 5, 900),
+        '/api/subscribe': ('subscribe', 5, 3600),
+        '/api/programs/join-alert': ('program-alert', 5, 3600),
+        '/api/contact': ('contact', 5, 3600),
+        '/api/chat': ('chat', 30, 600),
+        '/api/summarize-news': ('summarize-news', 10, 600),
+        '/api/summarize': ('summarize-article', 10, 600),
+    }
+    rule = limits.get(request.path)
+    if request.method == 'POST' and rule and _rate_limited(*rule):
+        return jsonify({'status': 'error', 'message': 'Too many requests. Please try again later.'}), 429
 
 
 @app.before_request
@@ -163,33 +323,41 @@ def cookies():
 # Handle new user registrations. We receive their email and password here.
 @app.route('/api/auth/register', methods=['POST'])
 def register_user_account():
+    if _rate_limited('user-register', 5, 3600):
+        return jsonify({'status': 'error', 'message': 'Too many registration attempts. Please try again later.'}), 429
     p = request.get_json(silent=True) or request.form.to_dict()
-    name = (p.get('name') or '').strip()
+    name = (p.get('name') or '').strip()[:100]
     email = (p.get('email') or '').strip().lower()
     password = p.get('password') or ''
-    if not email or '@' not in email:
+    if not _valid_email(email):
         return jsonify({'status': 'error', 'message': 'Please enter a valid email address.'}), 400
+    password_problem = _password_error(password)
+    if password_problem:
+        return jsonify({'status': 'error', 'message': password_problem}), 400
     if not name:
         name = email.split('@')[0].replace('.', ' ').title()
-    
-    pwd_hash = generate_password_hash(password) if password and len(password) >= 4 else None
-    result = db.create_or_update_user_account(email, name, pwd_hash)
+
+    pwd_hash = generate_password_hash(password)
+    if not db.create_user_account(email, name, pwd_hash):
+        return jsonify({'status': 'error', 'message': 'An account with this email already exists. Please sign in or reset your password.'}), 409
     _safe_add_recipient(email)
+    session.clear()
     session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     db.record_user_login(email, 'register')
     db.log_user_activity(email, 'account_created', f'Registered as {name}')
     
-    # Fast async dispatch welcome email via worker pool
+    # Send now so the API reports the real delivery result.
+    welcome_sent = False
     try:
-        from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
-        EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
+        from ai_news_agent import send_welcome_email
+        welcome_sent = send_welcome_email(email, name)
     except Exception as e:
         logger.error(f'Error triggering welcome email: {e}')
-    message_text = 'Account already exists! You can now log in.' if result == 'updated' else 'Welcome to Nova Brief! Your account is active and your welcome email is on the way.'
     return jsonify({
         'status': 'success',
-        'message': message_text,
+        'message': 'Welcome to Nova Brief! Your account is active.' + (' Your welcome email was sent.' if welcome_sent else ' Email delivery is temporarily unavailable; your account is still ready.'),
+        'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
     })
@@ -198,33 +366,31 @@ def register_user_account():
 # Handle user login. We check if the password matches the one in our database.
 @app.route('/api/auth/login', methods=['POST'])
 def login_user_account():
+    if _rate_limited('user-login', 10, 900):
+        return jsonify({'status': 'error', 'message': 'Too many login attempts. Please try again later.'}), 429
     p = request.get_json(silent=True) or request.form.to_dict()
     email = (p.get('email') or '').strip().lower()
     password = p.get('password') or ''
-    if not email or '@' not in email:
-        return jsonify({'status': 'error', 'message': 'Please enter a valid email address.'}), 400
-    
+    invalid_message = 'Invalid email or password. Use Forgot Password if you need to create or reset your password.'
+    if not _valid_email(email) or not password or len(password) > 128:
+        check_password_hash(_dummy_password_hash, password or 'invalid')
+        return jsonify({'status': 'error', 'message': invalid_message}), 401
+
     user = db.get_user_by_email(email)
-    if not user:
-        name = email.split('@')[0].replace('.', ' ').title()
-        pwd_hash = generate_password_hash(password) if password and len(password) >= 4 else None
-        db.create_or_update_user_account(email, name, pwd_hash)
-        _safe_add_recipient(email)
-        user = db.get_user_by_email(email)
-        try:
-            from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
-            EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
-        except Exception: pass
-    elif user.get('password_hash') and password:
-        if not check_password_hash(user['password_hash'], password):
-            return jsonify({'status': 'error', 'message': 'Invalid password. You can also sign in with just your email.'}), 401
+    password_hash = user.get('password_hash') if user else _dummy_password_hash
+    if not check_password_hash(password_hash or _dummy_password_hash, password):
+        return jsonify({'status': 'error', 'message': invalid_message}), 401
+    if not user or not user.get('password_hash') or user.get('is_active') is False:
+        return jsonify({'status': 'error', 'message': invalid_message}), 401
     
     user_name = email.split('@')[0].title()
     if user:
         user_name = user.get('name') or user_name
         
+    session.clear()
     session.permanent = True
-    session.update({'user_email': user['email'] if user else email, 'user_name': user_name, 'role': 'user'})
+    session.update({'user_email': user['email'], 'user_name': user_name, 'role': 'user'})
+    _clear_rate_limit('user-login')
     db.record_user_login(email, 'user_login')
     db.log_user_activity(email, 'login', 'User logged in')
     return jsonify({
@@ -237,13 +403,18 @@ def login_user_account():
 
 @app.route('/api/auth/admin/login', methods=['POST'])
 def login_admin_account():
+    if _rate_limited('admin-login', 5, 900):
+        return jsonify({'status': 'error', 'message': 'Too many login attempts. Please try again later.'}), 429
     p = request.get_json(silent=True) or request.form.to_dict()
     email = (p.get('email') or '').strip().lower()
     password = p.get('password') or ''
-    if email != ADMIN_EMAIL or password != ADMIN_PASSWORD:
+    password_matches = check_password_hash(ADMIN_PASSWORD_HASH, password) if ADMIN_PASSWORD_HASH else hmac.compare_digest(ADMIN_PASSWORD, password)
+    if not ADMIN_EMAIL or not hmac.compare_digest(email, ADMIN_EMAIL) or not password_matches:
         return jsonify({'status': 'error', 'message': 'Invalid email or password. Please try again.'}), 401
-    session.permanent = True
+    session.clear()
+    session.permanent = False
     session.update({'user_email': ADMIN_EMAIL, 'user_name': 'Administrator', 'role': 'admin'})
+    _clear_rate_limit('admin-login')
     db.record_user_login(ADMIN_EMAIL, 'admin_login')
     return jsonify({'status': 'success', 'message': 'Admin login successful.', 'redirect': '/analytics/dashboard'})
 
@@ -517,7 +688,7 @@ def delete_contact_message_endpoint(msg_id):
 
 @app.route('/api/chat/history', methods=['GET', 'DELETE'])
 def handle_chat_history():
-    user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+    user_id = _chat_user_id()
     if request.method == 'DELETE':
         try:
             db.clear_chatbot_history(user_id)
@@ -598,30 +769,28 @@ def subscribe_public():
     p = request.get_json(silent=True) or request.form.to_dict()
     email = (p.get('email') or '').strip().lower()
     name = (p.get('name') or '').strip()
-    if not email or '@' not in email:
+    if not _valid_email(email):
         return jsonify({'status': 'error', 'message': 'Please enter a valid email address.'}), 400
     if not name:
         name = email.split('@')[0].replace('.', ' ').title()
         
     _safe_add_recipient(email)
     db.create_or_update_user_account(email, name)
-    db.record_user_login(email, 'subscription')
-    session.permanent = True
-    session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
-    # Fast async dispatch welcome email via worker pool
+    welcome_sent = False
     try:
-        from ai_news_agent import send_welcome_email, EMAIL_EXECUTOR
-        EMAIL_EXECUTOR.submit(send_welcome_email, email, name)
-    except Exception: pass
+        from ai_news_agent import send_welcome_email
+        welcome_sent = send_welcome_email(email, name)
+    except Exception as e:
+        logger.error(f'Error sending subscription welcome email: {e}')
     
     return jsonify({
         'status': 'success',
-        'message': f'Welcome, {name}! You are now subscribed and signed in. Your welcome briefing has been dispatched.',
+        'message': f'Welcome, {name}! You are subscribed. Sign in separately to access your dashboard.',
         'already_registered': False,
-        'welcome_email_sent': True,
+        'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
-        'redirect': '/user/dashboard'
+        'redirect': '/user/login'
     })
 
 
@@ -631,31 +800,28 @@ def join_program_alert():
     email = (p.get('email') or '').strip().lower()
     name = (p.get('name') or '').strip()
     program_title = (p.get('program_title') or p.get('program') or '').strip()
-    if not email or '@' not in email:
+    if not _valid_email(email):
         return jsonify({'status': 'error', 'message': 'Please enter a valid email address.'}), 400
     if not name:
         name = email.split('@')[0].replace('.', ' ').title()
     
     _safe_add_recipient(email)
     db.enable_user_program_notifications(email, name)
-    db.record_user_login(email, 'program_alert_join')
     db.log_user_activity(email, 'joined_program_alerts', f'Joined alerts for {program_title or "all programs"}')
-    session.permanent = True
-    session.update({'user_email': email, 'user_name': name, 'role': 'user'})
     
-    # Fast async dispatch dedicated program welcome email via worker pool
+    welcome_sent = False
     try:
-        from ai_news_agent import send_program_welcome_email, EMAIL_EXECUTOR
-        EMAIL_EXECUTOR.submit(send_program_welcome_email, email, name, program_title)
+        from ai_news_agent import send_program_welcome_email
+        welcome_sent = send_program_welcome_email(email, name, program_title)
     except Exception as e:
         logger.error(f'Error sending program welcome email: {e}')
         
     return jsonify({
         'status': 'success',
-        'message': f'Welcome, {name}! You have joined Student Program Alerts. Your welcome email has been sent to {email}.',
-        'welcome_email_sent': True,
+        'message': f'Welcome, {name}! You have joined Student Program Alerts.' + (' Your confirmation email was sent.' if welcome_sent else ' Email delivery is temporarily unavailable.'),
+        'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
-        'redirect': '/user/dashboard'
+        'redirect': '/user/login'
     })
 
 
@@ -665,7 +831,7 @@ def join_program_alert():
 def summarize_news():
     data = request.get_json() or {}
     articles = data.get('articles', [])
-    if not articles:
+    if not isinstance(articles, list) or not articles or len(articles) > 10:
         return jsonify({'status': 'error', 'message': 'No articles selected.'}), 400
 
     import os
@@ -703,8 +869,13 @@ def summarize_news():
 @app.route('/api/chat', methods=['POST'])
 def handle_ai_chat():
     data = request.get_json() or {}
-    user_msg = data.get('message', '').strip()
+    raw_message = data.get('message', '')
+    if not isinstance(raw_message, str) or len(raw_message) > 2000:
+        return jsonify({'status': 'error', 'message': 'Message is too long.'}), 400
+    user_msg = raw_message.strip()
     history = data.get('history', [])
+    if not isinstance(history, list):
+        history = []
     
     if not user_msg:
         return jsonify({'reply': 'How can I help you today?'})
@@ -738,7 +909,7 @@ def handle_ai_chat():
             response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
             if response.status_code == 200:
                 reply = response.json()['choices'][0]['message']['content']
-                user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+                user_id = _chat_user_id()
                 db.record_chatbot_history(user_id=user_id, user_message=user_msg, bot_reply=reply)
                 return jsonify({'reply': reply})
     except Exception as e:
@@ -810,7 +981,7 @@ def handle_ai_chat():
         # Removed escalation save to keep inbox clean
 
     # Save to dedicated chatbot history (no longer in contact inbox)
-    user_id = session.get('user_id') or request.remote_addr or 'anonymous'
+    user_id = _chat_user_id()
     db.record_chatbot_history(user_id=user_id, user_message=user_msg, bot_reply=reply)
         
     return jsonify({'reply': reply})
@@ -831,10 +1002,8 @@ def summarize_article():
         
         # Scrape the article text
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        resp = requests.get(url, headers=headers, timeout=10)
-        resp.raise_for_status()
-        
-        soup = BeautifulSoup(resp.text, 'html.parser')
+        article_html = _fetch_public_article(url, headers)
+        soup = BeautifulSoup(article_html, 'html.parser')
         paragraphs = soup.find_all('p')
         text = ' '.join([p.get_text(strip=True) for p in paragraphs])
         
@@ -1082,7 +1251,8 @@ def start_background_scheduler():
     except Exception as e:
         logger.error(f'Could not start background scheduler: {e}')
 
-start_background_scheduler()
+if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'false').lower() == 'true':
+    start_background_scheduler()
 
 
 # -- Entry Point ---------------------------------------------------------------

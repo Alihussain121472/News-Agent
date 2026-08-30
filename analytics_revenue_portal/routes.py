@@ -142,7 +142,10 @@ def unread_count():
 
 @analytics_bp.route('/api/messages/<int:msg_id>/read', methods=['POST'])
 @admin_required
-
+def mark_msg_read(msg_id):
+    db = NewsDatabase()
+    db.mark_message_read(msg_id)
+    return jsonify({'status': 'success'})
 @analytics_bp.route('/api/messages/<int:msg_id>/reply', methods=['POST'])
 @admin_required
 def reply_msg(msg_id):
@@ -160,13 +163,17 @@ def reply_msg(msg_id):
         return jsonify({'status': 'error', 'message': 'Message not found'}), 404
         
     subject = f"Re: {msg['subject']}"
+    from markupsafe import escape
+    safe_name = escape(msg['name'])
+    safe_reply = escape(reply_text).replace('\n', '<br>')
+    safe_original = escape(msg['message'])
     html = f"""<html><body style="font-family:Arial,sans-serif;color:#333;line-height:1.6;">
-    <p>Hi {msg['name']},</p>
-    <p>{reply_text.replace(chr(10), '<br>')}</p>
+    <p>Hi {safe_name},</p>
+    <p>{safe_reply}</p>
     <br>
     <p>Best regards,<br>Nova Admin Team</p>
     <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
-    <p style="color:#888;font-size:12px;">On {msg['submitted_at'][:10]}, you wrote:<br><em>{msg['message']}</em></p>
+    <p style="color:#888;font-size:12px;">On {str(msg['submitted_at'])[:10]}, you wrote:<br><em>{safe_original}</em></p>
     </body></html>"""
     
     success = send_email(msg['email'], subject, html)
@@ -176,8 +183,4 @@ def reply_msg(msg_id):
     else:
         return jsonify({'status': 'success', 'message': 'Reply saved to history, but email failed to send (Check SMTP).'})
 
-def mark_msg_read(msg_id):
-    db = NewsDatabase()
-    db.mark_message_read(msg_id)
-    return jsonify({'status': 'success'})
 

@@ -1,10 +1,13 @@
-﻿import os
+"""Safely update DATABASE_URL without storing credentials in source code."""
+import os
+import re
+
+database_url = os.environ.get('NEW_DATABASE_URL', '').strip()
+if not database_url:
+    raise SystemExit('Set NEW_DATABASE_URL before running this helper.')
 
 with open('.env', 'r', encoding='utf-8') as f:
     content = f.read()
-
-import re
-content = re.sub(r'DATABASE_URL=.*', 'DATABASE_URL=postgresql://postgres.qgueetgopiidzuqrzznz:Alihussain110%40@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres', content)
-
+content = re.sub(r'^DATABASE_URL=.*$', f'DATABASE_URL={database_url}', content, flags=re.MULTILINE)
 with open('.env', 'w', encoding='utf-8') as f:
     f.write(content)
