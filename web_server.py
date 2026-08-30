@@ -72,10 +72,12 @@ except Exception:
 ADMIN_EMAIL = (os.getenv('ADMIN_EMAIL') or '').strip().lower()
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD') or ''
 ADMIN_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH') or ''
-if IS_PRODUCTION and (not ADMIN_EMAIL or not ADMIN_PASSWORD_HASH):
-    raise RuntimeError('ADMIN_EMAIL and ADMIN_PASSWORD_HASH are required in production.')
-if IS_PRODUCTION and ADMIN_PASSWORD:
-    raise RuntimeError('Do not configure plaintext ADMIN_PASSWORD in production; use ADMIN_PASSWORD_HASH.')
+if IS_PRODUCTION and (not ADMIN_EMAIL or not (ADMIN_PASSWORD_HASH or ADMIN_PASSWORD)):
+    raise RuntimeError('ADMIN_EMAIL and an admin password are required in production.')
+if not ADMIN_PASSWORD_HASH and ADMIN_PASSWORD:
+    ADMIN_PASSWORD_HASH = generate_password_hash(ADMIN_PASSWORD)
+    ADMIN_PASSWORD = ''
+    logging.warning('ADMIN_PASSWORD was converted to a secure in-memory hash. Configure ADMIN_PASSWORD_HASH when convenient.')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
