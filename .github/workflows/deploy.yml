@@ -36,8 +36,7 @@ jobs:
       run: |
         # CI has no production DATABASE_URL. Compile the application without
         # opening an external database connection.
-        python -m compileall -q web_server.py database.py ai_news_agent.py \
-          analytics_revenue_portal growth_seo_agent social_media_agent
+        python -m py_compile web_server.py database.py ai_news_agent.py analytics_revenue_portal/__init__.py analytics_revenue_portal/routes.py growth_seo_agent/__init__.py growth_seo_agent/routes.py social_media_agent/__init__.py social_media_agent/routes.py
     
     - name: Test Flask app
       run: |
