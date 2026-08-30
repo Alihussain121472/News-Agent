@@ -196,7 +196,7 @@
         </div>
         <div class="flex flex-wrap gap-4 mt-8">
           <a href="#subscribe" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-black px-10 py-5 rounded-2xl shadow-[0_0_40px_rgba(37,99,235,0.4)] transition-all hover:scale-105 hover:shadow-[0_0_60px_rgba(52,211,153,0.5)] transform animate-bounce">
-            <i class="fas fa-bolt text-yellow-300"></i> Initiate Free Access
+            <i class="fas fa-bolt text-yellow-300"></i> Get Free Access
           </a>
           <a href="/user/dashboard" class="inline-flex items-center gap-2 bg-slate-800/80 backdrop-blur-md border border-slate-400/30 hover:bg-slate-700 hover:border-slate-300 text-white font-bold px-8 py-5 rounded-2xl shadow-lg transition-all hover:-translate-y-1">
             <i class="fas fa-newspaper text-blue-400"></i> Read Live News
@@ -216,7 +216,7 @@
           </div>
           <div class="space-y-3" id="heroLiveFeedContainer">
             <div class="bg-slate-800/60 rounded-xl p-4 border border-slate-700/50 text-center animate-pulse">
-              <div class="text-sm text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching live intel...</div>
+              <div class="text-sm text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching live updates...</div>
             </div>
           </div>
         </div>
@@ -377,7 +377,7 @@
         <input type="email" id="progAlertEmail" placeholder="your.student.email@domain.com" required
           class="flex-1 bg-slate-950/90 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 transition"/>
         <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm whitespace-nowrap shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
-          <span>Join Alerts</span>
+          <span>Get Alerts</span>
           <i class="fas fa-paper-plane text-xs"></i>
         </button>
       </form>
@@ -414,7 +414,7 @@
         <i class="fas fa-envelope text-white text-2xl"></i>
       </div>
       <h2 class="text-4xl font-black text-white mb-4">Join <span class="bg-gradient-to-br from-blue-400 to-emerald-400 bg-clip-text text-transparent">Nova Brief</span></h2>
-      <p class="text-slate-400 text-lg mb-8">Exclusive daily AI intelligence briefings and elite student program alerts. Complimentary forever.</p>
+      <p class="text-slate-400 text-lg mb-8">Exclusive daily AI intelligence briefings and elite student program alerts. Free forever.</p>
       <form id="subscribeForm" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-4">
         <input type="text" id="subName" placeholder="Your Name" required
           class="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
@@ -659,7 +659,7 @@ if (pForm) {
       msg.classList.remove('hidden');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<span>Join Alerts</span><i class="fas fa-paper-plane text-xs ml-2"></i>';
+      btn.innerHTML = '<span>Get Alerts</span><i class="fas fa-paper-plane text-xs ml-2"></i>';
     }
   });
 }
