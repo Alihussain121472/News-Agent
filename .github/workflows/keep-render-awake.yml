@@ -42,4 +42,16 @@ jobs:
             https://www.novabrief.tech/robots.txt)"
 
           grep --fixed-strings "Allow: /" <<< "$robots"
-          echo "Nova Brief is awake and crawler access is enabled."
+
+          ads="$(curl \
+            --fail \
+            --silent \
+            --show-error \
+            --location \
+            --max-time 30 \
+            https://www.novabrief.tech/ads.txt)"
+
+          grep --fixed-strings \
+            "google.com, pub-1036052096443002, DIRECT, f08c47fec0942fa0" \
+            <<< "$ads"
+          echo "Nova Brief is awake; crawler access and ads.txt are valid."

@@ -900,7 +900,7 @@ def handle_contact():
 # Provide a sitemap for Google and other search engines to discover our pages.
 @app.route('/sitemap.xml')
 def sitemap():
-    domain = 'https://novabrief-web.onrender.com'
+    domain = 'https://www.novabrief.tech'
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>{domain}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
@@ -912,7 +912,7 @@ def sitemap():
 
 @app.route('/robots.txt')
 def robots():
-    domain = 'https://novabrief-web.onrender.com'
+    domain = 'https://www.novabrief.tech'
     return f'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: {domain}/sitemap.xml', 200, {'Content-Type': 'text/plain'}
 
 
@@ -926,7 +926,7 @@ def adstxt():
 def ping_google():
     try:
         import requests
-        sitemap_url = 'https://novabrief-web.onrender.com/sitemap.xml'
+        sitemap_url = 'https://www.novabrief.tech/sitemap.xml'
         google_ping_url = f'https://www.google.com/ping?sitemap={sitemap_url}'
         response = requests.get(google_ping_url, timeout=10)
         return jsonify({'status': 'success', 'message': f'Google ping response code: {response.status_code}'})
