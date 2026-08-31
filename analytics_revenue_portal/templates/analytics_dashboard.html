@@ -1,172 +1,178 @@
 {% extends "base_saas.html" %}
-{% block title %}Analytics & Growth - Nova OS{% endblock %}
-{% block page_title %}Analytics Dashboard{% endblock %}
-{% block page_subtitle %}Your website growth, traffic, and revenue at a glance.{% endblock %}
+{% block title %}Dashboard - Nova OS{% endblock %}
+{% block page_title %}Platform overview{% endblock %}
+{% block page_subtitle %}Live operating signals from your NovaBrief platform.{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-  <div class="kpi-card">
-    <div class="flex justify-between items-start mb-4">
+<section aria-label="Platform metrics" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <article class="kpi-card">
+    <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-sm font-medium text-slate-500">Platform Traffic</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ total_visitors }}</h3>
+        <p class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">Total traffic</p>
+        <p class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ total_visitors }}</p>
       </div>
-      <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-        <i class="fas fa-users"></i>
-      </div>
+      <div class="grid h-11 w-11 place-items-center rounded-xl border border-blue-100 bg-blue-50 text-blue-600"><i class="fas fa-chart-simple"></i></div>
     </div>
-    <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
-      <span class="text-slate-400 ml-2">tracked by DB</span>
+    <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+      <span class="badge badge-green"><i class="fas fa-wave-square"></i> Live</span>
+      <span>All-time visits</span>
     </div>
-  </div>
+  </article>
 
-  <div class="kpi-card">
-    <div class="flex justify-between items-start mb-4">
+  <article class="kpi-card">
+    <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-sm font-medium text-slate-500">Active Members</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ total_users }}</h3>
+        <p class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">This month</p>
+        <p class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ monthly_visitors }}</p>
       </div>
-      <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-        <i class="fas fa-search"></i>
-      </div>
+      <div class="grid h-11 w-11 place-items-center rounded-xl border border-indigo-100 bg-indigo-50 text-indigo-600"><i class="fas fa-calendar-days"></i></div>
     </div>
-    <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
-      <span class="text-slate-400 ml-2">tracked by DB</span>
+    <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+      <span class="badge badge-green"><i class="fas fa-database"></i> Live</span>
+      <span>Current month</span>
     </div>
-  </div>
+  </article>
 
-  <div class="kpi-card">
-    <div class="flex justify-between items-start mb-4">
+  <article class="kpi-card">
+    <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-sm font-medium text-slate-500">Acquired Prospects</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ leads }}</h3>
+        <p class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">Active members</p>
+        <p class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ total_users }}</p>
       </div>
-      <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-        <i class="fas fa-envelope-open-text"></i>
-      </div>
+      <div class="grid h-11 w-11 place-items-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600"><i class="fas fa-user-group"></i></div>
     </div>
-    <div class="flex items-center text-sm">
-      <span class="badge badge-red flex items-center gap-1"><i class="fas fa-arrow-down"></i> Live Data</span>
-      <span class="text-slate-400 ml-2">tracked by DB</span>
+    <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+      <span class="badge badge-green"><i class="fas fa-circle-check"></i> Verified</span>
+      <span>Registered users</span>
     </div>
-  </div>
+  </article>
 
-  <div class="kpi-card">
-    <div class="flex justify-between items-start mb-4">
+  <article class="kpi-card">
+    <div class="flex items-start justify-between gap-4">
       <div>
-        <p class="text-sm font-medium text-slate-500">Gross Revenue</p>
-        <h3 class="text-2xl font-bold text-slate-900 mt-1">`$0.00</h3>
+        <p class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">Support requests</p>
+        <p class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ leads }}</p>
       </div>
-      <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-        <i class="fas fa-dollar-sign"></i>
-      </div>
+      <div class="grid h-11 w-11 place-items-center rounded-xl border border-violet-100 bg-violet-50 text-violet-600"><i class="fas fa-inbox"></i></div>
     </div>
-    <div class="flex items-center text-sm">
-      <span class="badge badge-green flex items-center gap-1"><i class="fas fa-arrow-up"></i> Live Data</span>
-      <span class="text-slate-400 ml-2">tracked by DB</span>
+    <div class="mt-5 flex items-center gap-2 text-xs text-slate-400">
+      <span class="badge badge-green"><i class="fas fa-message"></i> Live</span>
+      <span>All enquiries</span>
     </div>
-  </div>
-</div>
+  </article>
+</section>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-  <div class="kpi-card lg:col-span-2">
-    <div class="flex justify-between items-center mb-6">
-      <h3 class="font-bold text-slate-900">Traffic History</h3>
-      <select class="bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
-        <option>Last 30 Days</option>
-        <option>Last 3 Months</option>
-        <option>This Year</option>
-      </select>
-    </div>
-    <div class="w-full relative h-[300px] mt-4"><canvas id="mainChart"></canvas></div>
-  </div>
-  
-  <div class="kpi-card bg-gradient-to-br from-slate-900 to-blue-900 text-white border-none shadow-xl">
-    <h3 class="font-bold text-white mb-6 flex items-center gap-2">
-      <i class="fas fa-robot text-blue-400"></i> AI Growth Score
-    </h3>
-    <div class="flex items-center justify-center mb-8">
-      <div class="relative w-32 h-32 flex items-center justify-center">
-        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-          <path class="text-slate-700" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          <path class="text-blue-400" stroke-dasharray="87, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        </svg>
-        <div class="absolute text-3xl font-bold text-white">87</div>
+<section class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,0.7fr)]">
+  <article class="surface-card p-5 sm:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h2 class="text-base font-extrabold tracking-tight text-slate-900">Traffic activity</h2>
+        <p class="mt-1 text-xs font-medium text-slate-400">Daily visits recorded during the last seven days</p>
       </div>
+      <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Live database
+      </span>
     </div>
-    <h4 class="font-semibold text-blue-200 mb-2 text-sm uppercase tracking-wider">AI Priority Recommendation</h4>
-    <p class="text-slate-300 text-sm leading-relaxed mb-4">Your Active Members is growing rapidly, and recent improvements to your homepage Call-to-Actions are showing a positive increase in conversion rate! Keep up the good work.</p>
-    <button class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition">View Action Plan</button>
-  </div>
-</div>
+    <div class="relative mt-6 h-[310px] w-full"><canvas id="mainChart" aria-label="Website traffic over the last seven days"></canvas></div>
+  </article>
+
+  <aside class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 text-white shadow-xl shadow-slate-900/10">
+    <div class="border-b border-white/10 p-5 sm:p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.14em] text-blue-300">Operator shortcuts</p>
+          <h2 class="mt-2 text-lg font-extrabold tracking-tight text-white">Quick access</h2>
+        </div>
+        <div class="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-blue-300"><i class="fas fa-bolt"></i></div>
+      </div>
+      <p class="mt-3 text-xs leading-5 text-slate-400">Move directly into the three workflows used most often.</p>
+    </div>
+    <div class="space-y-2 p-3">
+      <a href="/social/dashboard" class="group flex items-center gap-3 rounded-xl border border-transparent p-3.5 transition hover:border-white/10 hover:bg-white/5">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-blue-500/15 text-blue-300"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <div class="min-w-0 flex-1"><div class="text-sm font-bold text-white">Social Studio</div><div class="mt-0.5 text-[11px] text-slate-500">Create and approve content</div></div>
+        <i class="fas fa-arrow-right text-xs text-slate-600 transition group-hover:translate-x-1 group-hover:text-blue-300"></i>
+      </a>
+      <a href="/analytics/messages" class="group flex items-center gap-3 rounded-xl border border-transparent p-3.5 transition hover:border-white/10 hover:bg-white/5">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-violet-500/15 text-violet-300"><i class="fas fa-inbox"></i></div>
+        <div class="min-w-0 flex-1"><div class="text-sm font-bold text-white">Support inbox</div><div class="mt-0.5 text-[11px] text-slate-500">Review user messages</div></div>
+        <i class="fas fa-arrow-right text-xs text-slate-600 transition group-hover:translate-x-1 group-hover:text-violet-300"></i>
+      </a>
+      <a href="/" target="_blank" rel="noopener" class="group flex items-center gap-3 rounded-xl border border-transparent p-3.5 transition hover:border-white/10 hover:bg-white/5">
+        <div class="grid h-10 w-10 place-items-center rounded-lg bg-emerald-500/15 text-emerald-300"><i class="fas fa-arrow-up-right-from-square"></i></div>
+        <div class="min-w-0 flex-1"><div class="text-sm font-bold text-white">Public platform</div><div class="mt-0.5 text-[11px] text-slate-500">Open the live experience</div></div>
+        <i class="fas fa-arrow-right text-xs text-slate-600 transition group-hover:translate-x-1 group-hover:text-emerald-300"></i>
+      </a>
+    </div>
+  </aside>
+</section>
 {% endblock %}
 
 {% block scripts %}
-  <script>
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    const mainChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'Website Visits',
-            data: [],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderWidth: 3,
-            pointBackgroundColor: '#3b82f6',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            fill: true,
-            tension: 0.4
-          }
-        ]
+<script>
+  const chartCanvas = document.getElementById('mainChart');
+  const chartContext = chartCanvas.getContext('2d');
+  const chartGradient = chartContext.createLinearGradient(0, 0, 0, 300);
+  chartGradient.addColorStop(0, 'rgba(79, 109, 245, 0.22)');
+  chartGradient.addColorStop(1, 'rgba(79, 109, 245, 0.015)');
+
+  const mainChart = new Chart(chartContext, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Website visits',
+        data: [],
+        borderColor: '#4f6df5',
+        backgroundColor: chartGradient,
+        borderWidth: 2.5,
+        pointBackgroundColor: '#ffffff',
+        pointBorderColor: '#4f6df5',
+        pointBorderWidth: 2,
+        pointRadius: 3.5,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.38
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#101828',
+          padding: 12,
+          titleFont: { size: 11, family: 'Manrope', weight: '600' },
+          bodyFont: { size: 13, family: 'Manrope', weight: '700' },
+          displayColors: false,
+          cornerRadius: 10
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { 
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: '#1e293b',
-                padding: 12,
-                titleFont: { size: 13, family: 'Inter' },
-                bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
-                displayColors: false,
-                cornerRadius: 8
-            }
+      scales: {
+        y: {
+          beginAtZero: true,
+          border: { display: false },
+          grid: { color: '#eef1f5' },
+          ticks: { color: '#98a2b3', font: { family: 'Manrope', size: 10 }, padding: 10, precision: 0 }
         },
-        scales: {
-          y: { 
-              beginAtZero: true, 
-              grid: { borderDash: [4, 4], color: '#f1f5f9' },
-              ticks: { font: { family: 'Inter' }, color: '#64748b', padding: 10 }
-          },
-          x: { 
-              grid: { display: false },
-              ticks: { font: { family: 'Inter' }, color: '#64748b', padding: 10 }
-          }
+        x: {
+          border: { display: false },
+          grid: { display: false },
+          ticks: { color: '#98a2b3', font: { family: 'Manrope', size: 10 }, padding: 10, maxRotation: 0 }
         }
       }
-    });
+    }
+  });
 
-    fetch('/analytics/api/stats')
-      .then(res => res.json())
-      .then(data => {
-        mainChart.data.labels = data.labels;
-        mainChart.data.datasets[0].data = data.traffic;
-        mainChart.update();
-      });
-  </script>
+  fetch('/analytics/api/stats')
+    .then(response => response.json())
+    .then(data => {
+      mainChart.data.labels = data.labels.map(label => new Date(`${label}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }));
+      mainChart.data.datasets[0].data = data.traffic;
+      mainChart.update();
+    })
+    .catch(() => {});
+</script>
 {% endblock %}
-
-
-
-
-
-

@@ -2,6 +2,9 @@
 module.exports = {
   content: [
     "./templates/**/*.html",
+    "./analytics_revenue_portal/templates/**/*.html",
+    "./growth_seo_agent/templates/**/*.html",
+    "./social_media_agent/templates/**/*.html",
     "./static/js/**/*.js"
   ],
   theme: {

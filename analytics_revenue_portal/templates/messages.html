@@ -1,13 +1,13 @@
 ﻿{% extends "base_saas.html" %}
 {% block title %}Support Inbox - Nova OS{% endblock %}
-{% block page_title %}Inbox & Complaints{% endblock %}
-{% block page_subtitle %}Manage user support tickets, feedback, and AI Chatbot logs.{% endblock %}
+{% block page_title %}Support inbox{% endblock %}
+{% block page_subtitle %}Review customer questions, feedback, and response history.{% endblock %}
 
 {% block content %}
-<div class="h-[82vh] max-w-[1400px] mx-auto flex rounded-3xl border border-slate-200 overflow-hidden bg-white shadow-2xl shadow-slate-200/50">
+<div class="inbox-shell mx-auto flex max-w-[1400px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/40">
     
     <!-- Left Column: Message List -->
-    <div class="w-[380px] min-w-[380px] border-r border-slate-200 bg-slate-50/50 flex flex-col h-full">
+    <div class="inbox-list-panel w-[380px] min-w-[380px] border-r border-slate-200 bg-slate-50/50 flex flex-col h-full">
         <!-- Header & Filters -->
         <div class="p-5 border-b border-slate-200 bg-white shadow-sm z-10 relative">
             <div class="flex justify-between items-center mb-4">
@@ -66,7 +66,7 @@
     </div>
     
     <!-- Right Column: Message View -->
-    <div class="flex-1 bg-slate-50 flex flex-col h-full relative" id="message-view-container">
+    <div class="inbox-view-panel flex-1 bg-slate-50 flex flex-col h-full relative" id="message-view-container">
         <!-- Empty State -->
         <div id="empty-state" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 transition-all">
             <div class="w-24 h-24 mb-6 relative">
@@ -152,6 +152,15 @@
 .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
 .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.inbox-shell { height: calc(100vh - 11rem); min-height: 620px; }
+@media (max-width: 1024px) {
+  .inbox-list-panel { width: 330px !important; min-width: 330px !important; }
+}
+@media (max-width: 767px) {
+  .inbox-shell { height: auto; min-height: 0; flex-direction: column; }
+  .inbox-list-panel { width: 100% !important; min-width: 0 !important; height: 22rem !important; border-right: 0; border-bottom: 1px solid #e2e8f0; }
+  .inbox-view-panel { height: 34rem !important; min-height: 34rem; }
+}
 </style>
 
 <script>

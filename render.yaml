@@ -19,6 +19,12 @@ services:
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: Nova Brief <updates@novabrief.tech>
+      - key: RESEND_REPLY_TO
+        sync: false
       - key: NEWSAPI_KEY
         sync: false
       - key: RECIPIENT_EMAIL
@@ -33,6 +39,16 @@ services:
         value: Nova Brief
       - key: ENABLE_IN_PROCESS_SCHEDULER
         value: "false"
+      - key: SEO_SITE_URL
+        value: https://www.novabrief.tech
+      - key: GOOGLE_ADSENSE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_ADSENSE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_ADSENSE_REDIRECT_URI
+        value: https://www.novabrief.tech/analytics/adsense/callback
+      - key: ADSENSE_TOKEN_ENCRYPTION_KEY
+        generateValue: true
       - key: PORT
         value: "10000"
   - type: cron
@@ -50,6 +66,12 @@ services:
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: Nova Brief <updates@novabrief.tech>
+      - key: RESEND_REPLY_TO
+        sync: false
       - key: NEWSAPI_KEY
         sync: false
       - key: SMTP_HOST
@@ -58,3 +80,16 @@ services:
         value: "465"
       - key: EMAIL_FROM_NAME
         value: Nova Brief
+  - type: cron
+    name: novabrief-seo-monitor
+    env: python
+    plan: starter
+    autoDeploy: true
+    schedule: "15 * * * *"
+    buildCommand: pip install --disable-pip-version-check -r requirements.txt
+    startCommand: python -m growth_seo_agent.runner --trigger scheduled
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SEO_SITE_URL
+        value: https://www.novabrief.tech

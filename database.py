@@ -103,6 +103,17 @@ class NewsDatabase:
             recipient TEXT NOT NULL, subject TEXT, article_count INTEGER,
             status TEXT DEFAULT 'success', error_message TEXT)''')
 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS program_notification_deliveries (
+            id SERIAL PRIMARY KEY,
+            program_id INTEGER NOT NULL,
+            recipient TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            attempts INTEGER DEFAULT 0,
+            last_attempt_at TIMESTAMP,
+            delivered_at TIMESTAMP,
+            error_message TEXT,
+            UNIQUE(program_id, recipient))''')
+
         cursor.execute('''CREATE TABLE IF NOT EXISTS agent_status (
             id SERIAL PRIMARY KEY,
             status_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -115,7 +126,8 @@ class NewsDatabase:
             is_active BOOLEAN DEFAULT TRUE, total_emails_received INTEGER DEFAULT 0,
             last_email_sent TIMESTAMP, last_login_at TIMESTAMP,
             login_count INTEGER DEFAULT 0, password_hash TEXT,
-            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE)''')
+            role TEXT DEFAULT 'user', program_notifications BOOLEAN DEFAULT TRUE,
+            welcome_email_sent_at TIMESTAMP)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS user_preferences (
             email TEXT PRIMARY KEY,
@@ -212,13 +224,28 @@ class NewsDatabase:
         self._ensure_table_columns(conn, 'registered_users', [
             'last_login_at TIMESTAMP', 'login_count INTEGER DEFAULT 0',
             'password_hash TEXT', "role TEXT DEFAULT 'user'",
-            'program_notifications BOOLEAN DEFAULT TRUE'])
+            'program_notifications BOOLEAN DEFAULT TRUE',
+            'welcome_email_sent_at TIMESTAMP'])
         self._ensure_table_columns(conn, 'student_programs', [
             'notified_at TIMESTAMP', 'notify_before_days INTEGER DEFAULT 7'])
+
+        # Preserve one-time delivery for users who received a welcome before the
+        # dedicated tracking column was introduced.
+        cursor.execute('''UPDATE registered_users AS users
+            SET welcome_email_sent_at = history.sent_at
+            FROM (
+                SELECT recipient, MAX(sent_at) AS sent_at
+                FROM email_logs
+                WHERE status = 'success' AND subject = 'Welcome to Nova Brief'
+                GROUP BY recipient
+            ) AS history
+            WHERE users.email = history.recipient
+              AND users.welcome_email_sent_at IS NULL''')
 
         for idx_sql in [
             'CREATE INDEX IF NOT EXISTS idx_fetched_at ON news_articles(fetched_at DESC)',
             'CREATE INDEX IF NOT EXISTS idx_sent_at ON email_logs(sent_at DESC)',
+            'CREATE INDEX IF NOT EXISTS idx_program_delivery_status ON program_notification_deliveries(program_id, status)',
             'CREATE INDEX IF NOT EXISTS idx_user_email ON registered_users(email)',
             'CREATE INDEX IF NOT EXISTS idx_active_users ON registered_users(is_active)',
             'CREATE INDEX IF NOT EXISTS idx_activity_email ON user_activity_log(email)',
@@ -424,6 +451,35 @@ class NewsDatabase:
         conn.close()
         return emails
 
+    def get_users_pending_welcome_email(self, limit: int = 1000) -> List[Dict[str, Any]]:
+        """Return active users who have not yet received their welcome email."""
+        safe_limit = max(1, min(int(limit), 5000))
+        conn = safe_connect()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('''SELECT email, name
+            FROM registered_users
+            WHERE is_active = TRUE AND welcome_email_sent_at IS NULL
+            ORDER BY registered_at ASC
+            LIMIT %s''', (safe_limit,))
+        users = [to_dict(row) for row in cursor.fetchall()]
+        conn.close()
+        return users
+
+    def mark_welcome_email_sent(self, email: str) -> bool:
+        """Atomically mark a welcome as delivered and update user email counters once."""
+        normalized = email.strip().lower()
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute('''UPDATE registered_users
+            SET welcome_email_sent_at=CURRENT_TIMESTAMP,
+                last_email_sent=CURRENT_TIMESTAMP,
+                total_emails_received=COALESCE(total_emails_received, 0)+1
+            WHERE email=%s AND welcome_email_sent_at IS NULL''', (normalized,))
+        updated = cursor.rowcount > 0
+        conn.commit()
+        conn.close()
+        return updated
+
     def get_program_subscribers(self) -> List[str]:
         """Users who want program notifications."""
         conn = safe_connect()
@@ -432,6 +488,58 @@ class NewsDatabase:
         emails = [r[0] for r in cursor.fetchall()]
         conn.close()
         return emails
+
+    def get_pending_program_subscribers(self, program_id: int) -> List[str]:
+        """Return subscribers without a terminal delivery record for this program."""
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute('''SELECT users.email
+            FROM registered_users AS users
+            LEFT JOIN program_notification_deliveries AS delivery
+              ON delivery.program_id=%s AND delivery.recipient=users.email
+            WHERE users.is_active=TRUE
+              AND COALESCE(users.program_notifications,TRUE)=TRUE
+              AND (delivery.status IS NULL OR delivery.status NOT IN ('success','skipped'))
+            ORDER BY users.registered_at ASC''', (program_id,))
+        emails = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return emails
+
+    def record_program_notification_delivery(self, program_id: int, email: str,
+                                             status: str, error_message: str = None) -> None:
+        """Upsert one program-recipient result so retries never duplicate successes."""
+        normalized = email.strip().lower()
+        delivered_at_sql = 'CURRENT_TIMESTAMP' if status == 'success' else 'NULL'
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute(f'''INSERT INTO program_notification_deliveries
+            (program_id,recipient,status,attempts,last_attempt_at,delivered_at,error_message)
+            VALUES (%s,%s,%s,1,CURRENT_TIMESTAMP,{delivered_at_sql},%s)
+            ON CONFLICT (program_id,recipient) DO UPDATE SET
+                status=EXCLUDED.status,
+                attempts=program_notification_deliveries.attempts+1,
+                last_attempt_at=CURRENT_TIMESTAMP,
+                delivered_at=EXCLUDED.delivered_at,
+                error_message=EXCLUDED.error_message''',
+                       (program_id, normalized, status, error_message))
+        conn.commit()
+        conn.close()
+
+    def program_notification_is_complete(self, program_id: int) -> bool:
+        """A program is complete only when every current subscriber is delivered or skipped."""
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute('''SELECT NOT EXISTS (
+            SELECT 1 FROM registered_users AS users
+            LEFT JOIN program_notification_deliveries AS delivery
+              ON delivery.program_id=%s AND delivery.recipient=users.email
+            WHERE users.is_active=TRUE
+              AND COALESCE(users.program_notifications,TRUE)=TRUE
+              AND (delivery.status IS NULL OR delivery.status NOT IN ('success','skipped'))
+        )''', (program_id,))
+        complete = bool(cursor.fetchone()[0])
+        conn.close()
+        return complete
 
     def enable_user_program_notifications(self, email: str, name: str = None) -> bool:
         """Ensure user exists, is active, and has program notifications enabled."""

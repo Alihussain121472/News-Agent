@@ -10,6 +10,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
 import ai_news_agent
+from studio_registry import get_agent_studios
 
 load_dotenv('.env.local')
 load_dotenv()
@@ -33,6 +34,11 @@ app.config.update(
     SESSION_REFRESH_EACH_REQUEST=True,
     MAX_CONTENT_LENGTH=1024 * 1024,
 )
+
+
+@app.context_processor
+def inject_agent_studios():
+    return {'agent_studios': get_agent_studios()}
 
 @app.after_request
 def add_security_headers(response):
@@ -354,6 +360,11 @@ def register_user_account():
     try:
         from ai_news_agent import send_welcome_email
         welcome_sent = send_welcome_email(email, name)
+        if welcome_sent:
+            db.mark_welcome_email_sent(email)
+            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+        else:
+            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
     except Exception as e:
         logger.error(f'Error triggering welcome email: {e}')
     return jsonify({
@@ -766,9 +777,14 @@ def remove_recipient():
 @app.route('/api/config')
 @admin_required
 def get_config():
+    resend_ready = bool(os.getenv('RESEND_API_KEY') and os.getenv('RESEND_FROM_EMAIL'))
+    smtp_ready = bool((os.getenv('GMAIL_USER') and os.getenv('GMAIL_APP_PASSWORD')) or
+                      (os.getenv('EMAIL_USER') and os.getenv('EMAIL_APP_PASSWORD')))
     return jsonify({
         'recipient_email': os.getenv('RECIPIENT_EMAIL'),
-        'sender_email': os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER'),
+        'sender_email': os.getenv('RESEND_FROM_EMAIL') or os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER'),
+        'email_provider': 'Resend' if resend_ready else ('Gmail SMTP' if smtp_ready else 'Not configured'),
+        'email_ready': resend_ready or smtp_ready,
         'has_newsapi_key': bool(os.getenv('NEWSAPI_KEY')),
         'schedule_time': '8:00 AM daily'
     })
@@ -787,19 +803,26 @@ def subscribe_public():
         name = email.split('@')[0].replace('.', ' ').title()
         
     _safe_add_recipient(email)
-    db.create_or_update_user_account(email, name)
+    account_result = db.create_or_update_user_account(email, name)
+    user_record = db.get_user_by_email(email) or {}
     
     welcome_sent = False
     try:
-        from ai_news_agent import send_welcome_email
-        welcome_sent = send_welcome_email(email, name)
+        if not user_record.get('welcome_email_sent_at'):
+            from ai_news_agent import send_welcome_email
+            welcome_sent = send_welcome_email(email, name)
+            if welcome_sent:
+                db.mark_welcome_email_sent(email)
+                db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+            else:
+                db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
     except Exception as e:
         logger.error(f'Error sending subscription welcome email: {e}')
     
     return jsonify({
         'status': 'success',
         'message': f'Welcome, {name}! You are subscribed. Sign in separately to access your dashboard.',
-        'already_registered': False,
+        'already_registered': account_result == 'updated',
         'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
         'redirect': '/user/login'
@@ -1102,27 +1125,6 @@ def adstxt():
     return 'google.com, pub-1036052096443002, DIRECT, f08c47fec0942fa0', 200, {'Content-Type': 'text/plain'}
 
 
-@app.route('/api/admin/ping-google', methods=['POST'])
-@admin_required
-def ping_google():
-    try:
-        import requests
-        sitemap_url = 'https://www.novabrief.tech/sitemap.xml'
-        google_ping_url = f'https://www.google.com/ping?sitemap={sitemap_url}'
-        response = requests.get(google_ping_url, timeout=10)
-        return jsonify({'status': 'success', 'message': f'Google ping response code: {response.status_code}'})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-
-@app.after_request
-def add_security_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    return response
-
-
 @app.route('/user/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'GET':
@@ -1216,6 +1218,26 @@ def blog_post(slug):
 # -- Background Scheduler -----------------------------------------------------
 
 _scheduler_started = False
+_scheduler_lock_file = None
+
+
+def _claim_scheduler_leadership() -> bool:
+    """Run scheduled jobs in only one Gunicorn worker on the free web service."""
+    global _scheduler_lock_file
+    if os.name == 'nt':
+        return True
+    try:
+        import fcntl
+        import tempfile
+        lock_path = os.path.join(tempfile.gettempdir(), 'novabrief-scheduler.lock')
+        _scheduler_lock_file = open(lock_path, 'a+', encoding='utf-8')
+        fcntl.flock(_scheduler_lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except (BlockingIOError, OSError):
+        if _scheduler_lock_file:
+            _scheduler_lock_file.close()
+            _scheduler_lock_file = None
+        return False
 
 def _safe_run_news_digest():
     try:
@@ -1238,9 +1260,29 @@ def _safe_send_program_notifications():
     except Exception as e:
         logger.error(f'Scheduled program notifications failed: {e}')
 
+def _safe_send_pending_welcomes():
+    try:
+        from ai_news_agent import send_welcome_to_registered_users
+        result = send_welcome_to_registered_users()
+        if result.get('total'):
+            logger.info('Pending welcome-email retry completed: %s', result)
+    except Exception as e:
+        logger.error(f'Scheduled welcome-email retry failed: {e}')
+
+def _safe_run_seo_monitor():
+    try:
+        from growth_seo_agent.service import run_scheduled_if_due
+        result = run_scheduled_if_due()
+        logger.info(f'Scheduled SEO monitor status: {result.get("status")}')
+    except Exception as e:
+        logger.error(f'Scheduled SEO monitor failed: {e}')
+
 def start_background_scheduler():
     global _scheduler_started
     if _scheduler_started:
+        return
+    if not _claim_scheduler_leadership():
+        logger.info('Background scheduler is already running in another worker.')
         return
     _scheduler_started = True
     try:
@@ -1258,8 +1300,17 @@ def start_background_scheduler():
             _safe_send_program_notifications, 'cron', hour=10, minute=0,
             id='daily_program_check', replace_existing=True, misfire_grace_time=3600
         )
+        scheduler.add_job(
+            _safe_send_pending_welcomes, 'interval', minutes=15,
+            id='pending_welcome_retry', replace_existing=True,
+            coalesce=True, max_instances=1
+        )
+        scheduler.add_job(
+            _safe_run_seo_monitor, 'cron', minute=15,
+            id='seo_monitor_due_check', replace_existing=True, misfire_grace_time=1800
+        )
         scheduler.start()
-        logger.info('Scheduler started: News digest 10:00 AM UTC (3 PM PKT), Program notifications 10:00 AM UTC (3 PM PKT).')
+        logger.info('Scheduler started: news digest, program notifications, welcome retries, and hourly SEO due checks.')
     except Exception as e:
         logger.error(f'Could not start background scheduler: {e}')
 

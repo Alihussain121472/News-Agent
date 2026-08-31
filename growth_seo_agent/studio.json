@@ -1,0 +1,7 @@
+{
+  "id": "seo-studio",
+  "name": "SEO Studio",
+  "url": "/seo/dashboard",
+  "icon": "fa-chart-line",
+  "order": 20
+}

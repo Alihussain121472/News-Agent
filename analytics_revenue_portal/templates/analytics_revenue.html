@@ -1,92 +1,199 @@
-﻿{% extends "base_saas.html" %}
-{% block title %}Revenue Center - Nova OS{% endblock %}
-{% block page_title %}Revenue Center{% endblock %}
-{% block page_subtitle %}Track your AdSense and organic monetization.{% endblock %}
+{% extends "base_saas.html" %}
+{% block title %}Revenue - Nova OS{% endblock %}
+{% block page_title %}Revenue{% endblock %}
+{% block page_subtitle %}Private, verified AdSense earnings and website monetization signals.{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-  <div class="kpi-card bg-gradient-to-br from-emerald-500 to-emerald-700 text-white border-0 shadow-lg shadow-emerald-200">
-    <p class="text-emerald-100 text-sm font-medium mb-1">Total Earnings</p>
-    <h3 class="text-3xl font-bold mb-2">$0.00</h3>
-    <div class="text-sm text-emerald-200" id="adsense-status"><i class="fas fa-exclamation-triangle mr-1"></i> API Disconnected</div>
-  </div>
-  <div class="kpi-card bg-white shadow-sm hover:shadow-md transition border border-slate-200">
-    <p class="text-slate-500 text-sm font-medium mb-1">Ad Impressions</p>
-    <h3 class="text-2xl font-bold text-slate-900 mb-2">0</h3>
-    <div class="text-sm text-slate-400"><i class="fas fa-eye mr-1"></i> Pending Google Approval</div>
-  </div>
-  <div class="kpi-card bg-white shadow-sm hover:shadow-md transition border border-slate-200">
-    <p class="text-slate-500 text-sm font-medium mb-1">Active Ad Units</p>
-    <h3 class="text-2xl font-bold text-slate-900 mb-2">2</h3>
-    <div class="text-sm text-emerald-500"><i class="fas fa-code mr-1"></i> Injected into Website</div>
-  </div>
-</div>
+<script>if(localStorage.getItem('novaRevenueHidden')==='true')document.documentElement.classList.add('revenue-private');</script>
 
-<div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mb-8">
-  <h3 class="font-bold text-slate-900 mb-4"><i class="fas fa-plug text-blue-600 mr-2"></i> Connect Google AdSense API</h3>
-  <p class="text-sm text-slate-600 mb-4">To pull live revenue data directly from Google into this dashboard, you need to link your AdSense account securely via API credentials.</p>
-  
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">AdSense Publisher ID</label>
-        <input type="text" value="pub-1036052096443002" disabled class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-500 mb-4">
+{% set account = adsense.account if adsense.account else {} %}
+{% set currency = account.currency_code if account.currency_code else 'USD' %}
+{% set connection_message = request.args.get('connection') %}
+{% if connection_message %}
+<div class="mb-5 flex items-start gap-3 rounded-xl border px-4 py-3 text-xs font-semibold {% if connection_message == 'connected' %}border-emerald-200 bg-emerald-50 text-emerald-800{% else %}border-amber-200 bg-amber-50 text-amber-900{% endif %}">
+  <i class="fas {% if connection_message == 'connected' %}fa-circle-check text-emerald-600{% else %}fa-circle-info text-amber-600{% endif %} mt-0.5"></i>
+  <span>{% if connection_message == 'connected' %}Google AdSense is connected and the first earnings report has been imported.{% elif connection_message == 'setup_required' %}Google OAuth settings must be added to the deployment before you can connect AdSense.{% elif connection_message == 'cancelled' %}AdSense connection was cancelled; no account access was saved.{% elif connection_message == 'invalid_state' %}The connection request expired. Start the AdSense connection again.{% else %}AdSense could not be connected. Confirm the Google account has AdSense access and try again.{% endif %}</span>
+</div>
+{% endif %}
+
+<section class="surface-card overflow-hidden">
+  <div class="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex min-w-0 items-start gap-4">
+      <div class="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-emerald-100 bg-emerald-50 text-lg text-emerald-600"><i class="fas fa-chart-column"></i></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-lg font-extrabold tracking-tight text-slate-900">AdSense revenue</h2>
+          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider {% if adsense.connected %}bg-emerald-50 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+            <span class="h-1.5 w-1.5 rounded-full {% if adsense.connected %}bg-emerald-500{% else %}bg-slate-400{% endif %}"></span>
+            {% if adsense.connected %}Connected{% else %}Not connected{% endif %}
+          </span>
+        </div>
+        {% if adsense.connected %}
+        <p class="mt-1.5 truncate text-xs font-semibold text-slate-600">{{ account.account_display_name }}</p>
+        <p class="mt-2 text-[11px] text-slate-400">{% if account.last_synced_at %}Last refreshed <time data-time="{{ account.last_synced_at.isoformat() }}">{{ account.last_synced_at }}</time>{% else %}Waiting for the first report{% endif %}</p>
+        {% else %}
+        <p class="mt-2 max-w-2xl text-xs leading-5 text-slate-500">Connect with Google using read-only access. Nova OS can view reporting data but cannot change ads, payment settings, or your AdSense account.</p>
+        {% endif %}
+      </div>
     </div>
-    <div>
-        <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Google Cloud Service Account JSON</label>
-        <input type="password" placeholder="Paste entire JSON credential here..." class="w-full border border-slate-200 rounded-lg p-2.5 text-sm focus:border-blue-500 outline-none mb-4">
+    <div class="flex flex-wrap gap-2">
+      <button id="revenue-privacy-button" type="button" onclick="toggleRevenuePrivacy()" class="secondary-action" aria-pressed="false" aria-label="Hide revenue amounts">
+        <i id="revenue-privacy-icon" class="fas fa-eye"></i><span id="revenue-privacy-label">Hide revenue</span>
+      </button>
+      {% if adsense.connected %}
+      <button id="sync-adsense-button" type="button" onclick="syncAdSense()" class="primary-action"><i class="fas fa-arrows-rotate"></i> Refresh data</button>
+      {% else %}
+      <a href="{{ url_for('analytics.adsense_connect') }}" class="primary-action"><i class="fab fa-google"></i> Connect Google AdSense</a>
+      {% endif %}
     </div>
   </div>
-  <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition" onclick="alert('Google Cloud API configuration required. Please generate a Service Account Key in Google Cloud Platform first.')">Connect & Sync Data</button>
-</div>
+  {% if adsense.connected and account.last_error %}
+  <div class="border-t border-amber-100 bg-amber-50 px-5 py-3 text-[11px] font-semibold text-amber-900 sm:px-6"><i class="fas fa-triangle-exclamation mr-2 text-amber-600"></i>{{ account.last_error }}</div>
+  {% endif %}
+</section>
 
-<!-- (Chart code follows below) -->
-<div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-  <div class="flex justify-between items-center mb-6">
-    <h3 class="font-bold text-slate-900">Live Revenue Chart</h3>
-    <select class="border border-slate-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-emerald-500">
-      <option>Last 7 Days</option>
-    </select>
-  </div>
-  <div class="h-80 w-full relative">
-    <canvas id="revenueChart"></canvas>
-  </div>
-</div>
+<section class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="AdSense revenue summary">
+  <article class="kpi-card">
+    <div class="flex items-center justify-between"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">This month</p><i class="fas fa-calendar-days text-xs text-emerald-500"></i></div>
+    <div class="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 revenue-sensitive" data-revenue-value="{{ currency }} {{ '%.2f'|format(revenue_data.month_earnings) }}">{% if adsense.connected %}{{ currency }} {{ '%.2f'|format(revenue_data.month_earnings) }}{% else %}—{% endif %}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Estimated AdSense earnings</p>
+  </article>
+  <article class="kpi-card">
+    <div class="flex items-center justify-between"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Today</p><i class="fas fa-sun text-xs text-amber-500"></i></div>
+    <div class="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 revenue-sensitive" data-revenue-value="{{ currency }} {{ '%.2f'|format(revenue_data.today_earnings) }}">{% if adsense.connected %}{{ currency }} {{ '%.2f'|format(revenue_data.today_earnings) }}{% else %}—{% endif %}</div>
+    <p class="mt-3 text-[11px] text-slate-500">May adjust before finalization</p>
+  </article>
+  <article class="kpi-card">
+    <div class="flex items-center justify-between"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Page views</p><i class="fas fa-eye text-xs text-blue-500"></i></div>
+    <div class="mt-3 text-2xl font-extrabold tracking-tight text-slate-900">{% if adsense.connected %}{{ '{:,}'.format(revenue_data.month_page_views) }}{% else %}—{% endif %}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Reported by AdSense this month</p>
+  </article>
+  <article class="kpi-card">
+    <div class="flex items-center justify-between"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Page RPM</p><i class="fas fa-gauge-high text-xs text-violet-500"></i></div>
+    <div class="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 revenue-sensitive" data-revenue-value="{{ currency }} {{ '%.2f'|format(revenue_data.page_rpm) }}">{% if adsense.connected %}{{ currency }} {{ '%.2f'|format(revenue_data.page_rpm) }}{% else %}—{% endif %}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Estimated earnings per 1,000 views</p>
+  </article>
+</section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<section class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(310px,0.55fr)]">
+  <article class="surface-card overflow-hidden">
+    <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Verified reporting</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Daily AdSense earnings</h2></div>
+      <select id="revenue-period" onchange="loadRevenueSeries(this.value)" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:border-blue-400">
+        <option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option>
+      </select>
+    </div>
+    <div class="relative h-80 p-5 sm:p-6">
+      <canvas id="adsense-revenue-chart" aria-label="Daily AdSense earnings chart"></canvas>
+      <div id="revenue-chart-private" class="absolute inset-5 hidden place-items-center rounded-xl border border-dashed border-slate-200 bg-slate-50/95 text-center sm:inset-6">
+        <div><i class="fas fa-eye-slash text-lg text-slate-400"></i><p class="mt-2 text-xs font-extrabold text-slate-600">Revenue chart hidden</p><p class="mt-1 text-[10px] text-slate-400">Use the eye control to reveal it.</p></div>
+      </div>
+      {% if not adsense.connected %}<div class="absolute inset-5 grid place-items-center rounded-xl border border-dashed border-slate-200 bg-slate-50/95 text-center sm:inset-6"><div><i class="fab fa-google text-xl text-slate-400"></i><p class="mt-3 text-xs font-extrabold text-slate-700">Connect AdSense to load earnings</p><p class="mt-1 text-[10px] text-slate-400">The chart will show verified daily reporting.</p></div></div>{% endif %}
+    </div>
+  </article>
+
+  <div class="space-y-5">
+    <article class="surface-card overflow-hidden">
+      <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Google connection</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">AdSense account</h2></div>
+      {% if adsense.connected %}
+      <div class="space-y-4 p-5">
+        <div class="flex items-center gap-3"><div class="grid h-10 w-10 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><i class="fab fa-google"></i></div><div class="min-w-0"><p class="truncate text-xs font-extrabold text-slate-800">{{ account.account_display_name }}</p><p class="mt-1 truncate text-[10px] text-slate-400">{{ account.account_name }}</p></div></div>
+        <div class="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3"><div><p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Currency</p><p class="mt-1 text-xs font-bold text-slate-700">{{ currency }}</p></div><div><p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Access</p><p class="mt-1 text-xs font-bold text-slate-700">Read only</p></div></div>
+        <button type="button" onclick="disconnectAdSense()" class="w-full rounded-lg border border-red-100 px-3 py-2.5 text-xs font-bold text-red-600 transition hover:bg-red-50"><i class="fas fa-link-slash mr-2"></i>Disconnect account</button>
+      </div>
+      {% else %}
+      <div class="p-5">
+        <p class="text-xs leading-5 text-slate-500">Secure OAuth keeps your Google password outside Nova OS. Only the read-only AdSense reporting permission is requested.</p>
+        <a href="{{ url_for('analytics.adsense_connect') }}" class="primary-action mt-4 w-full"><i class="fab fa-google"></i> Connect account</a>
+        {% if not adsense.configured %}<div class="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-[10px] leading-5 text-amber-900"><strong>One-time setup needed:</strong> add the Google OAuth client ID, client secret, and callback address to the deployment settings.</div>{% endif %}
+      </div>
+      {% endif %}
+    </article>
+
+    <article class="surface-card overflow-hidden">
+      <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Website signals</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Local ad activity</h2></div>
+      <div class="grid grid-cols-2 gap-px bg-slate-100">
+        <div class="bg-white p-4"><p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Today’s signals</p><p class="mt-2 text-lg font-extrabold text-slate-800">{{ ad_stats.today_impressions }}</p></div>
+        <div class="bg-white p-4"><p class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Site visits</p><p class="mt-2 text-lg font-extrabold text-slate-800">{{ visitor_stats.monthly_visits }}</p></div>
+      </div>
+      <p class="border-t border-slate-100 px-5 py-3 text-[10px] leading-5 text-slate-400">Local interaction signals are kept separate from official AdSense earnings.</p>
+    </article>
+  </div>
+</section>
+
+<div id="revenue-toast" class="hidden" role="status" aria-live="polite"></div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+  .revenue-private .revenue-sensitive { position:relative; display:inline-block; color:transparent !important; user-select:none; }
+  .revenue-private .revenue-sensitive::after { position:absolute; inset:0 auto auto 0; color:#344054; content:'••••••'; letter-spacing:.16em; }
+</style>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  const ctx = document.getElementById('revenueChart').getContext('2d');
-  const revChart = new Chart(ctx, {
+  const initialRevenueSeries = {{ revenue_data.series|tojson }};
+  const revenueCurrency = {{ currency|tojson }};
+  let revenueHidden = localStorage.getItem('novaRevenueHidden') === 'true';
+  const chartContext = document.getElementById('adsense-revenue-chart').getContext('2d');
+  const revenueChart = new Chart(chartContext, {
     type: 'line',
-    data: { labels: [], datasets: [{
-      label: 'Revenue ($)',
-      data: [],
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      borderWidth: 3,
-      fill: true,
-      tension: 0.4
-    }]},
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9' }, ticks: { callback: function(value) { return '$' + value; } } },
-        x: { grid: { display: false } }
-      }
-    }
+    data: { labels: initialRevenueSeries.slice(-30).map(item => item.date), datasets: [{ label: 'Estimated earnings', data: initialRevenueSeries.slice(-30).map(item => item.estimated_earnings), borderColor: '#12a474', backgroundColor: 'rgba(18,164,116,.10)', borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: .35 }] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => revenueHidden ? 'Revenue hidden' : `${revenueCurrency} ${Number(context.parsed.y).toFixed(2)}` } } }, scales: { x: { grid: { display: false }, ticks: { color: '#98a2b3', maxTicksLimit: 7, font: { size: 10 } } }, y: { beginAtZero: true, grid: { color: '#eef1f5' }, ticks: { color: '#98a2b3', font: { size: 10 }, callback: value => revenueHidden ? '•••' : Number(value).toFixed(2) } } } }
   });
 
-  try {
-      const res = await fetch('/analytics/api/stats');
-      const data = await res.json();
-      revChart.data.labels = data.labels;
-      revChart.data.datasets[0].data = data.revenue;
-      revChart.update();
-  } catch(e) {
-      console.error("Error loading revenue data", e);
+  function showRevenueToast(message, success = true) {
+    const toast = document.getElementById('revenue-toast');
+    toast.textContent = message;
+    toast.className = `fixed bottom-5 right-5 z-[110] max-w-sm rounded-xl px-4 py-3 text-xs font-bold text-white shadow-2xl ${success ? 'bg-emerald-600' : 'bg-red-600'}`;
+    clearTimeout(showRevenueToast.timer); showRevenueToast.timer = setTimeout(() => toast.classList.add('hidden'), 4500);
   }
-});
+
+  function applyRevenuePrivacy() {
+    document.documentElement.classList.toggle('revenue-private', revenueHidden);
+    localStorage.setItem('novaRevenueHidden', String(revenueHidden));
+    const button = document.getElementById('revenue-privacy-button');
+    const icon = document.getElementById('revenue-privacy-icon');
+    button.setAttribute('aria-pressed', String(revenueHidden));
+    button.setAttribute('aria-label', revenueHidden ? 'Show revenue amounts' : 'Hide revenue amounts');
+    icon.className = `fas ${revenueHidden ? 'fa-eye-slash' : 'fa-eye'}`;
+    document.getElementById('revenue-privacy-label').textContent = revenueHidden ? 'Show revenue' : 'Hide revenue';
+    const privateChart = document.getElementById('revenue-chart-private');
+    privateChart.classList.toggle('hidden', !revenueHidden); privateChart.classList.toggle('grid', revenueHidden);
+    revenueChart.update('none');
+  }
+
+  function toggleRevenuePrivacy() { revenueHidden = !revenueHidden; applyRevenuePrivacy(); }
+
+  async function apiRequest(url, options = {}) {
+    const response = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'The action could not be completed.');
+    return data;
+  }
+
+  async function loadRevenueSeries(days) {
+    try {
+      const data = await apiRequest(`/analytics/api/adsense/revenue?days=${days}`);
+      revenueChart.data.labels = data.series.map(item => item.date);
+      revenueChart.data.datasets[0].data = data.series.map(item => item.estimated_earnings);
+      revenueChart.update();
+    } catch (error) { showRevenueToast(error.message, false); }
+  }
+
+  async function syncAdSense() {
+    const button = document.getElementById('sync-adsense-button'); const original = button.innerHTML; button.disabled = true; button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing…';
+    try { const data = await apiRequest('/analytics/api/adsense/sync', { method: 'POST', body: '{}' }); showRevenueToast(data.message); setTimeout(() => location.reload(), 700); }
+    catch (error) { showRevenueToast(error.message, false); button.disabled = false; button.innerHTML = original; }
+  }
+
+  async function disconnectAdSense() {
+    if (!confirm('Disconnect AdSense from Nova OS? Previously imported reporting rows will remain, but no new data will sync.')) return;
+    try { const data = await apiRequest('/analytics/api/adsense/disconnect', { method: 'POST', body: '{}' }); showRevenueToast(data.message); setTimeout(() => location.reload(), 700); }
+    catch (error) { showRevenueToast(error.message, false); }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyRevenuePrivacy();
+    document.querySelectorAll('[data-time]').forEach(element => { const date = new Date(element.dataset.time); if (!Number.isNaN(date.getTime())) element.textContent = date.toLocaleString(); });
+  });
 </script>
 {% endblock %}

@@ -1,9 +1,9 @@
-import os, sys, json, logging, smtplib, ssl
+import os, sys, json, logging, smtplib, ssl, hashlib, time
 from datetime import datetime
 from email.utils import formataddr, formatdate, make_msgid, parseaddr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 import requests, feedparser
 from dotenv import load_dotenv
@@ -15,7 +15,16 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
-load_dotenv()
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+IS_HOSTED = bool(
+    os.getenv('RENDER')
+    or os.getenv('RENDER_SERVICE_ID')
+    or os.getenv('FLASK_ENV', '').strip().lower() == 'production'
+)
+# Local project settings should beat stale variables inherited from a terminal.
+# Hosted deployments continue to treat their secret manager as authoritative.
+load_dotenv(os.path.join(APP_DIR, '.env.local'), override=not IS_HOSTED)
+load_dotenv(os.path.join(APP_DIR, '.env'))
 
 
 def get_env_value(*names: str) -> str:
@@ -136,58 +145,148 @@ import concurrent.futures
 EMAIL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10, thread_name_prefix='email_worker')
 
 
-# A high-speed function to send emails using Gmail SMTP (Port 587 STARTTLS primary, Port 465 SSL fallback).
+def _smtp_credentials() -> List[Tuple[str, str, str]]:
+    """Return configured username/password pairs without ever mixing aliases."""
+    candidates = [
+        ('SMTP', os.getenv('SMTP_USERNAME'), os.getenv('SMTP_PASSWORD')),
+        ('GMAIL', os.getenv('GMAIL_USER'), os.getenv('GMAIL_APP_PASSWORD')),
+        ('EMAIL', os.getenv('EMAIL_USER'), os.getenv('EMAIL_APP_PASSWORD') or os.getenv('EMAIL_PASS')),
+    ]
+    credentials = []
+    seen = set()
+    for label, username, password in candidates:
+        sender = parseaddr(username or '')[1].strip().lower()
+        clean_password = (password or '').replace(' ', '').replace('-', '').strip()
+        if not sender or '@' not in sender or not clean_password:
+            continue
+        identity = (sender, clean_password)
+        if identity in seen:
+            continue
+        seen.add(identity)
+        credentials.append((label, sender, clean_password))
+    return credentials
+
+
+def is_deliverable_user_email(email: str) -> bool:
+    """Reject malformed and reserved test addresses before a bulk send."""
+    address = parseaddr(email or '')[1].strip().lower()
+    if not address or '\n' in address or '\r' in address or address.count('@') != 1:
+        return False
+    local_part, domain = address.rsplit('@', 1)
+    if not local_part or not domain or '.' not in domain:
+        return False
+    reserved_domains = {'example.com', 'example.org', 'example.net', 'localhost'}
+    return domain not in reserved_domains and not domain.endswith('.invalid')
+
+
+def _email_idempotency_key(recipient: str, subject: str, html_content: str) -> str:
+    payload = f'{recipient}\n{subject}\n{html_content}'.encode('utf-8')
+    return f'novabrief-{hashlib.sha256(payload).hexdigest()}'
+
+
+def _send_via_resend(recipient: str, subject: str, html_content: str) -> bool:
+    """Send through Resend's queued API with safe retries and deduplication."""
+    api_key = get_env_value('RESEND_API_KEY')
+    from_email = get_env_value('RESEND_FROM_EMAIL')
+    if not api_key or not from_email:
+        return False
+
+    payload = {
+        'from': from_email,
+        'to': [recipient],
+        'subject': clean_text(subject, 180),
+        'html': html_content,
+    }
+    reply_to = get_env_value('RESEND_REPLY_TO', 'GMAIL_USER', 'EMAIL_USER')
+    if reply_to:
+        payload['reply_to'] = reply_to
+    headers = {
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+        'Idempotency-Key': _email_idempotency_key(recipient, subject, html_content),
+    }
+
+    for attempt in range(3):
+        try:
+            response = requests.post(
+                'https://api.resend.com/emails',
+                json=payload,
+                headers=headers,
+                timeout=20,
+            )
+            if 200 <= response.status_code < 300:
+                provider_id = (response.json() or {}).get('id', 'accepted')
+                logger.info('Email accepted by Resend for queued delivery (id=%s).', provider_id)
+                return True
+            if response.status_code not in {408, 429} and response.status_code < 500:
+                logger.error('Resend rejected the email request (status=%s).', response.status_code)
+                return False
+            logger.warning('Resend temporarily unavailable (status=%s, attempt=%s).', response.status_code, attempt + 1)
+        except (requests.RequestException, ValueError) as exc:
+            logger.warning('Resend connection attempt failed (%s, attempt=%s).', exc.__class__.__name__, attempt + 1)
+        if attempt < 2:
+            time.sleep(0.5 * (2 ** attempt))
+    return False
+
+
+# Send through SMTP with SSL/STARTTLS and safe credential-alias fallback.
 def send_email(to_email: str, subject: str, html_content: str) -> bool:
-    from_email = get_env_value('GMAIL_USER', 'EMAIL_USER')
-    password = get_env_value('GMAIL_APP_PASSWORD', 'EMAIL_APP_PASSWORD', 'EMAIL_PASS')
     smtp_host = get_env_value('SMTP_HOST') or 'smtp.gmail.com'
-    smtp_port = int(get_env_value('SMTP_PORT') or '465')
+    try:
+        smtp_port = int(get_env_value('SMTP_PORT') or '465')
+    except ValueError:
+        logger.error('SMTP_PORT must be a number.')
+        return False
     sender_name = get_env_value('EMAIL_FROM_NAME') or 'Nova Brief'
     recipient = parseaddr(to_email or '')[1].strip().lower()
-    sender = parseaddr(from_email or '')[1].strip().lower()
     if not recipient or '\n' in recipient or '\r' in recipient or '@' not in recipient:
         logger.error('Refusing to send email to an invalid recipient address.')
         return False
-    if not from_email or not password:
-        logger.error('Gmail credentials missing in environment.')
+    if get_env_value('RESEND_API_KEY') and get_env_value('RESEND_FROM_EMAIL'):
+        if _send_via_resend(recipient, subject, html_content):
+            return True
+        logger.warning('Primary email provider failed; attempting the Gmail SMTP fallback.')
+    credentials = _smtp_credentials()
+    if not credentials:
+        logger.error('SMTP credentials are missing from the environment.')
         return False
-
-    clean_pwd = password.replace(' ', '').replace('-', '').strip()
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = clean_text(subject, 180)
-    msg['From'] = formataddr((sender_name, sender))
-    msg['To'] = recipient
-    msg['Date'] = formatdate(localtime=False)
-    msg['Message-ID'] = make_msgid(domain=sender.split('@')[-1])
-    msg['Reply-To'] = sender
-    msg['List-Unsubscribe'] = f'<mailto:{sender}?subject=Unsubscribe>'
-    msg.attach(MIMEText(html_content, 'html', 'utf-8'))
 
     context = ssl.create_default_context()
     ports = [smtp_port]
     if smtp_host == 'smtp.gmail.com':
         ports.append(587 if smtp_port == 465 else 465)
-    for port in dict.fromkeys(ports):
-        try:
-            if port == 465:
-                smtp = smtplib.SMTP_SSL(smtp_host, port, timeout=20, context=context)
-            else:
-                smtp = smtplib.SMTP(smtp_host, port, timeout=20)
-            with smtp as s:
-                if port != 465:
-                    s.ehlo()
-                    s.starttls(context=context)
-                    s.ehlo()
-                s.login(sender, clean_pwd)
-                s.send_message(msg)
-            logger.info('Email accepted by SMTP for delivery.')
-            return True
-        except smtplib.SMTPAuthenticationError:
-            logger.error('Email authentication failed. Generate a new app password and update the deployment secret.')
-            return False
-        except (smtplib.SMTPException, OSError, ssl.SSLError) as exc:
-            logger.warning('SMTP connection attempt on port %s failed: %s', port, exc.__class__.__name__)
-    logger.error('Email delivery failed on all configured SMTP ports.')
+    for label, sender, password in credentials:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = clean_text(subject, 180)
+        msg['From'] = formataddr((sender_name, sender))
+        msg['To'] = recipient
+        msg['Date'] = formatdate(localtime=False)
+        msg['Message-ID'] = make_msgid(domain=sender.split('@')[-1])
+        msg['Reply-To'] = sender
+        msg['List-Unsubscribe'] = f'<mailto:{sender}?subject=Unsubscribe>'
+        msg.attach(MIMEText(html_content, 'html', 'utf-8'))
+
+        for port in dict.fromkeys(ports):
+            try:
+                if port == 465:
+                    smtp = smtplib.SMTP_SSL(smtp_host, port, timeout=20, context=context)
+                else:
+                    smtp = smtplib.SMTP(smtp_host, port, timeout=20)
+                with smtp as connection:
+                    if port != 465:
+                        connection.ehlo()
+                        connection.starttls(context=context)
+                        connection.ehlo()
+                    connection.login(sender, password)
+                    connection.send_message(msg)
+                logger.info('Email accepted by SMTP for delivery.')
+                return True
+            except smtplib.SMTPAuthenticationError:
+                logger.error('%s SMTP credentials were rejected; trying the next configured credential pair.', label)
+                break
+            except (smtplib.SMTPException, OSError, ssl.SSLError) as exc:
+                logger.warning('SMTP connection attempt on port %s failed: %s', port, exc.__class__.__name__)
+    logger.error('Email delivery failed for every configured SMTP credential pair.')
     return False
 
 
@@ -296,19 +395,30 @@ def send_program_welcome_email(to_email: str, name: str = None, program_title: s
 
 
 def send_welcome_to_registered_users() -> Dict[str, int]:
-    """Send a welcome message to active registered users and report exact outcomes."""
+    """Send one welcome message to each eligible active user who has not received one."""
     db = NewsDatabase()
-    recipients = db.get_all_active_users()
-    sent = failed = 0
-    for email in recipients:
-        user = db.get_user_by_email(email) or {}
+    recipients = db.get_users_pending_welcome_email()
+    sent = failed = skipped = 0
+    for user in recipients:
+        email = (user.get('email') or '').strip().lower()
+        if not is_deliverable_user_email(email):
+            skipped += 1
+            logger.warning('Skipped a reserved or invalid address during the welcome-email run.')
+            continue
         if send_welcome_email(email, user.get('name')):
             sent += 1
+            db.mark_welcome_email_sent(email)
             db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
         else:
             failed += 1
             db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
-    return {'total': len(recipients), 'sent': sent, 'failed': failed}
+    return {
+        'total': len(recipients),
+        'eligible': len(recipients) - skipped,
+        'sent': sent,
+        'failed': failed,
+        'skipped': skipped,
+    }
 
 
 def send_login_email(to_email: str) -> bool:
@@ -463,21 +573,33 @@ def send_program_notifications() -> int:
         logger.info('No programs to notify about today.')
         return 0
 
-    subscribers = db.get_program_subscribers()
-    if not subscribers:
-        logger.info('No program subscribers found.')
-        return 0
-
     sent_count = 0
     for program in programs:
         subject = f"🎓 New Program Alert: {program['title']} by {program['company']}"
         html = format_program_email(program)
+        subscribers = db.get_pending_program_subscribers(program['id'])
+        if not subscribers:
+            db.mark_program_notified(program['id'])
+            continue
+
         for email in subscribers:
+            if not is_deliverable_user_email(email):
+                db.record_program_notification_delivery(
+                    program['id'], email, 'skipped', 'Invalid or reserved recipient address')
+                continue
             if send_email(email, subject, html):
                 sent_count += 1
+                db.record_program_notification_delivery(program['id'], email, 'success')
+                db.log_email_sent(email, subject, 0, 'success')
                 db.log_user_activity(email, 'program_notification_sent', program['title'])
-        db.mark_program_notified(program['id'])
-        logger.info(f"Notified {len(subscribers)} users about: {program['title']}")
+            else:
+                db.record_program_notification_delivery(
+                    program['id'], email, 'failed', 'SMTP delivery failed')
+                db.log_email_sent(email, subject, 0, 'failed', 'SMTP delivery failed')
+
+        if db.program_notification_is_complete(program['id']):
+            db.mark_program_notified(program['id'])
+        logger.info('Program notification run completed for %s.', program['title'])
 
     return sent_count
 
@@ -696,8 +818,8 @@ if __name__ == '__main__':
     main()
 
 
-def send_password_reset_email(email: str, token: str) -> None:
-    reset_url = f"https://novabrief-web.onrender.com/user/reset-password/{token}"
+def send_password_reset_email(email: str, token: str) -> bool:
+    reset_url = f"https://www.novabrief.tech/user/reset-password/{token}"
     subject = "Reset Your Password - Nova Brief"
     html_content = f"""<!DOCTYPE html>
 <html>
@@ -726,30 +848,5 @@ def send_password_reset_email(email: str, token: str) -> None:
   </table>
 </body>
 </html>"""
-    send_email(email, subject, html_content)
-    reset_link = f'https://novabrief-web.onrender.com/user/reset-password/{token}'
-    subject = "Password Reset Request - Nova Brief"
-    html = f'''
-    <html>
-      <body style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-        <h2>Reset Your Password</h2>
-        <p>We received a request to reset your password for your Nova Brief account.</p>
-        <p>Click the link below to set a new password. This link will expire in 1 hour.</p>
-        <p><a href="{reset_link}" style="display:inline-block; padding:10px 20px; background-color:#2563eb; color:#fff; text-decoration:none; border-radius:5px;">Reset Password</a></p>
-        <p>If you didn't request this, you can safely ignore this email.</p>
-      </body>
-    </html>
-    '''
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = f"Nova Brief <{sender_email}>"
-        msg['To'] = email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(html, 'html', 'utf-8'))
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            server.send_message(msg)
-    except Exception as e:
-        logger.error(f'Failed to send password reset to {email}: {e}')
+    return send_email(email, subject, html_content)
 

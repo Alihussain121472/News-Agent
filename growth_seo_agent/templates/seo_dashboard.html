@@ -1,55 +1,367 @@
-﻿{% extends "base_saas.html" %}
-{% block title %}SEO Agent - Nova OS{% endblock %}
-{% block page_title %}SEO & Growth Agent{% endblock %}
-{% block page_subtitle %}Your automated SEO auditor and traffic builder.{% endblock %}
+{% extends "base_saas.html" %}
+{% block title %}SEO Studio - Nova OS{% endblock %}
+{% block page_title %}SEO Studio{% endblock %}
+{% block page_subtitle %}Continuous technical audits, keyword planning, content opportunities, and earned-link monitoring.{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-  <div class="kpi-card text-center">
-    <div class="relative w-32 h-32 mx-auto mb-4">
-      <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-        <path class="text-slate-100" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-        <path class="text-emerald-500" stroke-dasharray="82, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-      </svg>
-      <div class="absolute inset-0 flex flex-col items-center justify-center">
-        <span class="text-3xl font-bold text-slate-900">82</span>
-        <span class="text-[10px] uppercase font-bold text-slate-400">Score</span>
+<section class="surface-card overflow-hidden">
+  <div class="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex min-w-0 items-start gap-4">
+      <div class="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-emerald-100 bg-emerald-50 text-lg text-emerald-600"><i class="fas fa-chart-line"></i></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="text-lg font-extrabold tracking-tight text-slate-900">Continuous search monitoring</h2>
+          <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider {% if config.enabled %}bg-emerald-50 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
+            <span class="h-1.5 w-1.5 rounded-full {% if config.enabled %}bg-emerald-500{% else %}bg-slate-400{% endif %}"></span>
+            {% if config.enabled %}Monitoring active{% else %}Monitoring paused{% endif %}
+          </span>
+        </div>
+        <a href="{{ config.site_url }}" target="_blank" rel="noopener" class="mt-1.5 block truncate text-xs font-semibold text-blue-600 hover:underline">{{ config.site_url }} <i class="fas fa-arrow-up-right-from-square ml-1 text-[9px]"></i></a>
+        <p class="mt-2 text-xs leading-5 text-slate-500">
+          {% if latest_run and latest_run.status == 'completed' %}
+          Last completed <time data-time="{{ latest_run.completed_at.isoformat() }}">{{ latest_run.completed_at }}</time>. Next due {% if next_run_at %}<time data-time="{{ next_run_at.isoformat() }}">{{ next_run_at }}</time>{% endif %}.
+          {% elif latest_run and latest_run.status == 'running' %}A site audit is currently running.
+          {% else %}No completed audit yet. Run the first audit to establish a verified baseline.{% endif %}
+        </p>
       </div>
     </div>
-    <h3 class="font-bold text-slate-900 mb-1">SEO Health Score</h3>
-    <p class="text-xs text-emerald-600 font-semibold"><i class="fas fa-check-circle"></i> Good Standing</p>
+    <div class="flex flex-wrap gap-2">
+      <button type="button" onclick="switchSeoTab('settings')" class="secondary-action"><i class="fas fa-sliders"></i> Configure</button>
+      <button id="run-audit-button" type="button" onclick="runSeoAudit()" class="primary-action"><i class="fas fa-play"></i> Run audit now</button>
+    </div>
   </div>
+  <div class="border-t border-amber-100 bg-amber-50/60 px-5 py-3 text-[11px] leading-5 text-amber-900 sm:px-6">
+    <i class="fas fa-shield-halved mr-2 text-amber-600"></i>SEO Studio follows people-first and anti-spam practices. Rankings cannot be guaranteed, and backlink outreach always stays under your approval.
+  </div>
+</section>
 
-  <div class="kpi-card md:col-span-2">
-    <h3 class="font-bold text-slate-900 mb-4">AI SEO Recommendations</h3>
-        <div class="space-y-4">
-      <div class="p-4 border border-emerald-100 bg-emerald-50 rounded-xl flex gap-4">
-        <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
-        <div>
-          <h4 class="font-bold text-slate-900">Perfect Meta Descriptions</h4>
-          <p class="text-sm text-slate-600 mt-1">100% of your pages have optimized meta descriptions and keywords injected.</p>
-        </div>
+<section class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="SEO performance summary">
+  <article class="kpi-card">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Audit health</p>
+    <div class="mt-3 flex items-end gap-2"><span class="text-3xl font-extrabold tracking-tight text-slate-900">{{ latest_run.score if latest_run and latest_run.score is not none else '—' }}</span>{% if latest_run and latest_run.score is not none %}<span class="mb-1 text-xs font-bold text-slate-400">/100</span>{% endif %}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Evidence from the latest crawl</p>
+  </article>
+  <article class="kpi-card">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Pages checked</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ latest_run.pages_checked if latest_run else 0 }}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Up to {{ config.max_pages }} pages per cycle</p>
+  </article>
+  <article class="kpi-card">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Open findings</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ issues|length }}</div>
+    <p class="mt-3 text-[11px] {% if latest_run and latest_run.critical_count %}text-red-600{% else %}text-slate-500{% endif %}">{{ latest_run.critical_count if latest_run else 0 }} critical · {{ latest_run.warning_count if latest_run else 0 }} warnings</p>
+  </article>
+  <article class="kpi-card">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Earned links</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ earned_backlinks }}</div>
+    <p class="mt-3 text-[11px] text-slate-500">{{ backlinks|length }} prospects monitored</p>
+  </article>
+</section>
+
+<nav class="mt-5 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm" aria-label="SEO Studio sections">
+  <button type="button" class="seo-tab active" data-seo-tab="overview" onclick="switchSeoTab('overview')"><i class="fas fa-gauge-high"></i> Overview</button>
+  <button type="button" class="seo-tab" data-seo-tab="keywords" onclick="switchSeoTab('keywords')"><i class="fas fa-key"></i> Keywords <span class="seo-tab-count">{{ keywords|length }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="backlinks" onclick="switchSeoTab('backlinks')"><i class="fas fa-link"></i> Backlinks <span class="seo-tab-count">{{ backlinks|length }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="content" onclick="switchSeoTab('content')"><i class="fas fa-file-lines"></i> Content <span class="seo-tab-count">{{ open_content }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="settings" onclick="switchSeoTab('settings')"><i class="fas fa-sliders"></i> Settings</button>
+</nav>
+
+<div id="seo-panel-overview" class="seo-panel mt-5">
+  <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
+    <section class="surface-card overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Prioritized work</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Latest audit findings</h2></div>
+        {% if latest_run %}<span class="text-[10px] font-bold text-slate-400">Run #{{ latest_run.id }}</span>{% endif %}
       </div>
-      
-      <div class="p-4 border border-emerald-100 bg-emerald-50 rounded-xl flex gap-4">
-        <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
-        <div>
-          <h4 class="font-bold text-slate-900">No Content Gaps Detected</h4>
-          <p class="text-sm text-slate-600 mt-1">Your content is fully optimized across all high-traffic AI automation keywords.</p>
-        </div>
+      <div class="divide-y divide-slate-100">
+        {% for issue in issues %}
+        <article class="flex gap-3 px-5 py-4">
+          <div class="mt-0.5 grid h-8 w-8 flex-none place-items-center rounded-lg {% if issue.severity == 'critical' %}bg-red-50 text-red-600{% elif issue.severity == 'warning' %}bg-amber-50 text-amber-600{% else %}bg-blue-50 text-blue-600{% endif %}">
+            <i class="fas {% if issue.severity == 'critical' %}fa-circle-exclamation{% elif issue.severity == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %} text-xs"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2"><h3 class="text-xs font-extrabold text-slate-800">{{ issue.title }}</h3><span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">{{ issue.category }}</span></div>
+            <a href="{{ issue.url }}" target="_blank" rel="noopener" class="mt-1 block truncate text-[10px] text-blue-600 hover:underline">{{ issue.url }}</a>
+            <p class="mt-2 text-[11px] leading-5 text-slate-500">{{ issue.recommendation }}</p>
+          </div>
+        </article>
+        {% else %}
+        <div class="px-6 py-14 text-center"><div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><i class="fas fa-circle-check"></i></div><h3 class="mt-4 text-sm font-extrabold text-slate-800">No audit findings yet</h3><p class="mt-2 text-xs text-slate-500">Run the first audit to produce verified recommendations.</p></div>
+        {% endfor %}
       </div>
-      
-      <div class="p-4 border border-emerald-100 bg-emerald-50 rounded-xl flex gap-4">
-        <i class="fas fa-check-circle text-emerald-600 mt-1"></i>
-        <div>
-          <h4 class="font-bold text-slate-900">Sitemap Automatically Pinging</h4>
-          <p class="text-sm text-slate-600 mt-1">Your sitemap.xml and robots.txt are active and successfully indexed by Google.</p>
+    </section>
+
+    <div class="space-y-5">
+      <section class="surface-card overflow-hidden">
+        <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Monitoring history</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Recent audit runs</h2></div>
+        <div class="divide-y divide-slate-100">
+          {% for run in runs %}
+          <div class="flex items-center gap-3 px-5 py-3.5">
+            <span class="h-2 w-2 rounded-full {% if run.status == 'completed' %}bg-emerald-500{% elif run.status == 'running' %}bg-blue-500 animate-pulse{% else %}bg-red-500{% endif %}"></span>
+            <div class="min-w-0 flex-1"><div class="text-xs font-bold capitalize text-slate-700">{{ run.trigger_type }} audit</div><time data-time="{{ run.started_at.isoformat() }}" class="mt-0.5 block text-[10px] text-slate-400">{{ run.started_at }}</time></div>
+            <span class="text-xs font-extrabold text-slate-700">{{ run.score if run.score is not none else '—' }}</span>
+          </div>
+          {% else %}<div class="px-5 py-8 text-center text-xs text-slate-400">No audit history yet.</div>{% endfor %}
         </div>
-      </div>
+      </section>
+      <section class="surface-card overflow-hidden">
+        <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Agent activity</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Event log</h2></div>
+        <div class="divide-y divide-slate-100">
+          {% for event in events[:6] %}<div class="px-5 py-3.5"><div class="text-xs font-bold text-slate-700">{{ event.message }}</div><time data-time="{{ event.created_at.isoformat() }}" class="mt-1 block text-[10px] text-slate-400">{{ event.created_at }}</time></div>
+          {% else %}<div class="px-5 py-8 text-center text-xs text-slate-400">No agent events yet.</div>{% endfor %}
+        </div>
+      </section>
     </div>
   </div>
 </div>
+
+<div id="seo-panel-keywords" class="seo-panel mt-5 hidden">
+  <section class="surface-card overflow-hidden">
+    <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Search demand</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Tracked keyword portfolio</h2></div>
+      <button type="button" onclick="toggleElement('keyword-form')" class="primary-action"><i class="fas fa-plus"></i> Add keyword</button>
+    </div>
+    <form id="keyword-form" class="hidden border-b border-slate-100 bg-slate-50/70 p-5" onsubmit="saveKeyword(event)">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <label class="field-label xl:col-span-2">Keyword<input id="keyword" required maxlength="160" class="field-input" placeholder="e.g. AI news for students"></label>
+        <label class="field-label">Search intent<select id="keyword-intent" class="field-input"><option value="informational">Informational</option><option value="commercial">Commercial</option><option value="transactional">Transactional</option><option value="navigational">Navigational</option></select></label>
+        <label class="field-label">Priority<select id="keyword-priority" class="field-input"><option value="1">1 — Highest</option><option value="2">2 — High</option><option value="3" selected>3 — Normal</option><option value="4">4 — Low</option><option value="5">5 — Later</option></select></label>
+        <label class="field-label xl:col-span-2">Target URL<input id="keyword-target" type="url" class="field-input" placeholder="https://www.novabrief.tech/page"></label>
+        <label class="field-label">Current position <span>(optional)</span><input id="keyword-position" type="number" min="1" class="field-input" placeholder="Manual/Search Console"></label>
+        <label class="field-label">Monthly volume <span>(optional)</span><input id="keyword-volume" type="number" min="0" class="field-input" placeholder="Verified estimate"></label>
+      </div>
+      <label class="field-label mt-3">Notes<textarea id="keyword-notes" rows="2" class="field-input resize-none" placeholder="Audience, country, or content angle"></textarea></label>
+      <div class="mt-4 flex justify-end gap-2"><button type="button" onclick="toggleElement('keyword-form', false)" class="secondary-action">Cancel</button><button id="save-keyword-button" class="primary-action">Save keyword</button></div>
+    </form>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[760px] text-left">
+        <thead class="border-b border-slate-100 bg-slate-50/60 text-[9px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Keyword</th><th class="px-4 py-3">Intent</th><th class="px-4 py-3 text-center">Priority</th><th class="px-4 py-3 text-center">Position</th><th class="px-4 py-3 text-right">Volume</th><th class="px-5 py-3 text-right">Action</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for keyword in keywords %}<tr class="text-xs text-slate-600 hover:bg-slate-50/60"><td class="px-5 py-4"><div class="font-extrabold text-slate-800">{{ keyword.keyword }}</div>{% if keyword.target_url %}<a href="{{ keyword.target_url }}" target="_blank" rel="noopener" class="mt-1 block max-w-xs truncate text-[10px] text-blue-600">{{ keyword.target_url }}</a>{% endif %}</td><td class="px-4 py-4 capitalize">{{ keyword.intent }}</td><td class="px-4 py-4 text-center font-bold">{{ keyword.priority }}</td><td class="px-4 py-4 text-center font-bold">{{ '#' ~ keyword.position if keyword.position else '—' }}</td><td class="px-4 py-4 text-right">{{ keyword.search_volume or '—' }}</td><td class="px-5 py-4 text-right"><button type="button" onclick="deleteKeyword({{ keyword.id }})" class="rounded-lg px-2.5 py-2 text-red-500 transition hover:bg-red-50" aria-label="Remove {{ keyword.keyword }}"><i class="fas fa-trash"></i></button></td></tr>
+          {% else %}<tr><td colspan="6" class="px-6 py-14 text-center text-xs text-slate-400">No tracked keywords.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>
+
+<div id="seo-panel-backlinks" class="seo-panel mt-5 hidden">
+  <section class="surface-card overflow-hidden">
+    <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Earned authority</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Backlink prospect monitoring</h2><p class="mt-1 text-[10px] text-slate-400">Studio checks prospect pages for real links on every audit cycle.</p></div>
+      <button type="button" onclick="toggleElement('backlink-form')" class="primary-action"><i class="fas fa-plus"></i> Add prospect</button>
+    </div>
+    <form id="backlink-form" class="hidden border-b border-slate-100 bg-slate-50/70 p-5" onsubmit="saveBacklink(event)">
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <label class="field-label xl:col-span-2">Prospect page URL<input id="backlink-url" type="url" required class="field-input" placeholder="https://example.com/resources"></label>
+        <label class="field-label">Contact email <span>(optional)</span><input id="backlink-email" type="email" class="field-input" placeholder="editor@example.com"></label>
+        <label class="field-label">Relevance<select id="backlink-relevance" class="field-input"><option value="5">5 — Excellent fit</option><option value="4">4 — Strong fit</option><option value="3" selected>3 — Relevant</option><option value="2">2 — Limited fit</option><option value="1">1 — Weak fit</option></select></label>
+        <label class="field-label xl:col-span-2">Your page to reference<input id="backlink-target" type="url" class="field-input" value="{{ config.site_url }}"></label>
+        <label class="field-label">Follow-up date <span>(optional)</span><input id="backlink-followup" type="date" class="field-input"></label>
+        <label class="field-label">Notes<input id="backlink-notes" class="field-input" placeholder="Why this is relevant"></label>
+      </div>
+      <div class="mt-4 flex justify-end gap-2"><button type="button" onclick="toggleElement('backlink-form', false)" class="secondary-action">Cancel</button><button id="save-backlink-button" class="primary-action">Save prospect</button></div>
+    </form>
+    <div class="divide-y divide-slate-100">
+      {% for backlink in backlinks %}
+      <article class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(0,1.2fr)_160px_150px_auto] lg:items-center">
+        <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><h3 class="truncate text-xs font-extrabold text-slate-800">{{ backlink.domain }}</h3><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-500">Relevance {{ backlink.relevance_score }}/5</span></div><a href="{{ backlink.prospect_url }}" target="_blank" rel="noopener" class="mt-1 block truncate text-[10px] text-blue-600 hover:underline">{{ backlink.prospect_url }}</a>{% if backlink.last_checked_at %}<p class="mt-1 text-[10px] text-slate-400">Checked <time data-time="{{ backlink.last_checked_at.isoformat() }}">{{ backlink.last_checked_at }}</time>{% if backlink.last_http_status %} · HTTP {{ backlink.last_http_status }}{% endif %}</p>{% endif %}</div>
+        <select class="field-input !py-2" onchange="updateBacklinkStatus({{ backlink.id }}, this.value)">{% for value in ['prospect','qualified','contacted','earned','declined','lost','unreachable'] %}<option value="{{ value }}" {% if backlink.status == value %}selected{% endif %}>{{ value|title }}</option>{% endfor %}</select>
+        <button type="button" onclick="openOutreach({{ backlink.id }})" class="secondary-action"><i class="fas fa-envelope"></i> Outreach draft</button>
+        <button type="button" onclick="deleteBacklink({{ backlink.id }})" class="rounded-lg px-3 py-2 text-red-500 transition hover:bg-red-50" aria-label="Remove {{ backlink.domain }}"><i class="fas fa-trash"></i></button>
+      </article>
+      {% else %}<div class="px-6 py-14 text-center"><div class="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-600"><i class="fas fa-link"></i></div><h3 class="mt-4 text-sm font-extrabold text-slate-800">No backlink prospects yet</h3><p class="mx-auto mt-2 max-w-md text-xs leading-5 text-slate-500">Add relevant publications, resource pages, partners, or organizations. SEO Studio will monitor whether they link back to NovaBrief.</p></div>{% endfor %}
+    </div>
+  </section>
 </div>
+
+<div id="seo-panel-content" class="seo-panel mt-5 hidden">
+  <section class="surface-card overflow-hidden">
+    <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">People-first publishing</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Content opportunity queue</h2><p class="mt-1 text-[10px] text-slate-400">Opportunities come from tracked search intent that is not clearly covered in audited titles or headings.</p></div>
+    <div class="grid grid-cols-1 gap-4 p-5 lg:grid-cols-2">
+      {% for item in content_opportunities %}
+      <article class="rounded-xl border border-slate-200 bg-white p-4">
+        <div class="flex items-start justify-between gap-3"><div><span class="text-[9px] font-extrabold uppercase tracking-wider text-blue-600">{{ item.intent }}</span><h3 class="mt-1.5 text-sm font-extrabold leading-5 text-slate-800">{{ item.recommended_title }}</h3></div><span class="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold capitalize text-slate-500">{{ item.status }}</span></div>
+        <p class="mt-3 text-[11px] leading-5 text-slate-500">{{ item.rationale }}</p>
+        <div class="mt-4 flex flex-wrap gap-2"><button type="button" onclick="openContentBrief({{ item.id }})" class="primary-action"><i class="fas fa-file-lines"></i> Open brief</button><select class="field-input !w-auto !py-2" onchange="updateContentStatus({{ item.id }}, this.value)">{% for value in ['idea','approved','briefed','published','dismissed'] %}<option value="{{ value }}" {% if item.status == value %}selected{% endif %}>{{ value|title }}</option>{% endfor %}</select></div>
+      </article>
+      {% else %}<div class="col-span-full px-6 py-14 text-center text-xs text-slate-400">Add tracked keywords or run an audit to create content opportunities.</div>{% endfor %}
+    </div>
+  </section>
+</div>
+
+<div id="seo-panel-settings" class="seo-panel mt-5 hidden">
+  <section class="surface-card max-w-3xl overflow-hidden">
+    <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Automation control</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Monitoring settings</h2></div>
+    <form class="p-5 sm:p-6" onsubmit="saveSeoConfig(event)">
+      <label class="field-label">Website URL<input id="seo-site-url" type="url" required class="field-input" value="{{ config.site_url }}"></label>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label class="field-label">Audit frequency<select id="seo-schedule" class="field-input">{% for hours, label in [(1,'Every hour'),(3,'Every 3 hours'),(6,'Every 6 hours'),(12,'Every 12 hours'),(24,'Every 24 hours')] %}<option value="{{ hours }}" {% if config.schedule_hours == hours %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+        <label class="field-label">Pages per audit<select id="seo-max-pages" class="field-input">{% for count in [5,10,20,30,50] %}<option value="{{ count }}" {% if config.max_pages == count %}selected{% endif %}>Up to {{ count }} pages</option>{% endfor %}</select></label>
+      </div>
+      <label class="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4"><input id="seo-enabled" type="checkbox" {% if config.enabled %}checked{% endif %} class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600"><span><span class="block text-xs font-extrabold text-slate-800">Keep continuous monitoring active</span><span class="mt-1 block text-[11px] leading-5 text-slate-500">The hourly scheduler checks whether the selected interval is due and avoids duplicate runs across workers.</span></span></label>
+      <div class="mt-5 flex justify-end"><button id="save-config-button" class="primary-action"><i class="fas fa-floppy-disk"></i> Save settings</button></div>
+    </form>
+  </section>
+</div>
+
+<div id="seo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="seo-modal-title">
+  <div class="max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4"><h2 id="seo-modal-title" class="text-sm font-extrabold text-slate-900">SEO Studio</h2><button type="button" onclick="closeSeoModal()" class="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close"><i class="fas fa-xmark"></i></button></div>
+    <div id="seo-modal-body" class="max-h-[65vh] overflow-y-auto p-5 text-sm text-slate-600"></div>
+    <div class="flex justify-end gap-2 border-t border-slate-100 px-5 py-4"><button id="copy-modal-button" type="button" onclick="copyModalContent()" class="secondary-action"><i class="fas fa-copy"></i> Copy</button><button type="button" onclick="closeSeoModal()" class="primary-action">Done</button></div>
+  </div>
+</div>
+
+<div id="seo-toast" class="fixed bottom-5 right-5 z-[110] hidden max-w-sm rounded-xl px-4 py-3 text-xs font-bold text-white shadow-2xl" role="status" aria-live="polite"></div>
+
+<style>
+  .seo-tab { display:inline-flex; min-height:2.45rem; flex:0 0 auto; align-items:center; gap:.5rem; padding:.55rem .85rem; border-radius:.62rem; color:#667085; font-size:.72rem; font-weight:750; transition:background 150ms,color 150ms,box-shadow 150ms; }
+  .seo-tab:hover { background:#f5f7fb; color:#344054; }
+  .seo-tab.active { color:#fff; background:#101828; box-shadow:0 6px 14px rgba(16,24,40,.14); }
+  .seo-tab-count { min-width:1.25rem; padding:.1rem .35rem; border-radius:999px; background:rgba(148,163,184,.15); font-size:.58rem; text-align:center; }
+  .seo-tab.active .seo-tab-count { background:rgba(255,255,255,.14); }
+  .field-label { display:block; color:#475467; font-size:.68rem; font-weight:750; }
+  .field-label > span { color:#98a2b3; font-weight:600; }
+  .field-input { display:block; width:100%; margin-top:.42rem; padding:.68rem .78rem; border:1px solid #dfe3ea; border-radius:.68rem; color:#344054; background:#fff; font-size:.75rem; font-weight:550; outline:none; transition:border-color 150ms,box-shadow 150ms; }
+  .field-input:focus { border-color:#8296f8; box-shadow:0 0 0 3px rgba(79,109,245,.11); }
+</style>
 {% endblock %}
 
+{% block scripts %}
+<script>
+  let modalCopyText = '';
+  const initialSeoRunId = {{ latest_run.id if latest_run else 'null' }};
+
+  function showToast(message, success = true) {
+    const toast = document.getElementById('seo-toast');
+    toast.textContent = message;
+    toast.className = `fixed bottom-5 right-5 z-[110] max-w-sm rounded-xl px-4 py-3 text-xs font-bold text-white shadow-2xl ${success ? 'bg-emerald-600' : 'bg-red-600'}`;
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.add('hidden'), 4500);
+  }
+
+  function toggleElement(id, force) {
+    const element = document.getElementById(id);
+    const show = typeof force === 'boolean' ? force : element.classList.contains('hidden');
+    element.classList.toggle('hidden', !show);
+    if (show) element.querySelector('input, select, textarea')?.focus();
+  }
+
+  function switchSeoTab(name) {
+    document.querySelectorAll('.seo-panel').forEach(panel => panel.classList.add('hidden'));
+    document.querySelectorAll('.seo-tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(`seo-panel-${name}`)?.classList.remove('hidden');
+    document.querySelector(`[data-seo-tab="${name}"]`)?.classList.add('active');
+    history.replaceState(null, '', `#${name}`);
+  }
+
+  async function apiRequest(url, options = {}) {
+    const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'The action could not be completed.');
+    return data;
+  }
+
+  async function runSeoAudit() {
+    const button = document.getElementById('run-audit-button');
+    const original = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting audit…';
+    try {
+      const result = await apiRequest('/seo/api/run', { method: 'POST', body: '{}' });
+      showToast(result.message);
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Audit running…';
+      let checks = 0;
+      const poll = setInterval(async () => {
+        checks += 1;
+        try {
+          const status = await apiRequest('/seo/api/status');
+          if (status.latest_run && status.latest_run.id !== initialSeoRunId && status.latest_run.status !== 'running') { clearInterval(poll); location.reload(); }
+        } catch (error) {}
+        if (checks >= 24) { clearInterval(poll); button.disabled = false; button.innerHTML = original; }
+      }, 5000);
+    } catch (error) {
+      showToast(error.message, false);
+      button.disabled = false;
+      button.innerHTML = original;
+    }
+  }
+
+  async function saveSeoConfig(event) {
+    event.preventDefault();
+    const button = document.getElementById('save-config-button');
+    button.disabled = true;
+    try {
+      const result = await apiRequest('/seo/api/config', { method: 'POST', body: JSON.stringify({ site_url: document.getElementById('seo-site-url').value, schedule_hours: document.getElementById('seo-schedule').value, max_pages: document.getElementById('seo-max-pages').value, enabled: document.getElementById('seo-enabled').checked }) });
+      showToast(result.message); setTimeout(() => location.reload(), 700);
+    } catch (error) { showToast(error.message, false); button.disabled = false; }
+  }
+
+  async function saveKeyword(event) {
+    event.preventDefault();
+    const button = document.getElementById('save-keyword-button'); button.disabled = true;
+    try {
+      const result = await apiRequest('/seo/api/keywords', { method: 'POST', body: JSON.stringify({ keyword: document.getElementById('keyword').value, intent: document.getElementById('keyword-intent').value, priority: document.getElementById('keyword-priority').value, target_url: document.getElementById('keyword-target').value, position: document.getElementById('keyword-position').value, search_volume: document.getElementById('keyword-volume').value, notes: document.getElementById('keyword-notes').value }) });
+      showToast(result.message); setTimeout(() => location.reload(), 600);
+    } catch (error) { showToast(error.message, false); button.disabled = false; }
+  }
+
+  async function deleteKeyword(id) {
+    if (!confirm('Remove this keyword from monitoring?')) return;
+    try { const result = await apiRequest(`/seo/api/keywords/${id}`, { method: 'DELETE' }); showToast(result.message); setTimeout(() => location.reload(), 500); } catch (error) { showToast(error.message, false); }
+  }
+
+  async function saveBacklink(event) {
+    event.preventDefault();
+    const button = document.getElementById('save-backlink-button'); button.disabled = true;
+    try {
+      const result = await apiRequest('/seo/api/backlinks', { method: 'POST', body: JSON.stringify({ prospect_url: document.getElementById('backlink-url').value, contact_email: document.getElementById('backlink-email').value, relevance_score: document.getElementById('backlink-relevance').value, target_url: document.getElementById('backlink-target').value, next_follow_up: document.getElementById('backlink-followup').value, notes: document.getElementById('backlink-notes').value }) });
+      showToast(result.message); setTimeout(() => location.reload(), 600);
+    } catch (error) { showToast(error.message, false); button.disabled = false; }
+  }
+
+  async function updateBacklinkStatus(id, status) {
+    try { const result = await apiRequest(`/seo/api/backlinks/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }); showToast(result.message); } catch (error) { showToast(error.message, false); setTimeout(() => location.reload(), 800); }
+  }
+
+  async function deleteBacklink(id) {
+    if (!confirm('Remove this backlink prospect?')) return;
+    try { const result = await apiRequest(`/seo/api/backlinks/${id}`, { method: 'DELETE' }); showToast(result.message); setTimeout(() => location.reload(), 500); } catch (error) { showToast(error.message, false); }
+  }
+
+  async function updateContentStatus(id, status) {
+    try { const result = await apiRequest(`/seo/api/content/${id}/status`, { method: 'POST', body: JSON.stringify({ status }) }); showToast(result.message); } catch (error) { showToast(error.message, false); setTimeout(() => location.reload(), 800); }
+  }
+
+  function openSeoModal(title, html, copyText) {
+    document.getElementById('seo-modal-title').textContent = title;
+    document.getElementById('seo-modal-body').innerHTML = html;
+    modalCopyText = copyText || '';
+    document.getElementById('copy-modal-button').classList.toggle('hidden', !modalCopyText);
+    const modal = document.getElementById('seo-modal'); modal.classList.remove('hidden'); modal.classList.add('flex');
+  }
+  function closeSeoModal() { const modal = document.getElementById('seo-modal'); modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  async function copyModalContent() { try { await navigator.clipboard.writeText(modalCopyText); showToast('Copied to clipboard.'); } catch (error) { showToast('Clipboard access was unavailable.', false); } }
+
+  async function openOutreach(id) {
+    try { const data = await apiRequest(`/seo/api/backlinks/${id}/outreach`); const copy = `Subject: ${data.subject}\n\n${data.body}`; openSeoModal('Approval-ready outreach draft', `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4"><p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Subject</p><p class="mt-2 font-bold text-slate-800"></p><hr class="my-4 border-slate-200"><pre class="whitespace-pre-wrap font-sans text-xs leading-6 text-slate-600"></pre></div>`, copy); const body = document.getElementById('seo-modal-body'); body.querySelector('p.mt-2').textContent = data.subject; body.querySelector('pre').textContent = data.body; } catch (error) { showToast(error.message, false); }
+  }
+
+  async function openContentBrief(id) {
+    try {
+      const data = await apiRequest(`/seo/api/content/${id}/brief`); const brief = data.brief;
+      const copy = `${brief.working_title}\n\nKeyword: ${brief.keyword}\nIntent: ${brief.intent}\nSlug: ${brief.slug}\nMeta description: ${brief.meta_description}\n\nOutline:\n${brief.outline.map((item, index) => `${index + 1}. ${item}`).join('\n')}\n\nQuality checks:\n${brief.quality_checks.map(item => `- ${item}`).join('\n')}`;
+      const html = `<div class="space-y-5"><div><p class="text-[10px] font-extrabold uppercase tracking-wider text-blue-600">Working title</p><h3 class="mt-2 text-lg font-extrabold text-slate-900"></h3><p class="mt-2 text-xs leading-5 text-slate-500"></p></div><div><p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Recommended outline</p><ol class="mt-3 space-y-2"></ol></div><div><p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Quality checks</p><ul class="mt-3 space-y-2"></ul></div></div>`;
+      openSeoModal('People-first content brief', html, copy); const body = document.getElementById('seo-modal-body'); body.querySelector('h3').textContent = brief.working_title; body.querySelector('h3 + p').textContent = brief.meta_description; const lists = body.querySelectorAll('ol, ul'); brief.outline.forEach((item, index) => { const li = document.createElement('li'); li.className = 'flex gap-3 text-xs leading-5 text-slate-600'; li.innerHTML = `<span class="font-extrabold text-blue-600">${index + 1}</span><span></span>`; li.querySelector('span:last-child').textContent = item; lists[0].appendChild(li); }); brief.quality_checks.forEach(item => { const li = document.createElement('li'); li.className = 'flex gap-3 text-xs leading-5 text-slate-600'; li.innerHTML = '<i class="fas fa-check mt-1 text-emerald-600"></i><span></span>'; li.querySelector('span').textContent = item; lists[1].appendChild(li); });
+    } catch (error) { showToast(error.message, false); }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const requestedTab = location.hash.replace('#', '');
+    if (['overview', 'keywords', 'backlinks', 'content', 'settings'].includes(requestedTab)) switchSeoTab(requestedTab);
+    document.querySelectorAll('[data-time]').forEach(element => { const date = new Date(element.dataset.time); if (!Number.isNaN(date.getTime())) element.textContent = date.toLocaleString(); });
+  });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSeoModal(); });
+</script>
+{% endblock %}

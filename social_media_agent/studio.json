@@ -1,0 +1,7 @@
+{
+  "id": "social-studio",
+  "name": "Social Studio",
+  "url": "/social/dashboard",
+  "icon": "fa-wand-magic-sparkles",
+  "order": 10
+}
