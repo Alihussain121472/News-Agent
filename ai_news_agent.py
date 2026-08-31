@@ -8,6 +8,8 @@ from typing import List, Dict, Any, Tuple
 import requests, feedparser
 from dotenv import load_dotenv
 from database import NewsDatabase
+from news_relevance import filter_relevant_news
+from urllib.parse import quote_plus
 
 logging.basicConfig(
     level=logging.INFO,
@@ -79,26 +81,48 @@ def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
     return {'why_important': wi, 'future_change': fc, 'why_care': wc}
 
 
-# Fetch latest AI news articles from Google News RSS feed as a backup source.
+# Focused searches provide global AI, major-company, and emerging-tech coverage.
+FOCUSED_NEWS_QUERIES = (
+    '"artificial intelligence" OR "generative AI" OR "AI model" OR "AI agents" OR OpenAI OR Anthropic',
+    'NVIDIA OR Google OR Alphabet OR Amazon OR AWS OR Microsoft OR Meta OR Apple OR Tesla OR xAI',
+    'semiconductor OR robotics OR "quantum computing" OR cybersecurity OR "cloud computing" OR "student developer"',
+)
+
+
+# Fetch relevant technology news from focused Google News RSS searches.
 def fetch_news_from_rss(limit: int = 5) -> List[Dict[str, Any]]:
-    rss_url = 'https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=en-US&gl=US&ceid=US:en'
     try:
-        feed = feedparser.parse(rss_url)
-        entries = feed.get('entries', [])
         items = []
-        for entry in entries[:limit]:
-            title = entry.get('title') or 'AI news update'
-            summary = entry.get('summary') or entry.get('description') or 'No summary available.'
-            b = build_briefing_notes(title, summary)
-            items.append({
-                'title': title,
-                'summary': clean_text(summary, 220),
-                'source': (entry.get('source') or {}).get('title', 'Google News') if isinstance(entry.get('source'), dict) else 'Google News',
-                'url': entry.get('link', '#'),
-                'published': entry.get('published', 'Recent'),
-                **b
-            })
-        return items
+        per_query = max(limit * 3, 20)
+        headers = {'User-Agent': 'NovaBrief/1.0 (+https://www.novabrief.tech/)'}
+        for query in FOCUSED_NEWS_QUERIES:
+            try:
+                rss_url = (
+                    'https://news.google.com/rss/search?q='
+                    f'{quote_plus(query + " when:3d")}&hl=en-US&gl=US&ceid=US:en'
+                )
+                response = requests.get(rss_url, headers=headers, timeout=15)
+                response.raise_for_status()
+                entries = feedparser.parse(response.content).get('entries', [])
+                for entry in entries[:per_query]:
+                    title = (entry.get('title') or '').strip()
+                    if not title:
+                        continue
+                    summary = entry.get('summary') or entry.get('description') or 'No summary available.'
+                    b = build_briefing_notes(title, summary)
+                    items.append({
+                        'title': title,
+                        'summary': clean_text(summary, 220),
+                        'source': (entry.get('source') or {}).get('title', 'Google News') if isinstance(entry.get('source'), dict) else 'Google News',
+                        'url': entry.get('link', '#'),
+                        'published': entry.get('published', 'Recent'),
+                        **b
+                    })
+            except Exception as query_error:
+                logger.warning('Focused RSS query failed: %s', query_error)
+        selected = filter_relevant_news(items, limit=limit)
+        logger.info('RSS editorial filter selected %s of %s candidates', len(selected), len(items))
+        return selected
     except Exception as e:
         logger.error(f'RSS error: {e}')
         return []
@@ -110,10 +134,12 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
     if not api_key or api_key.lower() in {'your_newsapi_key_here', 'placeholder'}:
         return fetch_news_from_rss(limit)
     try:
+        candidate_limit = min(max(limit * 6, 40), 100)
         resp = requests.get('https://newsapi.org/v2/top-headlines', params={
+            'q': 'AI OR NVIDIA OR Google OR Amazon OR AWS OR Microsoft OR OpenAI OR Meta OR Apple OR Anthropic',
             'category': 'technology',
-            'language': 'en',
-            'pageSize': limit,
+            'country': 'us',
+            'pageSize': candidate_limit,
             'apiKey': api_key
         }, timeout=15)
         if resp.status_code == 401:
@@ -123,8 +149,10 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
         if data.get('status') != 'ok':
             return fetch_news_from_rss(limit)
         items = []
-        for a in data.get('articles', [])[:limit]:
-            title = a.get('title') or 'AI news update'
+        for a in data.get('articles', []):
+            title = (a.get('title') or '').strip()
+            if not title:
+                continue
             summary = a.get('description') or a.get('content') or 'No summary available.'
             b = build_briefing_notes(title, summary)
             items.append({
@@ -135,8 +163,13 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
                 'published': a.get('publishedAt', 'Recent'),
                 **b
             })
-        return items
-    except Exception:
+        selected = filter_relevant_news(items, limit=limit)
+        logger.info('NewsAPI editorial filter selected %s of %s candidates', len(selected), len(items))
+        if selected:
+            return selected
+        return fetch_news_from_rss(limit)
+    except Exception as e:
+        logger.warning('NewsAPI failed; using focused RSS feeds: %s', e)
         return fetch_news_from_rss(limit)
 
 

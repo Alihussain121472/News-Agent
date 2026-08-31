@@ -654,14 +654,16 @@ def trigger_program_notifications():
 
 @app.route('/api/articles')
 def get_articles():
-    limit = request.args.get('limit', 20, type=int)
+    limit = max(1, min(request.args.get('limit', 20, type=int) or 20, 100))
     target_date = request.args.get('date')
+    days = request.args.get('days', type=int)
+    days = max(1, min(days, 90)) if days else None
     user_email = session.get('user_email')
     
     if target_date:
         articles = db.get_articles_by_date(target_date, limit=limit)
     else:
-        articles = db.get_recent_articles(limit=limit)
+        articles = db.get_recent_articles(limit=limit, days=days)
         
     # Personalized sorting if email is provided
     if user_email and not target_date:

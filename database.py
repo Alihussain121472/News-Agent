@@ -64,6 +64,7 @@ def to_dict(row):
 
 from typing import List, Dict, Any, Optional
 import logging
+from news_relevance import filter_relevant_news, is_relevant_technology_article
 
 logger = logging.getLogger(__name__)
 
@@ -263,17 +264,30 @@ class NewsDatabase:
     # ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ News articles ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
 
     def save_news_article(self, article: Dict[str, Any]) -> int:
+        if not is_relevant_technology_article(article):
+            logger.info('Rejected off-topic article: %s', article.get('title', 'Untitled'))
+            return 0
         conn = safe_connect()
         cursor = conn.cursor()
+        dedupe_key = article.get('url') or article.get('title', '').strip().lower()
+        cursor.execute('SELECT pg_advisory_xact_lock(hashtext(%s))', (dedupe_key,))
+        cursor.execute('''SELECT id FROM news_articles
+                          WHERE url = %s OR LOWER(title) = LOWER(%s) LIMIT 1''',
+                       (article.get('url', ''), article.get('title', '')))
+        existing = cursor.fetchone()
+        if existing:
+            conn.close()
+            return 0
         cursor.execute('''INSERT INTO news_articles
             (title,summary,source,url,published,why_important,future_change,why_care,sent_in_email)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id''', (
             article.get('title', ''), article.get('summary', ''),
             article.get('source', ''), article.get('url', ''),
             article.get('published', ''), article.get('why_important', ''),
             article.get('future_change', ''), article.get('why_care', ''),
             article.get('sent_in_email', True)))
-        article_id = cursor.lastrowid
+        inserted = cursor.fetchone()
+        article_id = inserted[0] if inserted else 0
         conn.commit()
         conn.close()
         return article_id
@@ -286,14 +300,15 @@ class NewsDatabase:
     def get_recent_articles(self, limit: int = 50, days: int = None) -> List[Dict[str, Any]]:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        candidate_limit = min(max(limit * 8, 80), 800)
         if days:
             cutoff = (datetime.now() - timedelta(days=days)).isoformat()
-            cursor.execute('SELECT * FROM news_articles WHERE fetched_at >= %s ORDER BY fetched_at DESC LIMIT %s', (cutoff, limit))
+            cursor.execute('SELECT * FROM news_articles WHERE fetched_at >= %s ORDER BY fetched_at DESC LIMIT %s', (cutoff, candidate_limit))
         else:
-            cursor.execute('SELECT * FROM news_articles ORDER BY fetched_at DESC LIMIT %s', (limit,))
+            cursor.execute('SELECT * FROM news_articles ORDER BY fetched_at DESC LIMIT %s', (candidate_limit,))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
-        return rows
+        return filter_relevant_news(rows, limit=limit)
 
     def get_articles_by_date_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         conn = safe_connect()
@@ -301,16 +316,17 @@ class NewsDatabase:
         cursor.execute('SELECT * FROM news_articles WHERE fetched_at BETWEEN %s AND %s ORDER BY fetched_at DESC', (start_date, end_date))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
-        return rows
+        return filter_relevant_news(rows)
 
     def search_articles(self, query: str, limit: int = 50) -> List[Dict[str, Any]]:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         p = f'%{query}%'
-        cursor.execute('SELECT * FROM news_articles WHERE title LIKE %s OR summary LIKE %s ORDER BY fetched_at DESC LIMIT %s', (p, p, limit))
+        candidate_limit = min(max(limit * 8, 80), 800)
+        cursor.execute('SELECT * FROM news_articles WHERE title ILIKE %s OR summary ILIKE %s ORDER BY fetched_at DESC LIMIT %s', (p, p, candidate_limit))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
-        return rows
+        return filter_relevant_news(rows, limit=limit)
 
     def cleanup_old_articles(self, months: int = 3) -> int:
         conn = safe_connect()
@@ -1251,7 +1267,7 @@ class NewsDatabase:
         ''', (email, month_ago))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
-        return rows
+        return filter_relevant_news(rows)
 
     def cleanup_saved_articles(self, days: int = 30):
         conn = safe_connect()
@@ -1269,7 +1285,7 @@ class NewsDatabase:
             SELECT * FROM news_articles 
             WHERE date(fetched_at) = %s 
             ORDER BY fetched_at DESC LIMIT %s
-        ''', (target_date, limit))
+        ''', (target_date, min(max(limit * 8, 80), 800)))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
-        return rows
+        return filter_relevant_news(rows, limit=limit)
