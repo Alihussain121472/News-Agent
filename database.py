@@ -335,7 +335,7 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role) VALUES (%s,%s,1,'user')", (email, name))
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role) VALUES (%s,%s,TRUE,'user')", (email, name))
             conn.commit()
             logger.info(f'New user registered: {email}')
             return True
@@ -419,7 +419,7 @@ class NewsDatabase:
     def get_all_active_users(self) -> List[str]:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('SELECT email FROM registered_users WHERE is_active = 1 ORDER BY registered_at ASC')
+        cursor.execute('SELECT email FROM registered_users WHERE is_active = TRUE ORDER BY registered_at ASC')
         emails = [r[0] for r in cursor.fetchall()]
         conn.close()
         return emails
@@ -428,7 +428,7 @@ class NewsDatabase:
         """Users who want program notifications."""
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('SELECT email FROM registered_users WHERE is_active=TRUE AND COALESCE(program_notifications,1)=1')
+        cursor.execute('SELECT email FROM registered_users WHERE is_active=TRUE AND COALESCE(program_notifications,TRUE)=TRUE')
         emails = [r[0] for r in cursor.fetchall()]
         conn.close()
         return emails
@@ -442,11 +442,11 @@ class NewsDatabase:
         row = cursor.fetchone()
         if not row:
             final_name = name or normalized.split('@')[0].replace('.', ' ').title()
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,program_notifications) VALUES (%s,%s,1,'user',1)",
+            cursor.execute("INSERT INTO registered_users (email,name,is_active,role,program_notifications) VALUES (%s,%s,TRUE,'user',TRUE)",
                            (normalized, final_name))
         else:
             final_name = name if name else row[1]
-            cursor.execute("UPDATE registered_users SET name=%s, is_active=TRUE, program_notifications=1 WHERE email=%s",
+            cursor.execute("UPDATE registered_users SET name=%s, is_active=TRUE, program_notifications=TRUE WHERE email=%s",
                            (final_name, normalized))
         conn.commit()
         conn.close()
