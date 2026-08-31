@@ -90,6 +90,9 @@ OFF_TOPIC_TERMS = (
     "fashion trend", "beauty tips", "recipe", "horoscope", "football match", "cricket match",
     "basketball score", "baseball score", "dating advice", "travel deals", "shopping deals",
     "shop deals", "best deals", "sale is live", "coupon code", "limited-time deal",
+    "early savings", "record low", "lowest price", "price drop", "discounted price",
+    "save on", "deal on", "buy now", "shopping guide", "renders leak", "render leak",
+    "rumor suggests", "rumour suggests", "leak reveals",
     "amazon rainforest", "amazon river", "amazon jungle", "apple pie", "apple recipe",
     "apple cider", "apple juice", "apple tree", "alphabet learning", "meta-analysis",
 )

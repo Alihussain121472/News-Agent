@@ -45,6 +45,12 @@ class NewsRelevanceTests(unittest.TestCase):
             'url': 'https://example.com/amazon-sale',
         }
         self.assertFalse(assess_news_relevance(article)['is_relevant'])
+        live_example = {
+            'title': 'Amazon offers early savings on Mac Mini, plus record low on AirTag',
+            'summary': 'A shopping guide for discounted Apple devices.',
+            'url': 'https://example.com/discounts',
+        }
+        self.assertFalse(assess_news_relevance(live_example)['is_relevant'])
 
     def test_rejects_ambiguous_company_words(self):
         stories = [
