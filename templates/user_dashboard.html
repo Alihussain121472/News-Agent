@@ -351,7 +351,7 @@ async function runSummarizer() {
             <div id="overviewArticles" class="space-y-3"></div>
           </section>
           <section class="glass rounded-2xl p-5" aria-labelledby="overview-programs-title">
-            <img src="/static/images/student-programs-grid.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
+            <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
             <h2 id="overview-programs-title" class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
           </section>
@@ -468,7 +468,7 @@ async function runSummarizer() {
       <!-- PROGRAMS TAB -->
       <div id="tab-programs" class="hidden">
         <div class="glass rounded-2xl p-5">
-          <img src="/static/images/student-programs-grid.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
+          <img src="/static/images/student-programs-grid-v2.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
             <div>
               <h3 class="font-bold text-white flex items-center gap-2 text-lg"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs & Early Alerts</h3>
@@ -537,13 +537,13 @@ const dashboardTabMeta = {
 
 function getProgramImage(program) {
   const identity = `${program.company || ''} ${program.title || ''}`.toLowerCase();
-  if (identity.includes('google')) return '/static/images/google-student-club.jpg';
-  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador.jpg';
-  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning.jpg';
-  if (identity.includes('meta')) return '/static/images/meta-engineering-internship.jpg';
-  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship.jpg';
-  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge.jpg';
-  return '/static/images/student-programs-grid.jpg';
+  if (identity.includes('google')) return '/static/images/google-student-club-v2.jpg';
+  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador-v2.jpg';
+  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning-v2.jpg';
+  if (identity.includes('meta')) return '/static/images/meta-engineering-internship-v2.jpg';
+  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship-v2.jpg';
+  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge-v2.jpg';
+  return '/static/images/student-programs-grid-v2.jpg';
 }
 
 // Set initials
