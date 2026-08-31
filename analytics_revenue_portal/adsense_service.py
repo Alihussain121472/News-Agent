@@ -57,7 +57,7 @@ def decrypt_refresh_token(token):
 
 def build_authorization_url(redirect_uri, state, code_challenge):
     client_id, _ = _client_credentials()
-    return f'{AUTHORIZATION_URL}?{urlencode({
+    params = {
         "client_id": client_id,
         "redirect_uri": redirect_uri,
         "response_type": "code",
@@ -68,7 +68,8 @@ def build_authorization_url(redirect_uri, state, code_challenge):
         "state": state,
         "code_challenge": code_challenge,
         "code_challenge_method": "S256",
-    })}'
+    }
+    return f'{AUTHORIZATION_URL}?{urlencode(params)}'
 
 
 def exchange_code(code, redirect_uri, code_verifier):
