@@ -38,7 +38,7 @@ services:
       - key: EMAIL_FROM_NAME
         value: Nova Brief
       - key: ENABLE_IN_PROCESS_SCHEDULER
-        value: "false"
+        value: "true"
       - key: SEO_SITE_URL
         value: https://www.novabrief.tech
       - key: GOOGLE_ADSENSE_CLIENT_ID
@@ -51,45 +51,3 @@ services:
         generateValue: true
       - key: PORT
         value: "10000"
-  - type: cron
-    name: novabrief-daily-email
-    env: python
-    plan: starter
-    autoDeploy: true
-    schedule: "0 10 * * *"
-    buildCommand: pip install --disable-pip-version-check -r requirements.txt
-    startCommand: python ai_news_agent.py --run-now
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: GMAIL_USER
-        sync: false
-      - key: GMAIL_APP_PASSWORD
-        sync: false
-      - key: RESEND_API_KEY
-        sync: false
-      - key: RESEND_FROM_EMAIL
-        value: Nova Brief <updates@novabrief.tech>
-      - key: RESEND_REPLY_TO
-        sync: false
-      - key: NEWSAPI_KEY
-        sync: false
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: "465"
-      - key: EMAIL_FROM_NAME
-        value: Nova Brief
-  - type: cron
-    name: novabrief-seo-monitor
-    env: python
-    plan: starter
-    autoDeploy: true
-    schedule: "15 * * * *"
-    buildCommand: pip install --disable-pip-version-check -r requirements.txt
-    startCommand: python -m growth_seo_agent.runner --trigger scheduled
-    envVars:
-      - key: DATABASE_URL
-        sync: false
-      - key: SEO_SITE_URL
-        value: https://www.novabrief.tech
