@@ -50,7 +50,7 @@ async function summarizeSelected() {
     
     if (data.status === 'success') {
       const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
-      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModalContent').innerHTML = formatted;
       document.getElementById('summaryModal').classList.remove('hidden');
     } else {
       alert('Failed to summarize: ' + data.message);
@@ -163,7 +163,7 @@ async function summarizeSelected() {
     
     if (data.status === 'success') {
       const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
-      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModalContent').innerHTML = formatted;
       document.getElementById('summaryModal').classList.remove('hidden');
     } else {
       alert('Failed to summarize: ' + data.message);
@@ -268,21 +268,36 @@ async function runSummarizer() {
         </div>
       </div>
     </div>
-    <nav class="p-3 flex-1">
-      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-2">Overview</div>
-      
-      <button onclick="switchTab('activity')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-activity">
-        <i class="fas fa-chart-line w-4 text-center"></i> My Activity
+    <nav class="p-3 flex-1" aria-label="Dashboard navigation">
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-2">Your briefing</div>
+      <button type="button" onclick="switchTab('articles')" data-dashboard-tab="articles" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-200 mb-1" id="nav-articles">
+        <i class="fas fa-newspaper w-4 text-center text-blue-400"></i>
+        <span>Latest News</span>
+        <span class="ml-auto text-[9px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">Live</span>
       </button>
-      
-      <button onclick="switchTab('programs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-programs">
-        <i class="fas fa-graduation-cap w-4 text-center"></i> Programs
+      <button type="button" onclick="switchTab('overview')" data-dashboard-tab="overview" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-overview">
+        <i class="fas fa-house w-4 text-center"></i> For You
       </button>
-      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Account</div>
-      <button onclick="switchTab('progress')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-progress">
+
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-5">Explore</div>
+      <button type="button" onclick="switchTab('summarizer')" data-dashboard-tab="summarizer" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-summarizer">
+        <i class="fas fa-wand-magic-sparkles w-4 text-center"></i> AI Summarizer
+      </button>
+      <button type="button" onclick="switchTab('memory')" data-dashboard-tab="memory" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-memory">
+        <i class="fas fa-bookmark w-4 text-center"></i> Saved Articles
+      </button>
+      <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-programs">
+        <i class="fas fa-graduation-cap w-4 text-center"></i> Student Programs
+      </button>
+
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-5">Account</div>
+      <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-activity">
+        <i class="fas fa-clock-rotate-left w-4 text-center"></i> My Activity
+      </button>
+      <button type="button" onclick="switchTab('progress')" data-dashboard-tab="progress" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-progress">
         <i class="fas fa-chart-bar w-4 text-center"></i> Progress Report
       </button>
-      <button onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4">
+      <button type="button" onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4">
         <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
       </button>
     </nav>
@@ -292,9 +307,9 @@ async function runSummarizer() {
   <main class="flex-1 overflow-y-auto">
     <!-- Top bar -->
     <header class="sticky top-0 z-10 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-bold text-white">User Dashboard</h1>
-        <p class="text-xs text-slate-400">Welcome back, <span id="topName" class="text-blue-400 font-semibold">{{ user_name or 'User' }}</span></p>
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold text-white truncate" id="pageTitle">Latest News</h1>
+        <p class="text-xs text-slate-400 truncate" id="pageSubtitle">Your curated AI and technology briefing</p>
       </div>
       <div class="flex items-center gap-3">
         <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl shadow">
@@ -309,19 +324,37 @@ async function runSummarizer() {
       </div>
     </header>
 
-    <div class="p-6">
+    <nav class="lg:hidden sticky top-[73px] z-10 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-4 py-2 overflow-x-auto" aria-label="Mobile dashboard navigation">
+      <div class="flex gap-2 min-w-max">
+        <button type="button" onclick="switchTab('articles')" data-dashboard-tab="articles" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-newspaper mr-1 text-blue-400"></i> News</button>
+        <button type="button" onclick="switchTab('overview')" data-dashboard-tab="overview" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-house mr-1"></i> For You</button>
+        <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-graduation-cap mr-1"></i> Programs</button>
+        <button type="button" onclick="switchTab('summarizer')" data-dashboard-tab="summarizer" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-wand-magic-sparkles mr-1"></i> Summarize</button>
+        <button type="button" onclick="switchTab('memory')" data-dashboard-tab="memory" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-bookmark mr-1"></i> Saved</button>
+        <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-slate-300"><i class="fas fa-clock-rotate-left mr-1"></i> Activity</button>
+      </div>
+    </nav>
+
+    <div class="p-4 sm:p-6 max-w-7xl mx-auto w-full">
 
       <!-- OVERVIEW TAB -->
       <div id="tab-overview">
-        <div class="grid lg:grid-cols-2 gap-6">
-          <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> Global Technology Intelligence</h3>
+        <div class="grid lg:grid-cols-3 gap-6">
+          <section class="glass rounded-2xl p-5 lg:col-span-2" aria-labelledby="overview-news-title">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <div class="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 mb-1"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Updated live</div>
+                <h2 id="overview-news-title" class="font-bold text-white flex items-center gap-2 text-lg"><i class="fas fa-newspaper text-blue-400"></i> Latest AI & Tech News</h2>
+              </div>
+              <button type="button" onclick="switchTab('articles')" class="text-xs font-bold text-blue-300 hover:text-white bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg px-3 py-2 transition">View all news <i class="fas fa-arrow-right ml-1"></i></button>
+            </div>
             <div id="overviewArticles" class="space-y-3"></div>
-          </div>
-          <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Active Program Applications</h3>
+          </section>
+          <section class="glass rounded-2xl p-5" aria-labelledby="overview-programs-title">
+            <img src="/static/images/student-programs-grid.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
+            <h2 id="overview-programs-title" class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
-          </div>
+          </section>
         </div>
       </div>
 
@@ -365,14 +398,21 @@ async function runSummarizer() {
       </div>
 
       <!-- ARTICLES TAB -->
-      <div id="tab-articles" class="hidden max-w-4xl mx-auto w-full">
-        <div class="flex flex-col sm:flex-row items-center justify-between mb-8 pb-4 border-b border-slate-700/50 gap-4">
-          <h2 class="text-2xl font-black text-white flex items-center gap-3"><i class="fas fa-bolt text-yellow-400"></i> Live Intelligence Feed</h2>
-          <div class="flex gap-2">
+      <div id="tab-articles" class="hidden max-w-5xl mx-auto w-full">
+        <div class="mb-8 pb-5 border-b border-slate-700/50">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div>
+              <div class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 mb-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Live intelligence feed</div>
+              <h2 class="text-3xl font-black text-white flex items-center gap-3"><i class="fas fa-newspaper text-blue-400"></i> Latest AI & Tech News</h2>
+              <p class="text-sm text-slate-400 mt-2 max-w-2xl">Fresh, readable technology stories selected by Nova Brief. Search, save or select stories to create an AI summary.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
             <input type="date" id="newsDatePicker" onchange="loadArticles()" class="bg-slate-800/50 border border-slate-700 text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
-          <div class="relative w-64">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" id="articleSearch" placeholder="Search topics..." onkeyup="liveSearch()" class="w-full bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
+              <div class="relative w-full sm:w-64">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="search" id="articleSearch" aria-label="Search news topics" placeholder="Search news topics..." onkeyup="liveSearch()" class="w-full bg-slate-800/50 border border-slate-700 text-white placeholder-slate-400 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
+              </div>
+            </div>
           </div>
         </div>
         <div id="articlesList" class="space-y-8 pb-12"></div>
@@ -428,6 +468,7 @@ async function runSummarizer() {
       <!-- PROGRAMS TAB -->
       <div id="tab-programs" class="hidden">
         <div class="glass rounded-2xl p-5">
+          <img src="/static/images/student-programs-grid.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
             <div>
               <h3 class="font-bold text-white flex items-center gap-2 text-lg"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs & Early Alerts</h3>
@@ -484,6 +525,27 @@ const USER_EMAIL = '{{ user_email }}';
 let allArticles = [];
 let overviewData = {};
 
+const dashboardTabMeta = {
+  articles: ['Latest News', 'Your curated AI and technology briefing'],
+  overview: ['For You', 'A quick view of news and opportunities'],
+  programs: ['Student Programs', 'Explore active learning and career opportunities'],
+  summarizer: ['AI Summarizer', 'Turn long articles into clear takeaways'],
+  memory: ['Saved Articles', 'Return to useful stories whenever you need them'],
+  activity: ['My Activity', 'Your meaningful account actions in one place'],
+  progress: ['Progress Report', 'See how you are using Nova Brief']
+};
+
+function getProgramImage(program) {
+  const identity = `${program.company || ''} ${program.title || ''}`.toLowerCase();
+  if (identity.includes('google')) return '/static/images/google-student-club.jpg';
+  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador.jpg';
+  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning.jpg';
+  if (identity.includes('meta')) return '/static/images/meta-engineering-internship.jpg';
+  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship.jpg';
+  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge.jpg';
+  return '/static/images/student-programs-grid.jpg';
+}
+
 // Set initials
 const init = (USER_NAME||'U').charAt(0).toUpperCase();
 document.getElementById('avatarInitial').textContent = init;
@@ -491,16 +553,25 @@ document.getElementById('avatarInitial').textContent = init;
 function switchTab(name){
   ['overview','activity','articles','programs','progress','summarizer','memory'].forEach(t=>{
     document.getElementById('tab-'+t).classList.add('hidden');
-    const n = document.getElementById('nav-'+t);
-    if(n){ n.classList.remove('active'); }
   });
   document.getElementById('tab-'+name).classList.remove('hidden');
-  const navBtn = document.getElementById('nav-'+name);
-  if(navBtn) navBtn.classList.add('active');
+
+  document.querySelectorAll('[data-dashboard-tab]').forEach(button => {
+    const isActive = button.dataset.dashboardTab === name;
+    button.classList.toggle('active', isActive);
+    if (isActive) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+
+  const meta = dashboardTabMeta[name] || dashboardTabMeta.articles;
+  document.getElementById('pageTitle').textContent = meta[0];
+  document.getElementById('pageSubtitle').textContent = meta[1];
+
   if(name==='activity') loadActivity();
   if(name==='articles') loadArticles();
   if(name==='programs') loadPrograms();
   if(name==='progress') loadProgress();
+  if(name==='memory') loadMemory();
 }
 
 function fmt(dt){ if(!dt) return 'Never'; try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; } }
@@ -734,9 +805,10 @@ async function loadArticles(){
 
 function renderArticles(arts){
   document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
-    <article class="group bg-transparent transition relative">
+    <article class="group glass rounded-2xl p-5 sm:p-6 transition relative hover:border-blue-500/40">
         <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
           <input type="checkbox" onchange="handleCheckbox()" value="${a.id}" class="news-checkbox w-5 h-5 rounded border-slate-600 bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer">
+          <span class="sr-only">Select this article for summarizing</span>
         </label>
       <div class="flex items-center gap-2 mb-2">
         <div class="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-[10px] text-slate-400 font-bold border border-slate-700">
@@ -762,8 +834,7 @@ function renderArticles(arts){
           <span class="text-xs text-slate-500">${Math.max(2, Math.floor((a.summary||'').length/130))} min read</span>
         </div>
         <div class="flex items-center gap-3">
-          <button class="text-slate-500 hover:text-slate-300 transition" title="Save for later"><i class="far fa-bookmark"></i></button>
-          <button class="text-slate-500 hover:text-slate-300 transition" title="Show less like this"><i class="fas fa-minus-circle"></i></button>
+          <button type="button" onclick="saveArticle(${a.id}, this)" class="text-slate-400 hover:text-blue-300 transition rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Save article for later"><i class="far fa-bookmark"></i><span class="sr-only">Save article</span></button>
         </div>
       </div>
     </article>`).join('') : '<div class="text-slate-500 text-sm text-center py-12">No articles in your feed yet.</div>';
@@ -780,6 +851,7 @@ async function loadPrograms(){
   const progs = await r.json();
   document.getElementById('programsList').innerHTML = progs.length ? progs.map(p=>`
     <div class="glass rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+      <img src="${getProgramImage(p)}" alt="" width="512" height="512" loading="lazy" decoding="async" class="w-full h-40 object-cover rounded-xl mb-4 border border-slate-700/60"/>
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
           <i class="fas fa-graduation-cap text-emerald-400"></i>
@@ -928,12 +1000,11 @@ if (USER_EMAIL) {
 
 loadOverview();
 
-// Deep-link support: if URL has ?tab=activity, switch to that tab automatically
+// Deep-link support; otherwise open the product's primary news experience.
 const urlParams = new URLSearchParams(window.location.search);
 const tabParam = urlParams.get('tab');
-if(tabParam && ['activity','articles','programs','progress','summarizer','memory'].includes(tabParam)) {
-  switchTab(tabParam);
-}
+const allowedTabs = ['overview','activity','articles','programs','progress','summarizer','memory'];
+switchTab(tabParam && allowedTabs.includes(tabParam) ? tabParam : 'articles');
 
 function handleCheckbox() {
   const checkboxes = document.querySelectorAll('.news-checkbox:checked');
@@ -974,7 +1045,7 @@ async function summarizeSelected() {
     
     if (data.status === 'success') {
       const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
-      document.getElementById('summaryContent').innerHTML = formatted;
+      document.getElementById('summaryModalContent').innerHTML = formatted;
       document.getElementById('summaryModal').classList.remove('hidden');
     } else {
       alert('Failed to summarize: ' + data.message);
@@ -1060,7 +1131,7 @@ async function runSummarizer() {
         <h3 class="text-xl font-bold text-white flex items-center gap-3"><i class="fas fa-bolt text-yellow-400"></i> AI Executive Summary</h3>
         <button onclick="closeSummaryModal()" class="text-slate-500 hover:text-slate-300 transition text-xl">&times;</button>
       </div>
-      <div id="summaryContent" class="p-6 overflow-y-auto flex-1 prose prose-invert prose-blue max-w-none text-slate-300 leading-relaxed text-sm">
+      <div id="summaryModalContent" class="p-6 overflow-y-auto flex-1 prose prose-invert prose-blue max-w-none text-slate-300 leading-relaxed text-sm">
       </div>
       <div class="p-4 border-t border-slate-800 text-center">
         <button onclick="closeSummaryModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2 px-6 rounded-xl transition">Close</button>
