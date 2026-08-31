@@ -492,9 +492,11 @@ def manage_saved_article(article_id):
     email = session.get('user_email')
     if request.method == 'POST':
         db.save_article(email, article_id)
+        db.log_user_activity(email, 'article_saved', 'Saved an article to your reading list')
         return jsonify({'status': 'success', 'message': 'Article saved.'})
     elif request.method == 'DELETE':
         db.delete_saved_article(email, article_id)
+        db.log_user_activity(email, 'article_removed', 'Removed an article from your reading list')
         return jsonify({'status': 'success', 'message': 'Article removed.'})
 
 
@@ -502,10 +504,18 @@ def manage_saved_article(article_id):
 @user_required
 def get_user_activity_log():
     email = session.get('user_email')
-    limit = request.args.get('limit', 50, type=int)
-    db.log_user_activity(email, 'activity_view', 'Viewed activity log')
+    limit = max(1, min(request.args.get('limit', 30, type=int), 50))
+    ignored_actions = {
+        'page_visit', 'dashboard_view', 'activity_view',
+        'articles_view', 'programs_view', 'progress_view',
+    }
+    recent_activity = db.get_user_activity_log(email, min(limit * 5, 200))
+    meaningful_activity = [
+        item for item in recent_activity
+        if item.get('action') not in ignored_actions
+    ][:limit]
     return jsonify({
-        'activity': db.get_user_activity_log(email, limit),
+        'activity': meaningful_activity,
         'stats': db.get_user_activity_stats(email),
     })
 
@@ -1037,8 +1047,8 @@ def summarize_article():
         groq_resp.raise_for_status()
         summary = groq_resp.json()['choices'][0]['message']['content']
         
-        # Record activity
-        db.record_activity(session.get('user_email'), 'summarizer_used', f'Summarized article: {url}')
+        # Record a useful, user-facing activity without storing the full URL.
+        db.log_user_activity(session.get('user_email'), 'article_summarized', 'Generated an AI article summary')
         
         return jsonify({'status': 'success', 'summary': summary})
         
