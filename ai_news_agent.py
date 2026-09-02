@@ -18,6 +18,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
+BRAND_NAME = 'NovaBrief Tech'
+SITE_URL = 'https://www.novabrief.tech'
+LOGO_URL = f'{SITE_URL}/static/icon-192.png'
 IS_HOSTED = bool(
     os.getenv('RENDER')
     or os.getenv('RENDER_SERVICE_ID')
@@ -44,11 +47,48 @@ def clean_text(value: str, max_length: int = 220) -> str:
     return text
 
 
+def _official_sender_required() -> bool:
+    """Production can fail closed instead of exposing a personal SMTP address."""
+    configured = get_env_value('REQUIRE_OFFICIAL_SENDER').lower()
+    if configured:
+        return configured in {'1', 'true', 'yes', 'on'}
+    return IS_HOSTED
+
+
+def _branded_from_address(configured_sender: str) -> str:
+    address = parseaddr(configured_sender or '')[1].strip().lower()
+    if not address:
+        return ''
+    if _official_sender_required() and not address.endswith('@novabrief.tech'):
+        return ''
+    return formataddr((BRAND_NAME, address))
+
+
+def _brand_header(title: str, subtitle: str = '') -> str:
+    subtitle_html = (
+        f'<div style="font-size:13px;color:#64748b;margin-top:4px;">{subtitle}</div>'
+        if subtitle else ''
+    )
+    return f'''<div style="text-align:center;margin-bottom:28px;">
+      <a href="{SITE_URL}" style="text-decoration:none;display:inline-block;">
+        <img src="{LOGO_URL}" width="72" height="72" alt="NovaBrief Tech logo" style="display:block;width:72px;height:72px;margin:0 auto 12px;border-radius:18px;"/>
+      </a>
+      <div style="font-size:13px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:.12em;">{BRAND_NAME}</div>
+      <h1 style="margin:8px 0 0;font-size:26px;line-height:1.2;color:#0f172a;">{title}</h1>
+      {subtitle_html}
+    </div>'''
+
+
+def _brand_footer() -> str:
+    return f'''<p style="margin:0 0 8px;font-weight:700;color:#475569;">Sent by {BRAND_NAME}</p>
+    <p style="margin:0;"><a href="{SITE_URL}" style="color:#4f46e5;text-decoration:none;">novabrief.tech</a> &bull; <a href="{SITE_URL}/privacy" style="color:#64748b;text-decoration:none;">Privacy</a> &bull; <a href="{SITE_URL}/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>'''
+
+
 def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
     tl = (title or '').lower()
     sl = (summary or '').lower()
     if any(w in tl for w in ['security', 'privacy', 'deepfake', 'misinformation', 'risk', 'attack', 'vulnerability']):
-        wi = 'This raises a real safety or trust issue that could affect how people use AI in everyday life.'
+        wi = 'This raises a real safety or trust issue that could affect how people use technology in everyday life.'
     elif any(w in tl for w in ['regulation', 'policy', 'government', 'law', 'europe', 'ai act']):
         wi = 'This could change the rules around AI adoption, accountability, and how businesses operate.'
     elif any(w in tl for w in ['openai', 'google', 'meta', 'microsoft', 'anthropic', 'gemini', 'chatgpt']):
@@ -56,7 +96,7 @@ def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
     elif any(w in tl for w in ['health', 'medical', 'drug', 'science', 'research']):
         wi = 'This could affect healthcare, research speed, and the quality of decisions in critical areas.'
     else:
-        wi = 'This matters because it shows how quickly AI is moving from experiment to real-world influence.'
+        wi = 'This matters because it shows how quickly technology is changing learning, careers, and everyday life.'
 
     if any(w in tl for w in ['job', 'work', 'labor', 'productivity', 'automation', 'assistant']):
         fc = 'It could change how work gets done, which tasks are automated, and where human value still matters most.'
@@ -65,27 +105,29 @@ def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
     elif any(w in tl for w in ['security', 'privacy', 'deepfake', 'fraud']):
         fc = 'It could make digital trust harder to maintain unless safeguards and public awareness improve quickly.'
     elif any(w in tl for w in ['energy', 'chip', 'compute', 'data center', 'infrastructure']):
-        fc = 'It could alter how companies invest in hardware, power, and digital infrastructure around AI.'
+        fc = 'It could alter how companies invest in hardware, power, computing, and digital infrastructure.'
     else:
-        fc = 'It could influence consumer habits, business decisions, and the speed at which AI becomes part of daily life.'
+        fc = 'It could influence the skills people learn, the tools they use, and how quickly technology becomes part of daily life.'
 
     if any(w in sl for w in ['risk', 'danger', 'harm', 'attack', 'fraud', 'misinformation', 'bias']):
         wc = 'Because the downside is not theoretical; it can affect trust, safety, and the decisions people make online.'
     elif any(w in tl for w in ['chip', 'model', 'cost', 'latency', 'compute']):
-        wc = 'Because this often signals the next wave of AI adoption, pricing pressure, and accessibility for everyone.'
+        wc = 'Because this often signals which technologies will become faster, more affordable, and widely accessible.'
     elif any(w in tl for w in ['regulation', 'policy', 'law']):
         wc = 'Because rules shape what AI can do, how fast it spreads, and how much control people retain.'
     else:
-        wc = 'Because what looks like a niche update today can become a normal part of life faster than expected.'
+        wc = 'Because today’s technology update can become tomorrow’s essential skill, tool, or career opportunity.'
 
     return {'why_important': wi, 'future_change': fc, 'why_care': wc}
 
 
-# Focused searches provide global AI, major-company, and emerging-tech coverage.
+# Focused searches provide useful global technology coverage for students.
 FOCUSED_NEWS_QUERIES = (
     '"artificial intelligence" OR "generative AI" OR "AI model" OR "AI agents" OR OpenAI OR Anthropic',
     'NVIDIA OR Google OR Alphabet OR Amazon OR AWS OR Microsoft OR Meta OR Apple OR Tesla OR xAI',
-    'semiconductor OR robotics OR "quantum computing" OR cybersecurity OR "cloud computing" OR "student developer"',
+    'programming OR "developer tools" OR "open source" OR cybersecurity OR "cloud computing" OR DevOps OR Linux',
+    'semiconductor OR robotics OR "quantum computing" OR "space technology" OR biotechnology OR "clean energy technology"',
+    '"student developer" OR scholarship OR internship OR hackathon OR "free certification" OR "digital skills" OR edtech',
 )
 
 
@@ -93,7 +135,7 @@ FOCUSED_NEWS_QUERIES = (
 def fetch_news_from_rss(limit: int = 5) -> List[Dict[str, Any]]:
     try:
         items = []
-        per_query = max(limit * 3, 20)
+        per_query = max(limit * 2, 20)
         headers = {'User-Agent': 'NovaBrief/1.0 (+https://www.novabrief.tech/)'}
         for query in FOCUSED_NEWS_QUERIES:
             try:
@@ -128,17 +170,19 @@ def fetch_news_from_rss(limit: int = 5) -> List[Dict[str, Any]]:
         return []
 
 
-# Search for AI news using NewsAPI. If it fails, fallback to RSS feed.
+# Search for global technology news using NewsAPI. If it fails, use focused RSS feeds.
 def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
     api_key = get_env_value('NEWSAPI_KEY', 'NEWS_API_KEY')
     if not api_key or api_key.lower() in {'your_newsapi_key_here', 'placeholder'}:
         return fetch_news_from_rss(limit)
     try:
         candidate_limit = min(max(limit * 6, 40), 100)
-        resp = requests.get('https://newsapi.org/v2/top-headlines', params={
-            'q': 'AI OR NVIDIA OR Google OR Amazon OR AWS OR Microsoft OR OpenAI OR Meta OR Apple OR Anthropic',
-            'category': 'technology',
-            'country': 'us',
+        resp = requests.get('https://newsapi.org/v2/everything', params={
+            'q': ('AI OR NVIDIA OR Google OR Amazon OR Microsoft OR Meta OR Apple OR '
+                  'programming OR cybersecurity OR "developer tools" OR "cloud computing" OR '
+                  'semiconductor OR robotics OR "student technology"'),
+            'language': 'en',
+            'sortBy': 'publishedAt',
             'pageSize': candidate_limit,
             'apiKey': api_key
         }, timeout=15)
@@ -220,7 +264,7 @@ def _email_idempotency_key(recipient: str, subject: str, html_content: str) -> s
 def _send_via_resend(recipient: str, subject: str, html_content: str) -> bool:
     """Send through Resend's queued API with safe retries and deduplication."""
     api_key = get_env_value('RESEND_API_KEY')
-    from_email = get_env_value('RESEND_FROM_EMAIL')
+    from_email = _branded_from_address(get_env_value('RESEND_FROM_EMAIL'))
     if not api_key or not from_email:
         return False
 
@@ -230,7 +274,12 @@ def _send_via_resend(recipient: str, subject: str, html_content: str) -> bool:
         'subject': clean_text(subject, 180),
         'html': html_content,
     }
-    reply_to = get_env_value('RESEND_REPLY_TO', 'GMAIL_USER', 'EMAIL_USER')
+    reply_to = get_env_value('RESEND_REPLY_TO')
+    if not reply_to and not _official_sender_required():
+        reply_to = get_env_value('GMAIL_USER', 'EMAIL_USER')
+    if reply_to and _official_sender_required():
+        reply_address = parseaddr(reply_to)[1].strip().lower()
+        reply_to = reply_to if reply_address.endswith('@novabrief.tech') else ''
     if reply_to:
         payload['reply_to'] = reply_to
     headers = {
@@ -270,7 +319,7 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
     except ValueError:
         logger.error('SMTP_PORT must be a number.')
         return False
-    sender_name = get_env_value('EMAIL_FROM_NAME') or 'Nova Brief'
+    sender_name = BRAND_NAME
     recipient = parseaddr(to_email or '')[1].strip().lower()
     if not recipient or '\n' in recipient or '\r' in recipient or '@' not in recipient:
         logger.error('Refusing to send email to an invalid recipient address.')
@@ -278,7 +327,13 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
     if get_env_value('RESEND_API_KEY') and get_env_value('RESEND_FROM_EMAIL'):
         if _send_via_resend(recipient, subject, html_content):
             return True
-        logger.warning('Primary email provider failed; attempting the Gmail SMTP fallback.')
+        if _official_sender_required():
+            logger.error('Official NovaBrief Tech delivery failed; personal SMTP fallback is disabled.')
+            return False
+        logger.warning('Primary email provider failed; attempting the SMTP fallback.')
+    elif _official_sender_required():
+        logger.error('Official NovaBrief Tech email delivery is not configured.')
+        return False
     credentials = _smtp_credentials()
     if not credentials:
         logger.error('SMTP credentials are missing from the environment.')
@@ -331,6 +386,8 @@ def dispatch_email_async(to_email: str, subject: str, html_content: str):
 def format_welcome_email(subscriber_email: str, name: str = None) -> str:
     today = datetime.now().strftime('%A, %B %d, %Y')
     greeting = f"Hello {name}," if name else "Hello,"
+    brand_header = _brand_header('Welcome to NovaBrief Tech', today)
+    brand_footer = _brand_footer()
     return f"""<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
@@ -341,7 +398,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
         <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
             <td style="padding:40px;text-align:left;">
-              <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;color:#111827;">Welcome to Nova Brief</h1>
+              {brand_header}
               <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your account has been successfully verified and activated. You are now subscribed to receive our enterprise-grade daily AI intelligence briefings and elite student program alerts.</p>
               
               <div style="background-color:#f3f4f6;border-radius:6px;padding:24px;margin-bottom:24px;">
@@ -367,8 +424,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
-              <p style="margin:0 0 8px 0;">Nova Brief &bull; Professional AI Intelligence</p>
-              <p style="margin:0;"><a href="https://www.novabrief.tech" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://www.novabrief.tech/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://www.novabrief.tech/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
+              {brand_footer}
             </td>
           </tr>
         </table>
@@ -386,6 +442,8 @@ def send_welcome_email(to_email: str, name: str = None) -> bool:
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
     greeting = f"Hello {name}," if name else "Hello,"
     prog_text = f"specifically for <strong>{program_title}</strong> and other elite programs" if program_title else "for elite student programs"
+    brand_header = _brand_header('Program Alerts Activated')
+    brand_footer = _brand_footer()
     return f"""<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/></head>
@@ -396,7 +454,7 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
         <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
             <td style="padding:40px;text-align:left;">
-              <h1 style="margin:0 0 16px 0;font-size:24px;font-weight:600;color:#111827;">Alert Registration Confirmed</h1>
+              {brand_header}
               <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your alert configuration has been successfully provisioned {prog_text}. You will now receive priority notifications before these applications officially open to the public.</p>
               
               <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:16px;margin-bottom:24px;color:#166534;font-size:14px;line-height:1.5;">
@@ -410,8 +468,7 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
-              <p style="margin:0 0 8px 0;">Nova Brief &bull; Elite Program Alerts</p>
-              <p style="margin:0;"><a href="https://www.novabrief.tech" style="color:#3b82f6;text-decoration:none;">Platform</a> &bull; <a href="https://www.novabrief.tech/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &bull; <a href="https://www.novabrief.tech/terms" style="color:#6b7280;text-decoration:none;">Terms of Service</a></p>
+              {brand_footer}
             </td>
           </tr>
         </table>
@@ -460,8 +517,10 @@ def send_login_email(to_email: str) -> bool:
 
 def format_news_email(news_items: List[Dict[str, Any]]) -> str:
     today = datetime.now().strftime('%A, %B %d, %Y')
+    brand_header = _brand_header('Technology Morning Brief', today)
+    brand_footer = _brand_footer()
     if not news_items:
-        return f"""<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f6f9fc;padding:40px 20px;"><div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e6ebf1;border-radius:8px;padding:32px;"><h2 style="margin:0 0 16px;font-size:20px;color:#111827;">AI Intelligence Briefing &bull; {today}</h2><div style="padding:16px;background:#fef3c7;border-radius:6px;color:#92400e;font-size:14px;">No significant AI developments detected in the current cycle.</div></div></body></html>"""
+        return f"""<!DOCTYPE html><html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f6f9fc;padding:40px 20px;"><div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e6ebf1;border-radius:8px;padding:32px;">{brand_header}<div style="padding:16px;background:#fef3c7;border-radius:6px;color:#92400e;font-size:14px;">No significant technology developments were selected for today's briefing.</div><div style="margin-top:24px;text-align:center;font-size:12px;color:#64748b;">{brand_footer}</div></div></body></html>"""
 
     items_html = ''.join(f"""
     <div style="margin-bottom:32px;padding-bottom:32px;border-bottom:1px solid #e5e7eb;">
@@ -483,21 +542,18 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
         <table width="100%" style="max-width:640px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
             <td style="padding:40px;text-align:left;">
-              <div style="font-size:12px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Nova Brief Intelligence</div>
-              <h1 style="margin:0 0 8px 0;font-size:28px;font-weight:700;color:#111827;letter-spacing:-0.02em;">AI Market Briefing</h1>
-              <p style="margin:0 0 32px 0;font-size:15px;color:#6b7280;">{today}</p>
+              {brand_header}
               
               {items_html}
               
               <div style="margin-top:8px;font-size:14px;color:#6b7280;line-height:1.5;text-align:center;">
-                <strong>Strategic Overview:</strong> Artificial intelligence continues to transition from conceptual frameworks to core enterprise infrastructure. Remain informed to maintain strategic advantage.
+                <strong>Daily perspective:</strong> The most useful technology updates are the ones that help you learn, make better decisions, and act on new opportunities.
               </div>
             </td>
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#9ca3af;">
-              <p style="margin:0 0 8px 0;">Nova Brief &bull; Proprietary Intelligence Feed</p>
-              <p style="margin:0;"><a href="https://novabrief-web.onrender.com" style="color:#6b7280;text-decoration:underline;">Dashboard</a> &bull; <a href="https://novabrief-web.onrender.com/privacy" style="color:#6b7280;text-decoration:underline;">Privacy</a></p>
+              {brand_footer}
             </td>
           </tr>
         </table>
@@ -539,6 +595,8 @@ def format_program_email(program: Dict[str, Any]) -> str:
     today = datetime.now().strftime('%A, %B %d, %Y')
     deadline_text = f"<strong>Application Deadline:</strong> {program.get('deadline', 'Refer to official portal')}<br>" if program.get('deadline') else ''
     launch_text = f"<strong>Launch Date:</strong> {program.get('launch_date', 'Imminent')}<br>" if program.get('launch_date') else ''
+    brand_header = _brand_header('Priority Student Program Alert', today)
+    brand_footer = _brand_footer()
 
     return f"""<!DOCTYPE html>
 <html>
@@ -550,6 +608,7 @@ def format_program_email(program: Dict[str, Any]) -> str:
         <table width="100%" style="max-width:600px;background-color:#ffffff;border:1px solid #e6ebf1;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">
           <tr>
             <td style="padding:40px;text-align:left;">
+              {brand_header}
               <div style="font-size:12px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Priority Application Alert</div>
               <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:600;color:#111827;">{program.get('title', 'New Program')}</h1>
               <p style="margin:0 0 24px 0;font-size:15px;color:#6b7280;">Offered by <strong>{program.get('company', 'Corporate Partner')}</strong></p>
@@ -567,7 +626,7 @@ def format_program_email(program: Dict[str, Any]) -> str:
           </tr>
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:24px;text-align:center;font-size:12px;color:#6b7280;">
-              <p style="margin:0 0 8px 0;">Nova Brief &bull; Career Intelligence</p>
+              {brand_footer}
             </td>
           </tr>
         </table>
@@ -638,6 +697,7 @@ def send_program_notifications() -> int:
 
 
 def get_recipients() -> List[str]:
+    """Return every active website user once, with optional legacy subscribers included."""
     db = NewsDatabase()
     registered_users = db.get_all_active_users()
     try:
@@ -645,11 +705,19 @@ def get_recipients() -> List[str]:
             json_recipients = json.load(f).get('recipients', [])
     except (FileNotFoundError, json.JSONDecodeError):
         json_recipients = []
-    all_recipients = list(set(registered_users + json_recipients))
+    all_recipients = []
+    seen = set()
+    for value in registered_users + json_recipients:
+        address = parseaddr(value or '')[1].strip().lower()
+        if address in seen or not is_deliverable_user_email(address):
+            continue
+        seen.add(address)
+        all_recipients.append(address)
     if not all_recipients:
         default = get_env_value('RECIPIENT_EMAIL', 'GMAIL_USER', 'EMAIL_USER')
-        if default:
-            all_recipients = [default]
+        address = parseaddr(default or '')[1].strip().lower()
+        if is_deliverable_user_email(address):
+            all_recipients = [address]
     return all_recipients
 
 
@@ -666,7 +734,7 @@ def fetch_latest_news_hourly() -> int:
     return 0
 def run_news_digest() -> bool:
     logger.info('=' * 60)
-    logger.info('Starting AI morning briefing...')
+    logger.info('Starting technology morning briefing...')
     db = NewsDatabase()
     today_key = datetime.now().strftime('%Y-%m-%d')
 
@@ -679,15 +747,18 @@ def run_news_digest() -> bool:
     if not recipients:
         db.log_agent_event('error', 'No recipient emails configured')
         return False
+    logger.info('Prepared the daily digest for %s active recipients.', len(recipients))
 
     news_items = search_ai_news(limit=25)
     if news_items:
         db.save_news_batch(news_items)
 
-    subject = f'AI Morning Brief - {datetime.now().strftime("%B %d, %Y")}'
+    subject = f'Technology Morning Brief - {datetime.now().strftime("%B %d, %Y")}'
+    delivered_before = set(db.get_successful_email_recipients(subject))
+    pending_recipients = [email for email in recipients if email not in delivered_before]
     success_count = 0
 
-    for to_email in recipients:
+    for to_email in pending_recipients:
         # Personalize for this user
         prefs = db.get_user_preferences(to_email)
         pref_keywords = (prefs.get('companies', '') + ' ' + prefs.get('fields', '')).lower().split()
@@ -713,8 +784,12 @@ def run_news_digest() -> bool:
         else:
             db.log_email_sent(to_email, subject, len(top_news), 'failed', 'Email sending failed')
 
-    db.record_daily_digest_run(len(recipients), success_count, len(news_items),
-                                'success' if success_count > 0 else 'failed')
+    total_success = len(delivered_before) + success_count
+    run_status = (
+        'success' if total_success == len(recipients)
+        else ('partial' if total_success > 0 else 'failed')
+    )
+    db.record_daily_digest_run(len(recipients), total_success, len(news_items), run_status)
 
     # Also check and send program notifications
     try:
@@ -728,9 +803,9 @@ def run_news_digest() -> bool:
     try:
         db.cleanup_saved_articles(days=30)
     except Exception: pass
-    db.log_agent_event('email_sent', f'Sent to {success_count}/{len(recipients)} recipients')
+    db.log_agent_event('email_sent', f'Delivered to {total_success}/{len(recipients)} recipients')
     logger.info('=' * 60)
-    return success_count > 0
+    return run_status == 'success'
 
 
 # The entry point of our script. It checks if we should run now or start the scheduler.

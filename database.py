@@ -20,10 +20,12 @@ class DummyDictCursor:
 
 
 import threading
-from psycopg2.pool import SimpleConnectionPool
+from psycopg2.pool import ThreadedConnectionPool
 
 _pool = None
 _pool_lock = threading.Lock()
+_database_init_lock = threading.Lock()
+_initialized_databases = set()
 
 class PooledConnection:
     def __init__(self, conn, pool):
@@ -47,7 +49,7 @@ def safe_connect():
         with _pool_lock:
             if _pool is None:
                 db_url = os.getenv('DATABASE_URL')
-                _pool = SimpleConnectionPool(1, 30, db_url)
+                _pool = ThreadedConnectionPool(1, 30, db_url)
     return PooledConnection(_pool.getconn(), _pool)
 
 import os
@@ -72,7 +74,12 @@ logger = logging.getLogger(__name__)
 class NewsDatabase:
     def __init__(self, db_path: str = 'news_history.db'):
         self.db_path = db_path
-        self.init_database()
+        database_key = os.getenv('DATABASE_URL') or db_path
+        if database_key not in _initialized_databases:
+            with _database_init_lock:
+                if database_key not in _initialized_databases:
+                    self.init_database()
+                    _initialized_databases.add(database_key)
 
     def _ensure_table_columns(self, conn, table_name: str, columns: List[str]) -> None:
         cursor = conn.cursor()
@@ -363,6 +370,17 @@ class NewsDatabase:
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
+
+    def get_successful_email_recipients(self, subject: str) -> List[str]:
+        """Return recipients already delivered this exact digest, for safe retries."""
+        conn = safe_connect()
+        cursor = conn.cursor()
+        cursor.execute('''SELECT DISTINCT LOWER(recipient)
+            FROM email_logs
+            WHERE subject=%s AND status='success' ''', (subject,))
+        recipients = [row[0] for row in cursor.fetchall() if row and row[0]]
+        conn.close()
+        return recipients
 
     def get_agent_logs(self, limit: int = 100) -> List[Dict[str, Any]]:
         conn = safe_connect()

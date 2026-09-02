@@ -2,6 +2,7 @@
 from flask import Flask, render_template, jsonify, request, redirect, url_for, session
 from database import NewsDatabase
 from datetime import datetime, timedelta
+import concurrent.futures
 import hashlib, hmac, ipaddress, logging, json, os, re, secrets, socket, threading, time
 from collections import defaultdict, deque
 from functools import wraps
@@ -89,6 +90,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 # Connect to our local SQLite database (where all user data is stored)
 db = NewsDatabase()
+VISITOR_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=2, thread_name_prefix='visitor_log')
 
 RECIPIENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'recipients.json')
 if not os.path.exists(RECIPIENTS_FILE):
@@ -246,12 +248,22 @@ def protect_unsafe_requests():
 def track_visitor():
     if request.path.startswith('/static') or request.path.startswith('/api'):
         return
-    try:
-        db.record_site_visit(request.path, request.remote_addr, request.user_agent.string[:250], session.get('user_email'))
-        if session.get('user_email') and session.get('role') == 'user':
-            db.log_user_activity(session['user_email'], 'page_visit', None, request.path)
-    except Exception:
-        pass
+    page = request.path
+    remote_addr = request.remote_addr
+    user_agent = request.user_agent.string[:250]
+    user_email = session.get('user_email')
+    user_role = session.get('role')
+
+    def persist_visit():
+        try:
+            db.record_site_visit(page, remote_addr, user_agent, user_email)
+            if user_email and user_role == 'user':
+                db.log_user_activity(user_email, 'page_visit', None, page)
+        except Exception as exc:
+            logger.warning('Visitor analytics write failed: %s', exc.__class__.__name__)
+
+    # Analytics must never make page navigation wait for a database write.
+    VISITOR_EXECUTOR.submit(persist_visit)
 
 
 def _safe_add_recipient(email: str):

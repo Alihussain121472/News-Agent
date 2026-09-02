@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import logging
 import os
 import secrets
 import time
@@ -26,6 +27,7 @@ from .adsense_service import (
 
 
 analytics_bp = Blueprint('analytics', __name__, template_folder='templates')
+logger = logging.getLogger(__name__)
 
 
 def admin_required(handler):
@@ -283,6 +285,8 @@ def reply_message(message_id):
     reply_text = ((request.get_json(silent=True) or {}).get('reply') or '').strip()
     if not reply_text:
         return jsonify({'status': 'error', 'message': 'Reply cannot be empty.'}), 400
+    if len(reply_text) > 10000:
+        return jsonify({'status': 'error', 'message': 'Reply is too long.'}), 400
     message = db.get_contact_message(message_id)
     if not message:
         return jsonify({'status': 'error', 'message': 'Message not found.'}), 404
@@ -290,12 +294,32 @@ def reply_message(message_id):
     safe_name = escape(message['name'])
     safe_reply = escape(reply_text).replace('\n', '<br>')
     safe_original = escape(message['message'])
-    html = f'''<html><body style="font-family:Arial,sans-serif;color:#333;line-height:1.6;">
-        <p>Hi {safe_name},</p><p>{safe_reply}</p><br><p>Best regards,<br>Nova Admin Team</p>
-        <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
-        <p style="color:#888;font-size:12px;">On {str(message['submitted_at'])[:10]}, you wrote:<br><em>{safe_original}</em></p>
+    html = f'''<!doctype html><html><body style="margin:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#1e293b;line-height:1.6;">
+        <div style="display:none;max-height:0;overflow:hidden;">NovaBrief Tech replied to your support message.</div>
+        <div style="max-width:620px;margin:0 auto;padding:28px 16px;">
+          <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;overflow:hidden;">
+            <div style="padding:22px 28px;background:#0f172a;">
+              <a href="https://www.novabrief.tech" style="color:#ffffff;text-decoration:none;font-size:18px;font-weight:800;">NovaBrief Tech</a>
+            </div>
+            <div style="padding:28px;">
+              <p>Hi {safe_name},</p><p>{safe_reply}</p>
+              <p style="margin-top:28px;">Best regards,<br><strong>NovaBrief Tech Support</strong></p>
+              <hr style="border:0;border-top:1px solid #e2e8f0;margin:24px 0;">
+              <p style="color:#64748b;font-size:12px;">On {str(message['submitted_at'])[:10]}, you wrote:<br><em>{safe_original}</em></p>
+            </div>
+          </div>
+        </div>
         </body></html>'''
     sent = send_email(message['email'], subject, html)
+    if not sent:
+        db.log_email_sent(message['email'], subject, 0, 'failed', 'Support reply provider rejected or could not deliver the message')
+        logger.error('Support reply delivery failed for message_id=%s', message_id)
+        return jsonify({
+            'status': 'error',
+            'message': 'Reply was not sent. The message remains open so you can retry after email delivery is restored.',
+        }), 502
+
     db.mark_message_replied(message_id, reply_text)
-    result_message = 'Reply sent and saved to history.' if sent else 'Reply saved, but email delivery is currently unavailable.'
-    return jsonify({'status': 'success', 'message': result_message})
+    db.log_email_sent(message['email'], subject, 0, 'success')
+    logger.info('Support reply accepted for delivery for message_id=%s', message_id)
+    return jsonify({'status': 'success', 'message': 'Reply sent and saved to history.'})

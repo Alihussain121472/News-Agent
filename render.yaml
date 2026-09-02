@@ -22,7 +22,7 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
-        value: Nova Brief <updates@novabrief.tech>
+        value: NovaBrief Tech <updates@novabrief.tech>
       - key: RESEND_REPLY_TO
         sync: false
       - key: NEWSAPI_KEY
@@ -36,9 +36,11 @@ services:
       - key: SMTP_PORT
         value: "465"
       - key: EMAIL_FROM_NAME
-        value: Nova Brief
-      - key: ENABLE_IN_PROCESS_SCHEDULER
+        value: NovaBrief Tech
+      - key: REQUIRE_OFFICIAL_SENDER
         value: "true"
+      - key: ENABLE_IN_PROCESS_SCHEDULER
+        value: "false"
       - key: SEO_SITE_URL
         value: https://www.novabrief.tech
       - key: GOOGLE_ADSENSE_CLIENT_ID

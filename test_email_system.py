@@ -1,7 +1,7 @@
 import os
 import smtplib
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import ai_news_agent
 
@@ -65,6 +65,9 @@ class EmailCredentialTests(unittest.TestCase):
 
         smtp.assert_not_called()
         request_headers = post.call_args.kwargs['headers']
+        self.assertEqual(
+            post.call_args.kwargs['json']['from'],
+            'NovaBrief Tech <updates@novabrief.tech>')
         self.assertTrue(request_headers['Authorization'].startswith('Bearer '))
         self.assertTrue(request_headers['Idempotency-Key'].startswith('novabrief-'))
         self.assertNotIn('re_test_key', str(post.call_args.kwargs['json']))
@@ -88,6 +91,67 @@ class EmailCredentialTests(unittest.TestCase):
         second_headers = post.call_args_list[1].kwargs['headers']
         self.assertEqual(first_headers['Idempotency-Key'], second_headers['Idempotency-Key'])
         sleep.assert_called_once()
+
+    def test_official_sender_mode_never_falls_back_to_personal_gmail(self):
+        env = {
+            'REQUIRE_OFFICIAL_SENDER': 'true',
+            'GMAIL_USER': 'personal@gmail.com',
+            'GMAIL_APP_PASSWORD': 'app-password',
+        }
+        with patch.dict(os.environ, env, clear=True), \
+                patch.object(ai_news_agent.smtplib, 'SMTP_SSL') as smtp:
+            self.assertFalse(ai_news_agent.send_email(
+                'user@real-domain.com', 'Daily brief', '<p>Hello</p>'))
+        smtp.assert_not_called()
+
+
+class DailyDigestAudienceTests(unittest.TestCase):
+    def test_recipients_include_every_active_user_once(self):
+        fake_db = MagicMock()
+        fake_db.get_all_active_users.return_value = [
+            'First@real-domain.com', 'second@real-domain.com', 'test@example.com',
+        ]
+        legacy_file = mock_open(read_data='{"recipients":["first@real-domain.com","third@real-domain.com"]}')
+        with patch.object(ai_news_agent, 'NewsDatabase', return_value=fake_db), \
+                patch('builtins.open', legacy_file), \
+                patch.dict(os.environ, {'RECIPIENT_EMAIL': 'only-one@real-domain.com'}, clear=True):
+            recipients = ai_news_agent.get_recipients()
+
+        self.assertEqual(recipients, [
+            'first@real-domain.com', 'second@real-domain.com', 'third@real-domain.com',
+        ])
+
+    def test_daily_email_uses_official_logo_and_domain(self):
+        html = ai_news_agent.format_news_email([{
+            'title': 'New developer tool', 'source': 'Nova', 'published': 'Today',
+            'summary': 'A useful update.', 'why_important': 'It helps students.',
+            'future_change': 'Learning gets easier.', 'url': 'https://example.test/story',
+        }])
+
+        self.assertIn('NovaBrief Tech logo', html)
+        self.assertIn('https://www.novabrief.tech/static/icon-192.png', html)
+        self.assertIn('Sent by NovaBrief Tech', html)
+        self.assertNotIn('novabrief-web.onrender.com', html)
+
+    def test_retry_sends_only_to_users_not_already_delivered(self):
+        fake_db = MagicMock()
+        fake_db.has_daily_digest_run.return_value = False
+        fake_db.get_successful_email_recipients.return_value = ['first@real-domain.com']
+        fake_db.get_user_preferences.return_value = {}
+        with patch.object(ai_news_agent, 'NewsDatabase', return_value=fake_db), \
+                patch.object(ai_news_agent, 'get_recipients', return_value=[
+                    'first@real-domain.com', 'second@real-domain.com']), \
+                patch.object(ai_news_agent, 'search_ai_news', return_value=[]), \
+                patch.object(ai_news_agent, 'send_email', return_value=True) as send_email:
+            result = ai_news_agent.run_news_digest()
+
+        self.assertTrue(result)
+        send_email.assert_called_once()
+        self.assertEqual(send_email.call_args.args[0], 'second@real-domain.com')
+        fake_db.record_daily_digest_run.assert_called_once()
+        run_args = fake_db.record_daily_digest_run.call_args.args
+        self.assertEqual(run_args[0:2], (2, 2))
+        self.assertEqual(run_args[3], 'success')
 
 
 class WelcomeBatchTests(unittest.TestCase):

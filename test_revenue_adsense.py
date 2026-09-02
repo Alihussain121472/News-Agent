@@ -141,6 +141,60 @@ class RevenueRouteTests(unittest.TestCase):
         self.assertIn('connection=invalid_state', response.location)
         exchange.assert_not_called()
 
+    @patch('ai_news_agent.send_email', return_value=False)
+    @patch('analytics_revenue_portal.routes.NewsDatabase')
+    def test_failed_support_reply_stays_retryable(self, database, send_email):
+        db = database.return_value
+        db.get_contact_message.return_value = {
+            'id': 42,
+            'name': 'Reader',
+            'email': 'reader@real-domain.com',
+            'subject': 'Need help',
+            'message': 'Please help me.',
+            'submitted_at': '2026-09-01 12:00:00',
+        }
+
+        response = self.client.post(
+            '/analytics/api/messages/42/reply',
+            json={'reply': 'We are looking into this.'},
+            headers={'Origin': 'http://localhost'},
+        )
+
+        self.assertEqual(502, response.status_code)
+        self.assertEqual('error', response.get_json()['status'])
+        send_email.assert_called_once()
+        db.mark_message_replied.assert_not_called()
+        db.log_email_sent.assert_called_once_with(
+            'reader@real-domain.com', 'Re: Need help', 0, 'failed',
+            'Support reply provider rejected or could not deliver the message')
+
+    @patch('ai_news_agent.send_email', return_value=True)
+    @patch('analytics_revenue_portal.routes.NewsDatabase')
+    def test_successful_support_reply_is_branded_and_saved(self, database, send_email):
+        db = database.return_value
+        db.get_contact_message.return_value = {
+            'id': 42,
+            'name': 'Reader',
+            'email': 'reader@real-domain.com',
+            'subject': 'Need help',
+            'message': 'Please help me.',
+            'submitted_at': '2026-09-01 12:00:00',
+        }
+
+        response = self.client.post(
+            '/analytics/api/messages/42/reply',
+            json={'reply': 'Your issue is fixed.'},
+            headers={'Origin': 'http://localhost'},
+        )
+
+        self.assertEqual(200, response.status_code)
+        html = send_email.call_args.args[2]
+        self.assertIn('NovaBrief Tech Support', html)
+        self.assertIn('https://www.novabrief.tech', html)
+        db.mark_message_replied.assert_called_once_with(42, 'Your issue is fixed.')
+        db.log_email_sent.assert_called_once_with(
+            'reader@real-domain.com', 'Re: Need help', 0, 'success')
+
 
 if __name__ == '__main__':
     unittest.main()
