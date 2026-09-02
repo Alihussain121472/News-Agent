@@ -1,4 +1,4 @@
-﻿{% extends "base_saas.html" %}
+{% extends "base_saas.html" %}
 {% block title %}Social Studio - Nova OS{% endblock %}
 {% block page_title %}NovaBrief Social Studio{% endblock %}
 {% block page_subtitle %}Your approval-first workspace for creating and publishing social content.{% endblock %}
@@ -19,9 +19,9 @@
               <h2 class="text-xl font-extrabold tracking-tight text-white">Social Studio</h2>
               <span class="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">v{{ studio_version }}</span>
             </div>
-            <div class="mt-2 inline-flex items-center gap-2 text-xs font-bold {% if studio_ready %}text-emerald-300{% else %}text-amber-300{% endif %}">
-              <span class="h-2 w-2 rounded-full {% if studio_ready %}bg-emerald-400{% else %}bg-amber-400{% endif %}"></span>
-              {% if studio_ready %}Ready on this Windows PC{% else %}Setup required before first use{% endif %}
+            <div class="mt-2 inline-flex items-center gap-2 text-xs font-bold {% if is_cloud or studio_ready %}text-emerald-300{% else %}text-amber-300{% endif %}">
+              <span class="h-2 w-2 rounded-full {% if is_cloud or studio_ready %}bg-emerald-400{% else %}bg-amber-400{% endif %}"></span>
+              {% if is_cloud %}Installed on your Windows PC{% elif studio_ready %}Ready on this Windows PC{% else %}Setup required before first use{% endif %}
             </div>
           </div>
         </div>
@@ -34,10 +34,17 @@
       </div>
 
       <div class="mt-7 flex flex-wrap gap-3">
+        {% if is_cloud %}
+        <div class="primary-action" style="cursor: default;">
+          <i class="fab fa-windows"></i>
+          Open app from Windows Desktop
+        </div>
+        {% else %}
         <button id="open-studio" type="button" onclick="runStudioAction('launch')" {% if not studio_ready %}disabled{% endif %} class="primary-action">
           <i class="fas fa-arrow-up-right-from-square"></i>
           Open Social Studio
         </button>
+        {% endif %}
         {% if setup_ready %}
         <button id="install-studio" type="button" onclick="runStudioAction('install')" class="secondary-action !border-white/10 !bg-white/5 !text-white hover:!bg-white/10">
           <i class="fas fa-download text-slate-300"></i>
