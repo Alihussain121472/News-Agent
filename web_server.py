@@ -1325,6 +1325,24 @@ def _safe_run_seo_monitor():
     except Exception as e:
         logger.error(f'Scheduled SEO monitor failed: {e}')
 
+
+@app.route('/api/temp/send-welcome', methods=['GET', 'POST'])
+def temp_send_welcome():
+    email = request.args.get('email')
+    if not email:
+        return 'No email', 400
+    try:
+        from ai_news_agent import send_welcome_email
+        success = send_welcome_email(email)
+        if success:
+            db.mark_welcome_email_sent(email)
+            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+            return 'Sent successfully to ' + email
+        else:
+            return 'Failed to send', 500
+    except Exception as e:
+        return str(e), 500
+
 def start_background_scheduler():
     global _scheduler_started
     if _scheduler_started:
@@ -1371,6 +1389,7 @@ if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'false').lower() == 'true':
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
 
