@@ -1336,24 +1336,8 @@ def _safe_run_seo_monitor():
 
 
 
-@app.route('/api/temp/send-welcome', methods=['GET'])
-def temp_send_welcome():
-    try:
-        from ai_news_agent import send_welcome_email
-        success = send_welcome_email("syedali6160@gmail.com")
-        if success:
-            db.mark_welcome_email_sent("syedali6160@gmail.com")
-            db.log_email_sent("syedali6160@gmail.com", 'Welcome to Nova Brief', 0, 'success')
-            return 'Sent successfully'
-        else:
-            return 'Failed to send', 500
-    except Exception as e:
-        return str(e), 500
 
 
-@app.route('/api/temp/get-logs', methods=['GET'])
-def temp_get_logs():
-    return jsonify(db.get_recent_email_logs(limit=5))
 
 def start_background_scheduler():
     global _scheduler_started
