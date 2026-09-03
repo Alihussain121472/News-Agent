@@ -50,6 +50,22 @@ def safe_connect():
             if _pool is None:
                 db_url = os.getenv('DATABASE_URL')
                 _pool = ThreadedConnectionPool(1, 30, db_url)
+    
+    # Test connection and handle Supabase stale connections
+    max_retries = 3
+    for _ in range(max_retries):
+        try:
+            conn = _pool.getconn()
+            with conn.cursor() as cursor:
+                cursor.execute('SELECT 1')
+            return PooledConnection(conn, _pool)
+        except Exception:
+            try:
+                _pool.putconn(conn, close=True)
+            except Exception:
+                pass
+    
+    # Fallback to a direct connection if pool fails
     return PooledConnection(_pool.getconn(), _pool)
 
 import os
