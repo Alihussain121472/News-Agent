@@ -317,7 +317,7 @@ async function runSummarizer() {
               <p class="text-sm text-neutral-500 dark:text-slate-400 mt-2 max-w-2xl">Fresh, readable technology stories selected by Nova Brief. Search, save or select stories to create an AI summary.</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-            <input type="date" id="newsDatePicker" onchange="loadArticles()" class="bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-600 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+            <input type="date" id="newsDatePicker" onchange="loadArticles()" class="bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-600 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 dark:[color-scheme:dark] dark:[&::-webkit-calendar-picker-indicator]:invert" />
               <div class="relative w-full sm:w-64">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-400 text-sm"></i>
                 <input type="search" id="articleSearch" aria-label="Search news topics" placeholder="Search news topics..." onkeyup="liveSearch()" class="w-full bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-400 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
