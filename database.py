@@ -1066,7 +1066,7 @@ class NewsDatabase:
         conn.commit()
         conn.close()
 
-        def get_daily_contact_count(self) -> int:
+    def get_daily_contact_count(self) -> int:
         conn = safe_connect()
         cursor = conn.cursor()
         from datetime import datetime
