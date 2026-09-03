@@ -98,6 +98,11 @@ TOPIC_TERMS: Dict[str, Tuple[str, ...]] = {
         "technology training", "developer training", "certification program", "coding bootcamp",
         "hackathon", "coding competition", "developer conference", "research paper",
     ),
+    "Pakistani Tech Career & Global Opportunities": (
+        "pakistan", "pakistani", "pakistani student", "pakistan it", "pakistan tech", "pakistan startup",
+        "remote internship", "global talent", "freelance tech", "remote developer",
+        "work from anywhere", "global internship", "tech visa", "student grant pakistan",
+    ),
     "Useful product and platform updates": (
         "software update", "security update", "privacy update", "accessibility feature",
         "operating system update", "platform update", "developer preview", "public beta",
@@ -229,6 +234,8 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
     score += min(max(len(topics) - 1, 0), 2) * 2
     if "Student opportunities" in topics or "Digital skills and education" in topics:
         score += 2
+    if "Pakistani Tech Career & Global Opportunities" in topics:
+        score += 5
     score += min(supporting_matches, 2)
     score -= finance_matches * 5
     score -= off_topic_matches * 7

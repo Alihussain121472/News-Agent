@@ -126,7 +126,8 @@ FOCUSED_NEWS_QUERIES = (
     '"artificial intelligence" OR "generative AI" OR "AI model" OR "AI agents" OR OpenAI OR Anthropic',
     'NVIDIA OR Google OR Alphabet OR Amazon OR AWS OR Microsoft OR Meta OR Apple OR Tesla OR xAI',
     'programming OR "developer tools" OR "open source" OR cybersecurity OR "cloud computing" OR DevOps OR Linux',
-    'semiconductor OR robotics OR "quantum computing" OR "space technology" OR biotechnology OR "clean energy technology"',
+    '("Pakistan" OR "Pakistani") AND ("tech career" OR "student" OR "internship" OR "scholarship" OR "freelance" OR "startup")',
+    '("Google" OR "Microsoft" OR "Meta" OR "AWS") AND ("remote job" OR "global talent" OR "freelance" OR "student program")',
     '"student developer" OR scholarship OR internship OR hackathon OR "free certification" OR "digital skills" OR edtech',
 )
 
