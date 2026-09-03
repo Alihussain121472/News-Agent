@@ -11,64 +11,79 @@
   <link rel="stylesheet" href="/static/css/tailwind.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <style>
-    body{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;}
-    .glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);}
-    .sidebar{background:rgba(0,0,0,0.4);border-right:1px solid rgba(255,255,255,0.08);}
-    .nav-item:hover,.nav-item.active{background:rgba(99,102,241,0.2);color:#818cf8;}
-    .nav-item.active{border-left:3px solid #6366f1;}
-    ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-track{background:#0f172a;} ::-webkit-scrollbar-thumb{background:#334155;border-radius:2px;}
-    .gradient-text{background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;}
-  </style>
+  
   <link rel="manifest" href="/static/manifest.json">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+    }
+  </script>
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleTheme() {
+        const htmlEl = document.documentElement;
+        htmlEl.classList.toggle('dark');
+        if (htmlEl.classList.contains('dark')) {
+            localStorage.setItem('color-theme', 'dark');
+        } else {
+            localStorage.setItem('color-theme', 'light');
+        }
+    }
+  </script>
 </head>
-<body class="font-sans text-slate-200">
+<body class="font-sans text-neutral-700 dark:text-slate-200">
 <div class="flex h-screen overflow-hidden">
 
   <!-- Sidebar -->
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col overflow-y-auto hidden lg:flex">
-    <div class="p-6 border-b border-white/10">
+    <div class="p-6 border-b border-neutral-200 dark:border-white/10">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-          <i class="fas fa-shield-alt text-white text-sm"></i>
+          <i class="fas fa-shield-alt text-neutral-900 dark:text-white text-sm"></i>
         </div>
         <div>
-          <div class="font-bold text-white">Nova Brief</div>
+          <div class="font-bold text-neutral-900 dark:text-white">Nova Brief</div>
           <div class="text-xs text-indigo-300">Admin Panel</div>
         </div>
       </div>
     </div>
     <nav class="p-3 flex-1">
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-2">Overview</div>
-      <button onclick="switchTab('overview')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-overview"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</button>
-      <button onclick="switchTab('users')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-users"><i class="fas fa-users w-4 text-center"></i> Users</button>
-      <button onclick="switchTab('useractivity')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-useractivity"><i class="fas fa-chart-line w-4 text-center"></i> User Activity</button>
+      <button onclick="switchTab('overview')" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-overview"><i class="fas fa-th-large w-4 text-center"></i> Dashboard</button>
+      <button onclick="switchTab('users')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-users"><i class="fas fa-users w-4 text-center"></i> Users</button>
+      <button onclick="switchTab('useractivity')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-useractivity"><i class="fas fa-chart-line w-4 text-center"></i> User Activity</button>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Content</div>
-      <button onclick="switchTab('articles')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-articles"><i class="fas fa-newspaper w-4 text-center"></i> Articles</button>
-      <button onclick="switchTab('programs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-programs"><i class="fas fa-graduation-cap w-4 text-center"></i> Programs</button>
-      <button onclick="switchTab('recipients')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-recipients"><i class="fas fa-envelope w-4 text-center"></i> Recipients</button>
+      <button onclick="switchTab('articles')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-articles"><i class="fas fa-newspaper w-4 text-center"></i> Articles</button>
+      <button onclick="switchTab('programs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-programs"><i class="fas fa-graduation-cap w-4 text-center"></i> Programs</button>
+      <button onclick="switchTab('recipients')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-recipients"><i class="fas fa-envelope w-4 text-center"></i> Recipients</button>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Monetization</div>
       <a href="/analytics/revenue" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-emerald-400 mb-1 hover:bg-emerald-500/10 transition"><i class="fas fa-dollar-sign w-4 text-center"></i> Revenue & Payouts</a>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Logs</div>
-      <button onclick="switchTab('emaillogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-emaillogs"><i class="fas fa-envelope-open-text w-4 text-center"></i> Email Logs</button>
-      <button onclick="switchTab('agentlogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-agentlogs"><i class="fas fa-robot w-4 text-center"></i> Agent Logs</button>
-      <button onclick="switchTab('contacts')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 mb-1" id="nav-contacts"><i class="fas fa-comments w-4 text-center"></i> Contact Messages</button>
+      <button onclick="switchTab('emaillogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-emaillogs"><i class="fas fa-envelope-open-text w-4 text-center"></i> Email Logs</button>
+      <button onclick="switchTab('agentlogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-agentlogs"><i class="fas fa-robot w-4 text-center"></i> Agent Logs</button>
+      <button onclick="switchTab('contacts')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-contacts"><i class="fas fa-comments w-4 text-center"></i> Contact Messages</button>
       <button onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</button>
     </nav>
   </aside>
 
   <!-- Main -->
   <main class="flex-1 overflow-y-auto">
-    <header class="sticky top-0 z-10 bg-black/40 backdrop-blur border-b border-white/10 px-6 py-4 flex items-center justify-between">
+    <header class="sticky top-0 z-10 bg-white/90 dark:bg-black/40 backdrop-blur border-b border-neutral-200 dark:border-white/10 px-6 py-4 flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-bold text-white">Admin Dashboard</h1>
-        <p class="text-xs text-slate-500">Nova Brief Control Panel</p>
+        <h1 class="text-xl font-bold text-neutral-900 dark:text-white">Admin Dashboard</h1>
+        <p class="text-xs text-neutral-500 dark:text-slate-500">Nova Brief Control Panel</p>
       </div>
       <div class="flex items-center gap-3">
-        <button onclick="runAgentNow()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition"><i class="fas fa-play mr-1"></i>Run Agent</button>
-        <button onclick="loadOverview()" class="glass hover:bg-white/10 text-xs text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
-        <a href="/" class="glass hover:bg-white/10 text-xs text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-home mr-1"></i>Site</a>
+        <button onclick="runAgentNow()" class="bg-indigo-600 hover:bg-indigo-500 text-neutral-900 dark:text-white text-xs font-bold px-4 py-2 rounded-lg transition"><i class="fas fa-play mr-1"></i>Run Agent</button>
+        <button onclick="loadOverview()" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+        <button onclick="toggleTheme()" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
+          <a href="/" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-home mr-1"></i>Site</a>
         <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs px-3 py-2 rounded-lg transition"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
       </div>
     </header>
@@ -81,25 +96,25 @@
       <div id="tab-overview">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" id="statsGrid"></div>
         <div class="grid lg:grid-cols-2 gap-6">
-          <div class="glass rounded-2xl p-5">
-            <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-users text-indigo-400"></i> Recent User Activity</h3>
+          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+            <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-users text-indigo-400"></i> Recent User Activity</h3>
             <div id="recentActivity" class="space-y-2 max-h-64 overflow-y-auto"></div>
           </div>
-          <div class="glass rounded-2xl p-5">
+          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-wallet text-emerald-400"></i> Payout & Monetization</h3>
+              <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-wallet text-emerald-400"></i> Payout & Monetization</h3>
               <a href="/analytics/revenue" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold">Manage â†’</a>
             </div>
             <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl mb-4 text-xs space-y-1.5">
-              <div class="flex justify-between"><span class="text-slate-400">Account:</span> <span class="text-white font-bold">Syed Ali Hussain</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Company:</span> <span class="text-white font-bold">NayaPay</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Number:</span> <span class="text-emerald-400 font-mono font-bold">03146618622</span></div>
-              <div class="flex justify-between"><span class="text-slate-400">Status:</span> <span class="text-emerald-300 font-bold">Verified for Wire Transfer</span></div>
+              <div class="flex justify-between"><span class="text-neutral-500 dark:text-slate-400">Account:</span> <span class="text-neutral-900 dark:text-white font-bold">Syed Ali Hussain</span></div>
+              <div class="flex justify-between"><span class="text-neutral-500 dark:text-slate-400">Company:</span> <span class="text-neutral-900 dark:text-white font-bold">NayaPay</span></div>
+              <div class="flex justify-between"><span class="text-neutral-500 dark:text-slate-400">Number:</span> <span class="text-emerald-400 font-mono font-bold">03146618622</span></div>
+              <div class="flex justify-between"><span class="text-neutral-500 dark:text-slate-400">Status:</span> <span class="text-emerald-300 font-bold">Verified for Wire Transfer</span></div>
             </div>
-            <h3 class="font-bold text-white mb-3 flex items-center gap-2 text-xs uppercase tracking-wider text-slate-400"><i class="fas fa-cogs text-purple-400"></i> Quick Actions</h3>
+            <h3 class="font-bold text-neutral-900 dark:text-white mb-3 flex items-center gap-2 text-xs uppercase tracking-wider text-neutral-500 dark:text-slate-400"><i class="fas fa-cogs text-purple-400"></i> Quick Actions</h3>
             <div class="space-y-2">
-              <button onclick="runAgentNow()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-play"></i> Run News Digest Now</button>
-              <button onclick="sendProgramNotifications()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-graduation-cap"></i> Send Program Notifications</button>
+              <button onclick="runAgentNow()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-neutral-900 dark:text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-play"></i> Run News Digest Now</button>
+              <button onclick="sendProgramNotifications()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-neutral-900 dark:text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2"><i class="fas fa-graduation-cap"></i> Send Program Notifications</button>
               <button onclick="cleanupData()" class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-red-500/30"><i class="fas fa-trash-alt"></i> Cleanup Old Articles</button>
             </div>
             <div class="mt-3 space-y-1 text-xs" id="configInfo"></div>
@@ -109,14 +124,14 @@
 
       <!-- USERS -->
       <div id="tab-users" class="hidden">
-        <div class="glass rounded-2xl p-5">
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-users text-indigo-400"></i> All Users</h3>
-            <input type="text" id="userSearch" placeholder="Search users..." onkeyup="filterUsers()" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 transition"/>
+            <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-users text-indigo-400"></i> All Users</h3>
+            <input type="text" id="userSearch" placeholder="Search users..." onkeyup="filterUsers()" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 transition"/>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-xs">
-              <thead><tr class="text-slate-500 border-b border-white/10">
+              <thead><tr class="text-neutral-500 dark:text-slate-500 border-b border-neutral-200 dark:border-white/10">
                 <th class="text-left py-2 px-3">User</th>
                 <th class="text-left py-2 px-3">Status</th>
                 <th class="text-left py-2 px-3">Emails</th>
@@ -133,14 +148,14 @@
 
       <!-- USER ACTIVITY (ADMIN VIEW) -->
       <div id="tab-useractivity" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-indigo-400"></i> User Activity Monitor</h3>
-          <p class="text-xs text-slate-500 mb-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-3 py-2">
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-line text-indigo-400"></i> User Activity Monitor</h3>
+          <p class="text-xs text-neutral-500 dark:text-slate-500 mb-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg px-3 py-2">
             <i class="fas fa-lock mr-2 text-indigo-400"></i>This section is private to admins. Users cannot see this view.
           </p>
           <div class="mb-4 flex gap-3">
-            <input type="email" id="activityEmailInput" placeholder="Enter user email to inspect..." class="flex-1 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition"/>
-            <button onclick="loadUserActivityAdmin()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">View Activity</button>
+            <input type="email" id="activityEmailInput" placeholder="Enter user email to inspect..." class="flex-1 bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition"/>
+            <button onclick="loadUserActivityAdmin()" class="bg-indigo-600 hover:bg-indigo-500 text-neutral-900 dark:text-white font-bold px-5 py-2.5 rounded-xl text-sm transition">View Activity</button>
           </div>
           <div id="adminActivityResult"></div>
         </div>
@@ -148,12 +163,12 @@
 
       <!-- ARTICLES -->
       <div id="tab-articles" class="hidden">
-        <div class="glass rounded-2xl p-5">
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-white flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> News Articles</h3>
+            <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-newspaper text-blue-400"></i> News Articles</h3>
             <div class="flex gap-2">
-              <input type="text" id="articleSearch" placeholder="Search..." onkeyup="searchAdminArticles()" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 transition w-48"/>
-              <select id="articleFilter" onchange="filterAdminArticles()" class="bg-white/5 border border-white/10 text-slate-400 rounded-xl px-3 py-2 text-xs focus:outline-none">
+              <input type="text" id="articleSearch" placeholder="Search..." onkeyup="searchAdminArticles()" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500 transition w-48"/>
+              <select id="articleFilter" onchange="filterAdminArticles()" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-500 dark:text-slate-400 rounded-xl px-3 py-2 text-xs focus:outline-none">
                 <option value="all">All Time</option><option value="7">Last 7 Days</option><option value="30">Last 30 Days</option>
               </select>
             </div>
@@ -164,23 +179,23 @@
 
       <!-- PROGRAMS -->
       <div id="tab-programs" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs</h3>
-          <div class="glass rounded-xl p-5 mb-6 border border-emerald-500/20">
-            <h4 class="font-semibold text-white mb-4 text-sm">Add New Program</h4>
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs</h3>
+          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5 mb-6 border border-emerald-500/20">
+            <h4 class="font-semibold text-neutral-900 dark:text-white mb-4 text-sm">Add New Program</h4>
             <div class="grid md:grid-cols-2 gap-3">
-              <input type="text" id="pTitle" placeholder="Program Title *" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-              <input type="text" id="pCompany" placeholder="Company (Google, NASA...) *" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-              <input type="url" id="pUrl" placeholder="Registration URL *" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 md:col-span-2"/>
-              <textarea id="pDesc" placeholder="Description" rows="2" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 md:col-span-2 resize-none"></textarea>
-              <input type="text" id="pDeadline" placeholder="Deadline (e.g. Dec 31, 2026)" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-              <input type="text" id="pLaunch" placeholder="Launch Date (e.g. Nov 15, 2026)" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
-              <select id="pCategory" class="bg-white/5 border border-white/10 text-slate-400 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500">
+              <input type="text" id="pTitle" placeholder="Program Title *" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
+              <input type="text" id="pCompany" placeholder="Company (Google, NASA...) *" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
+              <input type="url" id="pUrl" placeholder="Registration URL *" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 md:col-span-2"/>
+              <textarea id="pDesc" placeholder="Description" rows="2" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 md:col-span-2 resize-none"></textarea>
+              <input type="text" id="pDeadline" placeholder="Deadline (e.g. Dec 31, 2026)" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
+              <input type="text" id="pLaunch" placeholder="Launch Date (e.g. Nov 15, 2026)" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
+              <select id="pCategory" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-500 dark:text-slate-400 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500">
                 <option value="program">Program</option><option value="internship">Internship</option><option value="scholarship">Scholarship</option><option value="competition">Competition</option><option value="certification">Certification</option>
               </select>
-              <input type="number" id="pNotifyDays" placeholder="Notify X days before launch (default: 7)" value="7" class="bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
+              <input type="number" id="pNotifyDays" placeholder="Notify X days before launch (default: 7)" value="7" class="bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500"/>
             </div>
-            <button onclick="addProgram()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition"><i class="fas fa-plus mr-2"></i>Add Program & Notify Users</button>
+            <button onclick="addProgram()" class="mt-4 bg-emerald-600 hover:bg-emerald-500 text-neutral-900 dark:text-white font-bold px-6 py-2.5 rounded-xl text-sm transition"><i class="fas fa-plus mr-2"></i>Add Program & Notify Users</button>
           </div>
           <div id="adminProgramsList" class="grid md:grid-cols-2 gap-4"></div>
         </div>
@@ -188,11 +203,11 @@
 
       <!-- RECIPIENTS -->
       <div id="tab-recipients" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-envelope text-blue-400"></i> Email Recipients</h3>
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-envelope text-blue-400"></i> Email Recipients</h3>
           <div class="flex gap-3 mb-6">
-            <input type="email" id="newRecipient" placeholder="Add email address..." class="flex-1 bg-white/5 border border-white/10 text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition"/>
-            <button onclick="addRecipient()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"><i class="fas fa-plus mr-1"></i>Add</button>
+            <input type="email" id="newRecipient" placeholder="Add email address..." class="flex-1 bg-white/5 border border-neutral-200 dark:border-white/10 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition"/>
+            <button onclick="addRecipient()" class="bg-indigo-600 hover:bg-indigo-500 text-neutral-900 dark:text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"><i class="fas fa-plus mr-1"></i>Add</button>
           </div>
           <div id="recipientsList" class="space-y-2 max-h-[400px] overflow-y-auto"></div>
         </div>
@@ -200,24 +215,24 @@
 
       <!-- EMAIL LOGS -->
       <div id="tab-emaillogs" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-envelope-open-text text-blue-400"></i> Email Logs</h3>
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-envelope-open-text text-blue-400"></i> Email Logs</h3>
           <div id="emailLogsList" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
         </div>
       </div>
 
       <!-- AGENT LOGS -->
       <div id="tab-agentlogs" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-robot text-purple-400"></i> Agent Logs</h3>
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-robot text-purple-400"></i> Agent Logs</h3>
           <div id="agentLogsList" class="space-y-2 max-h-[600px] overflow-y-auto"></div>
         </div>
       </div>
 
       <!-- CONTACTS -->
       <div id="tab-contacts" class="hidden">
-        <div class="glass rounded-2xl p-5">
-          <h3 class="font-bold text-white mb-4 flex items-center gap-2"><i class="fas fa-comments text-orange-400"></i> Contact Messages</h3>
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-comments text-orange-400"></i> Contact Messages</h3>
           <div id="contactsList" class="space-y-4 max-h-[600px] overflow-y-auto"></div>
         </div>
       </div>
@@ -232,7 +247,7 @@ let allUsers=[], allAdminArticles=[];
 function notify(msg,type='success'){
   const n=document.getElementById('notification');
   n.textContent=msg;
-  n.className=`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl text-sm font-bold shadow-2xl max-w-xs ${type==='success'?'bg-emerald-600 text-white':'bg-red-600 text-white'}`;
+  n.className=`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl text-sm font-bold shadow-2xl max-w-xs ${type==='success'?'bg-emerald-600 text-neutral-900 dark:text-white':'bg-red-600 text-neutral-900 dark:text-white'}`;
   n.classList.remove('hidden');
   setTimeout(()=>n.classList.add('hidden'),3000);
 }
@@ -261,37 +276,37 @@ async function loadOverview(){
     if(r.status===401||r.status===403){ window.location.href='/admin/login'; return; }
     const d=await r.json(); const s=d.stats||{}; const a=d.admin_stats||{};
     document.getElementById('statsGrid').innerHTML=`
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-indigo-400 mb-1">${s.active_users||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-users mr-1"></i>Active Users</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-users mr-1"></i>Active Users</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-blue-400 mb-1">${s.total_articles||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-newspaper mr-1"></i>Total Articles</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-newspaper mr-1"></i>Total Articles</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-emerald-400 mb-1">${s.total_emails||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Sent</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Sent</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-purple-400 mb-1">${s.monthly_logins||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Monthly Logins</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Monthly Logins</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-orange-400 mb-1">${a.new_users_today||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-user-plus mr-1"></i>New Today</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-user-plus mr-1"></i>New Today</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-cyan-400 mb-1">${a.logins_today||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-clock mr-1"></i>Logins Today</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-clock mr-1"></i>Logins Today</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-pink-400 mb-1">${s.total_visits||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-globe mr-1"></i>Site Visits</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-globe mr-1"></i>Site Visits</div>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 text-center">
         <div class="text-3xl font-black text-yellow-400 mb-1">${a.active_programs||0}</div>
-        <div class="text-xs text-slate-500"><i class="fas fa-graduation-cap mr-1"></i>Programs</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-graduation-cap mr-1"></i>Programs</div>
       </div>`;
 
     const act=d.activity||[];
@@ -299,17 +314,17 @@ async function loadOverview(){
       <div class="flex items-center gap-3 bg-white/5 rounded-xl p-3">
         <div class="w-7 h-7 rounded-full bg-indigo-500/30 flex items-center justify-center flex-shrink-0 text-xs font-bold text-indigo-300">${(a.email||'?').charAt(0).toUpperCase()}</div>
         <div class="flex-1 min-w-0">
-          <div class="text-xs font-semibold text-white truncate">${a.email||''}</div>
-          <div class="text-xs text-slate-500 capitalize">${(a.action||'').replace(/_/g,' ')}</div>
+          <div class="text-xs font-semibold text-neutral-900 dark:text-white truncate">${a.email||''}</div>
+          <div class="text-xs text-neutral-500 dark:text-slate-500 capitalize">${(a.action||'').replace(/_/g,' ')}</div>
         </div>
         <div class="text-xs text-slate-600">${relTime(a.event_time)}</div>
-      </div>`).join(''):'<div class="text-slate-500 text-sm text-center py-4">No activity yet.</div>';
+      </div>`).join(''):'<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-4">No activity yet.</div>';
 
     const cfg=await fetch('/api/config').then(r=>r.json()).catch(()=>({}));
     document.getElementById('configInfo').innerHTML=`
-      <div class="flex justify-between text-slate-500 py-1 border-b border-white/5"><span>Sender</span><span class="text-slate-300">${cfg.sender_email||'Not set'}</span></div>
-      <div class="flex justify-between text-slate-500 py-1 border-b border-white/5"><span>NewsAPI</span><span class="${cfg.has_newsapi_key?'text-emerald-400':'text-red-400'}">${cfg.has_newsapi_key?'âœ“ Active':'âœ— Missing'}</span></div>
-      <div class="flex justify-between text-slate-500 py-1"><span>Schedule</span><span class="text-slate-300">${cfg.schedule_time||'8 AM daily'}</span></div>`;
+      <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1 border-b border-white/5"><span>Sender</span><span class="text-neutral-600 dark:text-slate-300">${cfg.sender_email||'Not set'}</span></div>
+      <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1 border-b border-white/5"><span>NewsAPI</span><span class="${cfg.has_newsapi_key?'text-emerald-400':'text-red-400'}">${cfg.has_newsapi_key?'âœ“ Active':'âœ— Missing'}</span></div>
+      <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1"><span>Schedule</span><span class="text-neutral-600 dark:text-slate-300">${cfg.schedule_time||'8 AM daily'}</span></div>`;
   }catch(e){ console.error(e); }
 }
 
@@ -326,14 +341,14 @@ function renderUsers(users){
   document.getElementById('usersTable').innerHTML=users.map(u=>`
     <tr class="border-b border-white/5 hover:bg-white/5 transition">
       <td class="py-2.5 px-3">
-        <div class="font-semibold text-white text-xs">${u.name||'â€”'}</div>
-        <div class="text-slate-500 text-xs">${u.email}</div>
+        <div class="font-semibold text-neutral-900 dark:text-white text-xs">${u.name||'â€”'}</div>
+        <div class="text-neutral-500 dark:text-slate-500 text-xs">${u.email}</div>
       </td>
       <td class="py-2.5 px-3"><span class="badge ${u.is_active?'bg-emerald-500/20 text-emerald-400':'bg-red-500/20 text-red-400'}">${u.is_active?'Active':'Inactive'}</span></td>
-      <td class="py-2.5 px-3 text-slate-300">${u.emails_received||0}</td>
-      <td class="py-2.5 px-3 text-slate-300">${u.login_events||0}</td>
-      <td class="py-2.5 px-3 text-slate-300">${u.activity_count||0}</td>
-      <td class="py-2.5 px-3 text-slate-500 text-xs">${u.registered_at?new Date(u.registered_at).toLocaleDateString():'-'}</td>
+      <td class="py-2.5 px-3 text-neutral-600 dark:text-slate-300">${u.emails_received||0}</td>
+      <td class="py-2.5 px-3 text-neutral-600 dark:text-slate-300">${u.login_events||0}</td>
+      <td class="py-2.5 px-3 text-neutral-600 dark:text-slate-300">${u.activity_count||0}</td>
+      <td class="py-2.5 px-3 text-neutral-500 dark:text-slate-500 text-xs">${u.registered_at?new Date(u.registered_at).toLocaleDateString():'-'}</td>
       <td class="py-2.5 px-3">
         <div class="flex gap-2">
           <button onclick="inspectUser('${u.email}')" class="text-xs text-indigo-400 hover:text-indigo-300 transition"><i class="fas fa-eye"></i></button>
@@ -357,29 +372,29 @@ async function loadUserActivityAdmin(){
   const email=document.getElementById('activityEmailInput').value.trim();
   if(!email){ notify('Enter a user email.','error'); return; }
   const container=document.getElementById('adminActivityResult');
-  container.innerHTML='<div class="text-slate-500 text-sm text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
+  container.innerHTML='<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Loading...</div>';
   try{
     const r=await fetch(`/api/admin/users/${encodeURIComponent(email)}/activity?limit=100`);
     const d=await r.json(); const stats=d.stats||{}; const u=d.user||{};
     container.innerHTML=`
-      <div class="glass rounded-xl p-4 mb-4">
+      <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 mb-4">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-          <div class="text-center"><div class="text-2xl font-black text-indigo-400">${stats.total_actions||0}</div><div class="text-xs text-slate-500">Total Actions</div></div>
-          <div class="text-center"><div class="text-2xl font-black text-blue-400">${stats.total_logins||0}</div><div class="text-xs text-slate-500">Logins</div></div>
-          <div class="text-center"><div class="text-2xl font-black text-emerald-400">${stats.emails_received||0}</div><div class="text-xs text-slate-500">Emails Received</div></div>
-          <div class="text-center"><div class="text-2xl font-black text-purple-400">${stats.active_days||0}</div><div class="text-xs text-slate-500">Active Days</div></div>
+          <div class="text-center"><div class="text-2xl font-black text-indigo-400">${stats.total_actions||0}</div><div class="text-xs text-neutral-500 dark:text-slate-500">Total Actions</div></div>
+          <div class="text-center"><div class="text-2xl font-black text-blue-400">${stats.total_logins||0}</div><div class="text-xs text-neutral-500 dark:text-slate-500">Logins</div></div>
+          <div class="text-center"><div class="text-2xl font-black text-emerald-400">${stats.emails_received||0}</div><div class="text-xs text-neutral-500 dark:text-slate-500">Emails Received</div></div>
+          <div class="text-center"><div class="text-2xl font-black text-purple-400">${stats.active_days||0}</div><div class="text-xs text-neutral-500 dark:text-slate-500">Active Days</div></div>
         </div>
-        <div class="text-xs text-slate-500"><span class="text-white font-semibold">${u.name||email}</span> Â· Joined ${u.registered_at?new Date(u.registered_at).toLocaleDateString():'Unknown'} Â· Last login: ${relTime(u.last_login_at)}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><span class="text-neutral-900 dark:text-white font-semibold">${u.name||email}</span> Â· Joined ${u.registered_at?new Date(u.registered_at).toLocaleDateString():'Unknown'} Â· Last login: ${relTime(u.last_login_at)}</div>
       </div>
       <div class="space-y-2 max-h-80 overflow-y-auto">
         ${(d.activity||[]).map(a=>`
           <div class="flex items-start gap-3 bg-white/5 rounded-xl p-3">
             <div class="flex-1">
-              <span class="text-xs font-semibold text-white capitalize">${(a.action||'').replace(/_/g,' ')}</span>
-              ${a.detail?`<span class="text-xs text-slate-500 ml-2">${a.detail}</span>`:''}
+              <span class="text-xs font-semibold text-neutral-900 dark:text-white capitalize">${(a.action||'').replace(/_/g,' ')}</span>
+              ${a.detail?`<span class="text-xs text-neutral-500 dark:text-slate-500 ml-2">${a.detail}</span>`:''}
             </div>
             <div class="text-xs text-slate-600 flex-shrink-0">${relTime(a.event_time)}</div>
-          </div>`).join('')||'<div class="text-slate-500 text-sm text-center py-4">No activity recorded.</div>'}
+          </div>`).join('')||'<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-4">No activity recorded.</div>'}
       </div>`;
   }catch(e){ container.innerHTML='<div class="text-red-400 text-sm text-center py-4">Error loading activity.</div>'; }
 }
@@ -399,21 +414,21 @@ function renderAdminArticles(arts){
   document.getElementById('adminArticlesList').innerHTML=arts.map(a=>`
     <div class="bg-white/5 rounded-xl p-4 hover:bg-white/8 transition">
       <div class="flex items-start justify-between gap-2 mb-1">
-        <div class="text-sm font-semibold text-white">${a.title||'Untitled'}</div>
+        <div class="text-sm font-semibold text-neutral-900 dark:text-white">${a.title||'Untitled'}</div>
         ${a.url&&a.url!=='#'?`<a href="${a.url}" target="_blank" class="text-xs text-indigo-400 flex-shrink-0"><i class="fas fa-external-link-alt"></i></a>`:''}
       </div>
-      <div class="text-xs text-slate-500 mb-2">${a.source||'Unknown'} Â· ${relTime(a.fetched_at)}</div>
-      <div class="text-xs text-slate-400 leading-relaxed">${(a.summary||'').substring(0,180)}...</div>
+      <div class="text-xs text-neutral-500 dark:text-slate-500 mb-2">${a.source||'Unknown'} Â· ${relTime(a.fetched_at)}</div>
+      <div class="text-xs text-neutral-500 dark:text-slate-400 leading-relaxed">${(a.summary||'').substring(0,180)}...</div>
     </div>`).join('');
 }
 
 async function loadPrograms(){
   const r=await fetch('/api/admin/programs'); const progs=await r.json();
   document.getElementById('adminProgramsList').innerHTML=progs.map(p=>`
-    <div class="glass rounded-xl p-4 border border-emerald-500/20">
+    <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 border border-emerald-500/20">
       <div class="flex items-start justify-between mb-2">
         <div>
-          <div class="text-sm font-bold text-white">${p.title}</div>
+          <div class="text-sm font-bold text-neutral-900 dark:text-white">${p.title}</div>
           <div class="text-xs text-emerald-400">${p.company} Â· ${p.category}</div>
         </div>
         <button onclick="deleteProgram(${p.id})" class="text-red-400 hover:text-red-300 text-xs"><i class="fas fa-trash-alt"></i></button>
@@ -448,7 +463,7 @@ async function loadRecipients(){
   const r=await fetch('/api/recipients'); const list=await r.json();
   document.getElementById('recipientsList').innerHTML=list.map(e=>`
     <div class="flex items-center justify-between bg-white/5 rounded-xl px-4 py-3">
-      <span class="text-sm text-slate-300">${e}</span>
+      <span class="text-sm text-neutral-600 dark:text-slate-300">${e}</span>
       <button onclick="removeRecipient('${e}')" class="text-red-400 hover:text-red-300 text-xs transition"><i class="fas fa-times mr-1"></i>Remove</button>
     </div>`).join('');
 }
@@ -470,8 +485,8 @@ async function loadEmailLogs(){
     <div class="bg-white/5 rounded-xl p-3 flex items-start gap-3">
       <span class="text-lg">${l.status==='success'?'âœ…':'âŒ'}</span>
       <div class="flex-1">
-        <div class="text-sm font-semibold text-white">${l.recipient}</div>
-        <div class="text-xs text-slate-500">${l.subject||''} Â· ${l.article_count||0} articles Â· ${relTime(l.sent_at)}</div>
+        <div class="text-sm font-semibold text-neutral-900 dark:text-white">${l.recipient}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500">${l.subject||''} Â· ${l.article_count||0} articles Â· ${relTime(l.sent_at)}</div>
         ${l.error_message?`<div class="text-xs text-red-400 mt-1">${l.error_message}</div>`:''}
       </div>
       <div class="text-xs text-slate-600">${fmt(l.sent_at)}</div>
@@ -486,27 +501,27 @@ async function loadAgentLogs(){
         <span class="text-xs font-bold text-purple-400 uppercase">${l.event_type||''}</span>
         <span class="text-xs text-slate-600">${relTime(l.status_time)}</span>
       </div>
-      <div class="text-sm text-slate-300">${l.message||''}</div>
-      ${l.details?`<div class="text-xs text-slate-500 mt-1">${l.details}</div>`:''}
+      <div class="text-sm text-neutral-600 dark:text-slate-300">${l.message||''}</div>
+      ${l.details?`<div class="text-xs text-neutral-500 dark:text-slate-500 mt-1">${l.details}</div>`:''}
     </div>`).join('');
 }
 
 async function loadContacts(){
   const r=await fetch('/api/admin/contact-messages'); const msgs=await r.json();
   document.getElementById('contactsList').innerHTML=msgs.map(m=>`
-    <div class="glass rounded-xl p-5">
+    <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5">
       <div class="flex items-start justify-between mb-2">
         <div>
-          <div class="font-semibold text-white">${m.name}</div>
-          <div class="text-xs text-slate-500">${m.email} Â· ${relTime(m.submitted_at)}</div>
+          <div class="font-semibold text-neutral-900 dark:text-white">${m.name}</div>
+          <div class="text-xs text-neutral-500 dark:text-slate-500">${m.email} Â· ${relTime(m.submitted_at)}</div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="badge ${m.status==='new'?'bg-blue-500/20 text-blue-400':'bg-slate-500/20 text-slate-400'}">${m.status}</span>
+            <span class="badge ${m.status==='new'?'bg-blue-500/20 text-blue-400':'bg-slate-500/20 text-neutral-500 dark:text-slate-400'}">${m.status}</span>
             <button onclick="deleteContactMessage(${m.id})" class="text-red-400 hover:text-red-300 text-xs px-2 py-1"><i class="fas fa-trash-alt"></i></button>
         </div>
       </div>
       <div class="text-sm font-semibold text-indigo-400 mb-2">${m.subject}</div>
-      <div class="text-sm text-slate-400 leading-relaxed">${m.message}</div>
+      <div class="text-sm text-neutral-500 dark:text-slate-400 leading-relaxed">${m.message}</div>
     </div>`).join('');
 }
 

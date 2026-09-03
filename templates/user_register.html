@@ -18,54 +18,77 @@
     .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(148, 163, 184, 0.15); }
     .gradient-text { background: linear-gradient(135deg, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   </style>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+    }
+  </script>
+  <script>
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    function toggleTheme() {
+        const htmlEl = document.documentElement;
+        htmlEl.classList.toggle('dark');
+        if (htmlEl.classList.contains('dark')) {
+            localStorage.setItem('color-theme', 'dark');
+        } else {
+            localStorage.setItem('color-theme', 'light');
+        }
+    }
+  </script>
 </head>
 <body class="flex items-center justify-center min-h-screen px-4 py-10">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
       <a href="/" class="inline-flex items-center gap-3 mb-4 group">
         <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-emerald-500 flex items-center justify-center shadow-xl shadow-blue-500/20 group-hover:scale-105 transition">
-          <i class="fas fa-bolt text-white text-lg"></i>
+          <i class="fas fa-bolt text-neutral-900 dark:text-white text-lg"></i>
         </div>
-        <span class="text-2xl font-black text-white tracking-tight">Nova Brief</span>
+        <span class="text-2xl font-black text-neutral-900 dark:text-white tracking-tight">Nova Brief</span>
       </a>
-      <h1 class="text-2xl font-extrabold text-white mb-2">Get Started in Seconds</h1>
-      <p class="text-slate-400 text-sm">Join thousands of students and professionals receiving daily AI updates & early program alerts.</p>
+      <h1 class="text-2xl font-extrabold text-neutral-900 dark:text-white mb-2">Get Started in Seconds</h1>
+      <p class="text-neutral-500 dark:text-slate-400 text-sm">Join thousands of students and professionals receiving daily AI updates & early program alerts.</p>
     </div>
 
-    <div class="glass-card rounded-3xl p-8 shadow-2xl">
+    <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50-card rounded-3xl p-8 shadow-2xl">
       <form id="registerForm" class="space-y-4">
         <div>
-          <label class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 block">Full Name</label>
+          <label class="text-xs font-bold text-neutral-600 dark:text-slate-300 uppercase tracking-wider mb-2 block">Full Name</label>
           <div class="relative">
-            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <i class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-500 text-sm"></i>
             <input type="text" id="name" placeholder="Your name (e.g. Alex Smith)" required
-              class="w-full bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+              class="w-full bg-slate-950/70 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
           </div>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 block">Email Address</label>
+          <label class="text-xs font-bold text-neutral-600 dark:text-slate-300 uppercase tracking-wider mb-2 block">Email Address</label>
           <div class="relative">
-            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-500 text-sm"></i>
             <input type="email" id="email" placeholder="your@email.com" required
-              class="w-full bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+              class="w-full bg-slate-950/70 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
           </div>
         </div>
 
         <div>
           <div class="flex justify-between items-center mb-2">
-            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block">Password</label>
-            <span class="text-xs text-slate-500">Required · 10+ characters</span>
+            <label class="text-xs font-bold text-neutral-600 dark:text-slate-300 uppercase tracking-wider block">Password</label>
+            <span class="text-xs text-neutral-500 dark:text-slate-500">Required · 10+ characters</span>
           </div>
           <div class="relative">
-            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-500 text-sm"></i>
             <input type="password" id="password" placeholder="Create a secure password" required minlength="10" maxlength="128" autocomplete="new-password"
-              class="w-full bg-slate-950/70 border border-slate-700 text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+              class="w-full bg-slate-950/70 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
           </div>
         </div>
 
         <button type="submit"
-          class="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm mt-2">
+          class="w-full bg-gradient-to-r from-blue-600 via-blue-500 to-emerald-500 hover:from-blue-500 hover:to-emerald-400 text-neutral-900 dark:text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 text-sm mt-2">
           <span>Create Account</span>
           <i class="fas fa-arrow-right text-xs"></i>
         </button>
@@ -73,9 +96,9 @@
 
       <div id="message" class="hidden mt-4 rounded-xl p-3 text-sm font-semibold text-center"></div>
 
-      <div class="mt-6 pt-6 border-t border-slate-800 text-center space-y-2 text-sm text-slate-400">
+      <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-slate-800 text-center space-y-2 text-sm text-neutral-500 dark:text-slate-400">
         <p>Already registered? <a href="/user/login" class="text-blue-400 hover:text-blue-300 font-semibold transition">Sign in with email</a></p>
-        <p><a href="/" class="text-slate-500 hover:text-slate-300 text-xs transition"><i class="fas fa-arrow-left mr-1"></i>Back to Homepage</a></p>
+        <p><a href="/" class="text-neutral-500 dark:text-slate-500 hover:text-neutral-600 dark:text-slate-300 text-xs transition"><i class="fas fa-arrow-left mr-1"></i>Back to Homepage</a></p>
       </div>
     </div>
   </div>
