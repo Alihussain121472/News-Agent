@@ -392,7 +392,7 @@
       </div>
       <h3 class="text-xl md:text-2xl font-black text-neutral-900 dark:text-white mb-2">Get Early Alerts for Google, Microsoft & NASA Programs</h3>
       <p class="text-neutral-600 dark:text-neutral-400 text-sm mb-5">Join the student alert list to get launch preparation tips & direct 1-click registration links delivered to your inbox.</p>
-      <form id="programAlertForm" class="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto">
+      <form id="programAlertForm" class="flex flex-col sm:flex-row gap-2.5 max-w-2xl mx-auto">
         <label for="progAlertEmail" class="sr-only">Student email address</label>
         <input type="email" id="progAlertEmail" placeholder="your.student.email@domain.com" required
           class="flex-1 bg-white dark:bg-neutral-900/50 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 transition"/>
@@ -400,6 +400,10 @@
           <span>Get Alerts</span>
           <i class="fas fa-paper-plane text-xs"></i>
         </button>
+        <a href="#programs" class="ui-button ui-button--secondary whitespace-nowrap flex items-center justify-center gap-2">
+          <span>Explore Programs</span>
+          <i class="fas fa-arrow-down text-xs"></i>
+        </a>
       </form>
       <div id="progAlertMsg" class="hidden rounded-xl p-3 text-xs font-semibold mt-3 text-center"></div>
     </div>
