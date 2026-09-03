@@ -56,3 +56,8 @@
 }
 
 
+
+/* Fix for native date picker icon in dark mode */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
