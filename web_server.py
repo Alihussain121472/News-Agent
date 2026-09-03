@@ -1360,8 +1360,8 @@ def start_background_scheduler():
         from apscheduler.schedulers.background import BackgroundScheduler
         scheduler = BackgroundScheduler(daemon=True)
         scheduler.add_job(
-            _safe_fetch_hourly, 'cron', minute=0,
-            id='hourly_news_fetch', replace_existing=True, misfire_grace_time=1800
+            _safe_fetch_hourly, 'cron', hour=0, minute=0,
+            id='daily_news_fetch', replace_existing=True, misfire_grace_time=1800
         )
         scheduler.add_job(
             _safe_run_news_digest, 'cron', hour=10, minute=0,
