@@ -750,7 +750,23 @@ def reply_contact_message(msg_id):
             db.mark_message_replied(msg_id, reply_text)
             return jsonify({'status': 'success', 'message': 'Reply sent and saved.'})
         else:
-            return jsonify({'status': 'error', 'message': 'Failed to send email via SMTP.'}), 500
+            err_msg = 'Unknown failure.'
+            try:
+                import smtplib
+                import os
+                gmail_user = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
+                gmail_pass = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_APP_PASSWORD')
+                if not gmail_user or not gmail_pass:
+                    err_msg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not set in Render Environment Variables!'
+                else:
+                    smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
+                    smtp.login(gmail_user, gmail_pass)
+                    smtp.quit()
+                    err_msg = 'SMTP login worked directly but send_email failed (possibly _official_sender_required blocking).'
+            except Exception as e:
+                err_msg = f'SMTP connection/login rejected by Gmail: {str(e)}'
+                
+            return jsonify({'status': 'error', 'message': f'Failed to send email. Error: {err_msg}'}), 502
     except Exception as e:
         logger.error(f'Error replying to message: {e}')
         return jsonify({'status': 'error', 'message': str(e)}), 500

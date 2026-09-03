@@ -316,10 +316,29 @@ def reply_message(message_id):
     if not sent:
         db.log_email_sent(message['email'], subject, 0, 'failed', 'Support reply provider rejected or could not deliver the message')
         logger.error('Support reply delivery failed for message_id=%s', message_id)
+
+        # Inline diagnostic to see why SMTP is failing
+        err_msg = 'Unknown failure.'
+        try:
+            import smtplib
+            import os
+            gmail_user = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
+            gmail_pass = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_APP_PASSWORD')
+            if not gmail_user or not gmail_pass:
+                err_msg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not set in Render Environment Variables!'
+            else:
+                smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
+                smtp.login(gmail_user, gmail_pass)
+                smtp.quit()
+                err_msg = 'SMTP login worked directly but send_email failed (possibly _official_sender_required blocking).'
+        except Exception as e:
+            err_msg = f'SMTP connection/login rejected by Gmail: {str(e)}'
+            
         return jsonify({
             'status': 'error',
-            'message': 'Reply was not sent. The message remains open so you can retry after email delivery is restored.',
+            'message': f'Reply was not sent. Error: {err_msg}',
         }), 502
+
 
     db.mark_message_replied(message_id, reply_text)
     db.log_email_sent(message['email'], subject, 0, 'success')
