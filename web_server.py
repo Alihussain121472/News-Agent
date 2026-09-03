@@ -1335,6 +1335,21 @@ def _safe_run_seo_monitor():
 
 
 
+
+@app.route('/api/temp/send-welcome', methods=['GET'])
+def temp_send_welcome():
+    try:
+        from ai_news_agent import send_welcome_email
+        success = send_welcome_email("syedali6160@gmail.com")
+        if success:
+            db.mark_welcome_email_sent("syedali6160@gmail.com")
+            db.log_email_sent("syedali6160@gmail.com", 'Welcome to Nova Brief', 0, 'success')
+            return 'Sent successfully'
+        else:
+            return 'Failed to send', 500
+    except Exception as e:
+        return str(e), 500
+
 def start_background_scheduler():
     global _scheduler_started
     if _scheduler_started:
@@ -1381,6 +1396,7 @@ if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'false').lower() == 'true':
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
 
