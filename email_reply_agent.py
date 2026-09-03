@@ -147,7 +147,7 @@ def process_and_reply_to_contact_message(name: str, email: str, subject: str, me
             if msg_id:
                 try:
                     import database
-                    database.db.mark_message_replied(msg_id, reply_text)
+                    database.NewsDatabase().mark_message_replied(msg_id, reply_text)
                 except Exception as db_e:
                     logger.error(f"Failed to mark message as replied in DB: {db_e}")
         else:
