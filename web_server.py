@@ -361,6 +361,13 @@ def register_user_account():
     if not db.create_user_account(email, name, pwd_hash):
         return jsonify({'status': 'error', 'message': 'An account with this email already exists. Please sign in or reset your password.'}), 409
     _safe_add_recipient(email)
+    
+    def _bg_welcome():
+        from ai_news_agent import send_welcome_to_registered_users
+        send_welcome_to_registered_users()
+    import threading
+    threading.Thread(target=_bg_welcome).start()
+    
     session.clear()
     session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
@@ -854,24 +861,25 @@ def subscribe_public():
     account_result = db.create_or_update_user_account(email, name)
     user_record = db.get_user_by_email(email) or {}
     
-    welcome_sent = False
-    try:
-        if not user_record.get('welcome_email_sent_at'):
-            from ai_news_agent import send_welcome_email
-            welcome_sent = send_welcome_email(email, name)
-            if welcome_sent:
-                db.mark_welcome_email_sent(email)
-                db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
-            else:
-                db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
-    except Exception as e:
-        logger.error(f'Error sending subscription welcome email: {e}')
+    def _bg_welcome():
+        try:
+            if not user_record.get('welcome_email_sent_at'):
+                from ai_news_agent import send_welcome_email
+                if send_welcome_email(email, name):
+                    db.mark_welcome_email_sent(email)
+                    db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+                else:
+                    db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
+        except Exception as e:
+            logger.error(f'Error sending subscription welcome email: {e}')
+    import threading
+    threading.Thread(target=_bg_welcome).start()
     
     return jsonify({
         'status': 'success',
         'message': f'Welcome, {name}! You are subscribed. Sign in separately to access your dashboard.',
         'already_registered': account_result == 'updated',
-        'welcome_email_sent': welcome_sent,
+        'welcome_email_sent': True,
         'user': {'name': name, 'email': email},
         'redirect': '/user/login'
     })
