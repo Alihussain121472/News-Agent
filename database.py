@@ -396,11 +396,14 @@ class NewsDatabase:
         conn = safe_connect()
         cursor = conn.cursor()
         try:
-            cursor.execute("INSERT INTO registered_users (email,name,is_active,role) VALUES (%s,%s,TRUE,'user')", (email, name))
+            cursor.execute('''INSERT INTO registered_users (email,name,is_active,role) VALUES (%s,%s,TRUE,'user')
+                ON CONFLICT (email) DO UPDATE SET is_active = TRUE WHERE registered_users.is_active = FALSE
+                RETURNING id''', (email, name))
+            created = cursor.fetchone() is not None
             conn.commit()
-            logger.info(f'New user registered: {email}')
-            return True
-        except psycopg2.IntegrityError:
+            logger.info(f'User registered/reactivated: {email}')
+            return created
+        except Exception:
             return False
         finally:
             conn.close()
@@ -420,7 +423,13 @@ class NewsDatabase:
         try:
             cursor.execute('''INSERT INTO registered_users (email, name, is_active, role, password_hash)
                 VALUES (%s, %s, TRUE, 'user', %s)
-                ON CONFLICT (email) DO NOTHING RETURNING id''',
+                ON CONFLICT (email) DO UPDATE
+                SET name = EXCLUDED.name,
+                    password_hash = EXCLUDED.password_hash,
+                    is_active = TRUE,
+                    program_notifications = TRUE
+                WHERE registered_users.is_active = FALSE
+                RETURNING id''',
                 (normalized, name, password_hash))
             created = cursor.fetchone() is not None
             conn.commit()
