@@ -1350,6 +1350,11 @@ def temp_send_welcome():
     except Exception as e:
         return str(e), 500
 
+
+@app.route('/api/temp/get-logs', methods=['GET'])
+def temp_get_logs():
+    return jsonify(db.get_recent_email_logs(limit=5))
+
 def start_background_scheduler():
     global _scheduler_started
     if _scheduler_started:
@@ -1396,6 +1401,7 @@ if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'false').lower() == 'true':
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=os.environ.get('FLASK_ENV') == 'development', host='0.0.0.0', port=port)
+
 
 
 
