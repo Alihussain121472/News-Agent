@@ -1146,10 +1146,19 @@ def handle_contact():
         return jsonify({'status': 'error', 'message': 'All fields are required.'}), 400
     try:
         db.record_contact_message(name, email, subject, message)
+        
+        # 1. Notify Admin (Existing logic)
         try:
             from ai_news_agent import send_contact_notification_email
             threading.Thread(target=send_contact_notification_email, args=(name, email, subject, message), daemon=True).start()
         except Exception: pass
+        
+        # 2. Automated AI Reply Agent (New logic)
+        try:
+            from email_reply_agent import spawn_automated_reply
+            spawn_automated_reply(name, email, subject, message)
+        except Exception as e:
+            app.logger.error(f'Failed to spawn automated reply agent: {e}')
         return jsonify({'status': 'success', 'message': "Thank you! We'll get back to you shortly."})
     except Exception as e:
         return jsonify({'status': 'error', 'message': 'Failed to process your message.'}), 500
