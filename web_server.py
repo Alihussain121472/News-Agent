@@ -1334,22 +1334,6 @@ def _safe_run_seo_monitor():
         logger.error(f'Scheduled SEO monitor failed: {e}')
 
 
-@app.route('/api/temp/send-welcome', methods=['GET', 'POST'])
-def temp_send_welcome():
-    email = request.args.get('email')
-    if not email:
-        return 'No email', 400
-    try:
-        from ai_news_agent import send_welcome_email
-        success = send_welcome_email(email)
-        if success:
-            db.mark_welcome_email_sent(email)
-            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
-            return 'Sent successfully to ' + email
-        else:
-            return 'Failed to send', 500
-    except Exception as e:
-        return str(e), 500
 
 def start_background_scheduler():
     global _scheduler_started
