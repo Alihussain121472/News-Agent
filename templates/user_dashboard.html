@@ -231,7 +231,7 @@ async function runSummarizer() {
           </div>
         </div>
         <button onclick="toggleTheme()" class="p-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-slate-800 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
-          <a href="/" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 px-3 py-1.5 rounded-lg text-xs text-neutral-600 dark:text-slate-300 hover:text-neutral-900 dark:text-white transition"><i class="fas fa-home mr-1"></i>Home</a>
+          <a href="/" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 px-3 py-1.5 rounded-lg text-xs text-neutral-600 dark:text-slate-300 hover:text-neutral-900 dark:text-white transition"><i class="fas fa-home mr-1"></i>Home</a>
         <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-red-500/30"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
       </div>
     </header>
@@ -252,7 +252,7 @@ async function runSummarizer() {
       <!-- OVERVIEW TAB -->
       <div id="tab-overview">
         <div class="grid lg:grid-cols-3 gap-6">
-          <section class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 lg:col-span-2" aria-labelledby="overview-news-title">
+          <section class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 lg:col-span-2" aria-labelledby="overview-news-title">
             <div class="flex items-center justify-between gap-3 mb-4">
               <div>
                 <div class="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 mb-1"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Updated live</div>
@@ -262,7 +262,7 @@ async function runSummarizer() {
             </div>
             <div id="overviewArticles" class="space-y-3"></div>
           </section>
-          <section class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5" aria-labelledby="overview-programs-title">
+          <section class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5" aria-labelledby="overview-programs-title">
             <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
             <h2 id="overview-programs-title" class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
@@ -278,24 +278,24 @@ async function runSummarizer() {
         </div>
 
         <div class="grid sm:grid-cols-3 gap-3 mb-6" aria-label="Quick actions">
-          <button type="button" onclick="switchTab('articles')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-blue-500/50 transition group">
+          <button type="button" onclick="switchTab('articles')" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-blue-500/50 transition group">
             <span class="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center mb-3 group-hover:bg-blue-500/25 transition" aria-hidden="true"><i class="fas fa-newspaper"></i></span>
             <span class="block text-sm font-bold text-neutral-900 dark:text-white">Browse latest news</span>
             <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Find useful AI and technology stories</span>
           </button>
-          <button type="button" onclick="switchTab('summarizer')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-purple-500/50 transition group">
+          <button type="button" onclick="switchTab('summarizer')" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-purple-500/50 transition group">
             <span class="w-9 h-9 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center mb-3 group-hover:bg-purple-500/25 transition" aria-hidden="true"><i class="fas fa-wand-magic-sparkles"></i></span>
             <span class="block text-sm font-bold text-neutral-900 dark:text-white">Summarize an article</span>
             <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Turn a long article into quick takeaways</span>
           </button>
-          <button type="button" onclick="switchTab('programs')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-emerald-500/50 transition group">
+          <button type="button" onclick="switchTab('programs')" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-emerald-500/50 transition group">
             <span class="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-3 group-hover:bg-emerald-500/25 transition" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
             <span class="block text-sm font-bold text-neutral-900 dark:text-white">Explore programs</span>
             <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Check current student opportunities</span>
           </button>
         </div>
 
-        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-clock-rotate-left text-blue-400" aria-hidden="true"></i> Recent account activity</h3>
@@ -336,7 +336,7 @@ async function runSummarizer() {
           <h2 class="text-2xl font-black text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-magic text-blue-400"></i> AI Article Summarizer</h2>
         </div>
         
-        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 mb-8">
+        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 mb-8">
           <p class="text-neutral-500 dark:text-slate-400 text-sm mb-6">Select a recent tech article from the feed, or paste any URL below to generate a quick, readable summary instantly.</p>
           
           <div class="mb-5">
@@ -361,7 +361,7 @@ async function runSummarizer() {
         <!-- Result Box -->
         <div id="summaryResultContainer" class="hidden">
           <h3 class="text-sm font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-widest mb-4">Summary Result</h3>
-          <div id="summaryContent" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 text-neutral-700 dark:text-slate-200 text-sm leading-relaxed prose prose-invert prose-blue max-w-none">
+          <div id="summaryContent" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 text-neutral-700 dark:text-slate-200 text-sm leading-relaxed prose prose-invert prose-blue max-w-none">
             <!-- Summary appears here -->
           </div>
         </div>
@@ -379,7 +379,7 @@ async function runSummarizer() {
 
       <!-- PROGRAMS TAB -->
       <div id="tab-programs" class="hidden">
-        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
           <img src="/static/images/student-programs-grid-v2.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
             <div>
@@ -398,7 +398,7 @@ async function runSummarizer() {
       <!-- PROGRESS TAB -->
       <div id="tab-progress" class="hidden">
         <!-- Daily Progress -->
-        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
+        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-calendar-day text-blue-400"></i> Today's Progress</h3>
             <span class="text-xs text-neutral-500 dark:text-slate-500" id="dailyDate"></span>
@@ -407,7 +407,7 @@ async function runSummarizer() {
         </div>
 
         <!-- Weekly Summary -->
-        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
+        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
           <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-purple-400"></i> Weekly Summary</h3>
           <div id="weeklyChart" class="flex items-end justify-between h-40 pt-4 border-b border-slate-700/50 pb-2">
             <!-- Bars injected here -->
@@ -416,11 +416,11 @@ async function runSummarizer() {
 
         <!-- All-Time Progress Report -->
         <div class="grid lg:grid-cols-2 gap-6">
-          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
             <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-trophy text-emerald-400"></i> All-Time Stats</h3>
             <div class="grid grid-cols-2 gap-4" id="progressStats"></div>
           </div>
-          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
             <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-400"></i> Top Actions</h3>
             <div id="topActionsList" class="space-y-3"></div>
           </div>
@@ -762,7 +762,7 @@ async function loadPrograms(){
   const r = await fetch('/api/user/programs');
   const progs = await r.json();
   document.getElementById('programsList').innerHTML = progs.length ? progs.map(p=>`
-    <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+    <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
       <img src="${getProgramImage(p)}" alt="" width="512" height="512" loading="lazy" decoding="async" class="w-full h-40 object-cover rounded-xl mb-4 border border-slate-700/60"/>
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
