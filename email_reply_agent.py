@@ -117,7 +117,7 @@ def generate_reply_text(name: str, subject: str, message: str) -> str:
         logger.error(f"Failed to generate Groq reply: {e}")
         return ""
 
-def process_and_reply_to_contact_message(name: str, email: str, subject: str, message: str):
+def process_and_reply_to_contact_message(name: str, email: str, subject: str, message: str, msg_id: int = None):
     """Background task to read contact message, generate AI reply, and send email."""
     try:
         reply_text = generate_reply_text(name, subject, message)
@@ -144,14 +144,20 @@ def process_and_reply_to_contact_message(name: str, email: str, subject: str, me
         success = send_email(email, reply_subject, email_html)
         if success:
             logger.info(f"Successfully sent AI automated reply to {email}")
+            if msg_id:
+                try:
+                    import database
+                    database.db.mark_message_replied(msg_id, reply_text)
+                except Exception as db_e:
+                    logger.error(f"Failed to mark message as replied in DB: {db_e}")
         else:
             logger.error(f"Failed to send email to {email}")
     except Exception as e:
         logger.error(f"Error in automated email reply agent: {e}")
 
-def spawn_automated_reply(name: str, email: str, subject: str, message: str):
+def spawn_automated_reply(name: str, email: str, subject: str, message: str, msg_id: int = None):
     """Helper to start the background thread."""
-    thread = threading.Thread(target=process_and_reply_to_contact_message, args=(name, email, subject, message), daemon=True)
+    thread = threading.Thread(target=process_and_reply_to_contact_message, args=(name, email, subject, message, msg_id), daemon=True)
     thread.start()
 
 # Updated by Master Agent for GitHub Contribution Sync
