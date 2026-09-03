@@ -1260,7 +1260,15 @@ def blog_index():
     except Exception:
         posts = []
     conn.close()
-    return render_template('blog_list.html', posts=posts)
+    
+    # Fetch active programs for the news page
+    try:
+        import database
+        programs = database.db.get_active_programs(limit=10)
+    except Exception:
+        programs = []
+
+    return render_template('blog_list.html', posts=posts, programs=programs)
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
