@@ -23,6 +23,38 @@ class NewsRelevanceTests(unittest.TestCase):
         }
         self.assertTrue(assess_news_relevance(article)['is_relevant'])
 
+    def test_accepts_programming_and_open_source_news(self):
+        article = {
+            'title': 'Python releases a major update for software developers',
+            'summary': 'The programming language adds developer tools and performance improvements.',
+            'source': 'Linux Foundation',
+            'url': 'https://example.com/python-release',
+        }
+        result = assess_news_relevance(article)
+        self.assertTrue(result['is_relevant'])
+        self.assertIn('Programming and software', result['topics'])
+
+    def test_accepts_useful_science_and_future_technology(self):
+        article = {
+            'title': 'University researchers announce battery technology breakthrough',
+            'summary': 'The clean energy technology could improve electric vehicles.',
+            'source': 'Nature',
+            'url': 'https://example.com/battery-research',
+        }
+        result = assess_news_relevance(article)
+        self.assertTrue(result['is_relevant'])
+        self.assertIn('Science and future technology', result['topics'])
+
+    def test_accepts_digital_skills_and_certification_news(self):
+        article = {
+            'title': 'Free cloud certification program opens for university students',
+            'summary': 'The technology training covers developer tools and digital skills.',
+            'url': 'https://example.com/student-certification',
+        }
+        result = assess_news_relevance(article)
+        self.assertTrue(result['is_relevant'])
+        self.assertIn('Digital skills and education', result['topics'])
+
     def test_rejects_generic_entertainment_and_sports(self):
         stories = [
             {'title': 'Celebrity red carpet fashion trend goes viral', 'summary': '', 'url': 'https://example.com/1'},
@@ -97,6 +129,24 @@ class NewsRelevanceTests(unittest.TestCase):
         results = filter_relevant_news(stories, limit=5)
         companies = {company for item in results for company in item['companies']}
         self.assertTrue({'OpenAI', 'NVIDIA', 'Google', 'Amazon'}.issubset(companies))
+
+    def test_diversifies_technology_topics(self):
+        stories = [
+            {
+                'title': f'OpenAI releases AI model update {index}',
+                'summary': 'A new artificial intelligence model for developers.',
+                'url': f'https://example.com/ai-{index}',
+            }
+            for index in range(5)
+        ]
+        stories.extend([
+            {'title': 'Python programming language releases major update', 'summary': 'Software developers get new tools.', 'url': 'https://example.com/python'},
+            {'title': 'Critical cybersecurity vulnerability receives security update', 'summary': 'Developers should patch systems.', 'url': 'https://example.com/security'},
+            {'title': 'University announces battery technology breakthrough', 'summary': 'Clean energy research advances.', 'url': 'https://example.com/battery'},
+        ])
+        results = filter_relevant_news(stories, limit=5)
+        topics = {topic for item in results for topic in item['news_topics']}
+        self.assertTrue({'Artificial intelligence', 'Programming and software', 'Cybersecurity', 'Science and future technology'}.issubset(topics))
 
     def test_reputable_reporting_ranks_above_low_signal_opinion(self):
         stories = [

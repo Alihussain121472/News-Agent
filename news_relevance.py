@@ -36,6 +36,19 @@ COMPANY_TERMS: Dict[str, Tuple[str, ...]] = {
     "Mistral AI": ("mistral ai",),
     "Cohere": ("cohere",),
     "Perplexity": ("perplexity ai",),
+    "Cisco": ("cisco",),
+    "Cloudflare": ("cloudflare",),
+    "Dell": ("dell technologies", "dell computer", "dell laptop"),
+    "HP": ("hewlett packard", "hp enterprise", "hpe"),
+    "Lenovo": ("lenovo",),
+    "Sony": ("sony", "playstation"),
+    "SAP": ("sap",),
+    "Mozilla": ("mozilla", "firefox"),
+    "Red Hat": ("red hat",),
+    "Canonical": ("canonical", "ubuntu"),
+    "GitLab": ("gitlab",),
+    "Databricks": ("databricks",),
+    "Snowflake": ("snowflake computing", "snowflake data cloud"),
 }
 
 TOPIC_TERMS: Dict[str, Tuple[str, ...]] = {
@@ -57,6 +70,13 @@ TOPIC_TERMS: Dict[str, Tuple[str, ...]] = {
         "cloud computing", "cloud platform", "developer tools", "software development",
         "open source", "open-source", "programming language", "coding assistant", "api release",
     ),
+    "Programming and software": (
+        "programming", "coding", "software engineering", "web development", "app development",
+        "mobile development", "python", "javascript", "typescript", "java programming", "golang",
+        "rust language", "c++", "developer framework", "code editor", "ide update", "git repository",
+        "linux kernel", "operating system", "database technology", "database release", "devops",
+        "kubernetes", "docker", "container platform", "web browser", "browser engine",
+    ),
     "Cybersecurity": (
         "cybersecurity", "cyber security", "data breach", "ransomware", "malware",
         "vulnerability", "zero-day", "zero day", "privacy technology",
@@ -65,10 +85,30 @@ TOPIC_TERMS: Dict[str, Tuple[str, ...]] = {
         "robotics", "humanoid robot", "autonomous vehicle", "self-driving", "spatial computing",
         "augmented reality", "virtual reality", "satellite internet", "fusion energy",
     ),
+    "Science and future technology": (
+        "space technology", "space mission", "satellite technology", "rocket technology",
+        "biotechnology", "health technology", "medical technology", "digital health",
+        "battery technology", "clean energy technology", "renewable technology", "electric vehicle",
+        "5g network", "6g network", "telecommunications", "internet infrastructure",
+        "edge computing", "internet of things", "iot security", "3d printing",
+    ),
+    "Digital skills and education": (
+        "technology education", "computer science education", "coding education", "digital skills",
+        "online learning", "learning platform", "educational technology", "edtech",
+        "technology training", "developer training", "certification program", "coding bootcamp",
+        "hackathon", "coding competition", "developer conference", "research paper",
+    ),
+    "Useful product and platform updates": (
+        "software update", "security update", "privacy update", "accessibility feature",
+        "operating system update", "platform update", "developer preview", "public beta",
+        "stable release", "major update", "productivity tool", "collaboration tool",
+    ),
     "Student opportunities": (
         "student program", "students program", "student developer", "student competition",
         "scholarship", "fellowship", "internship", "graduate program", "research program",
         "developer academy", "skills program", "free certification", "free course",
+        "apprenticeship", "student internship", "graduate internship", "campus program",
+        "student grant", "research grant", "university technology", "career opportunity",
     ),
 }
 
@@ -93,6 +133,7 @@ OFF_TOPIC_TERMS = (
     "early savings", "record low", "lowest price", "price drop", "discounted price",
     "save on", "deal on", "buy now", "shopping guide", "renders leak", "render leak",
     "rumor suggests", "rumour suggests", "leak reveals",
+    "best laptop", "best phone", "should you buy", "buying guide", "unboxing video",
     "amazon rainforest", "amazon river", "amazon jungle", "apple pie", "apple recipe",
     "apple cider", "apple juice", "apple tree", "alphabet learning", "meta-analysis",
 )
@@ -103,6 +144,8 @@ TECH_EVENT_TERMS = (
     "launch", "unveil", "release", "announce", "introduce", "build", "develop", "research",
     "chip", "model", "platform", "product", "security", "breach", "vulnerability", "outage",
     "partnership", "acquisition", "open source", "regulation", "policy", "student program",
+    "update", "upgrade", "framework", "language", "course", "certification", "scholarship",
+    "internship", "hackathon", "breakthrough", "discovery", "mission",
 )
 
 REPUTABLE_SOURCE_TERMS = (
@@ -110,7 +153,8 @@ REPUTABLE_SOURCE_TERMS = (
     "the verge", "techcrunch", "wired", "ars technica", "mit technology review", "ieee",
     "nature", "science", "the register", "the new stack", "venturebeat", "zdnet", "cnet",
     "openai", "google", "deepmind", "microsoft", "amazon", "aws", "nvidia", "meta",
-    "anthropic", "apple", "ibm", "oracle",
+    "anthropic", "apple", "ibm", "oracle", "github", "mozilla", "linux foundation",
+    "stack overflow", "cloudflare", "red hat", "canonical", "nasa", "cern",
 )
 
 LOW_SIGNAL_SOURCE_TERMS = (
@@ -183,6 +227,8 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
     score += min(max(len(companies) - 1, 0), 2)
     score += 4 if topics else 0
     score += min(max(len(topics) - 1, 0), 2) * 2
+    if "Student opportunities" in topics or "Digital skills and education" in topics:
+        score += 2
     score += min(supporting_matches, 2)
     score -= finance_matches * 5
     score -= off_topic_matches * 7
@@ -251,21 +297,26 @@ def filter_relevant_news(
     if limit is None or limit < 3:
         return results[:limit] if limit is not None else results
 
-    # Preserve quality order while limiting how much a single company can dominate
-    # a briefing. Deferred stories are used only when there are not enough diverse
-    # articles to fill the requested result.
-    company_cap = max(2, math.ceil(limit / 4))
+    # Preserve quality order while preventing one company or one technology topic
+    # from dominating a student briefing. Deferred stories fill any remaining space.
+    bucket_cap = max(2, math.ceil(limit / 4))
     selected = []
     deferred = []
     company_counts: Dict[str, int] = {}
+    topic_counts: Dict[str, int] = {}
     for item in results:
         primary_company = (item.get("companies") or [""])[0]
-        if primary_company and company_counts.get(primary_company, 0) >= company_cap:
+        primary_topic = (item.get("news_topics") or [""])[0]
+        company_full = primary_company and company_counts.get(primary_company, 0) >= bucket_cap
+        topic_full = primary_topic and topic_counts.get(primary_topic, 0) >= bucket_cap
+        if company_full or topic_full:
             deferred.append(item)
             continue
         selected.append(item)
         if primary_company:
             company_counts[primary_company] = company_counts.get(primary_company, 0) + 1
+        if primary_topic:
+            topic_counts[primary_topic] = topic_counts.get(primary_topic, 0) + 1
         if len(selected) >= limit:
             return selected
 
