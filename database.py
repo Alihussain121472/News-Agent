@@ -948,8 +948,8 @@ class NewsDatabase:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT * FROM student_programs
             WHERE is_active=TRUE AND notified_at IS NULL AND launch_date IS NOT NULL
-            AND date(launch_date) <= date('now', '+' || notify_before_days || ' days')
-            AND date(launch_date) >= CURRENT_DATE''')
+            AND launch_date <= CURRENT_DATE + (notify_before_days || ' days')::interval
+            AND launch_date >= CURRENT_DATE''')
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
