@@ -75,9 +75,11 @@ def dashboard():
     return render_template(
         'analytics_dashboard.html',
         total_visitors=visitor_stats.get('total_visits', 0),
+        daily_visitors=visitor_stats.get('daily_visits', 0),
         monthly_visitors=visitor_stats.get('monthly_visits', 0),
         total_users=db.get_user_count(),
         leads=len(db.get_contact_messages(limit=10000)),
+        daily_leads=db.get_daily_contact_count(),
         revenue=revenue_data['month_earnings'],
     )
 
@@ -323,3 +325,9 @@ def reply_message(message_id):
     db.log_email_sent(message['email'], subject, 0, 'success')
     logger.info('Support reply accepted for delivery for message_id=%s', message_id)
     return jsonify({'status': 'success', 'message': 'Reply sent and saved to history.'})
+
+@analytics_bp.route('/history')
+@admin_required
+def history():
+    db = NewsDatabase()
+    return render_template('admin_history.html', history=db.get_daily_history())

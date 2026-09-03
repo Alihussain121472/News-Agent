@@ -1,0 +1,45 @@
+﻿{% extends "base_saas.html" %}
+
+{% block title %}Historical Data | Nova Brief{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+  <div class="flex items-center gap-4">
+    <div class="grid h-12 w-12 place-items-center rounded-2xl bg-indigo-600 text-white shadow-sm">
+      <i class="fas fa-history text-xl"></i>
+    </div>
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900">Historical Data</h1>
+      <p class="mt-1 text-sm text-slate-500">View past 30 days of traffic and support requests</p>
+    </div>
+  </div>
+  <a href="/admin/dashboard" class="mt-4 inline-flex items-center gap-2 rounded-lg bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+</div>
+
+<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm text-slate-600">
+      <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+        <tr>
+          <th scope="col" class="px-6 py-4 font-semibold">Date</th>
+          <th scope="col" class="px-6 py-4 font-semibold text-right">Traffic (Visits)</th>
+          <th scope="col" class="px-6 py-4 font-semibold text-right">Support Requests</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100 bg-white">
+        {% for row in history %}
+        <tr class="hover:bg-slate-50/50 transition">
+          <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">{{ row.date }}</td>
+          <td class="whitespace-nowrap px-6 py-4 text-right">{{ row.visits }}</td>
+          <td class="whitespace-nowrap px-6 py-4 text-right">{{ row.requests }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="px-6 py-8 text-center text-slate-500">No historical data available yet. Check back tomorrow!</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <meta name="description" content="Nova Brief is the ultimate AI News Agent and Growth platform for students and tech enthusiasts. Get daily updates on AI, tech programs, and exclusive certifications.">
+  <meta name="keywords" content="AI News, Tech News, Student Programs, Google Certifications, Microsoft Student, AI Automation, Tech Opportunities">
+  <title>My Dashboard - Nova Brief</title>
+  <link rel="icon" href="/static/favicon.ico" sizes="any">
+  <link rel="icon" href="/static/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+  <script src="https://cdn.tailwindcss.com">
+function toggleTheme() {
+    const htmlEl = document.documentElement;
+    htmlEl.classList.toggle('dark');
+    if (htmlEl.classList.contains('dark')) {
+        localStorage.setItem('color-theme', 'dark');
+    } else {
+        localStorage.setItem('color-theme', 'light');
+    }
+}
+</script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <script>
+    // Theme logic
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <link rel="stylesheet" href="/static/css/tailwind.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous">
+function handleCheckbox() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  const dock = document.getElementById('summarizeDock');
+  const count = document.getElementById('selCount');
+  
+  if (checkboxes.length > 0) {
+    count.innerText = checkboxes.length;
+    dock.classList.remove('hidden');
+    dock.classList.add('translate-y-0', 'opacity-100');
+  } else {
+    dock.classList.add('hidden');
+  }
+}
+
+async function summarizeSelected() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  if (checkboxes.length === 0) return;
+  
+  const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
+  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  
+  const btn = document.getElementById('sumBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/summarize-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: selectedArticles })
+    });
+    const data = await res.json();
+    
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    
+    if (data.status === 'success') {
+      const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900 dark:text-white">$1</strong>');
+      document.getElementById('summaryModalContent').innerHTML = formatted;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    } else {
+      alert('Failed to summarize: ' + data.message);
+    }
+  } catch(err) {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    alert('An error occurred during summarization.');
+  }
+}
+
+function closeSummaryModal() {
+  document.getElementById('summaryModal').classList.add('hidden');
+  document.querySelectorAll('.news-checkbox').forEach(c => c.checked = false);
+  handleCheckbox();
+}
+
+
+// Run AI Summarizer
+async function runSummarizer() {
+  const selectUrl = document.getElementById('summarizeSelect').value;
+  const inputUrl = document.getElementById('summarizeUrl').value.trim();
+  const url = inputUrl || selectUrl;
+  
+  if(!url || !url.startsWith('http')) {
+    alert('Please select an article or enter a valid URL.');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSummarize');
+  const resultContainer = document.getElementById('summaryResultContainer');
+  const resultContent = document.getElementById('summaryContent');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70');
+  
+  try {
+    const r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    const data = await r.json();
+    
+    resultContainer.classList.remove('hidden');
+    if(data.status === 'success') {
+      // Format bullet points properly with Tailwind HTML
+      let html = data.summary.replace(/\n/g, '<br>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900 dark:text-white">$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em class="text-neutral-600 dark:text-slate-300">$1</em>');
+      resultContent.innerHTML = html;
+      resultContent.classList.remove('border-red-500/50', 'text-red-400');
+    } else {
+      resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> ${data.message}`;
+      resultContent.classList.add('border-red-500/50', 'text-red-400');
+    }
+  } catch(e) {
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Network error. Please try again.`;
+  } finally {
+    btn.innerHTML = '<i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary';
+    btn.disabled = false;
+    btn.classList.remove('opacity-70');
+    resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
+</script>
+
+  
+  <link rel="manifest" href="/static/manifest.json">
+</head>
+<body class="font-sans text-neutral-900 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-950 transition-colors duration-300">
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="sidebar w-64 flex-shrink-0 flex flex-col overflow-y-auto hidden lg:flex">
+    <div class="p-6 border-b border-neutral-200 dark:border-slate-800">
+      <a href="/" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center">
+          <i class="fas fa-newspaper text-neutral-900 dark:text-white text-sm"></i>
+        </div>
+        <span class="font-bold text-neutral-900 dark:text-white">Nova Brief</span>
+      </a>
+    </div>
+    <div class="p-4 border-b border-neutral-200 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-sm" id="avatarInitial">U</div>
+        <div>
+          <div class="text-sm font-semibold text-neutral-900 dark:text-white" id="sidebarName">{{ user_name or 'User' }}</div>
+          <div class="text-xs text-neutral-500 dark:text-slate-500" id="sidebarEmail">{{ user_email }}</div>
+        </div>
+      </div>
+    </div>
+    <nav class="p-3 flex-1" aria-label="Dashboard navigation">
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-2">Your briefing</div>
+      <button type="button" onclick="switchTab('articles')" data-dashboard-tab="articles" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-700 dark:text-slate-200 mb-1" id="nav-articles">
+        <i class="fas fa-newspaper w-4 text-center text-blue-400"></i>
+        <span>Latest News</span>
+        <span class="ml-auto text-[9px] font-black uppercase tracking-wider text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">Live</span>
+      </button>
+      <button type="button" onclick="switchTab('overview')" data-dashboard-tab="overview" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-overview">
+        <i class="fas fa-house w-4 text-center"></i> For You
+      </button>
+
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-5">Explore</div>
+      <button type="button" onclick="switchTab('summarizer')" data-dashboard-tab="summarizer" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-summarizer">
+        <i class="fas fa-wand-magic-sparkles w-4 text-center"></i> AI Summarizer
+      </button>
+      <button type="button" onclick="switchTab('memory')" data-dashboard-tab="memory" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-memory">
+        <i class="fas fa-bookmark w-4 text-center"></i> Saved Articles
+      </button>
+      <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-programs">
+        <i class="fas fa-graduation-cap w-4 text-center"></i> Student Programs
+      </button>
+
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-5">Account</div>
+      <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-activity">
+        <i class="fas fa-clock-rotate-left w-4 text-center"></i> My Activity
+      </button>
+      <button type="button" onclick="switchTab('progress')" data-dashboard-tab="progress" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-progress">
+        <i class="fas fa-chart-bar w-4 text-center"></i> Progress Report
+      </button>
+      <button type="button" onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4">
+        <i class="fas fa-sign-out-alt w-4 text-center"></i> Logout
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <!-- Top bar -->
+    <header class="sticky top-0 z-10 bg-white dark:bg-slate-900/90 backdrop-blur border-b border-neutral-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
+      <div class="min-w-0">
+        <h1 class="text-xl font-bold text-neutral-900 dark:text-white truncate" id="pageTitle">Latest News</h1>
+        <p class="text-xs text-neutral-500 dark:text-slate-400 truncate" id="pageSubtitle">Your curated AI and technology briefing</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 bg-neutral-100 dark:bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl shadow">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-xs" id="headerAvatar">U</div>
+          <div class="text-left">
+            <div class="text-xs font-bold text-neutral-900 dark:text-white leading-tight" id="headerName">{{ user_name or 'User' }}</div>
+            <div class="text-[10px] text-neutral-500 dark:text-slate-400 leading-tight" id="headerEmail">{{ user_email }}</div>
+          </div>
+        </div>
+        <button onclick="toggleTheme()" class="p-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-slate-800 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
+          <a href="/" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 px-3 py-1.5 rounded-lg text-xs text-neutral-600 dark:text-slate-300 hover:text-neutral-900 dark:text-white transition"><i class="fas fa-home mr-1"></i>Home</a>
+        <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-red-500/30"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+      </div>
+    </header>
+
+    <nav class="lg:hidden sticky top-[73px] z-10 bg-slate-950/95 backdrop-blur border-b border-neutral-200 dark:border-slate-800 px-4 py-2 overflow-x-auto" aria-label="Mobile dashboard navigation">
+      <div class="flex gap-2 min-w-max">
+        <button type="button" onclick="switchTab('articles')" data-dashboard-tab="articles" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-newspaper mr-1 text-blue-400"></i> News</button>
+        <button type="button" onclick="switchTab('overview')" data-dashboard-tab="overview" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-house mr-1"></i> For You</button>
+        <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-graduation-cap mr-1"></i> Programs</button>
+        <button type="button" onclick="switchTab('summarizer')" data-dashboard-tab="summarizer" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-wand-magic-sparkles mr-1"></i> Summarize</button>
+        <button type="button" onclick="switchTab('memory')" data-dashboard-tab="memory" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-bookmark mr-1"></i> Saved</button>
+        <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-clock-rotate-left mr-1"></i> Activity</button>
+      </div>
+    </nav>
+
+    <div class="p-4 sm:p-6 max-w-7xl mx-auto w-full">
+
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+        <div class="grid lg:grid-cols-3 gap-6">
+          <section class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 lg:col-span-2" aria-labelledby="overview-news-title">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <div class="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 mb-1"><span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Updated live</div>
+                <h2 id="overview-news-title" class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 text-lg"><i class="fas fa-newspaper text-blue-400"></i> Latest Student-Focused Technology News</h2>
+              </div>
+              <button type="button" onclick="switchTab('articles')" class="text-xs font-bold text-blue-300 hover:text-neutral-900 dark:text-white bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg px-3 py-2 transition">View all news <i class="fas fa-arrow-right ml-1"></i></button>
+            </div>
+            <div id="overviewArticles" class="space-y-3"></div>
+          </section>
+          <section class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5" aria-labelledby="overview-programs-title">
+            <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
+            <h2 id="overview-programs-title" class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
+            <div id="overviewPrograms" class="space-y-3"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- ACTIVITY TAB -->
+      <div id="tab-activity" class="hidden">
+        <div class="mb-6">
+          <h2 class="text-2xl font-black text-neutral-900 dark:text-white mb-2">My Activity</h2>
+          <p class="text-sm text-neutral-500 dark:text-slate-400 max-w-2xl">A clear history of meaningful account actions. Routine page views are left out so you can quickly find what matters.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-3 mb-6" aria-label="Quick actions">
+          <button type="button" onclick="switchTab('articles')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-blue-500/50 transition group">
+            <span class="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center mb-3 group-hover:bg-blue-500/25 transition" aria-hidden="true"><i class="fas fa-newspaper"></i></span>
+            <span class="block text-sm font-bold text-neutral-900 dark:text-white">Browse latest news</span>
+            <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Find useful AI and technology stories</span>
+          </button>
+          <button type="button" onclick="switchTab('summarizer')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-purple-500/50 transition group">
+            <span class="w-9 h-9 rounded-lg bg-purple-500/15 text-purple-400 flex items-center justify-center mb-3 group-hover:bg-purple-500/25 transition" aria-hidden="true"><i class="fas fa-wand-magic-sparkles"></i></span>
+            <span class="block text-sm font-bold text-neutral-900 dark:text-white">Summarize an article</span>
+            <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Turn a long article into quick takeaways</span>
+          </button>
+          <button type="button" onclick="switchTab('programs')" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-4 text-left hover:border-emerald-500/50 transition group">
+            <span class="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center mb-3 group-hover:bg-emerald-500/25 transition" aria-hidden="true"><i class="fas fa-graduation-cap"></i></span>
+            <span class="block text-sm font-bold text-neutral-900 dark:text-white">Explore programs</span>
+            <span class="block text-xs text-neutral-500 dark:text-slate-500 mt-1">Check current student opportunities</span>
+          </button>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-clock-rotate-left text-blue-400" aria-hidden="true"></i> Recent account activity</h3>
+              <p class="text-xs text-neutral-500 dark:text-slate-500 mt-1">Sign-ins, saved articles, summaries and alert changes</p>
+            </div>
+            <button type="button" onclick="loadActivity()" class="self-start sm:self-auto text-xs font-semibold text-blue-300 hover:text-neutral-900 dark:text-white bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 rounded-lg px-3 py-2 transition">
+              <i class="fas fa-rotate mr-1" aria-hidden="true"></i> Refresh
+            </button>
+          </div>
+          <div id="activityLog" class="space-y-2 max-h-[500px] overflow-y-auto" role="list" aria-live="polite" aria-busy="false"></div>
+        </div>
+      </div>
+
+      <!-- ARTICLES TAB -->
+      <div id="tab-articles" class="hidden max-w-5xl mx-auto w-full">
+        <div class="mb-8 pb-5 border-b border-slate-700/50">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div>
+              <div class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400 mb-2"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>Live intelligence feed</div>
+              <h2 class="text-3xl font-black text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-newspaper text-blue-400"></i> Technology News for Students</h2>
+              <p class="text-sm text-neutral-500 dark:text-slate-400 mt-2 max-w-2xl">Fresh, readable technology stories selected by Nova Brief. Search, save or select stories to create an AI summary.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+            <input type="date" id="newsDatePicker" onchange="loadArticles()" class="bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-600 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" />
+              <div class="relative w-full sm:w-64">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-400 text-sm"></i>
+                <input type="search" id="articleSearch" aria-label="Search news topics" placeholder="Search news topics..." onkeyup="liveSearch()" class="w-full bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-400 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="articlesList" class="space-y-8 pb-12"></div>
+      </div>
+
+            <!-- SUMMARIZER TAB -->
+      <div id="tab-summarizer" class="hidden max-w-3xl mx-auto w-full">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700/50">
+          <h2 class="text-2xl font-black text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-magic text-blue-400"></i> AI Article Summarizer</h2>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 mb-8">
+          <p class="text-neutral-500 dark:text-slate-400 text-sm mb-6">Select a recent tech article from the feed, or paste any URL below to generate a quick, readable summary instantly.</p>
+          
+          <div class="mb-5">
+            <label class="block text-xs font-bold text-neutral-500 dark:text-slate-500 uppercase tracking-wider mb-2">1. Select a Recent Article</label>
+            <select id="summarizeSelect" class="w-full bg-neutral-100 dark:bg-slate-800 border border-slate-700 text-neutral-900 dark:text-white rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition appearance-none">
+              <option value="">-- Choose an article to summarize --</option>
+            </select>
+          </div>
+          
+          <div class="text-center text-slate-600 text-xs font-bold uppercase tracking-widest my-4">OR</div>
+          
+          <div class="mb-6">
+            <label class="block text-xs font-bold text-neutral-500 dark:text-slate-500 uppercase tracking-wider mb-2">2. Paste Any Article URL</label>
+            <input type="url" id="summarizeUrl" placeholder="https://techcrunch.com/..." class="w-full bg-neutral-100 dark:bg-slate-800 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+          </div>
+          
+          <button id="btnSummarize" onclick="runSummarizer()" class="w-full bg-blue-600 hover:bg-blue-500 text-neutral-900 dark:text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2">
+            <i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary
+          </button>
+        </div>
+        
+        <!-- Result Box -->
+        <div id="summaryResultContainer" class="hidden">
+          <h3 class="text-sm font-bold text-neutral-500 dark:text-slate-400 uppercase tracking-widest mb-4">Summary Result</h3>
+          <div id="summaryContent" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-6 text-neutral-700 dark:text-slate-200 text-sm leading-relaxed prose prose-invert prose-blue max-w-none">
+            <!-- Summary appears here -->
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- MEMORY TAB -->
+      <div id="tab-memory" class="hidden max-w-4xl mx-auto w-full">
+        <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-700/50">
+          <h2 class="text-2xl font-black text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-bookmark text-blue-400"></i> Memory Vault</h2>
+          <span class="text-xs text-neutral-500 dark:text-slate-500 bg-neutral-100 dark:bg-slate-800 px-3 py-1 rounded-full"><i class="fas fa-info-circle"></i> Auto-cleans after 30 days</span>
+        </div>
+        <div id="memoryArticlesList" class="space-y-8 pb-12"></div>
+      </div>
+
+      <!-- PROGRAMS TAB -->
+      <div id="tab-programs" class="hidden">
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+          <img src="/static/images/student-programs-grid-v2.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
+            <div>
+              <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 text-lg"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs & Early Alerts</h3>
+              <p class="text-neutral-500 dark:text-slate-400 text-xs mt-1">You will receive early preparation alerts & 1-click registration links directly to your inbox.</p>
+            </div>
+            <button onclick="resendProgramWelcomeEmail(this)" class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
+              <i class="fas fa-paper-plane"></i> Send Program Welcome Email
+            </button>
+          </div>
+          <div id="programEmailMsg" class="hidden rounded-xl p-3 text-xs font-semibold mb-4 text-center"></div>
+          <div id="programsList" class="grid md:grid-cols-2 gap-4"></div>
+        </div>
+      </div>
+
+      <!-- PROGRESS TAB -->
+      <div id="tab-progress" class="hidden">
+        <!-- Daily Progress -->
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2"><i class="fas fa-calendar-day text-blue-400"></i> Today's Progress</h3>
+            <span class="text-xs text-neutral-500 dark:text-slate-500" id="dailyDate"></span>
+          </div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="dailyProgressStats"></div>
+        </div>
+
+        <!-- Weekly Summary -->
+        <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
+          <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-chart-bar text-purple-400"></i> Weekly Summary</h3>
+          <div id="weeklyChart" class="flex items-end justify-between h-40 pt-4 border-b border-slate-700/50 pb-2">
+            <!-- Bars injected here -->
+          </div>
+        </div>
+
+        <!-- All-Time Progress Report -->
+        <div class="grid lg:grid-cols-2 gap-6">
+          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+            <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-trophy text-emerald-400"></i> All-Time Stats</h3>
+            <div class="grid grid-cols-2 gap-4" id="progressStats"></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
+            <h3 class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-fire text-orange-400"></i> Top Actions</h3>
+            <div id="topActionsList" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const USER_NAME = '{{ user_name or "User" }}';
+const USER_EMAIL = '{{ user_email }}';
+let allArticles = [];
+let overviewData = {};
+
+const dashboardTabMeta = {
+  articles: ['Latest News', 'Useful technology, skills and industry updates for students'],
+  overview: ['For You', 'A quick view of news and opportunities'],
+  programs: ['Student Programs', 'Explore active learning and career opportunities'],
+  summarizer: ['AI Summarizer', 'Turn long articles into clear takeaways'],
+  memory: ['Saved Articles', 'Return to useful stories whenever you need them'],
+  activity: ['My Activity', 'Your meaningful account actions in one place'],
+  progress: ['Progress Report', 'See how you are using Nova Brief']
+};
+
+function getProgramImage(program) {
+  const identity = `${program.company || ''} ${program.title || ''}`.toLowerCase();
+  if (identity.includes('google')) return '/static/images/google-student-club-v2.jpg';
+  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador-v2.jpg';
+  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning-v2.jpg';
+  if (identity.includes('meta')) return '/static/images/meta-engineering-internship-v2.jpg';
+  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship-v2.jpg';
+  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge-v2.jpg';
+  return '/static/images/student-programs-grid-v2.jpg';
+}
+
+// Set initials
+const init = (USER_NAME||'U').charAt(0).toUpperCase();
+document.getElementById('avatarInitial').textContent = init;
+
+function switchTab(name){
+  ['overview','activity','articles','programs','progress','summarizer','memory'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.add('hidden');
+  });
+  document.getElementById('tab-'+name).classList.remove('hidden');
+
+  document.querySelectorAll('[data-dashboard-tab]').forEach(button => {
+    const isActive = button.dataset.dashboardTab === name;
+    button.classList.toggle('active', isActive);
+    if (isActive) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
+
+  const meta = dashboardTabMeta[name] || dashboardTabMeta.articles;
+  document.getElementById('pageTitle').textContent = meta[0];
+  document.getElementById('pageSubtitle').textContent = meta[1];
+
+  if(name==='activity') loadActivity();
+  if(name==='articles') loadArticles();
+  if(name==='programs') loadPrograms();
+  if(name==='progress') loadProgress();
+  if(name==='memory') loadMemory();
+}
+
+function fmt(dt){ if(!dt) return 'Never'; try{ return new Date(dt).toLocaleString(); }catch(e){ return dt; } }
+function relTime(dt){ if(!dt) return ''; try{ const d=new Date(dt); const s=Math.floor((Date.now()-d)/1000); if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }catch(e){ return ''; } }
+
+const activityMeta = {
+  login: {label:'Signed in', icon:'fa-right-to-bracket', color:'text-blue-400', bg:'bg-blue-500/10'},
+  logout: {label:'Signed out', icon:'fa-right-from-bracket', color:'text-neutral-500 dark:text-slate-400', bg:'bg-slate-500/10'},
+  account_created: {label:'Account created', icon:'fa-user-check', color:'text-emerald-400', bg:'bg-emerald-500/10'},
+  article_saved: {label:'Article saved', icon:'fa-bookmark', color:'text-blue-400', bg:'bg-blue-500/10'},
+  article_removed: {label:'Article removed', icon:'fa-bookmark', color:'text-orange-400', bg:'bg-orange-500/10'},
+  article_summarized: {label:'AI summary generated', icon:'fa-wand-magic-sparkles', color:'text-purple-400', bg:'bg-purple-500/10'},
+  joined_program_alerts: {label:'Program alerts enabled', icon:'fa-bell', color:'text-emerald-400', bg:'bg-emerald-500/10'},
+  program_notification_sent: {label:'Program alert received', icon:'fa-envelope-open-text', color:'text-emerald-400', bg:'bg-emerald-500/10'},
+  default: {label:'Account updated', icon:'fa-circle-check', color:'text-neutral-500 dark:text-slate-400', bg:'bg-slate-500/10'}
+};
+
+function appendActivityItem(container, activity) {
+  const meta = activityMeta[activity.action] || activityMeta.default;
+  const item = document.createElement('div');
+  item.className = 'flex items-start gap-3 bg-dark-800/40 rounded-xl p-4 border border-neutral-200 dark:border-slate-800/80';
+  item.setAttribute('role', 'listitem');
+
+  const iconWrap = document.createElement('span');
+  iconWrap.className = `w-9 h-9 rounded-lg ${meta.bg} ${meta.color} flex items-center justify-center flex-shrink-0`;
+  iconWrap.setAttribute('aria-hidden', 'true');
+  const icon = document.createElement('i');
+  icon.className = `fas ${meta.icon}`;
+  iconWrap.appendChild(icon);
+
+  const content = document.createElement('div');
+  content.className = 'flex-1 min-w-0';
+  const title = document.createElement('div');
+  title.className = 'text-sm font-semibold text-neutral-900 dark:text-white';
+  title.textContent = meta.label;
+  content.appendChild(title);
+  if (activity.detail) {
+    const detail = document.createElement('p');
+    detail.className = 'text-xs text-neutral-500 dark:text-slate-500 mt-1';
+    detail.textContent = activity.detail;
+    content.appendChild(detail);
+  }
+
+  const time = document.createElement('time');
+  time.className = 'text-xs text-neutral-500 dark:text-slate-500 flex-shrink-0';
+  time.dateTime = activity.logged_at || '';
+  time.textContent = relTime(activity.logged_at) || 'Recently';
+  time.title = fmt(activity.logged_at);
+
+  item.append(iconWrap, content, time);
+  container.appendChild(item);
+}
+
+
+async function loadMemory() {
+    try {
+        const r = await fetch('/api/user/saved-articles');
+        const arts = await r.json();
+        const container = document.getElementById('memoryArticlesList');
+        if(!arts.length) {
+            container.innerHTML = '<div class="text-center text-neutral-500 dark:text-slate-500 py-12"><i class="fas fa-box-open text-4xl mb-3 opacity-50 block"></i> No saved articles yet.<br>Save articles from the Live Feed to build your memory vault.</div>';
+            return;
+        }
+        container.innerHTML = arts.map(a => `
+            <article class="group bg-dark-800/40 p-5 rounded-xl border border-slate-700/50 relative mb-4">
+                <div class="text-[10px] text-neutral-500 dark:text-slate-500 absolute top-3 right-4"><i class="fas fa-clock"></i> Saved ${relTime(a.saved_at)}</div>
+                <h3 class="text-lg font-bold text-neutral-700 dark:text-slate-200 mb-2 pr-20"><a href="${a.url||'#'}" target="_blank" class="hover:text-blue-400 transition">${a.title}</a></h3>
+                <p class="text-neutral-500 dark:text-slate-400 text-sm mb-4 line-clamp-2">${a.summary}</p>
+                <button onclick="removeArticle(${a.id}, this)" class="text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-1 rounded text-xs font-bold transition border border-red-500/20"><i class="fas fa-trash-alt mr-1"></i> Remove</button>
+            </article>
+        `).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function saveArticle(id, btn) {
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
+    try {
+        await fetch('/api/user/saved-articles/'+id, {method: 'POST'});
+        btn.innerHTML = '<i class="fas fa-check text-emerald-400 mr-1"></i> Saved';
+        btn.classList.add('text-emerald-400');
+        loadMemory();
+    } catch(e) {}
+}
+
+async function removeArticle(id, btn) {
+    const card = btn.closest('article');
+    try {
+        await fetch('/api/user/saved-articles/'+id, {method: 'DELETE'});
+        card.style.opacity = '0';
+        setTimeout(() => { loadMemory(); }, 300);
+    } catch(e) {}
+}
+
+function shareArticle(url, title) {
+    if(navigator.share) {
+        navigator.share({ title: title, url: url });
+    } else {
+        window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(title + ' ' + url), '_blank');
+    }
+}
+
+async function openPreferences() {
+    try {
+        const r = await fetch('/api/user/preferences');
+        const p = await r.json();
+        const comps = (p.companies||'').split(',');
+        const fields = (p.fields||'').split(',');
+        
+        document.querySelectorAll('#prefCompanies input').forEach(cb => cb.checked = comps.includes(cb.value));
+        document.querySelectorAll('#prefFields input').forEach(cb => cb.checked = fields.includes(cb.value));
+        
+        document.getElementById('preferencesModal').classList.remove('hidden');
+    } catch(e) {}
+}
+function closePreferences() { document.getElementById('preferencesModal').classList.add('hidden'); }
+async function savePreferences() {
+    const btn = document.getElementById('btnSavePref');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    const comps = Array.from(document.querySelectorAll('#prefCompanies input:checked')).map(cb => cb.value).join(',');
+    const fields = Array.from(document.querySelectorAll('#prefFields input:checked')).map(cb => cb.value).join(',');
+    
+    try {
+        await fetch('/api/user/preferences', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({companies: comps, fields: fields})
+        });
+        closePreferences();
+        loadArticles(); // reload feed with new prefs
+    } catch(e) {}
+    btn.innerHTML = 'Save Preferences';
+}
+
+// Ensure loadMemory is called initially
+document.addEventListener('DOMContentLoaded', loadMemory);
+
+// Load overview
+async function loadOverview(){
+  try{
+    const r = await fetch('/api/user/overview');
+    if(r.status===401||r.status===403){ window.location.href='/user/login'; return; }
+    overviewData = await r.json();
+    const s = overviewData.summary||{};
+
+    
+
+    const arts = (overviewData.articles||[]).slice(0,5);
+    document.getElementById('overviewArticles').innerHTML = arts.length ? arts.map(a=>`
+      <a href="${a.url && a.url !== '#' ? a.url : 'javascript:switchTab(\'articles\')'}" target="${a.url && a.url !== '#' ? '_blank' : '_self'}" class="block bg-dark-800/60 rounded-xl p-3 border border-slate-700/50 hover:border-blue-500/50 transition cursor-pointer">
+        <div class="text-sm font-semibold text-neutral-900 dark:text-white leading-snug mb-1">${a.title||'Untitled'}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500">${a.source||''} &middot; ${relTime(a.fetched_at)}</div>
+      </a>`).join('') : '<div class=\"text-neutral-500 dark:text-slate-500 text-sm text-center py-6\">Intelligence feed pending. System synchronizes globally every hour.</div>';
+
+    const progs = (overviewData.programs||[]).slice(0,4);
+    document.getElementById('overviewPrograms').innerHTML = progs.length ? progs.map(p=>`
+      <div class="bg-dark-800/60 rounded-xl p-3 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+        <div class="flex items-center justify-between mb-1">
+          <div class="text-sm font-semibold text-neutral-900 dark:text-white">${p.title}</div>
+          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">${p.company}</span>
+        </div>
+        ${p.deadline?`<div class="text-xs text-orange-400"><i class="fas fa-calendar mr-1"></i>Deadline: ${p.deadline}</div>`:''}
+        ${p.registration_url?`<a href="${p.registration_url}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 transition mt-1 block"><i class="fas fa-external-link-alt mr-1"></i>Register Now</a>`:''}
+      </div>`).join('') : `<div class=\"text-neutral-500 dark:text-slate-500 text-sm text-center py-6\"><p class=\"mb-3\">No active program applications detected.</p><a href=\"/#programs\" class=\"inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-lg hover:bg-emerald-500/30 transition text-xs font-bold\">Submit Program Application &rarr;</a></div>`;
+  }catch(e){ console.error(e); }
+}
+
+// Load activity
+async function loadActivity(){
+  const container = document.getElementById('activityLog');
+  container.replaceChildren();
+  container.setAttribute('aria-busy', 'true');
+  const loading = document.createElement('p');
+  loading.className = 'text-neutral-500 dark:text-slate-500 text-sm text-center py-6';
+  loading.textContent = 'Loading recent activity…';
+  container.appendChild(loading);
+  try{
+    const r = await fetch('/api/user/activity?limit=30');
+    if(!r.ok) throw new Error('Activity request failed');
+    const d = await r.json();
+    const log = d.activity||[];
+    container.replaceChildren();
+    if (log.length) {
+      log.forEach(activity => appendActivityItem(container, activity));
+    } else {
+      const empty = document.createElement('div');
+      empty.className = 'text-center py-10';
+      const title = document.createElement('p');
+      title.className = 'text-sm font-semibold text-neutral-600 dark:text-slate-300';
+      title.textContent = 'No meaningful activity yet';
+      const hint = document.createElement('p');
+      hint.className = 'text-xs text-neutral-500 dark:text-slate-500 mt-1';
+      hint.textContent = 'Save an article, create a summary or enable program alerts to see it here.';
+      empty.append(title, hint);
+      container.appendChild(empty);
+    }
+  }catch(e){
+    container.replaceChildren();
+    const error = document.createElement('p');
+    error.className = 'text-red-300 text-sm text-center py-6';
+    error.textContent = 'Activity could not be loaded. Please try again.';
+    container.appendChild(error);
+  }finally{
+    container.setAttribute('aria-busy', 'false');
+  }
+}
+
+// Load articles
+
+async function loadArticles(){
+  const dateVal = document.getElementById('newsDatePicker') ? document.getElementById('newsDatePicker').value : '';
+    const r = await fetch(`/api/articles?limit=50${dateVal ? '&date='+dateVal : ''}`);
+  allArticles = await r.json();
+  renderArticles(allArticles);
+  
+  // Populate Summarizer Dropdown
+  const select = document.getElementById('summarizeSelect');
+  if(select && allArticles.length > 0) {
+    select.innerHTML = '<option value="">-- Choose an article to summarize --</option>';
+    allArticles.forEach(a => {
+      if(a.url && a.url !== '#') {
+        const opt = document.createElement('option');
+        opt.value = a.url;
+        opt.textContent = a.title.substring(0, 80) + (a.title.length > 80 ? '...' : '');
+        select.appendChild(opt);
+      }
+    });
+  }
+}
+
+
+function renderArticles(arts){
+  document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
+    <article class="group bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 sm:p-6 transition relative hover:border-blue-500/40">
+        <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
+          <input type="checkbox" onchange="handleCheckbox()" value="${a.id}" class="news-checkbox w-5 h-5 rounded border-slate-600 bg-neutral-100 dark:bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer">
+          <span class="sr-only">Select this article for summarizing</span>
+        </label>
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-6 h-6 rounded-full bg-neutral-100 dark:bg-slate-800 flex items-center justify-center text-[10px] text-neutral-500 dark:text-slate-400 font-bold border border-slate-700">
+          <i class="fas fa-robot"></i>
+        </div>
+        <span class="text-xs font-semibold text-neutral-600 dark:text-slate-300">${a.source||'Nova Brief AI'}</span>
+        <span class="text-xs text-neutral-500 dark:text-slate-500">•</span>
+        <span class="text-xs text-neutral-500 dark:text-slate-500">${relTime(a.fetched_at)}</span>
+      </div>
+      <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="block group-hover:opacity-80 transition">
+        <h3 class="text-xl md:text-2xl font-bold text-slate-100 leading-tight mb-2">${a.title||'Untitled'}</h3>
+        <p class="text-neutral-500 dark:text-slate-400 text-sm md:text-base leading-relaxed mb-4 font-light">${(a.summary||'').substring(0,280)}${(a.summary||'').length>280?'...':''}</p>
+      </a>
+      ${a.why_important?`<div class="bg-neutral-100 dark:bg-slate-800/40 border-l-2 border-blue-500 p-3 rounded-r-lg text-xs text-neutral-600 dark:text-slate-300 mb-4"><span class="font-bold text-blue-400 block mb-1">Why it matters:</span>${a.why_important}</div>`:''}
+      <div class="mb-5 mt-2">
+        <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="inline-flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+          Read Full Article on ${a.source||'Source'} <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+      <div class="flex items-center justify-between border-b border-neutral-200 dark:border-slate-800 pb-8">
+        <div class="flex items-center gap-4">
+          <span class="text-[11px] font-medium px-2.5 py-1 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-300 rounded-full">${(a.news_topics&&a.news_topics[0])||(a.companies&&a.companies[0])||'AI & Big Tech'}</span>
+          <span class="text-xs text-neutral-500 dark:text-slate-500">${Math.max(2, Math.floor((a.summary||'').length/130))} min read</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="saveArticle(${a.id}, this)" class="text-neutral-500 dark:text-slate-400 hover:text-blue-300 transition rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Save article for later"><i class="far fa-bookmark"></i><span class="sr-only">Save article</span></button>
+        </div>
+      </div>
+    </article>`).join('') : '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12">No articles in your feed yet.</div>';
+}
+
+function liveSearch(){
+  const q = document.getElementById('articleSearch').value.toLowerCase();
+  renderArticles(q ? allArticles.filter(a=>(a.title||'').toLowerCase().includes(q)||(a.summary||'').toLowerCase().includes(q)) : allArticles);
+}
+
+// Load programs
+async function loadPrograms(){
+  const r = await fetch('/api/user/programs');
+  const progs = await r.json();
+  document.getElementById('programsList').innerHTML = progs.length ? progs.map(p=>`
+    <div class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
+      <img src="${getProgramImage(p)}" alt="" width="512" height="512" loading="lazy" decoding="async" class="w-full h-40 object-cover rounded-xl mb-4 border border-slate-700/60"/>
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+          <i class="fas fa-graduation-cap text-emerald-400"></i>
+        </div>
+        <div>
+          <div class="text-sm font-bold text-neutral-900 dark:text-white">${p.title}</div>
+          <div class="text-xs text-emerald-400">${p.company}</div>
+        </div>
+        <span class="ml-auto text-xs bg-${p.category==='internship'?'blue':'emerald'}-500/20 text-${p.category==='internship'?'blue':'emerald'}-400 px-2 py-0.5 rounded-full">${(p.category||'program').toUpperCase()}</span>
+      </div>
+      <p class="text-xs text-neutral-500 dark:text-slate-400 leading-relaxed mb-3">${p.description||'Check the registration link for full details.'}</p>
+      <div class="space-y-1 text-xs text-neutral-500 dark:text-slate-500 mb-4">
+        ${p.deadline?`<div><i class="fas fa-calendar-alt mr-2 text-orange-400"></i>Deadline: <span class="text-orange-400 font-semibold">${p.deadline}</span></div>`:''}
+        ${p.launch_date?`<div><i class="fas fa-rocket mr-2 text-blue-400"></i>Launch: <span class="text-blue-400">${p.launch_date}</span></div>`:''}
+      </div>
+      ${p.registration_url?`
+      <a href="${p.registration_url}" target="_blank"
+         class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-neutral-900 dark:text-white font-bold py-2.5 rounded-xl text-sm transition">
+        <i class="fas fa-rocket"></i> Register Now
+      </a>`:'<div class="text-xs text-slate-600 text-center">Registration link coming soon</div>'}
+    </div>`).join('') : '<div class="col-span-2 text-neutral-500 dark:text-slate-500 text-sm text-center py-8">No programs available yet. You will receive email alerts when new programs are added.</div>';
+}
+
+async function resendProgramWelcomeEmail(btn){
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Sending...';
+  const msg = document.getElementById('programEmailMsg');
+  try {
+    const r = await fetch('/api/programs/join-alert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: USER_EMAIL, name: USER_NAME})
+    });
+    const d = await r.json();
+    msg.className = 'rounded-xl p-3 text-xs font-semibold mb-4 text-center ' + (r.ok ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-red-500/20 text-red-300 border border-red-500/30');
+    msg.textContent = d.message || 'Program welcome email sent!';
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 6000);
+  } catch(e) {
+    msg.className = 'rounded-xl p-3 text-xs font-semibold mb-4 text-center bg-red-500/20 text-red-300 border border-red-500/30';
+    msg.textContent = 'Failed to send. Please try again.';
+    msg.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+}
+
+// Load progress
+async function loadProgress(){
+  try{
+    // Fetch all 3 endpoints concurrently
+    const [actRes, dailyRes, weeklyRes] = await Promise.all([
+      fetch('/api/user/activity?limit=100'),
+      fetch('/api/user/daily-progress'),
+      fetch('/api/user/weekly-summary')
+    ]);
+    
+    // Process All-Time
+    const d = await actRes.json(); const stats = d.stats||{};
+    document.getElementById('progressStats').innerHTML = `
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-blue-400 mb-1">${stats.total_logins||0}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-sign-in-alt mr-1"></i>Total Logins</div>
+      </div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-emerald-400 mb-1">${stats.emails_received||0}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-envelope mr-1"></i>Emails Received</div>
+      </div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-purple-400 mb-1">${stats.active_days||0}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-calendar-check mr-1"></i>Active Days</div>
+      </div>
+      <div class="bg-dark-800/60 rounded-xl p-4 text-center border border-slate-700/50">
+        <div class="text-2xl font-black text-orange-400 mb-1">${stats.total_actions||0}</div>
+        <div class="text-xs text-neutral-500 dark:text-slate-500"><i class="fas fa-bolt mr-1"></i>Total Actions</div>
+      </div>`;
+    const top = stats.top_actions||[];
+    document.getElementById('topActionsList').innerHTML = top.length ? top.map(t=>`
+      <div class="flex items-center gap-4">
+        <div class="w-24 text-xs text-neutral-600 dark:text-slate-300 capitalize truncate">${(t.action||'').replace(/_/g,' ')}</div>
+        <div class="flex-1 bg-dark-700 rounded-full h-2">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full" style="width:${Math.min(100,Math.round((t.count/(top[0]?.count||1))*100))}%"></div>
+        </div>
+        <div class="text-xs font-bold text-blue-400 w-6 text-right">${t.count}</div>
+      </div>`).join('') : '<div class="text-neutral-500 dark:text-slate-500 text-xs">No actions recorded yet.</div>';
+
+    // Process Daily
+    if(dailyRes.ok) {
+      const daily = await dailyRes.json();
+      document.getElementById('dailyDate').textContent = daily.date || '';
+      document.getElementById('dailyProgressStats').innerHTML = `
+        <div class="bg-blue-500/10 rounded-xl p-4 text-center border border-blue-500/20">
+          <div class="text-2xl font-black text-blue-400 mb-1">${daily.pages_visited||0}</div>
+          <div class="text-xs text-blue-300">Pages Visited</div>
+        </div>
+        <div class="bg-emerald-500/10 rounded-xl p-4 text-center border border-emerald-500/20">
+          <div class="text-2xl font-black text-emerald-400 mb-1">${daily.articles_read||0}</div>
+          <div class="text-xs text-emerald-300">Articles Read</div>
+        </div>
+        <div class="bg-purple-500/10 rounded-xl p-4 text-center border border-purple-500/20">
+          <div class="text-2xl font-black text-purple-400 mb-1">${daily.programs_explored||0}</div>
+          <div class="text-xs text-purple-300">Programs Explored</div>
+        </div>
+        <div class="bg-orange-500/10 rounded-xl p-4 text-center border border-orange-500/20">
+          <div class="text-2xl font-black text-orange-400 mb-1">${daily.total_actions||0}</div>
+          <div class="text-xs text-orange-300">Total Actions Today</div>
+        </div>`;
+    }
+
+    // Process Weekly
+    if(weeklyRes.ok) {
+      const weekly = await weeklyRes.json();
+      const maxActions = Math.max(1, ...weekly.map(d => d.actions));
+      document.getElementById('weeklyChart').innerHTML = weekly.map(d => {
+        const h = Math.max(5, Math.round((d.actions / maxActions) * 100));
+        return `
+          <div class="flex flex-col items-center justify-end w-full group">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-neutral-500 dark:text-slate-400 mb-1">${d.actions}</div>
+            <div class="w-3/4 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-sm transition-all duration-500" style="height:${h}%"></div>
+            <div class="text-[10px] text-neutral-500 dark:text-slate-500 mt-2">${d.label}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+  }catch(e){ console.error(e); }
+}
+
+async function handleLogout(){
+  try {
+    await fetch('/api/auth/logout', {method: 'POST'});
+  } catch(e){}
+  localStorage.removeItem('nova_user_email');
+  localStorage.removeItem('nova_user_name');
+  localStorage.removeItem('nova_logged_in');
+  window.location.href = '/';
+}
+
+if (USER_EMAIL) {
+  localStorage.setItem('nova_user_email', USER_EMAIL);
+  if (USER_NAME && USER_NAME !== 'User') localStorage.setItem('nova_user_name', USER_NAME);
+  localStorage.setItem('nova_logged_in', 'true');
+}
+
+loadOverview();
+
+// Deep-link support; otherwise open the product's primary news experience.
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+const allowedTabs = ['overview','activity','articles','programs','progress','summarizer','memory'];
+switchTab(tabParam && allowedTabs.includes(tabParam) ? tabParam : 'articles');
+
+function handleCheckbox() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  const dock = document.getElementById('summarizeDock');
+  const count = document.getElementById('selCount');
+  
+  if (checkboxes.length > 0) {
+    count.innerText = checkboxes.length;
+    dock.classList.remove('hidden');
+    dock.classList.add('translate-y-0', 'opacity-100');
+  } else {
+    dock.classList.add('hidden');
+  }
+}
+
+async function summarizeSelected() {
+  const checkboxes = document.querySelectorAll('.news-checkbox:checked');
+  if (checkboxes.length === 0) return;
+  
+  const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
+  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  
+  const btn = document.getElementById('sumBtn');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/summarize-news', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articles: selectedArticles })
+    });
+    const data = await res.json();
+    
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    
+    if (data.status === 'success') {
+      const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900 dark:text-white">$1</strong>');
+      document.getElementById('summaryModalContent').innerHTML = formatted;
+      document.getElementById('summaryModal').classList.remove('hidden');
+    } else {
+      alert('Failed to summarize: ' + data.message);
+    }
+  } catch(err) {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    alert('An error occurred during summarization.');
+  }
+}
+
+function closeSummaryModal() {
+  document.getElementById('summaryModal').classList.add('hidden');
+  document.querySelectorAll('.news-checkbox').forEach(c => c.checked = false);
+  handleCheckbox();
+}
+
+
+// Run AI Summarizer
+async function runSummarizer() {
+  const selectUrl = document.getElementById('summarizeSelect').value;
+  const inputUrl = document.getElementById('summarizeUrl').value.trim();
+  const url = inputUrl || selectUrl;
+  
+  if(!url || !url.startsWith('http')) {
+    alert('Please select an article or enter a valid URL.');
+    return;
+  }
+  
+  const btn = document.getElementById('btnSummarize');
+  const resultContainer = document.getElementById('summaryResultContainer');
+  const resultContent = document.getElementById('summaryContent');
+  
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
+  btn.disabled = true;
+  btn.classList.add('opacity-70');
+  
+  try {
+    const r = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    const data = await r.json();
+    
+    resultContainer.classList.remove('hidden');
+    if(data.status === 'success') {
+      // Format bullet points properly with Tailwind HTML
+      let html = data.summary.replace(/\n/g, '<br>');
+      html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900 dark:text-white">$1</strong>');
+      html = html.replace(/\*(.*?)\*/g, '<em class="text-neutral-600 dark:text-slate-300">$1</em>');
+      resultContent.innerHTML = html;
+      resultContent.classList.remove('border-red-500/50', 'text-red-400');
+    } else {
+      resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> ${data.message}`;
+      resultContent.classList.add('border-red-500/50', 'text-red-400');
+    }
+  } catch(e) {
+    resultContainer.classList.remove('hidden');
+    resultContent.innerHTML = `<i class="fas fa-exclamation-circle text-red-500 mr-2"></i> Network error. Please try again.`;
+  } finally {
+    btn.innerHTML = '<i class="fas fa-bolt text-yellow-300"></i> Generate AI Summary';
+    btn.disabled = false;
+    btn.classList.remove('opacity-70');
+    resultContainer.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
+}
+</script>
+
+
+  <!-- Summarize Dock -->
+  <div id="summarizeDock" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white dark:bg-slate-900/90 backdrop-blur-xl border border-blue-500/30 rounded-full px-6 py-3 shadow-2xl flex items-center gap-6 hidden z-50 transition-all duration-300">
+    <span class="text-sm font-bold text-neutral-900 dark:text-white"><span id="selCount" class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full mr-1">0</span> Selected</span>
+    <button onclick="summarizeSelected()" id="sumBtn" class="bg-gradient-to-r from-blue-600 to-emerald-500 hover:opacity-90 text-neutral-900 dark:text-white font-bold py-1.5 px-4 rounded-full text-sm flex items-center gap-2 transition shadow-lg">
+      <i class="fas fa-magic"></i> Summarize Now
+    </button>
+  </div>
+
+  <!-- Summary Modal -->
+  <div id="summaryModal" class="fixed inset-0 bg-white dark:bg-slate-900/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col transform transition-all">
+      <div class="p-6 border-b border-neutral-200 dark:border-slate-800 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-bolt text-yellow-400"></i> AI Executive Summary</h3>
+        <button onclick="closeSummaryModal()" class="text-neutral-500 dark:text-slate-500 hover:text-neutral-600 dark:text-slate-300 transition text-xl">&times;</button>
+      </div>
+      <div id="summaryModalContent" class="p-6 overflow-y-auto flex-1 prose prose-invert prose-blue max-w-none text-neutral-600 dark:text-slate-300 leading-relaxed text-sm">
+      </div>
+      <div class="p-4 border-t border-neutral-200 dark:border-slate-800 text-center">
+        <button onclick="closeSummaryModal()" class="bg-neutral-100 dark:bg-slate-800 hover:bg-slate-700 text-neutral-900 dark:text-white font-semibold py-2 px-6 rounded-xl transition">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Preferences Modal -->
+  <div id="preferencesModal" class="fixed inset-0 bg-white dark:bg-slate-900/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-700/50 rounded-2xl shadow-2xl w-full max-w-xl flex flex-col transform transition-all">
+      <div class="p-6 border-b border-neutral-200 dark:border-slate-800 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-neutral-900 dark:text-white flex items-center gap-3"><i class="fas fa-sliders-h text-blue-400"></i> Personalize Feed</h3>
+        <button onclick="closePreferences()" class="text-neutral-500 dark:text-slate-500 hover:text-neutral-600 dark:text-slate-300 transition text-xl">&times;</button>
+      </div>
+      <div class="p-6 overflow-y-auto max-h-[60vh] space-y-6">
+        <div>
+          <h4 class="text-neutral-900 dark:text-white font-bold mb-3"><i class="fas fa-building text-neutral-500 dark:text-slate-400 mr-2"></i> Companies</h4>
+          <div class="grid grid-cols-2 gap-3" id="prefCompanies">
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Google" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Google</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Microsoft" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Microsoft</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Meta" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Meta / Facebook</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="OpenAI" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> OpenAI</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="NVIDIA" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> NVIDIA</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Apple" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Apple</label>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-neutral-900 dark:text-white font-bold mb-3"><i class="fas fa-microchip text-neutral-500 dark:text-slate-400 mr-2"></i> Fields of Interest</h4>
+          <div class="grid grid-cols-2 gap-3" id="prefFields">
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Generative AI" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Generative AI</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Machine Learning" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Machine Learning</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Robotics" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Robotics</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Cybersecurity" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Cybersecurity</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="AI Safety" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> AI Safety</label>
+            <label class="flex items-center gap-2 text-sm text-neutral-600 dark:text-slate-300"><input type="checkbox" value="Data Science" class="rounded bg-neutral-100 dark:bg-slate-800 border-slate-700"> Data Science</label>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-neutral-200 dark:border-slate-800 flex justify-end gap-3">
+        <button onclick="closePreferences()" class="text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:text-white px-4 py-2 transition">Cancel</button>
+        <button onclick="savePreferences()" id="btnSavePref" class="bg-blue-600 hover:bg-blue-500 text-neutral-900 dark:text-white font-bold py-2 px-6 rounded-lg transition shadow-lg">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
+
+
+
