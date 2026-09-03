@@ -136,16 +136,30 @@ FOCUSED_NEWS_QUERIES = (
 def fetch_news_from_rss(limit: int = 5) -> List[Dict[str, Any]]:
     try:
         items = []
+        import random
+        import time
         per_query = max(limit * 2, 20)
-        headers = {'User-Agent': 'NovaBrief/1.0 (+https://www.novabrief.tech/)'}
+        
+        user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2.1 Safari/605.1.15',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        ]
+        
         for query in FOCUSED_NEWS_QUERIES:
             try:
+                headers = {'User-Agent': random.choice(user_agents)}
                 rss_url = (
                     'https://news.google.com/rss/search?q='
                     f'{quote_plus(query + " when:3d")}&hl=en-US&gl=US&ceid=US:en'
                 )
                 response = requests.get(rss_url, headers=headers, timeout=15)
+                if response.status_code == 429:
+                    logger.warning(f"Google News RSS rate-limited (429). Skipping query: {query}")
+                    time.sleep(2)
+                    continue
                 response.raise_for_status()
+                time.sleep(1) # Be nice to Google
                 entries = feedparser.parse(response.content).get('entries', [])
                 for entry in entries[:per_query]:
                     title = (entry.get('title') or '').strip()
