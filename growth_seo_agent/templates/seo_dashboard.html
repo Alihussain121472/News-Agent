@@ -176,6 +176,29 @@
 </div>
 
 <div id="seo-panel-content" class="seo-panel mt-5 hidden">
+<div class="surface-card mb-5 overflow-hidden">
+<div class="border-b border-slate-800 bg-slate-900/50 px-5 py-4 sm:px-6">
+<h3 class="text-base font-extrabold text-white"><i class="fas fa-robot text-blue-400 mr-2"></i> AI SEO Article Writer</h3>
+<p class="mt-1 text-sm text-slate-400">Generate a fully formatted, SEO-optimized article with Meta Tags instantly.</p>
+</div>
+<div class="p-5 sm:p-6">
+<div class="flex gap-3 items-end">
+<div class="flex-1">
+<label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target Keyword</label>
+<input type="text" id="ai-keyword" placeholder="e.g. Free AI certifications for college students" class="block w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
+</div>
+<button type="button" onclick="generateAiArticle()" id="ai-generate-btn" class="primary-action"><i class="fas fa-pen-nib"></i> Generate Article</button>
+</div>
+<div id="ai-writer-results" class="mt-6 hidden">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+<div><label class="block text-xs font-bold text-slate-400 mb-1">SEO Title Tag</label><input type="text" id="ai-res-title" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
+<div><label class="block text-xs font-bold text-slate-400 mb-1">URL Slug</label><input type="text" id="ai-res-slug" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
+<div class="md:col-span-2"><label class="block text-xs font-bold text-slate-400 mb-1">Meta Description</label><textarea id="ai-res-meta" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm h-16" readonly></textarea></div>
+</div>
+<div><label class="block text-xs font-bold text-slate-400 mb-1">Markdown Content (H1, H2, H3)</label><textarea id="ai-res-content" class="w-full rounded bg-slate-900 text-white border-slate-700 p-4 text-sm h-64 font-mono" readonly></textarea></div>
+</div>
+</div>
+</div>
   <section class="surface-card overflow-hidden">
     <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">People-first publishing</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Content opportunity queue</h2><p class="mt-1 text-[10px] text-slate-400">Opportunities come from tracked search intent that is not clearly covered in audited titles or headings.</p></div>
     <div class="grid grid-cols-1 gap-4 p-5 lg:grid-cols-2">
@@ -363,5 +386,36 @@
     document.querySelectorAll('[data-time]').forEach(element => { const date = new Date(element.dataset.time); if (!Number.isNaN(date.getTime())) element.textContent = date.toLocaleString(); });
   });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSeoModal(); });
+async function generateAiArticle() {
+    const keyword = document.getElementById('ai-keyword').value.trim();
+    if (!keyword) { alert('Please enter a target keyword.'); return; }
+    
+    const btn = document.getElementById('ai-generate-btn');
+    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Writing...';
+    btn.disabled = true;
+    
+    try {
+        const res = await fetch('/seo/api/generate-article', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({keyword: keyword})
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            document.getElementById('ai-writer-results').classList.remove('hidden');
+            document.getElementById('ai-res-title').value = data.data.title;
+            document.getElementById('ai-res-meta').value = data.data.meta_description;
+            document.getElementById('ai-res-slug').value = data.data.slug;
+            document.getElementById('ai-res-content').value = data.data.content;
+        } else {
+            alert(data.message || 'Error generating article.');
+        }
+    } catch (e) {
+        alert('Network error.');
+    }
+    
+    btn.innerHTML = '<i class="fas fa-pen-nib"></i> Generate Article';
+    btn.disabled = false;
+}
 </script>
 {% endblock %}

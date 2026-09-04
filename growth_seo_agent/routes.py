@@ -270,3 +270,57 @@ def content_brief(content_id):
         return jsonify({'status': 'error', 'message': 'Content opportunity not found.'}), 404
     brief = build_content_brief(opportunity['keyword'], opportunity.get('intent') or 'informational', opportunity.get('target_url') or '')
     return jsonify({'status': 'success', 'brief': brief})
+
+import requests
+import json
+from markupsafe import escape
+
+@seo_bp.route('/api/generate-article', methods=['POST'])
+@admin_required
+def generate_seo_article():
+    data = request.get_json() or {}
+    keyword = data.get('keyword', '').strip()
+    
+    if not keyword:
+        return jsonify({'status': 'error', 'message': 'Keyword is required.'}), 400
+        
+    api_key = os.environ.get('GROQ_API_KEY')
+    if not api_key:
+        return jsonify({'status': 'error', 'message': 'Groq API Key is not configured.'}), 500
+        
+    system_prompt = """You are an Expert SEO Content Writer for NovaBrief Tech. 
+Your task is to write a highly optimized, engaging blog post targeting the provided keyword.
+
+Requirements:
+1. Provide a click-worthy SEO Title (max 60 chars).
+2. Provide an engaging Meta Description (max 160 chars).
+3. Provide a short, hyphenated URL slug.
+4. Write the full article using Markdown. Include an H1, multiple H2s, and H3s where appropriate.
+5. Make the content highly relevant to tech students, internships, or AI news.
+
+Return exactly and ONLY a valid JSON object with the keys: 
+"title", "meta_description", "slug", "content""""
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Target Keyword: {keyword}"}
+        ],
+        "temperature": 0.7,
+        "response_format": {"type": "json_object"}
+    }
+    
+    try:
+        resp = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=60)
+        resp.raise_for_status()
+        result_text = resp.json()['choices'][0]['message']['content'].strip()
+        result = json.loads(result_text)
+        return jsonify({'status': 'success', 'data': result})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to generate article: {str(e)}'}), 500
