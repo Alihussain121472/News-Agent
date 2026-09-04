@@ -1198,7 +1198,69 @@ def sitemap():
 @app.route('/robots.txt')
 def robots():
     domain = 'https://www.novabrief.tech'
-    return f'User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /dashboard\nSitemap: {domain}/sitemap.xml', 200, {'Content-Type': 'text/plain'}
+    robot_rules = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Allow: /news/\n"
+        "Allow: /programs/\n"
+        "Disallow: /analytics/\n"
+        "Disallow: /social/\n"
+        "Disallow: /dashboard/\n"
+        "Disallow: /user/\n"
+        "Disallow: /api/\n\n"
+        f"Sitemap: {domain}/sitemap-static.xml\n"
+        f"Sitemap: {domain}/sitemap-news.xml"
+    )
+    return robot_rules, 200, {'Content-Type': 'text/plain'}
+
+@app.route('/sitemap-static.xml')
+def sitemap_static():
+    domain = 'https://www.novabrief.tech'
+    xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+        f'  <url><loc>{domain}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>',
+        f'  <url><loc>{domain}/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>',
+        f'  <url><loc>{domain}/student-programs</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>',
+        f'  <url><loc>{domain}/news</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>',
+        '</urlset>'
+    ]
+    return '\n'.join(xml), 200, {'Content-Type': 'application/xml'}
+
+@app.route('/sitemap-news.xml')
+def sitemap_news():
+    domain = 'https://www.novabrief.tech'
+    articles = db.get_recent_news(limit=50) if hasattr(db, 'get_recent_news') else []
+    
+    xml = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">'
+    ]
+    for article in articles:
+        # Use fallback hash routing if individual article pages aren't defined
+        loc = f"{domain}/news#article-{article.get('id', '')}" 
+        title = article.get('title', 'Tech News').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+        pub_date = article.get('published_at', article.get('fetched_at', ''))
+        if not pub_date:
+            from datetime import datetime
+            pub_date = datetime.utcnow().isoformat() + 'Z'
+        elif isinstance(pub_date, str) and not pub_date.endswith('Z'):
+            pub_date = pub_date.replace(' ', 'T') + 'Z'
+            
+        xml.append('  <url>')
+        xml.append(f'    <loc>{loc}</loc>')
+        xml.append('    <news:news>')
+        xml.append('      <news:publication>')
+        xml.append('        <news:name>NovaBrief Tech</news:name>')
+        xml.append('        <news:language>en</news:language>')
+        xml.append('      </news:publication>')
+        xml.append(f'      <news:publication_date>{pub_date}</news:publication_date>')
+        xml.append(f'      <news:title>{title}</news:title>')
+        xml.append('    </news:news>')
+        xml.append('  </url>')
+    
+    xml.append('</urlset>')
+    return '\n'.join(xml), 200, {'Content-Type': 'application/xml'}
 
 
 @app.route('/ads.txt')
