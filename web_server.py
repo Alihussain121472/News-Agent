@@ -1329,15 +1329,16 @@ def server_error(e):
 def blog_index():
     import psycopg2
     import psycopg2.extras
-    import os
-    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+    from database import safe_connect, to_dict
+    conn = safe_connect()
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
         cursor.execute("SELECT * FROM blog_posts ORDER BY published_at DESC")
-        posts = [dict(row) for row in cursor.fetchall()]
+        posts = [to_dict(row) for row in cursor.fetchall()]
     except Exception:
         posts = []
-    conn.close()
+    finally:
+        conn.close()
     
     # Fetch active programs for the news page
     try:
@@ -1352,15 +1353,16 @@ def blog_index():
 def blog_post(slug):
     import psycopg2
     import psycopg2.extras
-    import os
-    conn = psycopg2.connect(os.getenv('DATABASE_URL'))
+    from database import safe_connect, to_dict
+    conn = safe_connect()
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
         cursor.execute("SELECT * FROM blog_posts WHERE slug=%s", (slug,))
         row = cursor.fetchone()
     except Exception:
         row = None
-    conn.close()
+    finally:
+        conn.close()
     if not row:
         return "Post not found", 404
     return render_template('blog_post.html', post=dict(row))
