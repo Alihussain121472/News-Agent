@@ -306,21 +306,32 @@ Return exactly and ONLY a valid JSON object with the keys:
         "Content-Type": "application/json"
     }
     
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"Target Keyword: {keyword}"}
-        ],
-        "temperature": 0.7,
-        "response_format": {"type": "json_object"}
-    }
-    
     try:
-        resp = requests.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload, timeout=60)
+        models_resp = requests.get('https://api.groq.com/openai/v1/models', headers={'Authorization': f'Bearer {api_key}'}, timeout=5)
+        available_models = [m['id'] for m in models_resp.json().get('data', [])]
+        model_name = 'llama-3.3-70b-versatile'
+        for preferred in ['llama-3.3-70b-versatile', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768']:
+            if preferred in available_models:
+                model_name = preferred
+                break
+        else:
+            if available_models: model_name = available_models[0]
+            
+        payload = {
+            'model': model_name,
+            'messages': [
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': f'Target Keyword: {keyword}'}
+            ],
+            'temperature': 0.7,
+            'max_tokens': 800,
+            'response_format': {'type': 'json_object'}
+        }
+        
+        resp = requests.post('https://api.groq.com/openai/v1/chat/completions', headers=headers, json=payload, timeout=60)
         resp.raise_for_status()
         result_text = resp.json()['choices'][0]['message']['content'].strip()
         result = json.loads(result_text)
         return jsonify({'status': 'success', 'data': result})
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to generate article: {str(e)}'}), 500
+        return jsonify({'status': 'error', 'message': f'API Error: {str(e)}'}), 500
