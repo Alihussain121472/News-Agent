@@ -256,3 +256,52 @@ body.light-mode .bg-neutral-700 {
   background-color: #f1f5f9 !important;
 }
 
+
+/* UNIVERSAL COMPONENT STYLING FOR LIGHT & DARK MODES */
+html:not(.dark) {
+  --color-text-strong: #0f172a;
+  --color-text: #334155;
+  --color-text-muted: #64748b;
+}
+
+html.dark {
+  --color-text-strong: #f8fafc;
+  --color-text: #e2e8f0;
+  --color-text-muted: #aebdd0;
+}
+
+/* Secondary Buttons in Light Mode */
+html:not(.dark) .ui-button--secondary {
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+html:not(.dark) .ui-button--secondary:hover {
+  background: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+/* Quiet Buttons in Light Mode */
+html:not(.dark) .ui-button--quiet {
+  color: #64748b !important;
+}
+
+html:not(.dark) .ui-button--quiet:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+}
+
+/* Dark Mode Preservation */
+html.dark .ui-button--secondary {
+  background: rgba(30, 41, 59, 0.78) !important;
+  border-color: rgba(148, 163, 184, 0.32) !important;
+  color: #f8fafc !important;
+}
+
+html.dark .ui-button--secondary:hover {
+  background: rgba(51, 65, 85, 0.92) !important;
+  border-color: rgba(148, 163, 184, 0.55) !important;
+}

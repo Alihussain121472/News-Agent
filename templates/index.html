@@ -95,34 +95,53 @@
 
 
   <script>
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    // Pure Light Mode default: Only use dark mode if explicitly chosen
+    if (localStorage.getItem('color-theme') === 'dark') {
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
     }
   </script>
-
-  
-<!-- Theme Logic -->
-<script>
-  function toggleAdminTheme() {
-    const isLight = document.body.classList.contains('light-mode');
-    if (isLight) {
-      document.body.classList.remove('light-mode');
-      localStorage.setItem('admin_theme', 'dark');
-    } else {
-      document.body.classList.add('light-mode');
-      localStorage.setItem('admin_theme', 'light');
+  <style>
+    /* Light/Dark mode styling for ui-button--secondary and interactive boxes */
+    html:not(.dark) {
+      --color-text-strong: #0f172a;
+      --color-text: #334155;
+      --color-text-muted: #64748b;
     }
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    // Default to light mode unless dark is explicitly saved
-    if (localStorage.getItem('admin_theme') !== 'dark') {
-      document.body.classList.add('light-mode');
+    html.dark {
+      --color-text-strong: #f8fafc;
+      --color-text: #e2e8f0;
+      --color-text-muted: #aebdd0;
     }
-  });
-</script>
+    html:not(.dark) .ui-button--secondary {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+    }
+    html:not(.dark) .ui-button--secondary:hover {
+      background: #e2e8f0 !important;
+      border-color: #94a3b8 !important;
+      color: #0f172a !important;
+    }
+    html:not(.dark) .ui-button--quiet {
+      color: #64748b !important;
+    }
+    html:not(.dark) .ui-button--quiet:hover {
+      background: rgba(0, 0, 0, 0.05) !important;
+      color: #0f172a !important;
+    }
+    html.dark .ui-button--secondary {
+      background: rgba(30, 41, 59, 0.78) !important;
+      border-color: rgba(148, 163, 184, 0.32) !important;
+      color: #f8fafc !important;
+    }
+    html.dark .ui-button--secondary:hover {
+      background: rgba(51, 65, 85, 0.92) !important;
+      border-color: rgba(148, 163, 184, 0.55) !important;
+    }
+  </style>
 </head>
 
 
@@ -155,8 +174,8 @@
         </div>
 
         <!-- User Portion (shows Name, Email, Avatar & Dashboard until logout) -->
-        <div id="navUserPortion" class="hidden items-center gap-3 bg-neutral-800/90 border border-neutral-700/70 rounded-2xl px-3 py-1.5 shadow-xl">
-          <div class="w-8 h-8 rounded-xl r from-blue-500 to-emerald-500 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-xs shadow" id="navAvatar">
+        <div id="navUserPortion" class="hidden items-center gap-3 bg-white dark:bg-neutral-800/90 border border-neutral-200 dark:border-neutral-700/70 rounded-2xl px-3 py-1.5 shadow-sm dark:shadow-xl">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-r from-blue-500 to-emerald-500 flex items-center justify-center text-white font-bold text-xs shadow" id="navAvatar">
             U
           </div>
           <div class="text-left pr-1">
@@ -164,12 +183,12 @@
               <span id="navUserName">User</span>
               <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
             </div>
-            <div class="text-[11px] text-neutral-600 dark:text-neutral-400 truncate max-w-[130px]" id="navUserEmail">user@email.com</div>
+            <div class="text-[11px] text-neutral-500 dark:text-neutral-400 truncate max-w-[130px]" id="navUserEmail">user@email.com</div>
           </div>
           <a href="/user/dashboard" class="ui-button ui-button--secondary ui-button--compact">
             <i class="fas fa-th-large text-[10px]"></i> Dashboard
           </a>
-          <button type="button" onclick="handleUserLogout()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact" aria-label="Sign out" title="Sign out">
+          <button type="button" onclick="handleUserLogout()" class="ui-button ui-button--quiet ui-button--icon ui-button--compact text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white" aria-label="Sign out" title="Sign out">
             <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
@@ -179,21 +198,21 @@
       </button>
     </div>
   </div>
-  <div id="mobileMenu" class="md:hidden hidden px-4 pb-4 border-t border-neutral-800 mt-2 space-y-2">
+  <div id="mobileMenu" class="md:hidden hidden px-4 pb-4 border-t border-neutral-200 dark:border-neutral-800 mt-2 space-y-2">
     <a href="#features" class="block text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white py-2 text-sm">Features</a>
     <a href="#programs" class="block text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white py-2 text-sm">Programs</a>
     <a href="#faq" class="block text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white py-2 text-sm">FAQ</a>
     <a href="#contact" class="block text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white py-2 text-sm">Contact</a>
-    <div id="mobileGuestPortion" class="space-y-2 pt-2 border-t border-neutral-800">
+    <div id="mobileGuestPortion" class="space-y-2 pt-2 border-t border-neutral-200 dark:border-neutral-800">
       <a href="/user/login" class="block text-neutral-300 hover:text-neutral-900 dark:hover:text-white py-2 text-sm">Sign In</a>
       <a href="#subscribe" class="ui-button ui-button--primary w-full">Get Started Free</a>
     </div>
-    <div id="mobileUserPortion" class="hidden pt-3 border-t border-neutral-800 space-y-2">
-      <div class="flex items-center gap-3 p-2 bg-neutral-800/80 rounded-xl border border-neutral-700">
-        <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-xs" id="mobileAvatar">U</div>
+    <div id="mobileUserPortion" class="hidden pt-3 border-t border-neutral-200 dark:border-neutral-800 space-y-2">
+      <div class="flex items-center gap-3 p-2 bg-neutral-50 dark:bg-neutral-800/80 rounded-xl border border-neutral-200 dark:border-neutral-700">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-xs" id="mobileAvatar">U</div>
         <div>
           <div class="text-xs font-bold text-neutral-900 dark:text-white" id="mobileUserName">User</div>
-          <div class="text-[11px] text-neutral-600 dark:text-neutral-400" id="mobileUserEmail">user@email.com</div>
+          <div class="text-[11px] text-neutral-500 dark:text-neutral-400" id="mobileUserEmail">user@email.com</div>
         </div>
       </div>
       <a href="/user/dashboard" class="ui-button ui-button--primary w-full">Go to Dashboard</a>
@@ -252,7 +271,7 @@
             </span>
           </div>
           <div class="space-y-3" id="heroLiveFeedContainer">
-            <div class="bg-white dark:bg-neutral-900/50 shadow-sm rounded-xl p-4 border border-neutral-700/50 text-center animate-pulse">
+            <div class="bg-white dark:bg-neutral-900/50 shadow-sm rounded-xl p-4 border border-neutral-200 dark:border-neutral-700/50 text-center animate-pulse">
               <div class="text-sm text-neutral-600 dark:text-neutral-400"><i class="fas fa-spinner fa-spin mr-2"></i> Fetching live updates...</div>
             </div>
           </div>
@@ -410,7 +429,7 @@
       </div>
 
       <!-- Quick Student Program Alert Signup -->
-    <div class="bg-neutral-800/50 border border-neutral-700/50 rounded-2xl p-6 md:p-8 max-w-3xl mx-auto text-center mb-10 shadow-2xl">
+    <div class="bg-white dark:bg-neutral-800/50 border border-neutral-200 dark:border-neutral-700/50 rounded-2xl p-6 md:p-8 max-w-3xl mx-auto text-center mb-10 shadow-lg dark:shadow-2xl">
       <div class="inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-wider mb-2">
         <i class="fas fa-graduation-cap"></i> Student Career Fast-Track
       </div>
@@ -419,7 +438,7 @@
       <form id="programAlertForm" class="flex flex-col sm:flex-row gap-2.5 max-w-2xl mx-auto">
         <label for="progAlertEmail" class="sr-only">Student email address</label>
         <input type="email" id="progAlertEmail" placeholder="your.student.email@domain.com" required
-          class="flex-1 bg-white dark:bg-neutral-900/50 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 transition"/>
+          class="flex-1 bg-white dark:bg-neutral-900/50 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition shadow-sm dark:shadow-none"/>
         <button type="submit" class="ui-button ui-button--primary whitespace-nowrap">
           <span>Get Alerts</span>
           <i class="fas fa-paper-plane text-xs"></i>
@@ -466,10 +485,10 @@
       <form id="subscribeForm" class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-4">
         <label for="subName" class="sr-only">Your name</label>
         <input type="text" id="subName" placeholder="Your Name" required
-          class="flex-1 bg-neutral-800 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+          class="flex-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition shadow-sm dark:shadow-none"/>
         <label for="subEmail" class="sr-only">Email address</label>
         <input type="email" id="subEmail" placeholder="your@email.com" required
-          class="flex-1 bg-neutral-800 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+          class="flex-1 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition shadow-sm dark:shadow-none"/>
         <button type="submit" class="ui-button ui-button--primary whitespace-nowrap">
           Subscribe <i class="fas fa-arrow-right ml-1"></i>
         </button>
@@ -573,16 +592,16 @@
       </div>
       <form class="space-y-4" onsubmit="handleContact(event)">
         <label for="cName" class="sr-only">Your name</label>
-        <input type="text" id="cName" placeholder="Your Name" required class="w-full bg-neutral-800 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+        <input type="text" id="cName" placeholder="Your Name" required class="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition shadow-sm dark:shadow-none"/>
         <label for="cEmail" class="sr-only">Email address</label>
-        <input type="email" id="cEmail" placeholder="your@email.com" required class="w-full bg-neutral-800 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition"/>
+        <input type="email" id="cEmail" placeholder="your@email.com" required class="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition shadow-sm dark:shadow-none"/>
         <label for="cSubject" class="sr-only">Subject</label>
-        <select id="cSubject" required class="w-full bg-neutral-800 border border-neutral-700 text-neutral-600 dark:text-neutral-400 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition">
-          <option value="">Select Subject</option>
+        <select id="cSubject" required class="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-neutral-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition appearance-none shadow-sm dark:shadow-none">
+          <option value="" disabled selected class="text-neutral-400 dark:text-neutral-500">Select Subject</option>
           <option>Support</option><option>Feedback</option><option>Partnership</option><option>Program Suggestion</option>
         </select>
         <label for="cMessage" class="sr-only">Message</label>
-        <textarea id="cMessage" rows="4" placeholder="Your message..." required class="w-full bg-neutral-800 border border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+        <textarea id="cMessage" rows="4" placeholder="Your message..." required class="w-full bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none shadow-sm dark:shadow-none"></textarea>
         <button type="submit" class="ui-button ui-button--primary w-full">Send Message</button>
         <div id="contactMsg" class="hidden rounded-xl p-3 text-sm font-semibold text-center"></div>
       </form>
@@ -591,7 +610,7 @@
 </section>
 
 <!-- Footer -->
-<footer class="border-t border-neutral-800 py-12 mt-8">
+<footer class="border-t border-neutral-200 dark:border-neutral-800 py-12 mt-8">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-4 gap-8 mb-8">
       <div>
@@ -1009,7 +1028,7 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
           const style = styles[index];
           const card = document.createElement('a');
           card.href = '/user/dashboard';
-          card.className = `block bg-white dark:bg-neutral-900/50 shadow-sm rounded-xl p-4 border ${style.border} hover:bg-neutral-700 transition`;
+          card.className = `block bg-white dark:bg-neutral-900/50 shadow-sm rounded-xl p-4 border ${style.border} hover:bg-neutral-50 dark:hover:bg-neutral-800/80 transition`;
 
           const row = document.createElement('div');
           row.className = 'flex items-start gap-3';
@@ -1043,8 +1062,8 @@ document.addEventListener('DOMContentLoaded', syncUserNavbar);
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const htmlEl = document.documentElement;
   
-  // Check local storage or system preference
-  if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  // Pure Light Mode default: Only dark if explicitly set
+  if (localStorage.getItem('color-theme') === 'dark') {
       htmlEl.classList.add('dark');
   } else {
       htmlEl.classList.remove('dark');
