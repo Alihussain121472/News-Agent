@@ -258,7 +258,13 @@
 </head>
 
 
-<body>
+<body class="light-mode">
+<script>
+  // Ensure dark mode is applied instantly if requested, otherwise stay light
+  if (localStorage.getItem('admin_theme') === 'dark') {
+    document.body.classList.remove('light-mode');
+  }
+</script>
   <header class="mobile-header">
     <div class="flex items-center gap-3">
       <div class="brand-mark" style="width:2.2rem;height:2.2rem;border-radius:.7rem"><i class="fas fa-bolt text-sm"></i></div>
