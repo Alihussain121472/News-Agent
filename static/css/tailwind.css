@@ -178,3 +178,81 @@ body.light-mode .hover\:bg-slate-800:hover {
 body.light-mode .hover\:bg-slate-700:hover {
   background-color: #e2e8f0 !important;
 }
+
+/* EXTENDED LIGHT MODE OVERRIDES FOR NEUTRAL AND DARK CLASSES */
+
+body.light-mode {
+  background-color: #f9fafb !important; /* bg-gray-50 */
+}
+
+/* Backgrounds */
+body.light-mode .bg-neutral-950,
+body.light-mode .bg-neutral-900,
+body.light-mode .bg-black {
+  background-color: #f9fafb !important;
+}
+
+body.light-mode .bg-neutral-800,
+body.light-mode .bg-neutral-800\/50,
+body.light-mode .bg-neutral-800\/80,
+body.light-mode .bg-neutral-800\/90,
+body.light-mode .bg-neutral-700 {
+  background-color: #ffffff !important;
+}
+
+body.light-mode .bg-\[\#020817\]\/90,
+body.light-mode .bg-\[\#1e293b\] {
+  background-color: #ffffff !important;
+}
+
+/* Inputs, Textareas, Selects */
+body.light-mode input.bg-neutral-800,
+body.light-mode textarea.bg-neutral-800,
+body.light-mode select.bg-neutral-800,
+body.light-mode input.bg-neutral-900,
+body.light-mode textarea.bg-neutral-900 {
+  background-color: #ffffff !important;
+  color: #172554 !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Text */
+body.light-mode .text-neutral-400,
+body.light-mode .text-neutral-300,
+body.light-mode .text-neutral-200,
+body.light-mode .text-neutral-100 {
+  color: #334155 !important;
+}
+
+/* Borders */
+body.light-mode .border-neutral-800,
+body.light-mode .border-neutral-700,
+body.light-mode .border-neutral-700\/30,
+body.light-mode .border-neutral-700\/40,
+body.light-mode .border-neutral-700\/50,
+body.light-mode .border-neutral-700\/70,
+body.light-mode .border-neutral-600 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Cards & UI Elements */
+body.light-mode .hover-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Fix specific live feed components (Dashboard inner cards) */
+body.light-mode .bg-slate-800,
+body.light-mode .bg-slate-800\/50,
+body.light-mode .bg-slate-800\/90 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Dropdowns / Header icons */
+body.light-mode .bg-slate-700,
+body.light-mode .bg-neutral-700 {
+  background-color: #f1f5f9 !important;
+}
+
