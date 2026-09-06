@@ -3,6 +3,7 @@ import requests
 import threading
 import logging
 from ai_news_agent import send_email
+from markupsafe import escape
 
 logger = logging.getLogger(__name__)
 
@@ -117,15 +118,32 @@ def generate_reply_text(name: str, subject: str, message: str) -> str:
         logger.error(f"Failed to generate Groq reply: {e}")
         return ""
 
+
+def build_fallback_reply(name: str, subject: str) -> str:
+    """Keep contact replies deliverable when the optional AI provider is unavailable."""
+    first_name = (name or '').strip().split()[0] if (name or '').strip() else 'there'
+    topic = (subject or 'your message').strip()
+    return (
+        f"Hi {first_name},\n\n"
+        f"Thank you for contacting NovaBrief Tech about {topic}. "
+        "We have received your message and are sorry for any trouble you experienced.\n\n"
+        "Our team is reviewing it now and will follow up with more details as soon as possible. "
+        "If you can share any additional context, please reply to this email.\n\n"
+        "Warm regards,\n"
+        "The NovaBrief Team\n"
+        "support@novabrief.tech | novabrief.tech"
+    )
+
 def process_and_reply_to_contact_message(name: str, email: str, subject: str, message: str, msg_id: int = None):
     """Background task to read contact message, generate AI reply, and send email."""
     try:
         reply_text = generate_reply_text(name, subject, message)
         if not reply_text:
-            return
+            logger.warning("AI reply unavailable for message_id=%s; using fallback reply.", msg_id)
+            reply_text = build_fallback_reply(name, subject)
         
         # Convert plain text to simple HTML for email
-        html_reply = reply_text.replace('\\n', '<br>').replace('\n', '<br>')
+        html_reply = escape(reply_text).replace('\\n', '<br>').replace('\n', '<br>')
         
         # Add basic email wrapper to match NovaBrief branding
         email_html = f"""
@@ -151,7 +169,7 @@ def process_and_reply_to_contact_message(name: str, email: str, subject: str, me
                 except Exception as db_e:
                     logger.error(f"Failed to mark message as replied in DB: {db_e}")
         else:
-            logger.error(f"Failed to send email to {email}")
+            logger.error("Automated reply delivery failed for message_id=%s to %s; leaving it retryable.", msg_id, email)
     except Exception as e:
         logger.error(f"Error in automated email reply agent: {e}")
 
@@ -159,5 +177,22 @@ def spawn_automated_reply(name: str, email: str, subject: str, message: str, msg
     """Helper to start the background thread."""
     thread = threading.Thread(target=process_and_reply_to_contact_message, args=(name, email, subject, message, msg_id), daemon=True)
     thread.start()
+
+
+def retry_pending_contact_replies(limit: int = 100) -> int:
+    """Retry automated replies for messages left open by a failed worker."""
+    import database
+
+    db = database.NewsDatabase()
+    pending = db.get_pending_contact_messages(limit=limit)
+    for item in pending:
+        process_and_reply_to_contact_message(
+            item.get('name') or '',
+            item.get('email') or '',
+            item.get('subject') or '',
+            item.get('message') or '',
+            item.get('id'),
+        )
+    return len(pending)
 
 # Updated by Master Agent for GitHub Contribution Sync

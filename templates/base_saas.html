@@ -233,7 +233,31 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
     }
   </style>
+
+  
+<!-- Theme Logic -->
+<script>
+  function toggleAdminTheme() {
+    const isLight = document.body.classList.contains('light-mode');
+    if (isLight) {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('admin_theme', 'dark');
+    } else {
+      document.body.classList.add('light-mode');
+      localStorage.setItem('admin_theme', 'light');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Default to light mode unless dark is explicitly saved
+    if (localStorage.getItem('admin_theme') !== 'dark') {
+      document.body.classList.add('light-mode');
+    }
+  });
+</script>
 </head>
+
+
 <body>
   <header class="mobile-header">
     <div class="flex items-center gap-3">
@@ -289,7 +313,12 @@
           <div class="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">Protected admin session</div>
         </div>
       </div>
+      
+      <button type="button" onclick="toggleAdminTheme()" class="nav-item">
+        <i class="fas fa-moon"></i><span>Toggle Dark/Light Mode</span>
+      </button>
       <a href="/analytics/settings" class="nav-item"><i class="fas fa-sliders"></i><span>Settings</span></a>
+
       <button type="button" onclick="handleNovaLogout()" class="nav-item nav-item-danger"><i class="fas fa-arrow-right-from-bracket"></i><span>Log out</span></button>
     </div>
   </aside>

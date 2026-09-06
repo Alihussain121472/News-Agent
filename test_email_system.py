@@ -155,6 +155,38 @@ class DailyDigestAudienceTests(unittest.TestCase):
 
 
 class WelcomeBatchTests(unittest.TestCase):
+    def test_welcome_delivery_records_only_after_provider_accepts(self):
+        fake_db = MagicMock()
+        fake_db.get_user_by_email.return_value = {
+            'email': 'person@real-domain.com',
+            'name': 'Person',
+            'welcome_email_sent_at': None,
+        }
+        with patch.object(ai_news_agent, 'send_welcome_email', return_value=True) as send_welcome:
+            self.assertTrue(ai_news_agent.deliver_welcome_email(
+                fake_db, 'person@real-domain.com', 'Person'))
+
+        send_welcome.assert_called_once_with('person@real-domain.com', 'Person')
+        fake_db.mark_welcome_email_sent.assert_called_once_with('person@real-domain.com')
+        fake_db.log_email_sent.assert_called_once_with(
+            'person@real-domain.com', 'Welcome to Nova Brief', 0, 'success')
+
+    def test_failed_welcome_delivery_remains_pending_for_retry(self):
+        fake_db = MagicMock()
+        fake_db.get_user_by_email.return_value = {
+            'email': 'person@real-domain.com',
+            'name': 'Person',
+            'welcome_email_sent_at': None,
+        }
+        with patch.object(ai_news_agent, 'send_welcome_email', return_value=False):
+            self.assertFalse(ai_news_agent.deliver_welcome_email(
+                fake_db, 'person@real-domain.com', 'Person'))
+
+        fake_db.mark_welcome_email_sent.assert_not_called()
+        fake_db.log_email_sent.assert_called_once_with(
+            'person@real-domain.com', 'Welcome to Nova Brief', 0, 'failed',
+            'Email provider rejected or could not deliver the welcome email')
+
     def test_batch_sends_only_to_pending_real_users(self):
         fake_db = MagicMock()
         fake_db.get_users_pending_welcome_email.return_value = [

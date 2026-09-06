@@ -278,28 +278,36 @@ from markupsafe import escape
 @seo_bp.route('/api/generate-article', methods=['POST'])
 @admin_required
 def generate_seo_article():
-    data = request.get_json() or {}
-    keyword = data.get('keyword', '').strip()
+    data = request.get_json(silent=True) or {}
+    keyword = str(data.get('keyword') or '').strip()
     
     if not keyword:
         return jsonify({'status': 'error', 'message': 'Keyword is required.'}), 400
+    if len(keyword) > 160:
+        return jsonify({'status': 'error', 'message': 'Keyword must be 160 characters or fewer.'}), 400
         
     api_key = os.environ.get('GROQ_API_KEY')
     if not api_key:
         return jsonify({'status': 'error', 'message': 'Groq API Key is not configured.'}), 500
         
-    system_prompt = """You are an Expert SEO Content Writer for NovaBrief Tech. 
-Your task is to write a highly optimized, engaging blog post targeting the provided keyword.
+    system_prompt = """You are NovaBrief Tech's senior, people-first SEO editor.
+Create genuinely useful content for university students and early-career technology readers.
+The article must satisfy the search intent behind the keyword before promoting NovaBrief.
 
-Requirements:
-1. Provide a click-worthy SEO Title (max 60 chars).
-2. Provide an engaging Meta Description (max 160 chars).
-3. Provide a short, hyphenated URL slug.
-4. Write the full article using Markdown. Include an H1, multiple H2s, and H3s where appropriate.
-5. Make the content highly relevant to tech students, internships, or AI news.
+Use these operating rules from NovaBrief's SEO playbook:
+- Expand the keyword into closely related, non-duplicative subtopics and natural long-tail questions.
+- Cover practical details such as eligibility, deadlines, application steps, preparation, costs, tools, or examples when relevant.
+- Structure the article with exactly one H1, descriptive H2 sections, and H3 subsections only where they improve scanning.
+- Use a concise, accurate title of 60 characters or fewer and a compelling meta description of 155 characters or fewer.
+- Return a lowercase, hyphenated URL slug with no dates unless the year is essential to the query.
+- Add useful internal-link opportunities using descriptive anchor text, but never invent URLs; use [INTERNAL_LINK: suggested topic] placeholders.
+- Include a short FAQ section only for real questions the article answers.
+- Prefer original explanations, clearly attributed facts, and visible update context. Do not keyword-stuff, copy competitors, make unsupported claims, or promise rankings.
+- If competitor or source material is not supplied, do not pretend to have performed competitor research. State gaps as editorial opportunities in the article notes instead.
 
-Return exactly and ONLY a valid JSON object with the keys: 
-"title", "meta_description", "slug", "content""""
+Return exactly and ONLY a valid JSON object with these keys:
+"title", "meta_description", "slug", "content", "target_questions", "internal_link_opportunities", "editor_notes".
+The content must be Markdown. The three list fields must be JSON arrays of strings."""
 
     headers = {
         "Authorization": f"Bearer {api_key}",
@@ -307,15 +315,7 @@ Return exactly and ONLY a valid JSON object with the keys:
     }
     
     try:
-        models_resp = requests.get('https://api.groq.com/openai/v1/models', headers={'Authorization': f'Bearer {api_key}'}, timeout=5)
-        available_models = [m['id'] for m in models_resp.json().get('data', [])]
-        model_name = 'llama-3.3-70b-versatile'
-        for preferred in ['llama-3.3-70b-versatile', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768']:
-            if preferred in available_models:
-                model_name = preferred
-                break
-        else:
-            if available_models: model_name = available_models[0]
+        model_name = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile').strip()
             
         payload = {
             'model': model_name,
@@ -332,6 +332,15 @@ Return exactly and ONLY a valid JSON object with the keys:
         resp.raise_for_status()
         result_text = resp.json()['choices'][0]['message']['content'].strip()
         result = json.loads(result_text)
+        required_fields = ('title', 'meta_description', 'slug', 'content')
+        if not isinstance(result, dict) or not all(isinstance(result.get(field), str) for field in required_fields):
+            raise ValueError('Groq returned an incomplete SEO article.')
+        if not all(isinstance(result.get(field), list) for field in ('target_questions', 'internal_link_opportunities', 'editor_notes')):
+            raise ValueError('Groq returned invalid SEO metadata.')
         return jsonify({'status': 'success', 'data': result})
+    except (KeyError, IndexError, TypeError, json.JSONDecodeError, ValueError) as e:
+        return jsonify({'status': 'error', 'message': f'Invalid AI response: {e}'}), 502
+    except requests.RequestException as e:
+        return jsonify({'status': 'error', 'message': f'Groq API request failed: {e}'}), 502
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'API Error: {str(e)}'}), 500

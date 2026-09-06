@@ -7,11 +7,18 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=development
-      - GMAIL_USER=${GMAIL_USER}
-      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+      - RESEND_REPLY_TO=${RESEND_REPLY_TO}
+      - REQUIRE_OFFICIAL_SENDER=${REQUIRE_OFFICIAL_SENDER:-false}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-465}
       - NEWSAPI_KEY=${NEWSAPI_KEY}
       - RECIPIENT_EMAIL=${RECIPIENT_EMAIL}
       - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
     volumes:
       - .:/app
       - /app/__pycache__

@@ -343,13 +343,19 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
         if _send_via_resend(recipient, subject, html_content):
             return True
         if _official_sender_required():
-            logger.warning('Official NovaBrief Tech delivery failed; trying personal SMTP fallback anyway.')
-        logger.warning('Primary email provider failed; attempting the SMTP fallback.')
+            logger.warning('Official Resend delivery failed; attempting official SMTP fallback.')
+        else:
+            logger.warning('Primary email provider failed; attempting the SMTP fallback.')
     elif _official_sender_required():
         logger.warning('Official NovaBrief Tech email delivery is not configured. Falling back to SMTP.')
     credentials = _smtp_credentials()
+    if _official_sender_required():
+        credentials = [
+            item for item in credentials
+            if item[1].endswith('@novabrief.tech')
+        ]
     if not credentials:
-        logger.error('SMTP credentials are missing from the environment.')
+        logger.error('No official NovaBrief Tech email credentials are configured.')
         return False
 
     context = ssl.create_default_context()
@@ -452,6 +458,28 @@ def send_welcome_email(to_email: str, name: str = None) -> bool:
     return send_email(to_email, 'Welcome to Nova Brief — Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
 
 
+def deliver_welcome_email(db: NewsDatabase, to_email: str, name: str = None, user: Dict[str, Any] = None) -> bool:
+    """Send a pending welcome and record it only after the provider accepts it."""
+    email = (to_email or '').strip().lower()
+    if not is_deliverable_user_email(email):
+        logger.warning('Skipped welcome email for invalid recipient.')
+        return False
+    user = user or db.get_user_by_email(email) or {}
+    if user.get('welcome_email_sent_at'):
+        return True
+    try:
+        sent = send_welcome_email(email, name or user.get('name'))
+    except Exception:
+        logger.exception('Welcome email delivery raised an exception for %s.', email)
+        sent = False
+    if not sent:
+        db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'Email provider rejected or could not deliver the welcome email')
+        return False
+    db.mark_welcome_email_sent(email)
+    db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
+    return True
+
+
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
     greeting = f"Hello {name}," if name else "Hello,"
     prog_text = f"specifically for <strong>{program_title}</strong> and other elite programs" if program_title else "for elite student programs"
@@ -508,13 +536,10 @@ def send_welcome_to_registered_users() -> Dict[str, int]:
             skipped += 1
             logger.warning('Skipped a reserved or invalid address during the welcome-email run.')
             continue
-        if send_welcome_email(email, user.get('name')):
+        if deliver_welcome_email(db, email, user.get('name'), user=user):
             sent += 1
-            db.mark_welcome_email_sent(email)
-            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
         else:
             failed += 1
-            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
     return {
         'total': len(recipients),
         'eligible': len(recipients) - skipped,

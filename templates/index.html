@@ -32,7 +32,7 @@
       }
     }
   </script>
-  <link rel="manifest" href="/static/manifest.json">
+  <link rel="manifest" href="/static/user_manifest.json">
 
   <meta name="keywords" content="Enterprise AI tools, Machine learning certifications, Tech student internships 2026, SaaS automation, AI news API, Nova Brief, Tech career growth, Cloud computing programs">
   <script type="application/ld+json">
@@ -101,7 +101,31 @@
         document.documentElement.classList.remove('dark');
     }
   </script>
+
+  
+<!-- Theme Logic -->
+<script>
+  function toggleAdminTheme() {
+    const isLight = document.body.classList.contains('light-mode');
+    if (isLight) {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('admin_theme', 'dark');
+    } else {
+      document.body.classList.add('light-mode');
+      localStorage.setItem('admin_theme', 'light');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Default to light mode unless dark is explicitly saved
+    if (localStorage.getItem('admin_theme') !== 'dark') {
+      document.body.classList.add('light-mode');
+    }
+  });
+</script>
 </head>
+
+
 <body class="font-sans text-neutral-900 dark:text-neutral-100 overflow-x-hidden min-h-screen bg-white dark:bg-neutral-950 transition-colors duration-300">
 
 <!-- Navbar -->

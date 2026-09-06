@@ -91,3 +91,90 @@
     border-color: rgba(239, 68, 68, 0.3);
     box-shadow: inset 2px 0 0 #ef4444, 0 0 15px rgba(239, 68, 68, 0.2);
 }
+
+/* LIGHT MODE OVERRIDES */
+body.light-mode {
+  background-color: #f8fafc !important; /* bg-slate-50 */
+  color: #0f172a !important; /* text-slate-900 */
+}
+
+body.light-mode .bg-slate-950,
+body.light-mode .bg-slate-900,
+body.light-mode .bg-slate-800 {
+  background-color: #ffffff !important;
+}
+
+body.light-mode .bg-slate-950\/50,
+body.light-mode .bg-slate-900\/50,
+body.light-mode .bg-slate-800\/50 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+body.light-mode .bg-slate-700 {
+  background-color: #f1f5f9 !important;
+}
+
+body.light-mode .bg-slate-600 {
+  background-color: #e2e8f0 !important;
+}
+
+body.light-mode .text-white,
+body.light-mode .text-slate-100,
+body.light-mode .text-slate-200 {
+  color: #0f172a !important;
+}
+
+body.light-mode .text-slate-300,
+body.light-mode .text-slate-400 {
+  color: #475569 !important;
+}
+
+body.light-mode .text-slate-500 {
+  color: #64748b !important;
+}
+
+body.light-mode .border-slate-800,
+body.light-mode .border-slate-700,
+body.light-mode .border-slate-600 {
+  border-color: #e2e8f0 !important;
+}
+
+body.light-mode .border-white\/10,
+body.light-mode .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+body.light-mode .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.03) !important;
+}
+
+body.light-mode .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Fix specific UI components for Light Mode */
+body.light-mode .surface-card,
+body.light-mode .glass-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+}
+
+body.light-mode input.bg-slate-900,
+body.light-mode textarea.bg-slate-900 {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-mode .hover\:bg-white\/10:hover {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+body.light-mode .hover\:bg-slate-800:hover {
+  background-color: #f1f5f9 !important;
+}
+
+body.light-mode .hover\:bg-slate-700:hover {
+  background-color: #e2e8f0 !important;
+}

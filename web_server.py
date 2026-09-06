@@ -5,11 +5,13 @@ from datetime import datetime, timedelta
 import concurrent.futures
 import hashlib, hmac, ipaddress, logging, json, os, re, secrets, socket, threading, time
 from collections import defaultdict, deque
+from zoneinfo import ZoneInfo
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
+from markupsafe import escape
 import ai_news_agent
 from studio_registry import get_agent_studios
 
@@ -32,8 +34,10 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SECURE=IS_PRODUCTION,
     SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_DOMAIN='.novabrief.tech' if IS_PRODUCTION else None,
     SESSION_REFRESH_EACH_REQUEST=True,
     MAX_CONTENT_LENGTH=1024 * 1024,
+    SEND_FILE_MAX_AGE_DEFAULT=timedelta(hours=1),
 )
 
 
@@ -49,6 +53,8 @@ def add_security_headers(response):
     response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
     if IS_PRODUCTION:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    if request.path.startswith('/static/'):
+        response.headers.setdefault('Cache-Control', 'public, max-age=3600')
     return response
 if IS_PRODUCTION:
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -362,12 +368,6 @@ def register_user_account():
         return jsonify({'status': 'error', 'message': 'An account with this email already exists. Please sign in or reset your password.'}), 409
     _safe_add_recipient(email)
     
-    def _bg_welcome():
-        from ai_news_agent import send_welcome_to_registered_users
-        send_welcome_to_registered_users()
-    import threading
-    threading.Thread(target=_bg_welcome).start()
-    
     session.clear()
     session.permanent = True
     session.update({'user_email': email, 'user_name': name, 'role': 'user'})
@@ -377,13 +377,8 @@ def register_user_account():
     # Send now so the API reports the real delivery result.
     welcome_sent = False
     try:
-        from ai_news_agent import send_welcome_email
-        welcome_sent = send_welcome_email(email, name)
-        if welcome_sent:
-            db.mark_welcome_email_sent(email)
-            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
-        else:
-            db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
+        from ai_news_agent import deliver_welcome_email
+        welcome_sent = deliver_welcome_email(db, email, name)
     except Exception as e:
         logger.error(f'Error triggering welcome email: {e}')
     return jsonify({
@@ -414,6 +409,13 @@ def login_user_account():
         return jsonify({'status': 'error', 'message': invalid_message}), 401
     if not user or not user.get('password_hash') or user.get('is_active') is False:
         return jsonify({'status': 'error', 'message': invalid_message}), 401
+
+    if not user.get('welcome_email_sent_at'):
+        try:
+            from ai_news_agent import deliver_welcome_email
+            deliver_welcome_email(db, email, user.get('name') or email.split('@')[0].title())
+        except Exception as e:
+            logger.error('Pending welcome retry failed during login for %s: %s', email, e)
     
     user_name = email.split('@')[0].title()
     if user:
@@ -605,10 +607,18 @@ def get_users_monitor():
 @app.route('/api/admin/user/<email>')
 @admin_required
 def get_user_detail(email):
-    detail = db.get_user_activity_detail(email)
-    if not detail:
+    user = db.get_user_by_email(email)
+    if not user:
         return jsonify({'error': 'User not found'}), 404
-    return jsonify(detail)
+    return jsonify({'user': user, 'stats': db.get_user_activity_stats(email), 'activity': db.get_user_full_activity(email)})
+
+
+@app.route('/api/admin/user/<email>/deactivate', methods=['POST'])
+@admin_required
+def deactivate_admin_user(email):
+    if not db.deactivate_user(email):
+        return jsonify({'status': 'error', 'message': 'User not found.'}), 404
+    return jsonify({'status': 'success', 'message': 'User deactivated.'})
 
 
 @app.route('/api/admin/recent-articles')
@@ -722,6 +732,7 @@ def get_contact_messages():
     return jsonify(db.get_contact_messages(limit=limit))
 
 @app.route('/api/admin/contact-messages/<int:msg_id>/reply', methods=['POST'])
+@admin_required
 def reply_contact_message(msg_id):
     try:
         reply_text = request.json.get('reply', '').strip()
@@ -736,10 +747,10 @@ def reply_contact_message(msg_id):
         from ai_news_agent import send_email
         html_content = f"""
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-            <p>Hi {msg['name']},</p>
+            <p>Hi {escape(msg['name'])},</p>
             <p>Thank you for reaching out to Nova Brief.</p>
-            <div style="background-color: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0; white-space: pre-wrap;">{reply_text}</div>
-            <p><strong>Your original message:</strong><br><br><i>{msg['message']}</i></p>
+            <div style="background-color: #f4f4f5; padding: 15px; border-radius: 8px; margin: 20px 0; white-space: pre-wrap;">{escape(reply_text)}</div>
+            <p><strong>Your original message:</strong><br><br><i>{escape(msg['message'])}</i></p>
             <p>Best regards,<br>The Nova Brief Team</p>
         </div>
         """
@@ -750,23 +761,10 @@ def reply_contact_message(msg_id):
             db.mark_message_replied(msg_id, reply_text)
             return jsonify({'status': 'success', 'message': 'Reply sent and saved.'})
         else:
-            err_msg = 'Unknown failure.'
-            try:
-                import smtplib
-                import os
-                gmail_user = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
-                gmail_pass = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_APP_PASSWORD')
-                if not gmail_user or not gmail_pass:
-                    err_msg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not set in Render Environment Variables!'
-                else:
-                    smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
-                    smtp.login(gmail_user, gmail_pass)
-                    smtp.quit()
-                    err_msg = 'SMTP login worked directly but send_email failed (possibly _official_sender_required blocking).'
-            except Exception as e:
-                err_msg = f'SMTP connection/login rejected by Gmail: {str(e)}'
-                
-            return jsonify({'status': 'error', 'message': f'Failed to send email. Error: {err_msg}'}), 502
+            return jsonify({
+                'status': 'error',
+                'message': 'Reply was not sent. Configure a verified Resend sender or SMTP account for @novabrief.tech, then retry.',
+            }), 502
     except Exception as e:
         logger.error(f'Error replying to message: {e}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
@@ -877,25 +875,18 @@ def subscribe_public():
     account_result = db.create_or_update_user_account(email, name)
     user_record = db.get_user_by_email(email) or {}
     
-    def _bg_welcome():
-        try:
-            if not user_record.get('welcome_email_sent_at'):
-                from ai_news_agent import send_welcome_email
-                if send_welcome_email(email, name):
-                    db.mark_welcome_email_sent(email)
-                    db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'success')
-                else:
-                    db.log_email_sent(email, 'Welcome to Nova Brief', 0, 'failed', 'SMTP delivery failed')
-        except Exception as e:
-            logger.error(f'Error sending subscription welcome email: {e}')
-    import threading
-    threading.Thread(target=_bg_welcome).start()
+    welcome_sent = False
+    try:
+        from ai_news_agent import deliver_welcome_email
+        welcome_sent = deliver_welcome_email(db, email, name)
+    except Exception as e:
+        logger.error(f'Error sending subscription welcome email: {e}')
     
     return jsonify({
         'status': 'success',
         'message': f'Welcome, {name}! You are subscribed. Sign in separately to access your dashboard.',
         'already_registered': account_result == 'updated',
-        'welcome_email_sent': True,
+        'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
         'redirect': '/user/login'
     })
@@ -1013,7 +1004,7 @@ def handle_ai_chat():
                 "max_tokens": 150
             }
             
-            response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers)
+            response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers, timeout=20)
             if response.status_code == 200:
                 reply = response.json()['choices'][0]['message']['content']
                 user_id = _chat_user_id()
@@ -1220,9 +1211,10 @@ def sitemap_static():
         '<?xml version="1.0" encoding="UTF-8"?>',
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
         f'  <url><loc>{domain}/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>',
-        f'  <url><loc>{domain}/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>',
-        f'  <url><loc>{domain}/student-programs</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>',
-        f'  <url><loc>{domain}/news</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>',
+        f'  <url><loc>{domain}/blog</loc><changefreq>daily</changefreq><priority>0.8</priority></url>',
+        f'  <url><loc>{domain}/privacy</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>',
+        f'  <url><loc>{domain}/terms</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>',
+        f'  <url><loc>{domain}/cookies</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>',
         '</urlset>'
     ]
     return '\n'.join(xml), 200, {'Content-Type': 'application/xml'}
@@ -1230,7 +1222,7 @@ def sitemap_static():
 @app.route('/sitemap-news.xml')
 def sitemap_news():
     domain = 'https://www.novabrief.tech'
-    articles = db.get_recent_news(limit=50) if hasattr(db, 'get_recent_news') else []
+    articles = db.get_recent_articles(limit=50)
     
     xml = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -1422,6 +1414,15 @@ def _safe_send_pending_welcomes():
     except Exception as e:
         logger.error(f'Scheduled welcome-email retry failed: {e}')
 
+def _safe_retry_pending_contact_replies():
+    try:
+        from email_reply_agent import retry_pending_contact_replies
+        count = retry_pending_contact_replies()
+        if count:
+            logger.info('Pending contact-reply retry completed for %s message(s).', count)
+    except Exception as e:
+        logger.error(f'Scheduled contact-reply retry failed: {e}')
+
 def _safe_run_seo_monitor():
     try:
         from growth_seo_agent.service import run_scheduled_if_due
@@ -1446,17 +1447,29 @@ def start_background_scheduler():
     _scheduler_started = True
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
-        scheduler = BackgroundScheduler(daemon=True)
+        timezone_name = os.getenv('NEWS_TIMEZONE', 'UTC').strip() or 'UTC'
+        try:
+            scheduler_timezone = ZoneInfo(timezone_name)
+        except Exception:
+            logger.warning('Invalid NEWS_TIMEZONE=%s; using UTC.', timezone_name)
+            scheduler_timezone = ZoneInfo('UTC')
+        try:
+            digest_hour = int(os.getenv('NEWS_DIGEST_HOUR', '8'))
+        except ValueError:
+            digest_hour = 8
+        if not 0 <= digest_hour <= 23:
+            digest_hour = 8
+        scheduler = BackgroundScheduler(daemon=True, timezone=scheduler_timezone)
         scheduler.add_job(
-            _safe_fetch_hourly, 'cron', hour=0, minute=0,
+            _safe_fetch_hourly, 'interval', hours=1,
             id='daily_news_fetch', replace_existing=True, misfire_grace_time=1800
         )
         scheduler.add_job(
-            _safe_run_news_digest, 'cron', hour=10, minute=0,
+            _safe_run_news_digest, 'cron', hour=digest_hour, minute=0,
             id='daily_news_digest', replace_existing=True, misfire_grace_time=3600
         )
         scheduler.add_job(
-            _safe_send_program_notifications, 'cron', hour=10, minute=0,
+            _safe_send_program_notifications, 'cron', hour=digest_hour, minute=0,
             id='daily_program_check', replace_existing=True, misfire_grace_time=3600
         )
         scheduler.add_job(
@@ -1465,15 +1478,22 @@ def start_background_scheduler():
             coalesce=True, max_instances=1
         )
         scheduler.add_job(
+            _safe_retry_pending_contact_replies, 'interval', minutes=5,
+            id='pending_contact_reply_retry', replace_existing=True,
+            coalesce=True, max_instances=1
+        )
+        scheduler.add_job(
             _safe_run_seo_monitor, 'cron', minute=15,
             id='seo_monitor_due_check', replace_existing=True, misfire_grace_time=1800
         )
         scheduler.start()
-        logger.info('Scheduler started: news digest, program notifications, welcome retries, and hourly SEO due checks.')
+        _safe_send_pending_welcomes()
+        _safe_retry_pending_contact_replies()
+        logger.info('Scheduler started: hourly news fetch, %02d:00 %s digest, program notifications, welcome retries, and SEO checks.', digest_hour, timezone_name)
     except Exception as e:
         logger.error(f'Could not start background scheduler: {e}')
 
-if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'false').lower() == 'true':
+if os.getenv('ENABLE_IN_PROCESS_SCHEDULER', 'true').lower() == 'true':
     start_background_scheduler()
 
 

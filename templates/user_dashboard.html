@@ -35,7 +35,7 @@ function toggleTheme() {
   </script>
   <script>
     // Theme logic
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (localStorage.getItem('color-theme') === 'dark') { // Forced light mode default
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
@@ -155,8 +155,10 @@ async function runSummarizer() {
 </script>
 
   
-  <link rel="manifest" href="/static/manifest.json">
-</head>
+  <link rel="manifest" href="/static/user_manifest.json">
+
+  </head>
+
 <body class="font-sans text-neutral-900 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-950 transition-colors duration-300">
 <div class="flex h-screen overflow-hidden">
 

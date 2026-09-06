@@ -12,7 +12,7 @@
 {% if connection_message %}
 <div class="mb-5 flex items-start gap-3 rounded-xl border px-4 py-3 text-xs font-semibold {% if connection_message == 'connected' %}border-emerald-200 bg-emerald-50 text-emerald-800{% else %}border-amber-200 bg-amber-50 text-amber-900{% endif %}">
   <i class="fas {% if connection_message == 'connected' %}fa-circle-check text-emerald-600{% else %}fa-circle-info text-amber-600{% endif %} mt-0.5"></i>
-  <span>{% if connection_message == 'connected' %}Google AdSense is connected and the first earnings report has been imported.{% elif connection_message == 'setup_required' %}Google OAuth settings must be added to the deployment before you can connect AdSense.{% elif connection_message == 'cancelled' %}AdSense connection was cancelled; no account access was saved.{% elif connection_message == 'invalid_state' %}The connection request expired. Start the AdSense connection again.{% else %}AdSense could not be connected. Confirm the Google account has AdSense access and try again.{% endif %}</span>
+  <span>{% if connection_message == 'connected' %}Google AdSense is connected and the first earnings report has been imported.{% elif connection_message == 'setup_required' %}Google OAuth settings must be added to the deployment before you can connect AdSense.{% elif connection_message == 'cancelled' %}AdSense connection was cancelled; no account access was saved.{% elif connection_message == 'invalid_state' %}This connection request is no longer valid. Start a fresh connection from this same website address, and finish it within 15 minutes.{% else %}AdSense could not be connected. Confirm the Google account has AdSense access and try again.{% endif %}</span>
 </div>
 {% endif %}
 

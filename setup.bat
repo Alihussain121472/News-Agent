@@ -66,6 +66,6 @@ echo.
 echo 4. Start daily scheduler:
 echo    python ai_news_agent.py --schedule
 echo.
-echo For more details, see AI_NEWS_AGENT_README.md
+echo For more details, see QUICK_START.md
 echo.
 pause

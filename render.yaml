@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     buildCommand: pip install --disable-pip-version-check -r requirements.txt
-    startCommand: gunicorn web_server:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    startCommand: gunicorn web_server:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
     envVars:
       - key: FLASK_ENV
         value: production
@@ -40,7 +40,11 @@ services:
       - key: REQUIRE_OFFICIAL_SENDER
         value: "true"
       - key: ENABLE_IN_PROCESS_SCHEDULER
-        value: "false"
+        value: "true"
+      - key: NEWS_TIMEZONE
+        value: Asia/Karachi
+      - key: NEWS_DIGEST_HOUR
+        value: "8"
       - key: SEO_SITE_URL
         value: https://www.novabrief.tech
       - key: GOOGLE_ADSENSE_CLIENT_ID

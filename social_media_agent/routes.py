@@ -1,7 +1,8 @@
 ﻿import os
 from functools import wraps
-from pathlib import Path
-import subprocess
+import json
+import webbrowser
+import requests
 from urllib.parse import urlparse
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
@@ -21,6 +22,23 @@ def admin_required(handler):
 def _is_cloud_hosted():
     return os.name != 'nt' or 'RENDER' in os.environ
 
+
+def _same_origin():
+    source = request.headers.get('Origin') or request.headers.get('Referer')
+    if not source:
+        return os.getenv('FLASK_ENV', 'development').strip().lower() != 'production'
+    try:
+        source_url = urlparse(source)
+        app_url = urlparse(request.host_url)
+        return source_url.scheme == app_url.scheme and source_url.netloc == app_url.netloc
+    except ValueError:
+        return False
+
+
+def _open_windows_app():
+    """Open the local Social Studio page for desktop development."""
+    webbrowser.open('http://127.0.0.1:5000/social/dashboard')
+
 @social_bp.route('/dashboard')
 @admin_required
 def dashboard():
@@ -34,17 +52,37 @@ def dashboard():
     )
 
 
-import requests
-import json
+@social_bp.route('/api/studio-status')
+@admin_required
+def studio_status():
+    return jsonify({
+        'status': 'ready' if os.environ.get('GROQ_API_KEY') else 'needs_configuration',
+        'version': SOCIAL_STUDIO_VERSION,
+        'cloud': _is_cloud_hosted(),
+        'model': os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+    })
+
+
+@social_bp.route('/api/launch-studio', methods=['POST'])
+@admin_required
+def launch_studio():
+    if not _same_origin():
+        return jsonify({'status': 'error', 'message': 'This action must be started from Nova OS.'}), 403
+    if _is_cloud_hosted():
+        return jsonify({'status': 'success', 'message': 'Social Studio is available in this browser.'})
+    _open_windows_app()
+    return jsonify({'status': 'success', 'message': 'Social Studio opened.'})
 
 @social_bp.route('/api/generate', methods=['POST'])
 @admin_required
 def generate_social_content():
-    data = request.get_json() or {}
-    topic = data.get('topic', '').strip()
+    data = request.get_json(silent=True) or {}
+    topic = str(data.get('topic') or '').strip()
     
     if not topic:
         return jsonify({'status': 'error', 'message': 'Topic or URL is required.'}), 400
+    if len(topic) > 12000:
+        return jsonify({'status': 'error', 'message': 'Topic or content must be 12,000 characters or fewer.'}), 400
         
     api_key = os.environ.get('GROQ_API_KEY')
     if not api_key:
@@ -66,17 +104,7 @@ Return ONLY a valid JSON object with the keys: "twitter", "linkedin", "facebook"
     }
     
     try:
-        # Dynamically fetch available model to prevent 404 errors
-        models_resp = requests.get('https://api.groq.com/openai/v1/models', headers={'Authorization': f'Bearer {api_key}'}, timeout=5)
-        available_models = [m['id'] for m in models_resp.json().get('data', [])]
-        # Pick a fallback model if llama is missing
-        model_name = 'llama-3.3-70b-versatile'
-        for preferred in ['llama-3.3-70b-versatile', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768']:
-            if preferred in available_models:
-                model_name = preferred
-                break
-        else:
-            if available_models: model_name = available_models[0] # ultimate fallback
+        model_name = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile').strip()
             
         payload = {
             'model': model_name,
@@ -93,6 +121,12 @@ Return ONLY a valid JSON object with the keys: "twitter", "linkedin", "facebook"
         resp.raise_for_status()
         result_text = resp.json()['choices'][0]['message']['content'].strip()
         result = json.loads(result_text)
+        if not isinstance(result, dict) or not all(isinstance(result.get(key), str) for key in ('twitter', 'linkedin', 'facebook')):
+            raise ValueError('Groq returned an incomplete social content response.')
         return jsonify({'status': 'success', 'data': result})
+    except (KeyError, IndexError, TypeError, json.JSONDecodeError, ValueError) as e:
+        return jsonify({'status': 'error', 'message': f'Invalid AI response: {e}'}), 502
+    except requests.RequestException as e:
+        return jsonify({'status': 'error', 'message': f'Groq API request failed: {e}'}), 502
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'API Error: {str(e)}'}), 500

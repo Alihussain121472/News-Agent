@@ -111,6 +111,7 @@ def adsense_connect():
     verifier = secrets.token_urlsafe(64)
     challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode('ascii')).digest()).decode('ascii').rstrip('=')
     redirect_uri = _adsense_redirect_uri()
+    session.permanent = True
     session['adsense_oauth'] = {
         'state': state,
         'verifier': verifier,
@@ -130,7 +131,7 @@ def adsense_callback():
     if (
         not pending
         or not hmac.compare_digest(state, pending.get('state') or '')
-        or int(time.time()) - int(pending.get('created_at') or 0) > 600
+        or int(time.time()) - int(pending.get('created_at') or 0) > 900
     ):
         return redirect(url_for('analytics.revenue', connection='invalid_state'))
     code = request.args.get('code') or ''
@@ -316,27 +317,9 @@ def reply_message(message_id):
     if not sent:
         db.log_email_sent(message['email'], subject, 0, 'failed', 'Support reply provider rejected or could not deliver the message')
         logger.error('Support reply delivery failed for message_id=%s', message_id)
-
-        # Inline diagnostic to see why SMTP is failing
-        err_msg = 'Unknown failure.'
-        try:
-            import smtplib
-            import os
-            gmail_user = os.getenv('GMAIL_USER') or os.getenv('EMAIL_USER')
-            gmail_pass = os.getenv('GMAIL_APP_PASSWORD') or os.getenv('EMAIL_APP_PASSWORD')
-            if not gmail_user or not gmail_pass:
-                err_msg = 'GMAIL_USER or GMAIL_APP_PASSWORD is not set in Render Environment Variables!'
-            else:
-                smtp = smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10)
-                smtp.login(gmail_user, gmail_pass)
-                smtp.quit()
-                err_msg = 'SMTP login worked directly but send_email failed (possibly _official_sender_required blocking).'
-        except Exception as e:
-            err_msg = f'SMTP connection/login rejected by Gmail: {str(e)}'
-            
         return jsonify({
             'status': 'error',
-            'message': f'Reply was not sent. Error: {err_msg}',
+            'message': 'Reply was not sent. Configure a verified Resend sender or SMTP account for @novabrief.tech, then retry.',
         }), 502
 
 

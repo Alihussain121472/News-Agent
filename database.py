@@ -1,3 +1,10 @@
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv('.env.local', override=False)
+load_dotenv('.env', override=False)
+
 import psycopg2
 import psycopg2.extras
 
@@ -68,7 +75,6 @@ def safe_connect():
     # Fallback to a direct connection if pool fails
     return PooledConnection(_pool.getconn(), _pool)
 
-import os
 import json
 from datetime import datetime, timedelta
 
@@ -179,7 +185,8 @@ class NewsDatabase:
             id SERIAL PRIMARY KEY,
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             name TEXT NOT NULL, email TEXT NOT NULL, subject TEXT NOT NULL,
-            message TEXT NOT NULL, status TEXT DEFAULT 'new')''')
+            message TEXT NOT NULL, status TEXT DEFAULT 'new', admin_reply TEXT,
+            replied_at TIMESTAMP)''')
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS daily_digest_runs (
             id SERIAL PRIMARY KEY,
@@ -252,6 +259,8 @@ class NewsDatabase:
             'welcome_email_sent_at TIMESTAMP'])
         self._ensure_table_columns(conn, 'student_programs', [
             'notified_at TIMESTAMP', 'notify_before_days INTEGER DEFAULT 7'])
+        self._ensure_table_columns(conn, 'contact_messages', [
+            'admin_reply TEXT', 'replied_at TIMESTAMP'])
 
         # Preserve one-time delivery for users who received a welcome before the
         # dedicated tracking column was introduced.
@@ -1048,9 +1057,11 @@ class NewsDatabase:
     def record_contact_message(self, name, email, subject, message) -> int:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO contact_messages (name,email,subject,message) VALUES (%s,%s,%s,%s)', (name, email, subject, message))
+        cursor.execute('''INSERT INTO contact_messages (name,email,subject,message)
+                          VALUES (%s,%s,%s,%s) RETURNING id''',
+                       (name, email, subject, message))
+        msg_id = cursor.fetchone()[0]
         conn.commit()
-        msg_id = cursor.lastrowid
         conn.close()
         return msg_id
 
@@ -1109,6 +1120,20 @@ class NewsDatabase:
         else:
             cursor.execute('SELECT * FROM contact_messages ORDER BY submitted_at DESC LIMIT %s', (limit,))
         rows = [to_dict(r) for r in cursor.fetchall()]
+        conn.close()
+        return rows
+
+    def get_pending_contact_messages(self, limit: int = 100) -> List[Dict[str, Any]]:
+        """Return contact messages that still need an automated reply."""
+        safe_limit = max(1, min(int(limit), 500))
+        conn = safe_connect()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute('''SELECT id, name, email, subject, message
+            FROM contact_messages
+            WHERE status IN ('new', 'read')
+            ORDER BY submitted_at ASC
+            LIMIT %s''', (safe_limit,))
+        rows = [to_dict(row) for row in cursor.fetchall()]
         conn.close()
         return rows
 

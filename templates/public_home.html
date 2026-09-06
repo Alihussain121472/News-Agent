@@ -466,7 +466,30 @@
             }
         }
     </style>
+
+  
+<!-- Theme Logic -->
+<script>
+  function toggleAdminTheme() {
+    const isLight = document.body.classList.contains('light-mode');
+    if (isLight) {
+      document.body.classList.remove('light-mode');
+      localStorage.setItem('admin_theme', 'dark');
+    } else {
+      document.body.classList.add('light-mode');
+      localStorage.setItem('admin_theme', 'light');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('admin_theme') !== 'dark') {
+      document.body.classList.add('light-mode');
+    }
+  });
+</script>
 </head>
+
+
 <body>
     <header class="topbar">
         <div class="container nav">
@@ -478,8 +501,14 @@
                 <a href="#features">Features</a>
                 <a href="#updates">Daily Brief</a>
                 <a href="#subscribe">Subscribe</a>
+                <a href="#" onclick="toggleAdminTheme(); return false;" class="nav-item"><i class="fas fa-moon"></i> Theme</a>
                 <a href="{{ url_for('dashboard') }}">Dashboard</a>
             </nav>
+                <div class="ml-4 flex items-center gap-4 border-l border-neutral-200 dark:border-slate-700 pl-4 hidden md:flex">
+                    <a href="https://x.com/Syedali6160" target="_blank" class="text-neutral-500 hover:text-blue-500 transition" aria-label="X"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" class="text-neutral-500 hover:text-blue-600 transition" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                </div>
+
         </div>
     </header>
 
@@ -611,7 +640,19 @@
         <div class="container">
             <p>Nova Brief © 2026</p>
         </div>
-    </footer>
+    
+                <div class="flex justify-center gap-6 mt-8">
+                    <a href="https://x.com/Syedali6160" target="_blank" class="text-neutral-500 hover:text-blue-500 text-xl transition">
+                        <span class="sr-only">X</span>
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" class="text-neutral-500 hover:text-blue-600 text-xl transition">
+                        <span class="sr-only">LinkedIn</span>
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
+
+</footer>
 
     <script>
         const form = document.getElementById('subscribeForm');

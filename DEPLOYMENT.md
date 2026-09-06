@@ -39,8 +39,12 @@ git push origin main
 
 4. **Add Environment Variables** (Click "Advanced" → "Add Environment Variable"):
    ```
-   GMAIL_USER=your-email@gmail.com
-   GMAIL_APP_PASSWORD=your-gmail-app-password
+   RESEND_API_KEY=your-resend-api-key
+   RESEND_FROM_EMAIL=NovaBrief Tech <support@novabrief.tech>
+   RESEND_REPLY_TO=support@novabrief.tech
+   # Optional SMTP fallback; the account must also be @novabrief.tech in production.
+   SMTP_USERNAME=support@novabrief.tech
+   SMTP_PASSWORD=your-smtp-password
    NEWSAPI_KEY=your-newsapi-key
    RECIPIENT_EMAIL=your-email@gmail.com
    PORT=10000
@@ -71,8 +75,11 @@ git push origin main
 2. Go to "Variables" tab
 3. Add these variables:
    ```
-   GMAIL_USER=your-email@gmail.com
-   GMAIL_APP_PASSWORD=your-gmail-app-password
+   RESEND_API_KEY=your-resend-api-key
+   RESEND_FROM_EMAIL=NovaBrief Tech <support@novabrief.tech>
+   RESEND_REPLY_TO=support@novabrief.tech
+   SMTP_USERNAME=support@novabrief.tech
+   SMTP_PASSWORD=your-smtp-password
    NEWSAPI_KEY=your-newsapi-key
    RECIPIENT_EMAIL=your-email@gmail.com
    FLASK_ENV=production
@@ -139,8 +146,9 @@ git push origin main
 - Ensure `requirements.txt` has all dependencies
 
 ### Email Not Sending:
-- Verify Gmail App Password is correct
-- Check environment variables are properly set
+- Verify the `RESEND_API_KEY` is valid and the `RESEND_FROM_EMAIL` domain is verified
+- If using SMTP fallback, verify the account is an official `@novabrief.tech` sender in production
+- Check `RESEND_REPLY_TO`, `DATABASE_URL`, and the other environment variables are set
 - Review app logs for errors
 
 ### Database Issues:

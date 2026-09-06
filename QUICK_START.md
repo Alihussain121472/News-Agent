@@ -17,12 +17,12 @@ Your AI News Agent has been upgraded to a **production-ready website** with:
 
 ## 📋 Step 1: Prepare Your Credentials (5 minutes)
 
-### 1.1 Gmail Setup
+### 1.1 Email Provider Setup
 ```
-1. Go to https://myaccount.google.com/apppasswords
-2. Enable 2-Factor Auth if needed
-3. Select "Mail" and "Windows Computer"
-4. Copy the 16-character password
+1. Create a Resend account at https://resend.com
+2. Verify the `novabrief.tech` sending domain
+3. Create a sending API key
+4. Configure `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `RESEND_REPLY_TO` in Render
 ```
 
 ### 1.2 Get Free NewsAPI Key
@@ -86,8 +86,11 @@ git push origin main
 ### 3.3 Add Environment Variables
 Click "Advanced" → Add these variables:
 ```
-GMAIL_USER = your-email@gmail.com
-GMAIL_APP_PASSWORD = xxxx-xxxx-xxxx-xxxx
+RESEND_API_KEY = your-resend-api-key
+RESEND_FROM_EMAIL = NovaBrief Tech <support@novabrief.tech>
+RESEND_REPLY_TO = support@novabrief.tech
+SMTP_USERNAME = support@novabrief.tech
+SMTP_PASSWORD = your-smtp-password
 NEWSAPI_KEY = your-newsapi-key
 RECIPIENT_EMAIL = your-email@gmail.com
 FLASK_ENV = production
@@ -177,10 +180,10 @@ See:
 
 ## 💰 Costs
 
-**COMPLETELY FREE TIER:**
+**FREE-TIER OPTIONS:**
 - Domain: $0 (Freenom)
 - Hosting: $0 (Render free tier)
-- Email: $0 (Gmail)
+- Email: Resend free tier or verified SMTP provider
 - News: $0 (NewsAPI free tier)
 - SSL: $0 (included)
 
@@ -228,7 +231,8 @@ Edit in templates:
 ### Common Issues:
 
 **❌ Emails not sending**
-- Check Gmail app password
+- Check the Resend API key and verified sending domain
+- Check the configured `RESEND_FROM_EMAIL` uses `@novabrief.tech`
 - Verify NewsAPI key
 - Check FLASK_ENV=production
 

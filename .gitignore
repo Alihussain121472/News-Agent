@@ -47,6 +47,7 @@ ai_news_agent.log
 
 # IDE
 .vscode/
+.vs/
 .idea/
 *.swp
 *.swo
