@@ -9,15 +9,15 @@ from typing import Any, Dict, Iterable, List, Tuple
 # Keep this list intentionally broad enough to cover the global technology industry,
 # while requiring a meaningful company or technology match before publication.
 COMPANY_TERMS: Dict[str, Tuple[str, ...]] = {
-    "NVIDIA": ("nvidia", "geforce", "cuda"),
-    "Google": ("google", "alphabet", "deepmind", "gemini", "waymo", "youtube"),
-    "Amazon": ("amazon", "aws", "amazon web services", "alexa"),
-    "Microsoft": ("microsoft", "azure", "copilot", "github"),
-    "OpenAI": ("openai", "chatgpt", "sora"),
-    "Meta": ("meta", "facebook", "instagram", "whatsapp", "llama"),
-    "Apple": ("apple", "iphone", "ipad", "macbook", "apple intelligence"),
-    "Anthropic": ("anthropic", "claude"),
-    "xAI": ("xai", "grok"),
+    "NVIDIA": ("nvidia", "geforce", "cuda", "jensen huang"),
+    "Google": ("google", "alphabet", "deepmind", "gemini", "waymo", "youtube", "sundar pichai", "demis hassabis"),
+    "Amazon": ("amazon", "aws", "amazon web services", "alexa", "andy jassy", "jeff bezos"),
+    "Microsoft": ("microsoft", "azure", "copilot", "github", "satya nadella", "mustafa suleyman"),
+    "OpenAI": ("openai", "chatgpt", "sora", "sam altman", "greg brockman", "mira murati"),
+    "Meta": ("meta", "facebook", "instagram", "whatsapp", "llama", "mark zuckerberg", "zuckerberg", "yann lecun"),
+    "Apple": ("apple", "iphone", "ipad", "macbook", "apple intelligence", "tim cook"),
+    "Anthropic": ("anthropic", "claude", "dario amodei"),
+    "xAI": ("xai", "grok", "elon musk"),
     "Tesla": ("tesla", "optimus"),
     "IBM": ("ibm", "watsonx"),
     "Intel": ("intel",),
@@ -152,6 +152,8 @@ TECH_EVENT_TERMS = (
     "partnership", "acquisition", "open source", "regulation", "policy", "student program",
     "update", "upgrade", "framework", "language", "course", "certification", "scholarship",
     "internship", "hackathon", "breakthrough", "discovery", "mission",
+    "tease", "hint", "coming soon", "reveal", "predict", "confirm", "preview", "roadmap",
+    "social media", "post", "tweet", "share", "upcoming", "demo", "prototype",
 )
 
 REPUTABLE_SOURCE_TERMS = (

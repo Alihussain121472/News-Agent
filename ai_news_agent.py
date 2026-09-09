@@ -123,8 +123,8 @@ def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
 
 # Focused searches provide useful global technology coverage for students.
 FOCUSED_NEWS_QUERIES = (
-    '"artificial intelligence" OR "generative AI" OR "AI model" OR OpenAI OR Anthropic',
-    '("Google" OR "Microsoft" OR "Apple" OR "Meta" OR "Amazon" OR "NVIDIA" OR "Tesla") AND ("AI" OR "software" OR "hardware" OR "cloud" OR "technology")',
+    '"artificial intelligence" OR "generative AI" OR "AI model" OR OpenAI OR Anthropic OR "Sam Altman"',
+    '("Google" OR "Microsoft" OR "Apple" OR "Meta" OR "Amazon" OR "NVIDIA" OR "Tesla" OR "Elon Musk" OR "Mark Zuckerberg" OR "Sundar Pichai" OR "Satya Nadella" OR "Jensen Huang") AND ("AI" OR "software" OR "hardware" OR "cloud" OR "technology" OR "coming soon" OR "teases" OR "announces" OR "post")',
     '"tech startup" OR "cybersecurity" OR "cloud computing" OR "software engineering" OR "programming"',
     '("Pakistan" OR "Pakistani") AND ("technology" OR "tech startup" OR "IT exports" OR "software" OR "artificial intelligence" OR "AI")',
     '("Google" OR "Microsoft" OR "Meta" OR "AWS") AND ("student program" OR "internship" OR "scholarship")',
@@ -192,7 +192,7 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
     try:
         candidate_limit = min(max(limit * 6, 40), 100)
         resp = requests.get('https://newsapi.org/v2/everything', params={
-            'q': ('AI OR NVIDIA OR Google OR Amazon OR Microsoft OR Meta OR Apple OR '
+            'q': ('AI OR NVIDIA OR Google OR Amazon OR Microsoft OR Meta OR Apple OR "Elon Musk" OR "Mark Zuckerberg" OR "Sam Altman" OR '
                   'programming OR cybersecurity OR "developer tools" OR "cloud computing" OR '
                   'semiconductor OR robotics OR "student technology"'),
             'language': 'en',
