@@ -98,10 +98,11 @@ TOPIC_TERMS: Dict[str, Tuple[str, ...]] = {
         "technology training", "developer training", "certification program", "coding bootcamp",
         "hackathon", "coding competition", "developer conference", "research paper",
     ),
-    "Pakistani Tech Career & Global Opportunities": (
-        "pakistan", "pakistani", "pakistani student", "pakistan it", "pakistan tech", "pakistan startup",
-        "remote internship", "global talent", "freelance tech", "remote developer",
-        "work from anywhere", "global internship", "tech visa", "student grant pakistan",
+    "Pakistan Technology & Startups": (
+        "pakistan tech", "pakistani tech", "pakistan it", "pakistani it", "pakistan startup", 
+        "pakistani startup", "pakistan software", "pakistani software", "pakistan ai", 
+        "pakistan artificial intelligence", "pakistan technology", "it exports pakistan",
+        "pakistan developer", "pakistani developer", "student grant pakistan",
     ),
     "Useful product and platform updates": (
         "software update", "security update", "privacy update", "accessibility feature",
@@ -132,7 +133,7 @@ FINANCE_ONLY_TERMS = (
 
 OFF_TOPIC_TERMS = (
     "celebrity", "red carpet", "box office", "movie review", "tv recap", "royal family",
-    "fashion trend", "beauty tips", "recipe", "horoscope", "football match", "cricket match",
+    "fashion trend", "beauty tips", "recipe", "horoscope", "football match", "cricket match", "politics", "election", "parliament", "prime minister", "supreme court", "arrested", "protest", "crime", "murder", "police", "military", "army",
     "basketball score", "baseball score", "dating advice", "travel deals", "shopping deals",
     "shop deals", "best deals", "sale is live", "coupon code", "limited-time deal",
     "early savings", "record low", "lowest price", "price drop", "discounted price",
@@ -234,7 +235,7 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
     score += min(max(len(topics) - 1, 0), 2) * 2
     if "Student opportunities" in topics or "Digital skills and education" in topics:
         score += 2
-    if "Pakistani Tech Career & Global Opportunities" in topics:
+    if "Pakistan Technology & Startups" in topics:
         score += 5
     score += min(supporting_matches, 2)
     score -= finance_matches * 5
