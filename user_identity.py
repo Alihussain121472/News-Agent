@@ -4,7 +4,7 @@
 def display_identity(name, email):
     name = ' '.join(name.split()) if isinstance(name, str) else ''
     email = email.strip() if isinstance(email, str) else ''
-    generic = {'user', 'admin', 'administrator', 'nova admin', 'novabrief admin', 'nova brief admin'}
+    generic = {'user', 'admin', 'administrator', 'nova admin', 'novabrief admin', 'nova brief admin', 'nove admin', 'nove', 'nova'}
     personal_name = name if name.casefold() not in generic else ''
     source = personal_name or email.partition('@')[0]
     initial = next((char.upper()[0] for char in source if char.isalnum()), '?')
