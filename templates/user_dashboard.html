@@ -717,41 +717,79 @@ async function loadArticles(force = false){
 }
 
 
-function renderArticles(arts){
-  document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
-    <article class="hover-card group bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 sm:p-6 transition relative">
-        <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
-          <input type="checkbox" onchange="handleCheckbox()" value="${a.id}" class="news-checkbox w-5 h-5 rounded border-slate-600 bg-neutral-100 dark:bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer">
-          <span class="sr-only">Select this article for summarizing</span>
-        </label>
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-6 h-6 rounded-full bg-neutral-100 dark:bg-slate-800 flex items-center justify-center text-[10px] text-neutral-500 dark:text-slate-400 font-bold border border-slate-700">
-          <i class="fas fa-robot"></i>
+function renderArticles(arts) {
+  if (!arts || arts.length === 0) {
+    document.getElementById('articlesList').innerHTML = '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12">No articles in your feed yet.</div>';
+    return;
+  }
+  
+  let html = '';
+  let adCount = 0;
+  
+  arts.forEach((a, index) => {
+    html += `
+      <article class="hover-card group bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 sm:p-6 transition relative">
+          <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
+            <input type="checkbox" onchange="handleCheckbox()" value="${a.id}" class="news-checkbox w-5 h-5 rounded border-slate-600 bg-neutral-100 dark:bg-slate-800 text-blue-500 focus:ring-blue-500 focus:ring-offset-slate-900 transition-all cursor-pointer">
+            <span class="sr-only">Select this article for summarizing</span>
+          </label>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-6 h-6 rounded-full bg-neutral-100 dark:bg-slate-800 flex items-center justify-center text-[10px] text-neutral-500 dark:text-slate-400 font-bold border border-slate-700">
+            <i class="fas fa-robot"></i>
+          </div>
+          <span class="text-xs font-semibold text-neutral-600 dark:text-slate-300">${a.source||'Nova Brief AI'}</span>
+          <span class="text-xs text-neutral-500 dark:text-slate-500">&bull;</span>
+          <span class="text-xs text-neutral-500 dark:text-slate-500">${relTime(a.fetched_at)}</span>
         </div>
-        <span class="text-xs font-semibold text-neutral-600 dark:text-slate-300">${a.source||'Nova Brief AI'}</span>
-        <span class="text-xs text-neutral-500 dark:text-slate-500">•</span>
-        <span class="text-xs text-neutral-500 dark:text-slate-500">${relTime(a.fetched_at)}</span>
-      </div>
-      <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="block group-hover:opacity-80 transition">
-        <h3 class="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white leading-tight mb-2">${a.title||'Untitled'}</h3>
-        <p class="text-neutral-500 dark:text-slate-400 text-sm md:text-base leading-relaxed mb-4 font-light">${(a.summary||'').substring(0,280)}${(a.summary||'').length>280?'...':''}</p>
-      </a>
-      ${a.why_important?`<div class="bg-neutral-100 dark:bg-slate-800/40 border-l-2 border-blue-500 p-3 rounded-r-lg text-xs text-neutral-600 dark:text-slate-300 mb-4"><span class="font-bold text-blue-400 block mb-1">Why it matters:</span>${a.why_important}</div>`:''}
-      <div class="mb-5 mt-2">
-        <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="inline-flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold px-4 py-2 rounded-lg transition-colors">
-          Read Full Article on ${a.source||'Source'} <i class="fas fa-external-link-alt"></i>
+        <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="block group-hover:opacity-80 transition">
+          <h3 class="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white leading-tight mb-2">${a.title||'Untitled'}</h3>
+          <p class="text-neutral-500 dark:text-slate-400 text-sm md:text-base leading-relaxed mb-4 font-light">${(a.summary||'').substring(0,280)}${(a.summary||'').length>280?'...':''}</p>
         </a>
-      </div>
-      <div class="flex items-center justify-between border-t border-neutral-200 dark:border-slate-800 pt-4 mt-4">
-        <div class="flex items-center gap-4">
-          <span class="text-[11px] font-medium px-2.5 py-1 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-300 rounded-full">${(a.news_topics&&a.news_topics[0])||(a.companies&&a.companies[0])||'AI & Big Tech'}</span>
-          <span class="text-xs text-neutral-500 dark:text-slate-500">${Math.max(2, Math.floor((a.summary||'').length/130))} min read</span>
+        ${a.why_important?`<div class="bg-neutral-100 dark:bg-slate-800/40 border-l-2 border-blue-500 p-3 rounded-r-lg text-xs text-neutral-600 dark:text-slate-300 mb-4"><span class="font-bold text-blue-400 block mb-1">Why it matters:</span>${a.why_important}</div>`:''}
+        <div class="mb-5 mt-2">
+          <a href="${a.url&&a.url!=='#'?a.url:'#'}" target="_blank" class="inline-flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold px-4 py-2 rounded-lg transition-colors">
+            Read Full Article on ${a.source||'Source'} <i class="fas fa-external-link-alt"></i>
+          </a>
         </div>
-        <div class="flex items-center gap-3">
-          <button type="button" onclick="saveArticle(${a.id}, this)" class="text-neutral-500 dark:text-slate-400 hover:text-blue-300 transition rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Save article for later"><i class="far fa-bookmark"></i><span class="sr-only">Save article</span></button>
+        <div class="flex items-center justify-between border-t border-neutral-200 dark:border-slate-800 pt-4 mt-4">
+          <div class="flex items-center gap-4">
+            <span class="text-[11px] font-medium px-2.5 py-1 bg-neutral-100 dark:bg-slate-800 text-neutral-600 dark:text-slate-300 rounded-full">${(a.news_topics&&a.news_topics[0])||(a.companies&&a.companies[0])||'AI & Big Tech'}</span>
+            <span class="text-xs text-neutral-500 dark:text-slate-500">${Math.max(2, Math.floor((a.summary||'').length/130))} min read</span>
+          </div>
+          <button type="button" onclick="saveArticle(${a.id}, this)" class="text-neutral-400 hover:text-blue-500 transition" aria-label="Save Article"><i class="far fa-bookmark text-lg"></i></button>
         </div>
-      </div>
-    </article>`).join('') : '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12">No articles in your feed yet.</div>';
+      </article>
+    `;
+
+    // Inject the Google AdSense In-Feed Ad after the 2nd, 7th, 14th, 22nd article
+    if (index === 1 || index === 6 || index === 13 || index === 21) {
+      html += `
+        <div class="hover-card group bg-white dark:bg-slate-900/40 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-4 sm:p-5 transition relative my-4 overflow-hidden">
+          <span class="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-500 mb-2 block tracking-widest text-center">Advertisement</span>
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-format="fluid"
+               data-ad-layout-key="+34+pu+4v-s-3g"
+               data-ad-client="ca-pub-1036052096443002"
+               data-ad-slot="8509700891"></ins>
+        </div>
+      `;
+      adCount++;
+    }
+  });
+
+  document.getElementById('articlesList').innerHTML = html;
+
+  // Trigger AdSense to push ads into the newly created <ins> slots
+  setTimeout(() => {
+    try {
+      for(let i = 0; i < adCount; i++) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch (e) {
+      console.error("AdSense Error: ", e);
+    }
+  }, 100);
 }
 
 function liveSearch(){
