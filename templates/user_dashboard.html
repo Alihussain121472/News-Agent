@@ -606,7 +606,7 @@ async function savePreferences() {
 }
 
 // Ensure loadMemory is called initially
-document.addEventListener('DOMContentLoaded', loadMemory);
+document.addEventListener('DOMContentLoaded', () => { loadMemory(); loadArticles(false); });
 
 // Load overview
 async function loadOverview(){
