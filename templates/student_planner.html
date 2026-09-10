@@ -1,0 +1,51 @@
+<section id="tab-planner" class="hidden student-tools" aria-labelledby="plannerTitle">
+  <div class="st-heading">
+    <div><p class="st-eyebrow"><i class="fas fa-lock" aria-hidden="true"></i> Your private workspace</p><h2 id="plannerTitle">Turn opportunities into next steps.</h2><p>Track your applications, prepare your documents and make room for learning.</p></div>
+    <div class="st-actions"><button type="button" id="plannerCalendar" class="st-button"><i class="fas fa-calendar-plus" aria-hidden="true"></i> Download calendar</button><button type="button" id="plannerAddApplication" class="st-button st-primary"><i class="fas fa-plus" aria-hidden="true"></i> Add application</button></div>
+  </div>
+  <p class="st-calendar-help">Calendar downloads include upcoming deadlines for saved or preparing applications and unfinished tasks. Import the file into your calendar; it is a snapshot, not an automatic sync or email reminder.</p>
+  <div id="plannerNotice" class="st-notice" role="status" aria-live="polite" hidden></div>
+  <div id="plannerSummary" class="st-summary" aria-label="Planner overview"></div>
+  <div class="st-workspace">
+    <section class="st-panel st-applications" aria-labelledby="applicationsHeading">
+      <div class="st-section-heading"><div><h3 id="applicationsHeading">Application tracker</h3><p>Saving here does not apply to the program.</p></div><button type="button" id="plannerRefresh" class="st-button st-small" aria-label="Refresh planner"><i class="fas fa-rotate" aria-hidden="true"></i> Refresh</button></div>
+      <label class="st-filter-status">Show applications<select id="applicationStatusFilter"><option value="">All statuses</option><option value="saved">Saved</option><option value="preparing">Preparing</option><option value="submitted">Submitted</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="closed">Closed</option></select></label>
+      <div id="plannerApplications" class="st-application-list" aria-busy="false"></div>
+    </section>
+    <section class="st-panel st-study" aria-labelledby="studyHeading">
+      <div class="st-section-heading"><div><h3 id="studyHeading">Study tasks</h3><p>Small steps for your next skill or application.</p></div><button type="button" id="plannerAddTask" class="st-button st-small"><i class="fas fa-plus" aria-hidden="true"></i> Add task</button></div>
+      <label class="st-check st-show-completed"><input type="checkbox" id="showCompletedTasks"> Show completed tasks</label>
+      <div id="plannerTasks" class="st-task-list" aria-busy="false"></div>
+      <p class="st-footnote">Notes and task details are private to your account. Avoid storing passwords or sensitive documents.</p>
+    </section>
+  </div>
+
+  <dialog id="applicationDialog" class="st-dialog" aria-labelledby="applicationDialogTitle" aria-describedby="applicationDialogHelp">
+    <form id="applicationForm">
+      <div class="st-section-heading"><h3 id="applicationDialogTitle">Add application</h3><button type="button" class="st-icon-button" data-close-dialog="applicationDialog" aria-label="Close application editor">&times;</button></div>
+      <p id="applicationDialogHelp" class="st-muted">Keep your own preparation record. Confirm the deadline and requirements on the provider's website.</p>
+      <input type="hidden" name="id">
+      <div class="st-form-grid">
+        <label class="st-full">Program or application title <span aria-hidden="true">*</span><input name="title" required maxlength="200" autocomplete="off" placeholder="e.g. Summer engineering internship"></label>
+        <label>Organization<input name="company" maxlength="120" autocomplete="organization" placeholder="e.g. University or company"></label>
+        <label>Status<select name="status"><option value="saved">Saved</option><option value="preparing">Preparing</option><option value="submitted">Submitted</option><option value="interview">Interview</option><option value="offer">Offer</option><option value="closed">Closed</option></select></label>
+        <label class="st-full">Provider link<input name="registration_url" type="url" maxlength="2000" placeholder="https://…" aria-describedby="applicationLinkHelp"><span id="applicationLinkHelp" class="st-input-help">Optional. Use a full http:// or https:// address.</span></label>
+        <label class="st-full">Deadline<input name="deadline" type="date" min="2000-01-01" max="2100-12-31"><span class="st-input-help">Leave blank if the provider has not confirmed a date.</span></label>
+        <fieldset class="st-full st-checklist"><legend>Preparation checklist</legend><label class="st-check"><input type="checkbox" name="checklist" value="eligibility"> Reviewed requirements</label><label class="st-check"><input type="checkbox" name="checklist" value="cv"> Updated CV</label><label class="st-check"><input type="checkbox" name="checklist" value="statement"> Prepared statement</label><label class="st-check"><input type="checkbox" name="checklist" value="documents"> Checked documents</label></fieldset>
+        <label class="st-full">Private notes<textarea name="notes" rows="4" maxlength="4000" placeholder="Questions to ask, documents to prepare, or your next step…"></textarea></label>
+      </div>
+      <p id="applicationFormError" class="st-form-error" role="alert" hidden></p>
+      <div class="st-dialog-actions"><button type="button" class="st-button" data-close-dialog="applicationDialog">Cancel</button><button type="submit" class="st-button st-primary">Save application</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="taskDialog" class="st-dialog st-task-dialog" aria-labelledby="taskDialogTitle">
+    <form id="taskForm">
+      <div class="st-section-heading"><h3 id="taskDialogTitle">Add study task</h3><button type="button" class="st-icon-button" data-close-dialog="taskDialog" aria-label="Close study task editor">&times;</button></div>
+      <input type="hidden" name="id">
+      <div class="st-form-grid"><label class="st-full">Task <span aria-hidden="true">*</span><input name="title" required maxlength="200" placeholder="e.g. Finish the first Python lesson" autocomplete="off"></label><label class="st-full">Due date<input name="due_date" type="date" min="2000-01-01" max="2100-12-31"><span class="st-input-help">Optional. Choose a realistic date for your next step.</span></label><label class="st-check st-full"><input type="checkbox" name="completed"> Completed</label></div>
+      <p id="taskFormError" class="st-form-error" role="alert" hidden></p>
+      <div class="st-dialog-actions"><button type="button" class="st-button" data-close-dialog="taskDialog">Cancel</button><button type="submit" class="st-button st-primary">Save task</button></div>
+    </form>
+  </dialog>
+</section>

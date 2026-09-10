@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Contact Nova Brief Tech - Get in touch with our editorial and support team for inquiries, corrections, program submissions, or partnerships.">
+    <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+    <title>Contact Us - Nova Brief</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+    {% include "theme_head.html" %}
+</head>
+
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <span class="text-lg font-bold text-neutral-900 dark:text-white tracking-tight">Nova Brief</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
+                    <a href="/news" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">News</a>
+                    <a href="/blog" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Blog</a>
+                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
+                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
+                    <a href="/contact" class="text-blue-600 dark:text-blue-400 font-bold text-sm">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <a href="/user/login" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Sign In</a>
+                    <a href="/#subscribe" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="py-16 text-center bg-gradient-to-b from-blue-500/5 to-transparent">
+        <div class="max-w-4xl mx-auto px-4">
+            <span class="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-full inline-block mb-4">Direct Communication</span>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Contact Our Team</h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Have a question, feedback, program tip, or partnership inquiry? Reach out directly and we will respond within 24 hours.</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 pb-20">
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Info Cards -->
+            <div class="space-y-6 md:col-span-1">
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
+                    <div class="w-10 h-10 bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Email Us</h3>
+                    <p class="text-xs text-slate-500 mb-3">For general inquiries, editorial tips, or bug reports:</p>
+                    <a href="mailto:support@novabrief.tech" class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline break-all">support@novabrief.tech</a>
+                    <div class="mt-1">
+                        <a href="mailto:supportnovabrief@gmail.com" class="text-xs text-slate-500 hover:underline break-all">supportnovabrief@gmail.com</a>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
+                    <div class="w-10 h-10 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Response Time</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Our automated intelligence desk confirms messages immediately, and our team responds personally within <strong>24 to 48 hours</strong>.</p>
+                </div>
+
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
+                    <div class="w-10 h-10 bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 rounded-xl flex items-center justify-center mb-4 text-lg">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Connect</h3>
+                    <div class="flex gap-3">
+                        <a href="https://x.com/Syedali6160" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-neutral-800 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-blue-600 transition">
+                            <i class="fab fa-twitter text-sm"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ali-hussain-93a24430a/" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-neutral-800 flex items-center justify-center text-slate-700 dark:text-slate-300 hover:text-blue-600 transition">
+                            <i class="fab fa-linkedin text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-8 rounded-2xl shadow-sm md:col-span-2">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Send Us a Message</h2>
+                <p class="text-sm text-slate-500 mb-6">Fill out the form below and our editorial or support desk will get back to you promptly.</p>
+
+                <form id="publicContactForm" class="space-y-4">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="contactName" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Full Name</label>
+                            <input type="text" id="contactName" placeholder="Your Name" required class="w-full bg-slate-50 dark:bg-neutral-800/80 border border-slate-300 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                        <div>
+                            <label for="contactEmail" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Email Address</label>
+                            <input type="email" id="contactEmail" placeholder="you@domain.com" required class="w-full bg-slate-50 dark:bg-neutral-800/80 border border-slate-300 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="contactSubject" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Subject</label>
+                        <input type="text" id="contactSubject" placeholder="What is this regarding?" required class="w-full bg-slate-50 dark:bg-neutral-800/80 border border-slate-300 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition">
+                    </div>
+                    <div>
+                        <label for="contactMessage" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Message</label>
+                        <textarea id="contactMessage" rows="5" placeholder="Your question, suggestion, or message..." required class="w-full bg-slate-50 dark:bg-neutral-800/80 border border-slate-300 dark:border-neutral-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 transition resize-none"></textarea>
+                    </div>
+                    <div id="contactStatus" class="hidden p-3 rounded-xl text-sm font-semibold text-center"></div>
+                    <button type="submit" id="contactSubmitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2">
+                        <span>Send Message</span>
+                        <i class="fas fa-paper-plane text-xs"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-6 mb-6">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <a href="/news" class="hover:text-blue-600">News</a>
+                <a href="/blog" class="hover:text-blue-600">Blog</a>
+                <a href="/about" class="hover:text-blue-600">About Us</a>
+                <a href="/contact" class="text-blue-600 font-bold">Contact</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
+                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
+                <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
+            </div>
+            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    document.getElementById('publicContactForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('contactSubmitBtn');
+        const status = document.getElementById('contactStatus');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+        
+        try {
+            const res = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: document.getElementById('contactName').value.trim(),
+                    email: document.getElementById('contactEmail').value.trim(),
+                    subject: document.getElementById('contactSubject').value.trim(),
+                    message: document.getElementById('contactMessage').value.trim()
+                })
+            });
+            const data = await res.json();
+            status.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-emerald-100', 'text-emerald-700');
+            if (res.ok) {
+                status.classList.add('bg-emerald-100', 'text-emerald-700');
+                status.textContent = data.message || "Thank you! Your message has been sent successfully.";
+                document.getElementById('publicContactForm').reset();
+            } else {
+                status.classList.add('bg-red-100', 'text-red-700');
+                status.textContent = data.message || "An error occurred. Please try again.";
+            }
+        } catch (err) {
+            status.classList.remove('hidden');
+            status.classList.add('bg-red-100', 'text-red-700');
+            status.textContent = "Unable to connect to the server. Please email support@novabrief.tech directly.";
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span>Send Message</span><i class="fas fa-paper-plane text-xs"></i>';
+        }
+    });
+    </script>
+</body>
+</html>

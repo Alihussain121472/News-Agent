@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Latest Artificial Intelligence and Technology News - Curated daily briefings, machine learning developments, and tech career updates from Nova Brief.">
+    <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+    <title>Live Tech & AI News - Nova Brief</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous"></script>
+
+    {% include "theme_head.html" %}
+</head>
+
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <span class="text-lg font-bold text-neutral-900 dark:text-white tracking-tight">Nova Brief</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
+                    <a href="/news" class="text-blue-600 dark:text-blue-400 font-bold text-sm">News</a>
+                    <a href="/blog" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Blog</a>
+                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
+                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
+                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <a href="/user/login" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Sign In</a>
+                    <a href="/#subscribe" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">Get Briefings</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="py-14 text-center bg-gradient-to-b from-blue-500/5 to-transparent border-b border-slate-200 dark:border-neutral-800/80">
+        <div class="max-w-4xl mx-auto px-4">
+            <span class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-xs uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full mb-4">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Verified News Feed
+            </span>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Live Technology & AI Intelligence</h1>
+            <p class="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Vetted daily developments in artificial intelligence, software engineering, space tech, and student career opportunities.</p>
+        </div>
+    </header>
+
+    <!-- Content Feed -->
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Articles List -->
+            <div class="lg:col-span-2 space-y-6">
+                {% for item in articles %}
+                <article id="article-{{ item.id }}" class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 md:p-7 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                        <span class="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-md">
+                            <i class="fas fa-newspaper mr-1"></i> {{ item.source or 'Tech News' }}
+                        </span>
+                        <span>&bull;</span>
+                        <span><i class="far fa-calendar-alt mr-1"></i> {{ (item.published_at|string)[:10] if item.published_at else ((item.fetched_at|string)[:10] if item.fetched_at else 'Recent') }}</span>
+                    </div>
+
+                    <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3 leading-snug hover:text-blue-600 transition">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+                    </h2>
+
+                    <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-5">
+                        {{ item.summary or 'Full coverage and source analysis available via the primary publication.' }}
+                    </p>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-neutral-800/80 text-xs">
+                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1.5">
+                            <span>Read Original Source</span>
+                            <i class="fas fa-external-link-alt text-[10px]"></i>
+                        </a>
+                        <span class="text-slate-400">Verified Article #{{ item.id }}</span>
+                    </div>
+                </article>
+                {% else %}
+                <div class="text-center py-16 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-8">
+                    <i class="fas fa-satellite-dish text-4xl text-slate-400 mb-4"></i>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Gathering Intelligence</h3>
+                    <p class="text-slate-500 text-sm">New technology articles are refreshed hourly. Please check back shortly.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Google AdSense in content sidebar (compliant placement) -->
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-3">Advertisement</span>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-1036052096443002"
+                         data-ad-slot="auto"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+
+                <!-- Deep Dive Guides Box -->
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                        <i class="fas fa-book-open text-blue-600"></i> Editorial Deep Dives
+                    </h3>
+                    <p class="text-xs text-slate-500 mb-4">Explore in-depth technical roadmaps, internship guides, and career strategies written by our editors:</p>
+                    <ul class="space-y-3 text-sm">
+                        <li>
+                            <a href="/blog/generative-ai-roadmap-students-2026" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium block leading-snug">
+                                &rarr; Complete Roadmap to Generative AI in 2026
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/blog/top-remote-tech-internships-students" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium block leading-snug">
+                                &rarr; Top 10 High-Paying Remote Tech Internships
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/blog/nasa-open-science-student-guide" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium block leading-snug">
+                                &rarr; NASA Open Science: Official Badges & Data
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/blog/free-tech-certifications-employers-respect" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium block leading-snug">
+                                &rarr; Free Tech Certifications That Employers Respect
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-neutral-800">
+                        <a href="/blog" class="text-xs font-bold text-blue-600 hover:underline">View All 20+ Articles &rarr;</a>
+                    </div>
+                </div>
+
+                <!-- Newsletter CTA -->
+                <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold mb-2">Get Daily Tech Briefings</h3>
+                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">Join thousands of students and engineers receiving daily AI breakthroughs and early application deadlines directly in their inbox.</p>
+                    <a href="/#subscribe" class="block w-full text-center bg-white text-blue-600 font-bold py-2.5 rounded-xl text-sm hover:bg-blue-50 transition">Subscribe Free</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-6 mb-6">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <a href="/news" class="text-blue-600 font-bold">News</a>
+                <a href="/blog" class="hover:text-blue-600">Blog</a>
+                <a href="/about" class="hover:text-blue-600">About Us</a>
+                <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
+                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
+                <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
+            </div>
+            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

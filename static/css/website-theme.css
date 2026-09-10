@@ -1,0 +1,84 @@
+/* Public/student pages only. The separate admin theme is intentionally untouched. */
+:root { color-scheme: light; }
+html.dark { color-scheme: dark; }
+.nova-site {
+  --theme-bg: #f5f7fb; --theme-surface: #ffffff; --theme-raised: #eef3f9;
+  --theme-text: #0f172a; --theme-muted: #526176; --theme-line: #d5deea;
+  --theme-blue: #1d4ed8; --theme-green: #047857; --theme-purple: #6d28d9;
+  --theme-red: #b91c1c; --theme-amber: #92400e; --theme-tint: #eaf1ff;
+  --theme-edge: #93b4ef; --theme-shadow: 0 8px 25px rgb(30 64 110 / 9%);
+  --color-text-strong: var(--theme-text); --color-text: var(--theme-text);
+  --color-text-muted: var(--theme-muted); --color-brand: var(--theme-blue);
+  --color-accent: var(--theme-green); --color-danger: var(--theme-red);
+  --color-warning: var(--theme-amber); --color-ink: var(--theme-text);
+  --color-darker-bg: var(--theme-bg); --darker-bg: var(--theme-bg);
+  --text-secondary: var(--theme-text); --text-muted: var(--theme-muted);
+  background: var(--theme-bg); color: var(--theme-text);
+  transition: background-color .18s ease, color .18s ease;
+}
+html.dark .nova-site {
+  --theme-bg: #080f1c; --theme-surface: #111c2f; --theme-raised: #19283d;
+  --theme-text: #edf3fc; --theme-muted: #a7b6cc; --theme-line: #334259;
+  --theme-blue: #93c5fd; --theme-green: #6ee7b7; --theme-purple: #c4b5fd;
+  --theme-red: #fda4af; --theme-amber: #fcd34d; --theme-tint: #192f50;
+  --theme-edge: #4d76b4; --theme-shadow: 0 10px 30px rgb(0 0 0 / 24%);
+}
+.nova-site :is(.bg-white,.bg-white\/80,.bg-white\/95,.glass-card,.hover-card,.sidebar) {
+  background: var(--theme-surface); border-color: var(--theme-line);
+}
+.nova-site :is(.bg-slate-50,.bg-slate-100,.bg-neutral-100,.bg-neutral-800,.bg-slate-800,.bg-slate-900\/50,.bg-dark-800\/60) { background-color: var(--theme-raised); }
+.nova-site :is(.text-neutral-900,.text-neutral-800,.text-neutral-700,.text-black,.text-slate-950,.text-slate-900,.text-slate-800,.text-slate-700,.text-slate-300,.text-slate-200) { color: var(--theme-text); }
+.nova-site :is(.text-neutral-300,.text-neutral-400,.text-neutral-500,.text-neutral-600,.text-slate-400,.text-slate-500,.text-slate-600) { color: var(--theme-muted); }
+.nova-site :is(.text-blue-200,.text-blue-300,.text-blue-400,.text-blue-500,.text-blue-600,.text-cyan-400,.text-sky-400,.text-indigo-400) { color: var(--theme-blue); }
+.nova-site :is(.text-purple-300,.text-purple-400,.text-purple-500) { color: var(--theme-purple); }
+.nova-site :is(.text-emerald-200,.text-emerald-300,.text-emerald-400,.text-green-400) { color: var(--theme-green); }
+.nova-site :is(.text-red-300,.text-red-400,.text-red-500,.text-red-600) { color: var(--theme-red); }
+.nova-site :is(.text-orange-400,.text-yellow-300,.text-yellow-400,.text-amber-400) { color: var(--theme-amber); }
+.nova-site :is(.border-slate-100,.border-slate-200,.border-neutral-200,.border-slate-700,.border-slate-700\/50,.border-neutral-700\/50,.border-slate-800) { border-color: var(--theme-line); }
+.nova-site .glass-card { border: 1px solid var(--theme-line); }
+.nova-site .hover-card { transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease; }
+.nova-site :is(.hover-card,.glass-card):hover { border-color: var(--theme-edge); box-shadow: var(--theme-shadow); }
+.nova-site :is(.nav-item,.tab-btn):hover { color: var(--theme-blue); background: var(--theme-tint); }
+.nova-site :is(.nav-item,.tab-btn).active { color: var(--theme-blue); background: var(--theme-tint); box-shadow: inset 0 0 0 1px var(--theme-edge); }
+.nova-site :is(input:not([type=checkbox]):not([type=radio]),textarea,select) {
+  background-color: var(--theme-surface); color: var(--theme-text); border-color: var(--theme-line); color-scheme: inherit;
+}
+.nova-site :is(input,textarea)::placeholder { color: var(--theme-muted); opacity: .8; }
+.nova-site input:is([type=checkbox],[type=radio]) { accent-color: #2563eb; }
+.nova-site input:autofill { -webkit-text-fill-color: var(--theme-text); box-shadow: 0 0 0 1000px var(--theme-raised) inset; }
+.nova-site :is(input,textarea,select):focus-visible { border-color: var(--theme-blue); outline: 2px solid var(--theme-blue); outline-offset: 2px; }
+.nova-site :is(button,a):focus-visible { outline: 3px solid var(--theme-blue); outline-offset: 3px; }
+.nova-site .ui-button--secondary { background: var(--theme-surface); color: var(--theme-text); border-color: var(--theme-line); box-shadow: 0 1px 3px rgb(15 23 42 / 7%); }
+.nova-site .ui-button--secondary:hover { background: var(--theme-raised); color: var(--theme-text); border-color: var(--theme-edge); }
+.nova-site .ui-button--quiet { color: var(--theme-muted); }
+.nova-site .ui-button--quiet:hover { background: var(--theme-tint); color: var(--theme-blue); }
+.nova-site .ui-button--primary { color: #fff; background: linear-gradient(135deg,#1d4ed8,#047857); }
+.nova-site .ui-button--primary:hover { color: #fff; background: linear-gradient(135deg,#1e40af,#065f46); }
+.nova-site :is(.text-white,.btn-primary,.st-primary,.nova-profile-avatar) { color: #fff; }
+.nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600,.bg-slate-900) { color: #fff; }
+.nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600):hover { color: #fff; background-color: #1d4ed8; }
+.nova-site :is(button,a).bg-slate-900 { background: #1e293b; }
+.nova-site :is(button,a).bg-slate-900:hover { background: #334155; }
+.nova-site :is(.hover\:bg-slate-700,.hover\:bg-white\/10):hover { background-color: var(--theme-raised); }
+.nova-site :is(#summaryModal,#preferencesModal) { background: rgb(8 15 28 / 60%); }
+.nova-site .student-tools {
+  --st-bg: var(--theme-surface); --st-subtle: var(--theme-raised); --st-text: var(--theme-text);
+  --st-muted: var(--theme-muted); --st-line: var(--theme-line); --st-blue: var(--theme-blue);
+  --st-tint: var(--theme-tint); --st-green: var(--theme-green);
+}
+.nova-site :is(.st-panel,.st-stat,.st-application,.st-opportunity,.st-dialog) { box-shadow: 0 2px 7px rgb(0 0 0 / 5%); }
+.nova-site :is(.st-application,.st-opportunity):hover { border-color: var(--theme-edge); }
+.nova-site .st-button.st-primary { color: #fff; }
+.nova-site .nova-profile-chip { display:flex; align-items:center; gap:10px; padding:7px 11px; border:1px solid var(--theme-line); border-radius:12px; background:var(--theme-surface); box-shadow:0 2px 7px rgb(15 23 42 / 5%); }
+.nova-site .nova-profile-avatar { display:grid; place-items:center; flex-shrink:0; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#2563eb,#047857); color:#fff; font-weight:750; }
+.nova-site .nova-profile-copy { min-width:0; max-width:190px; }
+.nova-site .nova-profile-name { font-size:13px; font-weight:650; color:var(--theme-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nova-site .nova-profile-email { font-size:11px; color:var(--theme-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.nova-site [data-theme-toggle] { color:var(--theme-muted); background:var(--theme-surface); border:1px solid var(--theme-line); border-radius:10px; min-width:38px; min-height:38px; }
+.nova-site [data-theme-toggle]:hover { color:var(--theme-blue); background:var(--theme-tint); }
+.nova-theme-corner { position:fixed; right:16px; bottom:16px; z-index:60; padding:9px 13px; font-size:13px; box-shadow:var(--theme-shadow); cursor:pointer; }
+.nova-site::-webkit-scrollbar-track,.nova-site ::-webkit-scrollbar-track { background:var(--theme-bg); }
+.nova-site::-webkit-scrollbar-thumb,.nova-site ::-webkit-scrollbar-thumb { background:var(--theme-line); }
+@media(max-width:639px) { .nova-profile-copy { display:none; } .nova-site .nova-profile-chip { padding:4px; } }
+@media(min-width:768px) { .nova-theme-mobile { display:none; } }
+@media(prefers-reduced-motion:reduce) { .nova-site,.nova-site * { transition:none!important; scroll-behavior:auto!important; } }

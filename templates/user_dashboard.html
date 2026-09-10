@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  
+
   <meta name="description" content="Nova Brief is the ultimate AI News Agent and Growth platform for students and tech enthusiasts. Get daily updates on AI, tech programs, and exclusive certifications.">
   <meta name="keywords" content="AI News, Tech News, Student Programs, Google Certifications, Microsoft Student, AI Automation, Tech Opportunities">
   <title>My Dashboard - Nova Brief</title>
@@ -10,48 +10,20 @@
   <link rel="icon" href="/static/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-<script>
-function toggleTheme() {
-    const htmlEl = document.documentElement;
-    htmlEl.classList.toggle('dark');
-    if (htmlEl.classList.contains('dark')) {
-        localStorage.setItem('color-theme', 'dark');
-    } else {
-        localStorage.setItem('color-theme', 'light');
-    }
-}
-</script>
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-        }
-      }
-    }
-  </script>
-  <script>
-    // Theme logic
-    if (localStorage.getItem('color-theme') === 'dark') { // Forced light mode default
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-  </script>
+
+
+
   <link rel="stylesheet" href="/static/css/tailwind.css">
+  <link rel="stylesheet" href="/static/css/student-tools.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <meta name="google-adsense-account" content="ca-pub-1036052096443002">
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous"></script>
   <script>
 function handleCheckbox() {
   const checkboxes = document.querySelectorAll('.news-checkbox:checked');
   const dock = document.getElementById('summarizeDock');
   const count = document.getElementById('selCount');
-  
+
   if (checkboxes.length > 0) {
     count.innerText = checkboxes.length;
     dock.classList.remove('hidden');
@@ -64,15 +36,15 @@ function handleCheckbox() {
 async function summarizeSelected() {
   const checkboxes = document.querySelectorAll('.news-checkbox:checked');
   if (checkboxes.length === 0) return;
-  
+
   const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
   const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
-  
+
   const btn = document.getElementById('sumBtn');
   const originalHtml = btn.innerHTML;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
   btn.disabled = true;
-  
+
   try {
     const res = await fetch('/api/summarize-news', {
       method: 'POST',
@@ -80,10 +52,10 @@ async function summarizeSelected() {
       body: JSON.stringify({ articles: selectedArticles })
     });
     const data = await res.json();
-    
+
     btn.innerHTML = originalHtml;
     btn.disabled = false;
-    
+
     if (data.status === 'success') {
       const formatted = data.summary.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong class="text-neutral-900 dark:text-white">$1</strong>');
       document.getElementById('summaryModalContent').innerHTML = formatted;
@@ -110,20 +82,20 @@ async function runSummarizer() {
   const selectUrl = document.getElementById('summarizeSelect').value;
   const inputUrl = document.getElementById('summarizeUrl').value.trim();
   const url = inputUrl || selectUrl;
-  
+
   if(!url || !url.startsWith('http')) {
     alert('Please select an article or enter a valid URL.');
     return;
   }
-  
+
   const btn = document.getElementById('btnSummarize');
   const resultContainer = document.getElementById('summaryResultContainer');
   const resultContent = document.getElementById('summaryContent');
-  
+
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Article...';
   btn.disabled = true;
   btn.classList.add('opacity-70');
-  
+
   try {
     const r = await fetch('/api/summarize', {
       method: 'POST',
@@ -131,7 +103,7 @@ async function runSummarizer() {
       body: JSON.stringify({url: url})
     });
     const data = await r.json();
-    
+
     resultContainer.classList.remove('hidden');
     if(data.status === 'success') {
       // Format bullet points properly with Tailwind HTML
@@ -156,12 +128,13 @@ async function runSummarizer() {
 }
 </script>
 
-  
+
   <link rel="manifest" href="/static/user_manifest.json">
 
-  </head>
+    {% include "theme_head.html" %}
+</head>
 
-<body class="font-sans text-neutral-900 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-950 transition-colors duration-300">
+<body class="nova-site font-sans text-neutral-900 dark:text-neutral-100 bg-neutral-50 dark:bg-neutral-950 transition-colors duration-300">
 <div class="flex h-screen overflow-hidden">
 
   <!-- Sidebar -->
@@ -174,9 +147,9 @@ async function runSummarizer() {
     </div>
     <div class="p-4 border-b border-neutral-200 dark:border-slate-800">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-sm" id="avatarInitial">U</div>
+        <div class="nova-profile-avatar" id="avatarInitial" aria-hidden="true">{{ user_initial or '?' }}</div>
         <div>
-          <div class="text-sm font-semibold text-neutral-900 dark:text-white" id="sidebarName">{{ user_name or 'User' }}</div>
+          <div class="text-sm font-semibold text-neutral-900 dark:text-white" id="sidebarName">{{ display_name or user_name or 'My account' }}</div>
           <div class="text-xs text-neutral-500 dark:text-slate-500" id="sidebarEmail">{{ user_email }}</div>
         </div>
       </div>
@@ -202,6 +175,9 @@ async function runSummarizer() {
       <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-programs">
         <i class="fas fa-graduation-cap w-4 text-center"></i> Student Programs
       </button>
+      <button type="button" onclick="switchTab('planner')" data-dashboard-tab="planner" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-planner">
+        <i class="fas fa-list-check w-4 text-center" aria-hidden="true"></i> My Planner
+      </button>
 
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-5">Account</div>
       <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-activity">
@@ -225,14 +201,14 @@ async function runSummarizer() {
         <p class="text-xs text-neutral-500 dark:text-slate-400 truncate" id="pageSubtitle">Your curated AI and technology briefing</p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 bg-neutral-100 dark:bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl shadow">
-          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-emerald-500 flex items-center justify-center text-neutral-900 dark:text-white font-bold text-xs" id="headerAvatar">U</div>
-          <div class="text-left">
-            <div class="text-xs font-bold text-neutral-900 dark:text-white leading-tight" id="headerName">{{ user_name or 'User' }}</div>
-            <div class="text-[10px] text-neutral-500 dark:text-slate-400 leading-tight" id="headerEmail">{{ user_email }}</div>
+        <div class="nova-profile-chip" aria-label="Your account">
+          <div class="nova-profile-avatar" id="headerAvatar" aria-hidden="true">{{ user_initial or '?' }}</div>
+          <div class="nova-profile-copy">
+            <div class="nova-profile-name" id="headerName">{{ display_name or user_name or 'My account' }}</div>
+            <div class="nova-profile-email" id="headerEmail">{{ user_email }}</div>
           </div>
         </div>
-        <button onclick="toggleTheme()" class="p-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-slate-800 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
+        <button data-theme-toggle aria-label="Switch to dark mode" class="p-2 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-slate-800 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
           <a href="/" class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 px-3 py-1.5 rounded-lg text-xs text-neutral-600 dark:text-slate-300 hover:text-neutral-900 dark:text-white transition"><i class="fas fa-home mr-1"></i>Home</a>
         <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition border border-red-500/30"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
       </div>
@@ -243,6 +219,7 @@ async function runSummarizer() {
         <button type="button" onclick="switchTab('articles')" data-dashboard-tab="articles" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-newspaper mr-1 text-blue-400"></i> News</button>
         <button type="button" onclick="switchTab('overview')" data-dashboard-tab="overview" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-house mr-1"></i> For You</button>
         <button type="button" onclick="switchTab('programs')" data-dashboard-tab="programs" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-graduation-cap mr-1"></i> Programs</button>
+        <button type="button" onclick="switchTab('planner')" data-dashboard-tab="planner" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-list-check mr-1" aria-hidden="true"></i> My Planner</button>
         <button type="button" onclick="switchTab('summarizer')" data-dashboard-tab="summarizer" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-wand-magic-sparkles mr-1"></i> Summarize</button>
         <button type="button" onclick="switchTab('memory')" data-dashboard-tab="memory" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-bookmark mr-1"></i> Saved</button>
         <button type="button" onclick="switchTab('activity')" data-dashboard-tab="activity" class="tab-btn border border-slate-700 rounded-full px-3 py-2 text-xs font-semibold text-neutral-600 dark:text-slate-300"><i class="fas fa-clock-rotate-left mr-1"></i> Activity</button>
@@ -268,6 +245,7 @@ async function runSummarizer() {
             <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
             <h2 id="overview-programs-title" class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
+            <button type="button" onclick="switchTab('planner')" class="student-planner-shortcut">Organize applications &amp; study tasks <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
           </section>
         </div>
       </div>
@@ -380,22 +358,28 @@ async function runSummarizer() {
       </div>
 
       <!-- PROGRAMS TAB -->
-      <div id="tab-programs" class="hidden">
-        <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5">
-          <img src="/static/images/student-programs-grid-v2.jpg" alt="Students collaborating in technology learning and mentorship programs" width="1536" height="1024" decoding="async" class="w-full h-44 md:h-56 object-cover rounded-2xl mb-5 border border-emerald-500/20"/>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-4 border-b border-slate-700/50">
-            <div>
-              <h3 class="font-bold text-neutral-900 dark:text-white flex items-center gap-2 text-lg"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Programs & Early Alerts</h3>
-              <p class="text-neutral-500 dark:text-slate-400 text-xs mt-1">You will receive early preparation alerts & 1-click registration links directly to your inbox.</p>
-            </div>
-            <button onclick="resendProgramWelcomeEmail(this)" class="inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap">
-              <i class="fas fa-paper-plane"></i> Send Program Welcome Email
-            </button>
-          </div>
-          <div id="programEmailMsg" class="hidden rounded-xl p-3 text-xs font-semibold mb-4 text-center"></div>
-          <div id="programsList" class="grid md:grid-cols-2 gap-4"></div>
+      <div id="tab-programs" class="hidden student-tools">
+        <div class="st-heading">
+          <div><p class="st-eyebrow">Discover your next step</p><h2>Student opportunities</h2><p>Find a program, check its requirements, then keep your next steps in My Planner.</p></div>
+          <button type="button" onclick="switchTab('planner')" class="st-button st-primary"><i class="fas fa-list-check" aria-hidden="true"></i> Open My Planner</button>
         </div>
+        <form id="opportunityFilters" class="st-panel st-filters" aria-label="Filter student opportunities">
+          <label class="st-search">Search programs<input type="search" name="q" placeholder="Skills, program or keyword" maxlength="100"></label>
+          <label>Category<select name="category"><option value="">All categories</option></select></label>
+          <label>Organization<select name="company"><option value="">All organizations</option></select></label>
+          <label>Deadline<select name="within"><option value="">Any deadline</option><option value="7">Next 7 days</option><option value="30">Next 30 days</option></select></label>
+          <label>Sort by<select name="sort"><option value="deadline">Soonest deadline</option><option value="newest">Newest added</option></select></label>
+          <div class="st-actions"><button type="submit" class="st-button st-primary">Find programs</button><button type="reset" class="st-button">Clear</button></div>
+        </form>
+        <div class="st-results-line"><p id="opportunityCount" role="status" aria-live="polite">Loading opportunities…</p><p>Always confirm eligibility and dates with the provider.</p></div>
+        <div id="opportunityNotice" class="st-notice" role="status" aria-live="polite" hidden></div>
+        <div id="programsList" class="st-opportunity-grid" aria-busy="false"></div>
+        <nav id="opportunityPagination" class="st-pagination" aria-label="Opportunity pages" hidden><button type="button" id="opportunityPrev" class="st-button">Previous</button><span id="opportunityPage"></span><button type="button" id="opportunityNext" class="st-button">Next</button></nav>
+        <div class="st-panel st-email-action"><div><h3>Program email</h3><p>Request a copy of the current program welcome email for your account.</p></div><button type="button" onclick="resendProgramWelcomeEmail(this)" class="st-button"><i class="fas fa-paper-plane" aria-hidden="true"></i> Send to my email</button></div>
+        <div id="programEmailMsg" class="hidden rounded-xl p-3 text-xs font-semibold mb-4 text-center" role="status"></div>
       </div>
+
+      {% include 'student_planner.html' %}
 
       <!-- PROGRESS TAB -->
       <div id="tab-progress" class="hidden">
@@ -433,9 +417,10 @@ async function runSummarizer() {
   </main>
 </div>
 
+<script src="/static/js/student-tools.js"></script>
 <script>
-const USER_NAME = '{{ user_name or "User" }}';
-const USER_EMAIL = '{{ user_email }}';
+const USER_NAME = {{ (user_name or 'User') | tojson }};
+const USER_EMAIL = {{ user_email | tojson }};
 let allArticles = [];
 let overviewData = {};
 
@@ -443,6 +428,7 @@ const dashboardTabMeta = {
   articles: ['Latest News', 'Useful technology, skills and industry updates for students'],
   overview: ['For You', 'A quick view of news and opportunities'],
   programs: ['Student Programs', 'Explore active learning and career opportunities'],
+  planner: ['My Planner', 'Your private applications, deadlines and study tasks'],
   summarizer: ['AI Summarizer', 'Turn long articles into clear takeaways'],
   memory: ['Saved Articles', 'Return to useful stories whenever you need them'],
   activity: ['My Activity', 'Your meaningful account actions in one place'],
@@ -460,12 +446,10 @@ function getProgramImage(program) {
   return '/static/images/student-programs-grid-v2.jpg';
 }
 
-// Set initials
-const init = (USER_NAME||'U').charAt(0).toUpperCase();
-document.getElementById('avatarInitial').textContent = init;
+// Both profile initials are rendered by the server, with no placeholder flash.
 
 function switchTab(name){
-  ['overview','activity','articles','programs','progress','summarizer','memory'].forEach(t=>{
+  ['overview','activity','articles','programs','planner','progress','summarizer','memory'].forEach(t=>{
     document.getElementById('tab-'+t).classList.add('hidden');
   });
   document.getElementById('tab-'+name).classList.remove('hidden');
@@ -484,6 +468,7 @@ function switchTab(name){
   if(name==='activity') loadActivity();
   if(name==='articles') loadArticles();
   if(name==='programs') loadPrograms();
+  if(name==='planner') StudentTools.loadPlanner();
   if(name==='progress') loadProgress();
   if(name==='memory') loadMemory();
 }
@@ -641,15 +626,7 @@ async function loadOverview(){
       </a>`).join('') : '<div class=\"text-neutral-500 dark:text-slate-500 text-sm text-center py-6\">Intelligence feed pending. System synchronizes globally every hour.</div>';
 
     const progs = (overviewData.programs||[]).slice(0,4);
-    document.getElementById('overviewPrograms').innerHTML = progs.length ? progs.map(p=>`
-      <div class="bg-white dark:bg-dark-800/60 rounded-xl p-3 border border-neutral-200 dark:border-emerald-500/20 hover:border-emerald-500/40 transition shadow-sm">
-        <div class="flex items-center justify-between mb-1">
-          <div class="text-sm font-semibold text-neutral-900 dark:text-white">${p.title}</div>
-          <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">${p.company}</span>
-        </div>
-        ${p.deadline?`<div class="text-xs text-orange-400"><i class="fas fa-calendar mr-1"></i>Deadline: ${p.deadline}</div>`:''}
-        ${p.registration_url?`<a href="${p.registration_url}" target="_blank" class="text-xs text-blue-400 hover:text-blue-300 transition mt-1 block"><i class="fas fa-external-link-alt mr-1"></i>Register Now</a>`:''}
-      </div>`).join('') : `<div class=\"text-neutral-500 dark:text-slate-500 text-sm text-center py-6\"><p class=\"mb-3\">No active program applications detected.</p><a href=\"/#programs\" class=\"inline-block bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-lg hover:bg-emerald-500/30 transition text-xs font-bold\">Submit Program Application &rarr;</a></div>`;
+    StudentTools.renderOverviewPrograms(progs);
   }catch(e){ console.error(e); }
 }
 
@@ -695,24 +672,45 @@ async function loadActivity(){
 
 // Load articles
 
-async function loadArticles(){
+let articlesLoading = false;
+async function loadArticles(force = false){
   const dateVal = document.getElementById('newsDatePicker') ? document.getElementById('newsDatePicker').value : '';
-    const r = await fetch(`/api/articles?limit=50${dateVal ? '&date='+dateVal : ''}`);
-  allArticles = await r.json();
-  renderArticles(allArticles);
   
-  // Populate Summarizer Dropdown
-  const select = document.getElementById('summarizeSelect');
-  if(select && allArticles.length > 0) {
-    select.innerHTML = '<option value="">-- Choose an article to summarize --</option>';
-    allArticles.forEach(a => {
-      if(a.url && a.url !== '#') {
-        const opt = document.createElement('option');
-        opt.value = a.url;
-        opt.textContent = a.title.substring(0, 80) + (a.title.length > 80 ? '...' : '');
-        select.appendChild(opt);
-      }
-    });
+  // Cache check: If we already have articles loaded, no date filter is applied, and we aren't forcing a refresh, just render instantly.
+  if (allArticles.length > 0 && !dateVal && !force) {
+    renderArticles(allArticles);
+    return;
+  }
+
+  if (articlesLoading) return;
+  articlesLoading = true;
+
+  if (allArticles.length === 0) {
+    document.getElementById('articlesList').innerHTML = '<div class="p-10 text-center text-slate-500"><i class="fas fa-spinner fa-spin fa-2x mb-4 text-blue-500"></i><p class="font-semibold tracking-wide text-sm">Fetching latest tech intelligence...</p></div>';
+  }
+
+  try {
+    const r = await fetch(`/api/articles?limit=50${dateVal ? '&date='+dateVal : ''}`);
+    allArticles = await r.json();
+    renderArticles(allArticles);
+    
+    // Populate Summarizer Dropdown
+    const select = document.getElementById('summarizeSelect');
+    if(select && allArticles.length > 0) {
+      select.innerHTML = '<option value="">-- Choose an article to summarize --</option>';
+      allArticles.forEach(a => {
+        if(a.url && a.url !== '#') {
+          const opt = document.createElement('option');
+          opt.value = a.url;
+          opt.textContent = a.title.substring(0, 80) + (a.title.length > 80 ? '...' : '');
+          select.appendChild(opt);
+        }
+      });
+    }
+  } catch (e) {
+    document.getElementById('articlesList').innerHTML = '<div class="p-8 text-center text-red-400">Failed to load articles. Please try again.</div>';
+  } finally {
+    articlesLoading = false;
   }
 }
 
@@ -761,32 +759,7 @@ function liveSearch(){
 
 // Load programs
 async function loadPrograms(){
-  const r = await fetch('/api/user/programs');
-  const progs = await r.json();
-  document.getElementById('programsList').innerHTML = progs.length ? progs.map(p=>`
-    <div class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-xl p-5 border border-emerald-500/20 hover:border-emerald-500/40 transition">
-      <img src="${getProgramImage(p)}" alt="" width="512" height="512" loading="lazy" decoding="async" class="w-full h-40 object-cover rounded-xl mb-4 border border-slate-700/60"/>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-          <i class="fas fa-graduation-cap text-emerald-400"></i>
-        </div>
-        <div>
-          <div class="text-sm font-bold text-neutral-900 dark:text-white">${p.title}</div>
-          <div class="text-xs text-emerald-400">${p.company}</div>
-        </div>
-        <span class="ml-auto text-xs bg-${p.category==='internship'?'blue':'emerald'}-500/20 text-${p.category==='internship'?'blue':'emerald'}-400 px-2 py-0.5 rounded-full">${(p.category||'program').toUpperCase()}</span>
-      </div>
-      <p class="text-xs text-neutral-500 dark:text-slate-400 leading-relaxed mb-3">${p.description||'Check the registration link for full details.'}</p>
-      <div class="space-y-1 text-xs text-neutral-500 dark:text-slate-500 mb-4">
-        ${p.deadline?`<div><i class="fas fa-calendar-alt mr-2 text-orange-400"></i>Deadline: <span class="text-orange-400 font-semibold">${p.deadline}</span></div>`:''}
-        ${p.launch_date?`<div><i class="fas fa-rocket mr-2 text-blue-400"></i>Launch: <span class="text-blue-400">${p.launch_date}</span></div>`:''}
-      </div>
-      ${p.registration_url?`
-      <a href="${p.registration_url}" target="_blank"
-         class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-neutral-900 dark:text-white font-bold py-2.5 rounded-xl text-sm transition">
-        <i class="fas fa-rocket"></i> Register Now
-      </a>`:'<div class="text-xs text-slate-600 text-center">Registration link coming soon</div>'}
-    </div>`).join('') : '<div class="col-span-2 text-neutral-500 dark:text-slate-500 text-sm text-center py-8">No programs available yet. You will receive email alerts when new programs are added.</div>';
+  return StudentTools.loadPrograms();
 }
 
 async function resendProgramWelcomeEmail(btn){
@@ -917,7 +890,7 @@ loadOverview();
 // Deep-link support; otherwise open the product's primary news experience.
 const urlParams = new URLSearchParams(window.location.search);
 const tabParam = urlParams.get('tab');
-const allowedTabs = ['overview','activity','articles','programs','progress','summarizer','memory'];
+const allowedTabs = ['overview','activity','articles','programs','planner','progress','summarizer','memory'];
 switchTab(tabParam && allowedTabs.includes(tabParam) ? tabParam : 'articles');
 
 function handleCheckbox() {

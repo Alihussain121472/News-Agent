@@ -1,78 +1,159 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Brief Blog - Tech News & AI</title>
-  <link rel="icon" href="/static/favicon.ico" sizes="any">
-  <link rel="icon" href="/static/icon-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <title>Nova Brief Editorial Blog - Tech News, AI Guides & Careers</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
-    <meta name="description" content="Read the latest insights on AI, Tech, and student growth from Nova Brief.">
+    <meta name="description" content="In-depth technology guides, artificial intelligence tutorials, cloud computing roadmaps, and career strategies for students from Nova Brief.">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous"></script>
 
-  </head>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% include "theme_head.html" %}
+</head>
 
-<body class="bg-slate-50 font-sans text-slate-800">
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 fixed w-full top-0 z-50">
+    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 fixed w-full top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="/" class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white"><i class="fas fa-bolt"></i></div>
-                    <span class="font-bold text-xl tracking-tight text-slate-900">Nova Brief</span>
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Nova Brief</span>
                 </a>
-                <a href="/user/login" class="text-slate-600 hover:text-blue-600 font-medium text-sm">Sign In</a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
+                    <a href="/news" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">News</a>
+                    <a href="/blog" class="text-blue-600 dark:text-blue-400 font-bold text-sm">Blog</a>
+                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
+                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
+                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <a href="/user/login" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium text-sm">Sign In</a>
+                    <a href="/#subscribe" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">Subscribe</a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-24">
-        <h1 class="text-4xl font-extrabold text-slate-900 mb-2">Latest Insights</h1>
-        <p class="text-lg text-slate-600 mb-12">Actionable tech news, AI tutorials, and career growth strategies.</p>
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-20">
+        <header class="mb-12">
+            <span class="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-full inline-block mb-3">Editorial Library</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3">Technology Insights & Guides</h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400">Actionable software engineering guides, AI architectures, and student career roadmaps.</p>
+        </header>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b border-slate-200 pb-2">AI & Tech News</h2>
+            <div class="lg:col-span-2 space-y-6">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Published Articles ({{ posts|length }})</h2>
+                    <span class="text-xs text-slate-500">Peer-reviewed educational content</span>
+                </div>
+
                 {% for post in posts %}
-                <article class="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm hover:shadow-md transition">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-3"><a href="/blog/{{ post.slug }}" class="hover:text-blue-600">{{ post.title }}</a></h2>
-                    <p class="text-slate-500 text-sm mb-4"><i class="far fa-clock mr-1"></i> Published {{ post.published_at[:10] }}</p>
-                    <p class="text-slate-700 leading-relaxed mb-4">{{ post.meta_description }}</p>
-                    <a href="/blog/{{ post.slug }}" class="text-blue-600 font-bold hover:underline">Read full article <i class="fas fa-arrow-right ml-1"></i></a>
+                <article class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-7 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-2">
+                        <span><i class="far fa-calendar-alt mr-1"></i> {{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}</span>
+                        <span>&bull;</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 font-semibold"><i class="fas fa-check-circle text-[10px]"></i> Verified Guide</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3 leading-snug">
+                        <a href="/blog/{{ post.slug }}" class="hover:text-blue-600 transition">{{ post.title }}</a>
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4 text-sm md:text-base">{{ post.meta_description }}</p>
+                    <div class="pt-3 border-t border-slate-100 dark:border-neutral-800 flex items-center justify-between">
+                        <a href="/blog/{{ post.slug }}" class="text-blue-600 dark:text-blue-400 font-bold text-sm hover:underline inline-flex items-center gap-1.5">
+                            <span>Read full article</span>
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </a>
+                        <span class="text-xs text-slate-400">800–1500 words</span>
+                    </div>
                 </article>
                 {% else %}
-                <div class="text-center py-12 bg-white border border-slate-200 rounded-2xl">
+                <div class="text-center py-12 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl">
                     <p class="text-slate-500">More articles coming soon!</p>
                 </div>
                 {% endfor %}
             </div>
             
-            <div class="lg:col-span-1">
-                <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl sticky top-24">
-                    <h2 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <div class="lg:col-span-1 space-y-6">
+                <!-- AdSense Unit on editorial index -->
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-5 rounded-2xl">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-pub-1036052096443002"
+                         data-ad-slot="auto"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+
+                <!-- Student Tech Programs -->
+                <div class="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 p-6 rounded-2xl">
+                    <h3 class="text-lg font-bold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-2">
                         <i class="fas fa-rocket text-blue-600"></i> Student Tech Programs
-                    </h2>
-                    <p class="text-sm text-blue-800 mb-6">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
+                    </h3>
+                    <p class="text-xs text-blue-800 dark:text-blue-400 mb-5">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
                     
                     <div class="space-y-4">
                         {% for prog in programs %}
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-blue-100 hover:border-blue-300 transition">
-                            <div class="text-xs font-bold text-blue-600 mb-1 uppercase tracking-wide">{{ prog.company }}</div>
-                            <h3 class="font-bold text-slate-900 mb-2 leading-tight">{{ prog.title }}</h3>
+                        <div class="bg-white dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-blue-100 dark:border-neutral-800 hover:border-blue-300 transition">
+                            <div class="text-[11px] font-bold text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">{{ prog.company }}</div>
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-2 leading-tight text-sm">{{ prog.title }}</h4>
                             <div class="text-xs text-slate-500 mb-3"><i class="far fa-calendar-alt mr-1"></i> Launches: {{ prog.launch_date[:10] if prog.launch_date else 'TBD' }}</div>
-                            <a href="{{ prog.registration_url }}" target="_blank" class="inline-block w-full text-center bg-blue-600 text-white text-sm font-bold py-2 rounded-lg hover:bg-blue-700 transition">Apply Now</a>
+                            <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="inline-block w-full text-center bg-blue-600 text-white text-xs font-bold py-2 rounded-lg hover:bg-blue-700 transition">Apply Now</a>
                         </div>
                         {% else %}
-                        <p class="text-sm text-slate-600">No new programs right now.</p>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">No active program alerts right now.</p>
                         {% endfor %}
                     </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                        <i class="fas fa-compass text-slate-500"></i> Editorial Navigation
+                    </h3>
+                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                        <li><a href="/news" class="hover:text-blue-600">&rarr; Live Tech News Feed</a></li>
+                        <li><a href="/about" class="hover:text-blue-600">&rarr; About Our Editorial Team</a></li>
+                        <li><a href="/contact" class="hover:text-blue-600">&rarr; Submit a Program or Story</a></li>
+                        <li><a href="/disclaimer" class="hover:text-blue-600">&rarr; Editorial Disclaimer</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-6 mb-6">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <a href="/news" class="hover:text-blue-600">News</a>
+                <a href="/blog" class="text-blue-600 font-bold">Blog</a>
+                <a href="/about" class="hover:text-blue-600">About Us</a>
+                <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
+                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
+                <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
+            </div>
+            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

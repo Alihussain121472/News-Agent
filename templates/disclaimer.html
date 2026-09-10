@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Nova Brief Legal & Editorial Disclaimer - Information on tech career resources, third-party program links, educational advice, and advertising disclosures.">
+    <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+    <title>Disclaimer - Nova Brief</title>
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        .legal-page { padding: 4rem 0; }
+        .legal-container { max-width: 800px; margin: 0 auto; }
+        .legal-page h1 { font-size: 2.25rem; font-weight: 800; margin-bottom: 1.5rem; }
+        .legal-page h2 { font-size: 1.4rem; font-weight: 700; margin-top: 2rem; margin-bottom: 0.75rem; }
+        .legal-page p { margin-bottom: 1rem; line-height: 1.75; color: #475569; }
+        .dark .legal-page p { color: #94a3b8; }
+        .legal-page ul { margin-left: 1.5rem; list-style-type: disc; margin-bottom: 1rem; color: #475569; }
+        .dark .legal-page ul { color: #94a3b8; }
+        .legal-page li { margin-bottom: 0.5rem; }
+    </style>
+
+    {% include "theme_head.html" %}
+</head>
+
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 sticky top-0 z-50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <span class="text-lg font-bold text-neutral-900 dark:text-white tracking-tight">Nova Brief</span>
+                </a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
+                    <a href="/news" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">News</a>
+                    <a href="/blog" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Blog</a>
+                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
+                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <a href="/user/login" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Sign In</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="legal-page">
+        <div class="container legal-container px-4">
+            <h1 class="text-slate-900 dark:text-white">Website & Content Disclaimer</h1>
+            <p class="text-xs text-slate-400 mb-6">Last updated: September 2026</p>
+
+            <h2>1. General Educational Information</h2>
+            <p>
+                The information provided by Nova Brief ("we," "us," or "our") on <a href="https://www.novabrief.tech" class="text-blue-600 underline">novabrief.tech</a> is for general educational, informational, and career exploration purposes only. All information on the site is provided in good faith; however, we make no representation or warranty of any kind, express or implied, regarding the accuracy, adequacy, validity, reliability, availability, or completeness of any information on the site.
+            </p>
+
+            <h2>2. No Professional Career or Financial Advice</h2>
+            <p>
+                The site cannot and does not contain legal, financial, or guaranteed employment advice. The technology career roadmaps, internship preparation tips, and coding guides are based on industry research and standard best practices. Accordingly, before taking any actions based upon such information, we encourage you to consult with the appropriate professional or career advisor. The use or reliance of any information contained on this site is solely at your own risk.
+            </p>
+
+            <h2>3. External Links & Student Program Submissions</h2>
+            <p>
+                The site contains links to other websites or content belonging to or originating from third parties (such as Google, NASA, Microsoft, AWS, IBM, and universities). Such external links are not investigated, monitored, or checked for accuracy, adequacy, validity, reliability, or completeness by us.
+            </p>
+            <p>
+                Nova Brief does not administer or control third-party student fellowships, hackathons, or hiring processes. We are not responsible for deadlines, eligibility changes, or admissions decisions made by external organizations. Always verify application criteria on the official portal of the offering company.
+            </p>
+
+            <h2>4. Advertising and Affiliate Disclosure</h2>
+            <p>
+                Nova Brief may display third-party advertisements, including advertisements served by <strong>Google AdSense</strong>. These advertisements may use cookies, web beacons, and similar tracking technologies to deliver targeted ads based on your visits to this and other websites. We do not endorse or guarantee the products, services, or claims made by advertisers appearing on the platform.
+            </p>
+
+            <h2>5. Trademark Attribution</h2>
+            <p>
+                All company names, logos, product names, and brand trademarks mentioned on Nova Brief (including Google, Microsoft, Meta, AWS, Apple, OpenAI, and NASA) are trademarks or registered trademarks of their respective holders. Use of them does not imply any affiliation with, sponsorship, or endorsement by them.
+            </p>
+
+            <h2>6. Contact Us</h2>
+            <p>
+                If you require any more information or have any questions about our site's disclaimer, please contact us by email at <a href="mailto:support@novabrief.tech" class="text-blue-600 underline">support@novabrief.tech</a>.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-6 mb-6">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <a href="/news" class="hover:text-blue-600">News</a>
+                <a href="/blog" class="hover:text-blue-600">Blog</a>
+                <a href="/about" class="hover:text-blue-600">About Us</a>
+                <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
+                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
+                <a href="/disclaimer" class="text-blue-600 font-bold">Disclaimer</a>
+            </div>
+            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,47 +1,150 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ post.title }} - Nova Brief</title>
-  <link rel="icon" href="/static/favicon.ico" sizes="any">
-  <link rel="icon" href="/static/icon-192.png" type="image/png">
-  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <link rel="icon" href="/static/favicon.ico" sizes="any">
+    <link rel="icon" href="/static/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
     <meta name="description" content="{{ post.meta_description }}">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous"></script>
 
-  </head>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    <style>
+        .article-body h2 { font-size: 1.6rem; font-weight: 800; margin-top: 2rem; margin-bottom: 0.75rem; color: #0f172a; }
+        .dark .article-body h2 { color: #f8fafc; }
+        .article-body h3 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #1e293b; }
+        .dark .article-body h3 { color: #e2e8f0; }
+        .article-body p { margin-bottom: 1.25rem; line-height: 1.8; color: #334155; }
+        .dark .article-body p { color: #cbd5e1; }
+        .article-body p.lead { font-size: 1.15rem; line-height: 1.75; color: #1e293b; font-weight: 500; }
+        .dark .article-body p.lead { color: #e2e8f0; }
+        .article-body ul, .article-body ol { margin-left: 1.5rem; margin-bottom: 1.5rem; color: #334155; line-height: 1.75; }
+        .dark .article-body ul, .dark .article-body ol { color: #cbd5e1; }
+        .article-body ul { list-style-type: disc; }
+        .article-body ol { list-style-type: decimal; }
+        .article-body li { margin-bottom: 0.5rem; }
+        .article-body pre { background: #0f172a; color: #f8fafc; padding: 1.25rem; border-radius: 0.75rem; overflow-x: auto; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .article-body code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+        .article-body p code { background: #e2e8f0; color: #0f172a; padding: 0.15rem 0.4rem; border-radius: 0.3rem; font-size: 0.85em; }
+        .dark .article-body p code { background: #1e293b; color: #93c5fd; }
+    </style>
 
-<body class="bg-slate-50 font-sans text-slate-800">
+    {% include "theme_head.html" %}
+</head>
+
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
     <!-- Navbar -->
-    <nav class="bg-white border-b border-slate-200 fixed w-full top-0 z-50">
+    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 fixed w-full top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <a href="/" class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white"><i class="fas fa-bolt"></i></div>
-                    <span class="font-bold text-xl tracking-tight text-slate-900">Nova Brief</span>
+                <a href="/" class="flex items-center gap-3">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Nova Brief</span>
                 </a>
-                <div class="flex gap-4">
-                    <a href="/blog" class="text-slate-600 hover:text-blue-600 font-medium text-sm mt-1">All Articles</a>
-                    <a href="/register" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-medium text-sm hover:bg-blue-700 transition">Get Daily Brief</a>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
+                    <a href="/news" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">News</a>
+                    <a href="/blog" class="text-blue-600 dark:text-blue-400 font-bold text-sm">Blog</a>
+                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
+                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
+                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                    <a href="/user/login" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium text-sm">Sign In</a>
+                    <a href="/#subscribe" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">Get Daily Brief</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <article class="max-w-3xl mx-auto px-4 sm:px-6 py-24">
-        <a href="/blog" class="text-blue-600 text-sm font-bold mb-6 inline-block hover:underline"><i class="fas fa-arrow-left mr-1"></i> Back to Blog</a>
-        <h1 class="text-3xl md:text-5xl font-extrabold text-slate-900 mb-4 leading-tight">{{ post.title }}</h1>
-        <p class="text-slate-500 mb-10 pb-6 border-b border-slate-200"><i class="far fa-calendar-alt mr-2"></i> Published on {{ post.published_at[:10] }} &bull; 5 min read</p>
-        
-        <div class="prose prose-lg max-w-none prose-slate">
-            {{ post.content | safe }}
-        </div>
+    <!-- Article Container -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-28 pb-20">
+        <a href="/blog" class="text-blue-600 dark:text-blue-400 text-sm font-bold mb-6 inline-flex items-center gap-1.5 hover:underline">
+            <i class="fas fa-arrow-left text-xs"></i>
+            <span>Back to All Articles</span>
+        </a>
 
-    </article>
+        <header class="mb-8">
+            <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                <span class="bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold px-2.5 py-1 rounded-md">
+                    Technical Guide
+                </span>
+                <span>&bull;</span>
+                <span><i class="far fa-calendar-alt mr-1"></i> Published {{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}</span>
+                <span>&bull;</span>
+                <span><i class="far fa-clock mr-1"></i> 6 min read</span>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-5">
+                {{ post.title }}
+            </h1>
+
+            <div class="flex items-center gap-3 py-4 border-y border-slate-200 dark:border-neutral-800 text-xs text-slate-600 dark:text-slate-400">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    NB
+                </div>
+                <div>
+                    <div class="font-bold text-slate-900 dark:text-white text-sm">Nova Brief Editorial Desk</div>
+                    <div>Peer-reviewed by Syed Ali Hussain &bull; <a href="/about" class="text-blue-600 hover:underline">Editorial Standards</a></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Article Body -->
+        <article class="article-body bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-8 md:p-12 rounded-2xl shadow-sm mb-12">
+            {{ post.content | safe }}
+
+            <!-- In-Article Google AdSense (High publisher-content placement) -->
+            <div class="my-10 pt-6 border-t border-slate-100 dark:border-neutral-800 text-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>
+                <ins class="adsbygoogle"
+                     style="display:block; text-align:center;"
+                     data-ad-layout="in-article"
+                     data-ad-format="fluid"
+                     data-ad-client="ca-pub-1036052096443002"
+                     data-ad-slot="auto"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+        </article>
+
+        <!-- Newsletter Subscription Box -->
+        <section class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-8 md:p-10 rounded-2xl shadow-lg mb-12 text-center">
+            <h2 class="text-2xl font-bold mb-3 text-white">Never Miss an Elite Opportunity</h2>
+            <p class="text-blue-100 max-w-xl mx-auto mb-6 text-sm leading-relaxed">Join students receiving daily AI briefings, hackathon deadlines, and corporate student fellowship alerts from Google, Microsoft, NASA, and AWS.</p>
+            <a href="/#subscribe" class="inline-block bg-white text-blue-600 font-bold px-8 py-3.5 rounded-xl hover:bg-blue-50 transition shadow-md">
+                Activate Free Intelligence Briefings
+            </a>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex flex-wrap justify-center gap-6 mb-6">
+                <a href="/" class="hover:text-blue-600">Home</a>
+                <a href="/news" class="hover:text-blue-600">News</a>
+                <a href="/blog" class="text-blue-600 font-bold">Blog</a>
+                <a href="/about" class="hover:text-blue-600">About Us</a>
+                <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
+                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
+                <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
+            </div>
+            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>

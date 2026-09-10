@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -63,9 +63,10 @@
         }
     </style>
 
-  </head>
+    {% include "theme_head.html" %}
+</head>
 
-<body>
+<body class="nova-site">
     <nav class="navbar">
         <div class="container">
             <div class="nav-content">
@@ -75,8 +76,10 @@
                 </div>
                 <div class="nav-links">
                     <a href="/" class="nav-link">Home</a>
-                    <a href="/#features" class="nav-link">Features</a>
-                    <a href="/#contact" class="nav-link">Contact</a>
+                    <a href="/news" class="nav-link">News</a>
+                    <a href="/blog" class="nav-link">Blog</a>
+                    <a href="/about" class="nav-link">About</a>
+                    <a href="/contact" class="nav-link">Contact</a>
                 </div>
             </div>
         </div>
@@ -85,7 +88,7 @@
     <section class="legal-page">
         <div class="container legal-container">
             <h1>Terms of Service</h1>
-            <p class="last-updated">Last updated: January 2024</p>
+            <p class="last-updated">Last updated: September 2026</p>
 
             <h2>1. Agreement to Terms</h2>
             <p>
@@ -158,7 +161,7 @@
             <h2>10. Contact Information</h2>
             <p>
                 If you have any questions about these Terms of Service, please contact us at 
-                <a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a>
+                <a href="mailto:support@novabrief.tech">support@novabrief.tech</a>
             </p>
         </div>
     </section>
@@ -166,12 +169,13 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom">
-                <p>&copy; 2026 Nova Brief. All rights reserved.</p>
+                <p>&copy; 2026 Nova Brief Tech. All rights reserved. | <a href="/privacy">Privacy</a> | <a href="/terms">Terms</a> | <a href="/disclaimer">Disclaimer</a> | <a href="/about">About</a> | <a href="/contact">Contact</a></p>
             </div>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<button type="button" class="nova-theme-corner" data-theme-toggle aria-label="Switch to dark mode"><span data-theme-label>Dark mode</span></button>
 </body>
 </html>
 

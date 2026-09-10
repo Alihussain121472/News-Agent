@@ -76,7 +76,7 @@ def safe_connect():
     return PooledConnection(_pool.getconn(), _pool)
 
 import json
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 def to_dict(row):
     if row is None: return None
@@ -84,6 +84,8 @@ def to_dict(row):
     for k, v in d.items():
         if isinstance(v, datetime):
             d[k] = str(v)
+        elif isinstance(v, date):
+            d[k] = v.isoformat()
     return d
 
 from typing import List, Dict, Any, Optional
@@ -287,6 +289,8 @@ class NewsDatabase:
         ]:
             cursor.execute(idx_sql)
 
+        from student_planner.repository import ensure_schema
+        ensure_schema(conn)
         conn.commit()
         conn.close()
         logger.info(f'Database initialized at {self.db_path}')
@@ -939,25 +943,27 @@ class NewsDatabase:
         cursor = conn.cursor()
         cursor.execute('''INSERT INTO student_programs
             (title,company,description,registration_url,deadline,launch_date,category,notify_before_days)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''',
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id''',
             (title, company, description, registration_url, deadline, launch_date, category, notify_before_days))
-        prog_id = cursor.lastrowid
+        prog_id = cursor.fetchone()[0]
         conn.commit()
         conn.close()
         logger.info(f'Added program: {title}')
         return prog_id
 
     def get_active_programs(self, limit: int = 50) -> List[Dict[str, Any]]:
-        # Emergency Fallback since Supabase is offline
-        programs = [
-            {'title': 'Google Developer Student Clubs', 'company': 'Google', 'category': 'Program', 'registration_url': 'https://developers.google.com/community/gdsc', 'launch_date': '2026-08-15'},
-            {'title': 'Microsoft Student Ambassadors', 'company': 'Microsoft', 'category': 'Program', 'registration_url': 'https://mvp.microsoft.com/en-us/studentambassadors', 'launch_date': '2026-09-01'},
-            {'title': 'AWS Educate Academy', 'company': 'Amazon AWS', 'category': 'Cloud Training', 'registration_url': 'https://aws.amazon.com/education/awseducate/', 'launch_date': '2026-08-30'},
-            {'title': 'Meta University', 'company': 'Meta', 'category': 'Internship', 'registration_url': 'https://www.metacareers.com/students-and-grads/', 'launch_date': '2026-10-15'},
-            {'title': 'IBM SkillsBuild', 'company': 'IBM', 'category': 'Certification', 'registration_url': 'https://skillsbuild.org/students', 'launch_date': '2026-09-10'},
-            {'title': 'Swift Student Challenge', 'company': 'Apple', 'category': 'Competition', 'registration_url': 'https://developer.apple.com/swift-student-challenge/', 'launch_date': '2027-02-05'}
-        ]
-        return programs[:limit]
+        # Read the same records the admin manages; do not invent dates or programs.
+        conn = safe_connect()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute('''SELECT * FROM student_programs WHERE is_active=TRUE
+                    AND (deadline IS NULL OR deadline >= CURRENT_DATE)
+                    ORDER BY deadline ASC NULLS LAST, created_at DESC, id DESC LIMIT %s''',
+                    (max(1, min(int(limit), 200)),))
+                return [to_dict(row) for row in cursor.fetchall()]
+        finally:
+            conn.rollback()
+            conn.close()
 
     def get_all_programs(self, limit: int = 100) -> List[Dict[str, Any]]:
         conn = safe_connect()
@@ -966,6 +972,22 @@ class NewsDatabase:
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
+
+    def toggle_program_active(self, program_id: int, active: bool) -> bool:
+        """Use the existing admin control to publish or hide a student opportunity."""
+        conn = safe_connect()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute('UPDATE student_programs SET is_active=%s WHERE id=%s',
+                               (bool(active), program_id))
+                changed = cursor.rowcount > 0
+            conn.commit()
+            return changed
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
 
     def get_programs_to_notify(self) -> List[Dict[str, Any]]:
         """Programs whose launch_date is within notify_before_days and haven't been notified yet."""

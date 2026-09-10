@@ -31,7 +31,7 @@ class ProfessionalUiTests(unittest.TestCase):
     def test_dashboard_renders_real_operational_metrics(self):
         html = self.render(
             'analytics_dashboard.html',
-            total_visitors=3834,
+            daily_visitors=3834,
             monthly_visitors=420,
             total_users=72,
             leads=16,

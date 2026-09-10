@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  
+
   <meta name="description" content="Nova Brief is the ultimate AI News Agent and Growth platform for students and tech enthusiasts. Get daily updates on AI, tech programs, and exclusive certifications.">
   <meta name="keywords" content="AI News, Tech News, Student Programs, Google Certifications, Microsoft Student, AI Automation, Tech Opportunities">
   <title>User Sign In - Nova Brief</title>
@@ -10,7 +10,6 @@
   <link rel="icon" href="/static/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
-  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
@@ -19,32 +18,14 @@
   </style>
   <link rel="manifest" href="/static/user_manifest.json">
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
-    }
-  </script>
-  <script>
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleTheme() {
-        const htmlEl = document.documentElement;
-        htmlEl.classList.toggle('dark');
-        if (htmlEl.classList.contains('dark')) {
-            localStorage.setItem('color-theme', 'dark');
-        } else {
-            localStorage.setItem('color-theme', 'light');
-        }
-    }
-  </script>
 
-  </head>
 
-<body class="flex items-center justify-center min-h-screen px-4 py-10">
+
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+  {% include "theme_head.html" %}
+</head>
+
+<body class="nova-site flex items-center justify-center min-h-screen px-4 py-10">
   <div class="w-full max-w-md">
     <div class="text-center mb-8">
       <a href="/" class="inline-flex items-center gap-3 mb-4 group">
@@ -133,6 +114,7 @@
     }
   });
   </script>
+<button type="button" class="nova-theme-corner" data-theme-toggle aria-label="Switch to dark mode"><span data-theme-label>Dark mode</span></button>
 </body>
 </html>
 

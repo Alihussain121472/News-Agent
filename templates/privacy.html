@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -63,9 +63,10 @@
         }
     </style>
 
-  </head>
+    {% include "theme_head.html" %}
+</head>
 
-<body>
+<body class="nova-site">
     <nav class="navbar">
         <div class="container">
             <div class="nav-content">
@@ -75,8 +76,10 @@
                 </div>
                 <div class="nav-links">
                     <a href="/" class="nav-link">Home</a>
-                    <a href="/#features" class="nav-link">Features</a>
-                    <a href="/#contact" class="nav-link">Contact</a>
+                    <a href="/news" class="nav-link">News</a>
+                    <a href="/blog" class="nav-link">Blog</a>
+                    <a href="/about" class="nav-link">About</a>
+                    <a href="/contact" class="nav-link">Contact</a>
                 </div>
             </div>
         </div>
@@ -85,82 +88,75 @@
     <section class="legal-page">
         <div class="container legal-container">
             <h1>Privacy Policy</h1>
-            <p class="last-updated">Last updated: January 2024</p>
+            <p class="last-updated">Last updated: September 2026</p>
 
             <h2>1. Introduction</h2>
             <p>
-                Nova Brief ("we," "us," "our," or "Company") operates the Nova Brief website and newsletter service. 
-                This Privacy Policy explains our online information practices and the choices you can make about how 
-                your information is used.
+                Nova Brief ("we," "us," "our," or "Company"), operating <a href="https://www.novabrief.tech" class="text-blue-600 underline">novabrief.tech</a>, is a student-focused technology intelligence platform. 
+                This Privacy Policy explains how we collect, use, and protect your information when you browse our website, read our articles, or subscribe to our intelligence briefings.
             </p>
 
             <h2>2. Information We Collect</h2>
             <p>We may collect information about you in the following ways:</p>
             <ul>
-                <li><strong>Email Address:</strong> When you subscribe to our newsletter</li>
-                <li><strong>Name:</strong> When you voluntarily provide it during registration</li>
-                <li><strong>Usage Data:</strong> Information about how you interact with our website (pages visited, time spent, etc.)</li>
-                <li><strong>Device Information:</strong> Browser type, IP address, and device type</li>
-                <li><strong>Contact Information:</strong> When you submit the contact form</li>
+                <li><strong>Email Address:</strong> When you subscribe to our newsletter or register for an account.</li>
+                <li><strong>Name & Profile:</strong> When voluntarily provided during account registration.</li>
+                <li><strong>Usage & Device Data:</strong> Browser type, operating system, pages visited, referral sources, and IP address collected automatically via server logs and analytics.</li>
+                <li><strong>Correspondence:</strong> Messages and inquiries sent via our contact form or direct email.</li>
             </ul>
 
             <h2>3. How We Use Your Information</h2>
-            <p>We use the information we collect for various purposes:</p>
+            <p>We use the information we collect for the following legitimate purposes:</p>
             <ul>
-                <li>To send you our daily news briefing</li>
-                <li>To communicate with you about your subscription</li>
-                <li>To respond to your inquiries and support requests</li>
-                <li>To improve our website and services</li>
-                <li>To analyze website usage and trends</li>
-                <li>To comply with legal obligations</li>
+                <li>To deliver daily curated technology briefings and student program notifications.</li>
+                <li>To respond to user inquiries, questions, and feedback.</li>
+                <li>To analyze website performance, improve editorial quality, and enhance user experience.</li>
+                <li>To prevent fraud, abuse, and maintain network security.</li>
+                <li>To comply with applicable legal and regulatory obligations.</li>
             </ul>
 
-            <h2>4. Data Security</h2>
+            <h2>4. Google AdSense & Third-Party Advertising Cookies (Mandatory Disclosure)</h2>
             <p>
-                We implement appropriate technical and organizational measures to protect your personal information 
-                against unauthorized access, alteration, disclosure, or destruction. However, no method of transmission 
-                over the Internet or method of electronic storage is 100% secure.
+                We use <strong>Google AdSense</strong> to serve advertisements across our public editorial pages. Please note the following important privacy disclosures regarding advertising partners:
             </p>
-
-            <h2>5. Email Communications</h2>
-            <p>
-                When you subscribe to Nova Brief, you agree to receive our daily news briefing via email. You can 
-                unsubscribe at any time by clicking the unsubscribe link in any email or by contacting us directly.
-            </p>
-
-            <h2>6. Third-Party Services</h2>
-            <p>
-                We may use third-party services (such as email providers and analytics platforms) to support our operations. 
-                These services may have access to your information as necessary to perform their functions, but they are 
-                contractually obligated to use it only for the purposes we specify.
-            </p>
-
-            <h2>7. Cookies</h2>
-            <p>
-                Our website may use cookies to enhance your experience. You can choose to disable cookies through your 
-                browser settings, but this may affect functionality of our website.
-            </p>
-
-            <h2>8. Your Rights</h2>
-            <p>Depending on your location, you may have certain rights regarding your personal information:</p>
             <ul>
-                <li>Right to access your data</li>
-                <li>Right to correct inaccurate data</li>
-                <li>Right to delete your data</li>
-                <li>Right to restrict processing</li>
-                <li>Right to data portability</li>
+                <li><strong>Third-Party Vendors:</strong> Third-party vendors, including Google, use cookies to serve ads based on a user's prior visits to our website or other websites on the internet.</li>
+                <li><strong>DoubleClick / Advertising Cookies:</strong> Google's use of advertising cookies enables it and its partners to serve ads to our visitors based on their visit to Nova Brief and/or other sites on the web.</li>
+                <li><strong>Opting Out of Personalized Advertising:</strong> You can opt out of personalized Google advertising at any time by visiting <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google Ads Settings</a>.</li>
+                <li><strong>Third-Party Vendor Opt-Out:</strong> Alternatively, you can opt out of a third-party vendor's use of cookies for personalized advertising by visiting <a href="http://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">AboutAds.info</a>.</li>
+                <li><strong>Google Partner Disclosures:</strong> To learn more about how Google processes data when you use our site, please review <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">How Google uses information from sites or apps that use our services</a>.</li>
             </ul>
 
-            <h2>9. Changes to This Policy</h2>
+            <h2>5. Cookies and Web Beacons</h2>
             <p>
-                We may update this Privacy Policy from time to time. We will notify you of any changes by posting 
-                the new Privacy Policy on this page and updating the "Last Updated" date.
+                Cookies are small data files placed on your device. We use essential cookies to maintain session preferences (such as dark mode settings) and advertising cookies to measure ad performance. You can configure your browser to refuse all cookies or notify you when a cookie is sent; however, some site features may require cookies to function properly.
+            </p>
+
+            <h2>6. Third-Party Services & Data Processors</h2>
+            <p>
+                We partner with reputable cloud infrastructure, email delivery, and analytics providers (such as Google and Render) to operate our platform securely. These providers are bound by confidentiality agreements and access data strictly for authorized processing purposes.
+            </p>
+
+            <h2>7. Email Communications & Opt-Out</h2>
+            <p>
+                Subscribers receive technology news and student program alerts. You may unsubscribe from marketing or digest emails at any time by clicking the "Unsubscribe" link located at the bottom of every email or by contacting our team directly.
+            </p>
+
+            <h2>8. Data Retention and User Rights</h2>
+            <p>
+                You have the right to request access to, correction of, or deletion of your personal data stored on our systems. To exercise any of these rights, please submit a request to our support team. We do not sell, rent, or trade your personal information to third parties.
+            </p>
+
+            <h2>9. Policy Updates</h2>
+            <p>
+                We may periodically update this Privacy Policy to reflect changes in our operational or legal obligations. Revisions will be posted on this page with an updated effective date.
             </p>
 
             <h2>10. Contact Us</h2>
             <p>
-                If you have any questions about this Privacy Policy, please contact us at 
-                <a href="mailto:supportnovabrief@gmail.com">supportnovabrief@gmail.com</a>
+                For questions, concerns, or data privacy requests, please reach out to us at:
+                <br><strong>Email:</strong> <a href="mailto:support@novabrief.tech" class="text-blue-600 underline">support@novabrief.tech</a> / <a href="mailto:supportnovabrief@gmail.com" class="text-blue-600 underline">supportnovabrief@gmail.com</a>
+                <br><strong>Website:</strong> <a href="https://www.novabrief.tech" class="text-blue-600 underline">https://www.novabrief.tech</a>
             </p>
         </div>
     </section>
@@ -168,12 +164,13 @@
     <footer class="footer">
         <div class="container">
             <div class="footer-bottom">
-                <p>&copy; 2026 Nova Brief. All rights reserved.</p>
+                <p>&copy; 2026 Nova Brief Tech. All rights reserved. | <a href="/privacy">Privacy</a> | <a href="/terms">Terms</a> | <a href="/disclaimer">Disclaimer</a> | <a href="/about">About</a> | <a href="/contact">Contact</a></p>
             </div>
         </div>
     </footer>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<button type="button" class="nova-theme-corner" data-theme-toggle aria-label="Switch to dark mode"><span data-theme-label>Dark mode</span></button>
 </body>
 </html>
 

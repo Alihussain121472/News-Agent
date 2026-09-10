@@ -7,39 +7,19 @@
   <link rel="icon" href="/static/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 
-  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/static/css/tailwind.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   
   <link rel="manifest" href="/static/manifest.json">
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
-    }
-  </script>
-  <script>
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    function toggleTheme() {
-        const htmlEl = document.documentElement;
-        htmlEl.classList.toggle('dark');
-        if (htmlEl.classList.contains('dark')) {
-            localStorage.setItem('color-theme', 'dark');
-        } else {
-            localStorage.setItem('color-theme', 'light');
-        }
-    }
-  </script>
+  
+  
 
-  </head>
+    {% include "theme_head.html" %}
+</head>
 
-<body class="font-sans text-neutral-700 dark:text-slate-200">
+<body class="nova-site font-sans text-neutral-700 dark:text-slate-200">
 <div class="flex h-screen overflow-hidden">
 
   <!-- Sidebar -->
@@ -82,7 +62,7 @@
       <div class="flex items-center gap-3">
         <button onclick="runAgentNow()" class="bg-indigo-600 hover:bg-indigo-500 text-neutral-900 dark:text-white text-xs font-bold px-4 py-2 rounded-lg transition"><i class="fas fa-play mr-1"></i>Run Agent</button>
         <button onclick="loadOverview()" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
-        <button onclick="toggleTheme()" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
+        <button data-theme-toggle aria-label="Switch to dark mode" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
           <a href="/" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-home mr-1"></i>Site</a>
         <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs px-3 py-2 rounded-lg transition"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
       </div>
