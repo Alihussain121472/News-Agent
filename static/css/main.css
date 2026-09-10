@@ -83,3 +83,46 @@ input:focus, textarea:focus, select:focus {
   box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
   transform: translateY(-1px);
 }
+
+/* Theme Toggle Button: only one icon visible at a time */
+[data-theme-toggle], #themeToggleBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+}
+html:not(.dark) [data-theme-toggle] .fa-sun,
+html:not(.dark) #themeToggleBtn .fa-sun,
+html:not([data-theme="dark"]) [data-theme-toggle] .fa-sun,
+html:not([data-theme="dark"]) #themeToggleBtn .fa-sun,
+[data-theme-toggle] .dark\:inline,
+#themeToggleBtn .dark\:inline {
+  display: none !important;
+}
+html:not(.dark) [data-theme-toggle] .fa-moon,
+html:not(.dark) #themeToggleBtn .fa-moon,
+html:not([data-theme="dark"]) [data-theme-toggle] .fa-moon,
+html:not([data-theme="dark"]) #themeToggleBtn .fa-moon {
+  display: inline-block !important;
+}
+html.dark [data-theme-toggle] .fa-moon,
+html.dark #themeToggleBtn .fa-moon,
+html[data-theme="dark"] [data-theme-toggle] .fa-moon,
+html[data-theme="dark"] #themeToggleBtn .fa-moon,
+html.dark [data-theme-toggle] .dark\:hidden,
+html.dark #themeToggleBtn .dark\:hidden,
+html[data-theme="dark"] [data-theme-toggle] .dark\:hidden,
+html[data-theme="dark"] #themeToggleBtn .dark\:hidden {
+  display: none !important;
+}
+html.dark [data-theme-toggle] .fa-sun,
+html.dark #themeToggleBtn .fa-sun,
+html[data-theme="dark"] [data-theme-toggle] .fa-sun,
+html[data-theme="dark"] #themeToggleBtn .fa-sun,
+html.dark [data-theme-toggle] .dark\:inline,
+html.dark #themeToggleBtn .dark\:inline,
+html[data-theme="dark"] [data-theme-toggle] .dark\:inline,
+html[data-theme="dark"] #themeToggleBtn .dark\:inline {
+  display: inline-block !important;
+}
+

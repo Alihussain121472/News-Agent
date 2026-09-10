@@ -15,6 +15,14 @@
       button.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
       const label = button.querySelector('[data-theme-label]');
       if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
+      const moon = button.querySelector('.fa-moon');
+      const sun = button.querySelector('.fa-sun');
+      if (moon && moon.style && typeof moon.style.setProperty === 'function') {
+        moon.style.setProperty('display', dark ? 'none' : 'inline-block', 'important');
+      }
+      if (sun && sun.style && typeof sun.style.setProperty === 'function') {
+        sun.style.setProperty('display', dark ? 'inline-block' : 'none', 'important');
+      }
     });
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = dark ? '#080f1c' : '#f5f7fb';

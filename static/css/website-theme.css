@@ -74,8 +74,15 @@ html.dark .nova-site {
 .nova-site .nova-profile-copy { min-width:0; max-width:190px; }
 .nova-site .nova-profile-name { font-size:13px; font-weight:650; color:var(--theme-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nova-site .nova-profile-email { font-size:11px; color:var(--theme-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.nova-site [data-theme-toggle] { color:var(--theme-muted); background:var(--theme-surface); border:1px solid var(--theme-line); border-radius:10px; min-width:38px; min-height:38px; }
+.nova-site [data-theme-toggle] { color:var(--theme-muted); background:var(--theme-surface); border:1px solid var(--theme-line); border-radius:10px; min-width:38px; min-height:38px; display:inline-flex; align-items:center; justify-content:center; }
 .nova-site [data-theme-toggle]:hover { color:var(--theme-blue); background:var(--theme-tint); }
+
+/* Theme toggle icon switching: display only one icon at a time */
+[data-theme-toggle], #themeToggleBtn { display:inline-flex!important; align-items:center!important; justify-content:center!important; cursor:pointer; }
+html:not(.dark) [data-theme-toggle] .fa-sun, html:not(.dark) #themeToggleBtn .fa-sun, html:not([data-theme="dark"]) [data-theme-toggle] .fa-sun, html:not([data-theme="dark"]) #themeToggleBtn .fa-sun, [data-theme-toggle] .dark\:inline, #themeToggleBtn .dark\:inline { display:none!important; }
+html:not(.dark) [data-theme-toggle] .fa-moon, html:not(.dark) #themeToggleBtn .fa-moon, html:not([data-theme="dark"]) [data-theme-toggle] .fa-moon, html:not([data-theme="dark"]) #themeToggleBtn .fa-moon { display:inline-block!important; }
+html.dark [data-theme-toggle] .fa-moon, html.dark #themeToggleBtn .fa-moon, html[data-theme="dark"] [data-theme-toggle] .fa-moon, html[data-theme="dark"] #themeToggleBtn .fa-moon, html.dark [data-theme-toggle] .dark\:hidden, html.dark #themeToggleBtn .dark\:hidden, html[data-theme="dark"] [data-theme-toggle] .dark\:hidden, html[data-theme="dark"] #themeToggleBtn .dark\:hidden { display:none!important; }
+html.dark [data-theme-toggle] .fa-sun, html.dark #themeToggleBtn .fa-sun, html[data-theme="dark"] [data-theme-toggle] .fa-sun, html[data-theme="dark"] #themeToggleBtn .fa-sun, html.dark [data-theme-toggle] .dark\:inline, html.dark #themeToggleBtn .dark\:inline, html[data-theme="dark"] [data-theme-toggle] .dark\:inline, html[data-theme="dark"] #themeToggleBtn .dark\:inline { display:inline-block!important; }
 .nova-theme-corner { position:fixed; right:16px; bottom:16px; z-index:60; padding:9px 13px; font-size:13px; box-shadow:var(--theme-shadow); cursor:pointer; }
 .nova-site::-webkit-scrollbar-track,.nova-site ::-webkit-scrollbar-track { background:var(--theme-bg); }
 .nova-site::-webkit-scrollbar-thumb,.nova-site ::-webkit-scrollbar-thumb { background:var(--theme-line); }
