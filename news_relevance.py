@@ -231,7 +231,7 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
 
     # One clear company/topic match is the main signal. Additional name-dropping
     # adds only a small amount so clickbait headlines do not outrank real reporting.
-    score = 4 if companies else 0
+    score = 2 if companies else 0
     score += min(max(len(companies) - 1, 0), 2)
     score += 4 if topics else 0
     score += min(max(len(topics) - 1, 0), 2) * 2

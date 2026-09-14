@@ -712,30 +712,38 @@ def api_news_search():
     if not query:
         return jsonify([])
     
-    safe_query = urllib.parse.quote(query)
+    # Enforce strict technology and AI constraint on all searches
+    advanced_query = f'({query}) AND ("technology" OR "AI" OR "artificial intelligence" OR "software" OR "startup")'
+    safe_query = urllib.parse.quote(advanced_query)
     rss_url = f"https://news.google.com/rss/search?q={safe_query}&hl=en-US&gl=US&ceid=US:en"
     
     try:
         feed = feedparser.parse(rss_url)
         results = []
         import hashlib
-        for entry in feed.entries[:30]:
-            # Generate a consistent ID so frontend selection works
-            article_id = int(hashlib.md5(entry.link.encode()).hexdigest()[:8], 16)
-            
-            # Google news titles often have " - Source Name" at the end. We can leave it or split it.
+        from news_relevance import assess_news_relevance
+        for entry in feed.entries[:50]:
             source = entry.source.title if hasattr(entry, 'source') else 'Web'
+            summary = entry.description if hasattr(entry, 'description') else ''
+            
+            # Strictly enforce tech/AI relevance using our editorial engine
+            if not assess_news_relevance({'title': entry.title, 'summary': summary, 'source': source})['is_relevant']:
+                continue
+                
+            article_id = int(hashlib.md5(entry.link.encode()).hexdigest()[:8], 16)
             
             results.append({
                 'id': article_id,
                 'title': entry.title,
                 'url': entry.link,
                 'source': source,
-                'summary': entry.description if hasattr(entry, 'description') else '',
+                'summary': summary,
                 'fetched_at': entry.published if hasattr(entry, 'published') else datetime.now(timezone.utc).isoformat(),
                 'news_topics': ['Global Search'],
                 'companies': []
             })
+            if len(results) >= 30:
+                break
         return jsonify(results)
     except Exception as e:
         print("RSS Search error:", e)
