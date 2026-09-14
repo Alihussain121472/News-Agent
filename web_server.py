@@ -718,18 +718,17 @@ def api_news_search():
     rss_url = f"https://news.google.com/rss/search?q={safe_query}&hl=en-US&gl=US&ceid=US:en"
     
     try:
-        feed = feedparser.parse(rss_url)
+        import requests
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+        response = requests.get(rss_url, headers=headers, timeout=10)
+        feed = feedparser.parse(response.content)
+        
         results = []
         import hashlib
-        from news_relevance import assess_news_relevance
         for entry in feed.entries[:50]:
             source = entry.source.title if hasattr(entry, 'source') else 'Web'
             summary = entry.description if hasattr(entry, 'description') else ''
             
-            # Strictly enforce tech/AI relevance using our editorial engine
-            if not assess_news_relevance({'title': entry.title, 'summary': summary, 'source': source})['is_relevant']:
-                continue
-                
             article_id = int(hashlib.md5(entry.link.encode()).hexdigest()[:8], 16)
             
             results.append({
