@@ -40,7 +40,7 @@ async function summarizeSelected() {
   if (checkboxes.length === 0) return;
 
   const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
-  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  const selectedArticles = currentFeed.filter(a => selectedIds.includes(a.id));
 
   const btn = document.getElementById('sumBtn');
   const originalHtml = btn.innerHTML;
@@ -302,10 +302,13 @@ async function runSummarizer() {
             </div>
             <div class="flex flex-col sm:flex-row items-center gap-2 w-full lg:w-auto">
             <input type="date" id="newsDatePicker" onchange="loadArticles()" class="bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-600 dark:text-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 " />
-              <div class="relative w-full sm:w-64">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-400 text-sm"></i>
-                <input type="search" id="articleSearch" aria-label="Search news topics" placeholder="Search news topics..." onkeyup="liveSearch()" class="w-full bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-400 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
-              </div>
+              <form id="searchForm" onsubmit="executeGlobalSearch(event); return false;" class="relative w-full sm:w-80 flex gap-2">
+                  <div class="relative w-full">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 dark:text-slate-400 text-sm"></i>
+                    <input type="search" id="articleSearch" aria-label="Search global news" placeholder="Search global news..." class="w-full bg-neutral-100 dark:bg-slate-800/50 border border-slate-700 text-neutral-900 dark:text-white placeholder-slate-400 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition shadow-inner"/>
+                  </div>
+                  <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm hidden sm:block">Search</button>
+                </form>
             </div>
           </div>
         </div>
@@ -424,6 +427,7 @@ async function runSummarizer() {
 const USER_NAME = {{ (user_name or 'User') | tojson }};
 const USER_EMAIL = {{ user_email | tojson }};
 let allArticles = [];
+let currentFeed = []; // holds the currently displayed articles
 let overviewData = {};
 
 const dashboardTabMeta = {
@@ -718,6 +722,7 @@ async function loadArticles(force = false){
 
 
 function renderArticles(arts){
+  currentFeed = arts;
   document.getElementById('articlesList').innerHTML = arts.length ? arts.map(a=>`
     <article class="hover-card group bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5 sm:p-6 transition relative">
         <label class="absolute top-0 right-0 cursor-pointer z-10 p-2" title="Select to Summarize">
@@ -754,9 +759,39 @@ function renderArticles(arts){
     </article>`).join('') : '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12">No articles in your feed yet.</div>';
 }
 
-function liveSearch(){
-  const q = document.getElementById('articleSearch').value.toLowerCase();
-  renderArticles(q ? allArticles.filter(a=>(a.title||'').toLowerCase().includes(q)||(a.summary||'').toLowerCase().includes(q)) : allArticles);
+let isSearchingGlobal = false;
+async function executeGlobalSearch(e){
+  if (e) e.preventDefault();
+  const q = document.getElementById('articleSearch').value.trim();
+  
+  if (!q) {
+    // Revert to local feed
+    document.getElementById('newsDatePicker').value = '';
+    loadArticles(true);
+    return;
+  }
+  
+  if (isSearchingGlobal) return;
+  isSearchingGlobal = true;
+  
+  const list = document.getElementById('articlesList');
+  list.innerHTML = '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12"><i class="fas fa-spinner fa-spin text-2xl mb-3 text-blue-500"></i><br>Searching the web for latest news...</div>';
+  
+  try {
+    const r = await fetch('/api/news/search?q=' + encodeURIComponent(q));
+    const data = await r.json();
+    
+    if (data && data.length > 0) {
+      renderArticles(data);
+    } else {
+      list.innerHTML = '<div class="text-neutral-500 dark:text-slate-500 text-sm text-center py-12">No recent news found for "' + q + '". Try a different keyword.</div>';
+    }
+  } catch (err) {
+    console.error(err);
+    list.innerHTML = '<div class="text-red-500 text-sm text-center py-12">Search failed. Please try again.</div>';
+  } finally {
+    isSearchingGlobal = false;
+  }
 }
 
 // Load programs
@@ -914,7 +949,7 @@ async function summarizeSelected() {
   if (checkboxes.length === 0) return;
   
   const selectedIds = Array.from(checkboxes).map(c => parseInt(c.value));
-  const selectedArticles = allArticles.filter(a => selectedIds.includes(a.id));
+  const selectedArticles = currentFeed.filter(a => selectedIds.includes(a.id));
   
   const btn = document.getElementById('sumBtn');
   const originalHtml = btn.innerHTML;

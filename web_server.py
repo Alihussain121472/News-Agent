@@ -705,6 +705,42 @@ def trigger_program_notifications():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
+
+@app.route('/api/news/search')
+def api_news_search():
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify([])
+    
+    safe_query = urllib.parse.quote(query)
+    rss_url = f"https://news.google.com/rss/search?q={safe_query}&hl=en-US&gl=US&ceid=US:en"
+    
+    try:
+        feed = feedparser.parse(rss_url)
+        results = []
+        import hashlib
+        for entry in feed.entries[:30]:
+            # Generate a consistent ID so frontend selection works
+            article_id = int(hashlib.md5(entry.link.encode()).hexdigest()[:8], 16)
+            
+            # Google news titles often have " - Source Name" at the end. We can leave it or split it.
+            source = entry.source.title if hasattr(entry, 'source') else 'Web'
+            
+            results.append({
+                'id': article_id,
+                'title': entry.title,
+                'url': entry.link,
+                'source': source,
+                'summary': entry.description if hasattr(entry, 'description') else '',
+                'fetched_at': entry.published if hasattr(entry, 'published') else datetime.now(timezone.utc).isoformat(),
+                'news_topics': ['Global Search'],
+                'companies': []
+            })
+        return jsonify(results)
+    except Exception as e:
+        print("RSS Search error:", e)
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/articles')
 def get_articles():
     limit = max(1, min(request.args.get('limit', 20, type=int) or 20, 100))
