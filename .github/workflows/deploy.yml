@@ -27,6 +27,11 @@ jobs:
     - name: Audit Python dependencies
       run: pip-audit -r requirements.txt
 
+    - name: Verify Python Practice Hub
+      run: |
+        python scripts/setup_practice.py
+        python -m unittest discover -s tests/practice -p 'test_*.py' -v
+
     - name: Audit Node dependencies
       run: |
         npm ci --ignore-scripts

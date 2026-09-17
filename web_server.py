@@ -22,6 +22,8 @@ load_dotenv()
 # Initialize the Flask application
 app = Flask(__name__)
 app.register_blueprint(planner_bp)
+from python_practice.routes import practice_bp
+app.register_blueprint(practice_bp)
 
 IS_PRODUCTION = os.getenv('FLASK_ENV', 'development').strip().lower() == 'production'
 SECRET_KEY = (os.getenv('SECRET_KEY') or '').strip()

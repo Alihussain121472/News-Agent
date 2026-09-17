@@ -16,6 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application files
 COPY . .
 
+# Checksum-verified CPython WebAssembly runner for the dashboard practice hub.
+RUN python scripts/setup_practice.py
+
 # Create data directory for database
 RUN mkdir -p /app/data
 

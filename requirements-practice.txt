@@ -1,0 +1,6 @@
+# Pure-Python guest packages, mounted read-only inside the WASI sandbox.
+pytest==8.3.5
+pluggy==1.6.0
+packaging==26.3
+iniconfig==2.3.0
+colorama==0.4.6

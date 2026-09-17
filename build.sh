@@ -6,6 +6,9 @@ echo "=== Nova Brief Build Script ==="
 # Install Python dependencies
 pip install -r requirements.txt
 
+# Prepare the isolated Python runner used by the member Practice Hub.
+python scripts/setup_practice.py
+
 # Create recipients.json if it doesn't exist
 if [ ! -f "recipients.json" ]; then
     echo '{"recipients":[]}' > recipients.json

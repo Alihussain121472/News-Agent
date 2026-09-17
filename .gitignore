@@ -5,6 +5,9 @@
 !.env.example
 
 # Python
+.practice-deps/
+.practice-runtime/
+.practice-test/
 __pycache__/
 *.py[cod]
 *$py.class

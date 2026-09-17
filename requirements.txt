@@ -8,4 +8,6 @@ Werkzeug==3.0.4
 Markdown==3.6
 psycopg2-binary
 beautifulsoup4==4.12.3
+# Pin the published Python binding (core runtime patch numbers are not PyPI releases).
+wasmtime==48.0.0
 cryptography==50.0.1

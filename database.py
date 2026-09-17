@@ -291,6 +291,8 @@ class NewsDatabase:
 
         from student_planner.repository import ensure_schema
         ensure_schema(conn)
+        from python_practice.repository import ensure_schema as ensure_practice_schema
+        ensure_practice_schema(conn)
         conn.commit()
         conn.close()
         logger.info(f'Database initialized at {self.db_path}')

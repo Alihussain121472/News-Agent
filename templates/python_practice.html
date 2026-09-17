@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Python Practice Hub · Nova Brief</title>
+  <meta name="description" content="Learn Python by doing. Original coding exercises, quizzes, puzzles and assessments inspired by the CS50P curriculum.">
+  <link rel="icon" href="/static/favicon.ico">
+  <script src="/static/js/theme.js"></script>
+  <link rel="stylesheet" href="/static/vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="/static/css/python-practice.css">
+  <script defer src="/static/vendor/codemirror/codemirror.js"></script>
+  <script defer src="/static/vendor/codemirror/python.js"></script>
+  <script defer src="/static/js/python-practice.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to learning workspace</a>
+<div class="app-shell">
+  <aside class="sidebar" aria-label="Learning navigation">
+    <a class="brand" href="/user/dashboard"><span class="brand-mark">N<span>✦</span></span><span>Nova Brief<small>YOUR LEARNING SPACE</small></span></a>
+    <a class="back-link" href="/user/dashboard">← Back to dashboard</a>
+    <div class="nav-caption">BUILD YOUR SKILLS</div>
+    <nav id="side-nav">
+      <button data-view="practice" class="active"><span class="nav-symbol">⌘</span>Practice Hub<span class="nav-dot"></span></button>
+      <button data-view="quiz"><span class="nav-symbol">▤</span>Quiz Center</button>
+      <button data-view="puzzle"><span class="nav-symbol">◇</span>Python Puzzles</button>
+      <button data-view="exam"><span class="nav-symbol">◎</span>Grand Test</button>
+      <button data-view="progress"><span class="nav-symbol">▥</span>My Progress</button>
+    </nav>
+    <div class="sidebar-course"><span class="eyebrow">THE LEARNING PATH</span><h3>Inspired by CS50P</h3><p>Ten chapters. A world of possibilities.</p><a href="https://cs50.harvard.edu/python/" target="_blank" rel="noopener">Explore the official course ↗</a></div>
+    <div class="sidebar-bottom"><span class="avatar">{{ (user_name or 'L')[0] | upper }}</span><div><strong>{{ user_name }}</strong><small>Python learner</small></div><button data-theme-toggle class="theme-toggle" aria-label="Switch to dark mode"><span data-theme-label>Dark mode</span></button></div>
+  </aside>
+  <div class="page-shell">
+    <header class="topbar"><div class="breadcrumb"><a href="/user/dashboard">Dashboard</a><span>/</span><strong id="breadcrumb">Python Practice Hub</strong></div><div class="top-actions"><span class="python-tag"><span>●</span> Python 3.12</span><button data-theme-toggle class="mobile-theme" aria-label="Switch to dark mode">◐</button></div></header>
+    <nav class="mobile-nav" aria-label="Learning modes"><button data-view="practice">Practice</button><button data-view="quiz">Quizzes</button><button data-view="puzzle">Puzzles</button><button data-view="exam">Grand Test</button><button data-view="progress">Progress</button></nav>
+    <main id="main" tabindex="-1"><div class="loading-state"><span class="loader"></span><h2>Opening your learning space…</h2><p>Loading exercises and your saved progress.</p></div></main>
+    <footer>Built for curious minds. <span>Independent practice inspired by CS50P. Not affiliated with Harvard.</span><button id="runtime-info">Runtime & course notes</button></footer>
+  </div>
+</div>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<dialog id="info-dialog"><form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form><h2>Your Python workspace</h2><p>Real CPython 3.12 runs in a server-side WebAssembly sandbox. Each test gets up to 10 seconds, 128 MiB of Python memory and 16 KiB of output. Stop interrupts running code. Heavy computation may reach an instruction limit earlier.</p><p>Standard-library modules, pytest assertions, unittest suites, command-line arguments and private virtual text files are supported. Files reset for each run. Each file is limited to 1 MB, with at most 32 files. There is no network, host-file access, shell, subprocess support, arbitrary package installation or binary image editing. Pytest file discovery is not supported; use the supplied in-memory test patterns.</p><p>API exercises use offline JSON fixtures. Pillow and package installation are covered through explanations and quizzes. Drafts, submissions, quiz results and assessment answers are stored privately in your account. Your latest 100 submissions, 100 quizzes and 20 Grand Tests are retained.</p><p>Our original exercises follow the <a href="https://cs50.harvard.edu/python/" target="_blank" rel="noopener">official ten-section CS50P curriculum</a>. The <a href="https://www.youtube.com/watch?v=nLRL_NcnK-4" target="_blank" rel="noopener">full course video</a> is linked without unverified chapter timestamps. Course notes are available for each module. These practice results are not a CS50 certificate.</p></dialog>
+</body>
+</html>

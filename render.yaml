@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     autoDeploy: true
-    buildCommand: pip install --disable-pip-version-check -r requirements.txt
+    buildCommand: pip install --disable-pip-version-check -r requirements.txt && python scripts/setup_practice.py
     startCommand: gunicorn web_server:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
     envVars:
       - key: FLASK_ENV

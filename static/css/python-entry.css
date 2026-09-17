@@ -1,0 +1,10 @@
+.python-hub-entry{margin-bottom:24px;padding:24px;border:1px solid #b9ddca;border-radius:18px;background:linear-gradient(115deg,#eaf7ef,#fff);color:#143c2a}
+.python-hub-entry>div{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.python-hub-entry h2{font-size:22px;font-weight:800;line-height:1.35;margin:4px 0}
+.python-hub-entry p{font-size:13px;line-height:1.6;max-width:660px;color:#3f5e4d}
+.python-hub-entry a{display:inline-flex;align-items:center;justify-content:center;gap:10px;flex-shrink:0;background:#176643;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none}
+.python-hub-entry a:hover{background:#104e32}
+.python-hub-entry a:focus-visible{outline:3px solid #176643;outline-offset:4px}
+.dark .python-hub-entry{background:linear-gradient(115deg,#143729,#172522);border-color:#305a43;color:#ecf8ef}
+.dark .python-hub-entry h2{color:#ecf8ef}.dark .python-hub-entry p{color:#bed5c7}
+@media(max-width:640px){.python-hub-entry{padding:19px}.python-hub-entry>div{align-items:stretch;flex-direction:column;gap:14px}.python-hub-entry h2{font-size:20px}header a[aria-label="Open Python Practice Hub"]{display:none}}
