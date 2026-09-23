@@ -8,6 +8,24 @@
   let data, state, view = 'practice', selectedModule = '', selectedType = 'all', current = null;
   let editor = null, draftTimer, saveChain = Promise.resolve(), dirty = false, revision = 0;
   let activeJob = null, pollTimer, timer, examContext = false, serverOffset = 0, finishing = false;
+  const saveTasks = new Map();
+  let quizContext = null;
+  function queueSave(key, task) {
+    const entry = {task}; saveTasks.set(key, entry);
+    saveChain = saveChain.catch(()=>{}).then(task).then(()=>{
+      if(saveTasks.get(key)===entry)saveTasks.delete(key);
+    }).catch(error=>{entry.error=error;throw error;});
+    saveChain.catch(()=>{});
+    return saveChain;
+  }
+  async function waitForSaves() {
+    await saveChain.catch(()=>{});
+    if(saveTasks.size)throw new Error('Some answers have not saved. Use Retry save before continuing.');
+  }
+  async function retrySaves() {
+    for(const [key,entry] of [...saveTasks])queueSave(key,entry.task).catch(()=>{});
+    try{await flushDraft();await waitForSaves();notice('All changes saved.');}catch(e){notice(e.message);}
+  }
   const names = {practice:'Python Practice Hub',quiz:'Quiz Center',puzzle:'Python Puzzles',exam:'Grand Test',progress:'My Progress'};
   const badge = difficulty => `<span class="badge ${difficulty.toLowerCase()}">${escape(difficulty)}</span>`;
   const moduleOf = id => data.modules.find(m => m.id === id);
@@ -41,8 +59,8 @@
   }
   async function navigate(next) {
     if (activeJob && !finishing) { notice('Stop your running program before leaving the workspace.'); return; }
-    try { await flushDraft(); } catch (e) { notice(e.message); return; }
-    current = null; editor = null; examContext = false; clearInterval(timer);
+    try { await flushDraft(); await waitForSaves(); } catch (e) { notice(e.message); return; }
+    current = null; editor = null; examContext = false; quizContext = null;
     view = next;
     $$('.sidebar [data-view], .mobile-nav [data-view]').forEach(b => b.classList.toggle('active', b.dataset.view===view));
     $('#breadcrumb').textContent = names[view];
@@ -51,6 +69,7 @@
     if (view==='quiz') renderQuizzes();
     if (view==='exam') renderExam();
     if (view==='progress') renderProgress();
+    if(state.active_exam?.status==='active')startTimer();
   }
   function renderLibrary() {
     const puzzle = view==='puzzle';
@@ -82,34 +101,37 @@
     clearTimeout(draftTimer);
     if(!current||!dirty)return saveChain;
     const id=current.id, code=getCode(), stdin=$('#stdin')?.value||'', rev=revision;
+    let argv;try{argv=JSON.parse($('#argv').value);}catch(_){return Promise.reject(new Error('Command-line arguments must be a JSON array.'));}
     const exam=examContext?state.active_exam?.id:null;
     const task=async()=>{
-      if(exam){await api('exam/answer',{exam,id,answer:code});if(state.active_exam?.id===exam)state.active_exam.answers[id]=code;}
-      else{await api('draft/'+id,{code,stdin});state.drafts[id]={code,stdin};state.last_exercise=id;}
+      if(exam){await api('exam/answer',{exam,id,answer:code,stdin,argv});if(state.active_exam?.id===exam){state.active_exam.answers[id]=code;(state.active_exam.inputs??={})[id]={stdin,argv};}}
+      else{await api('draft/'+id,{code,stdin,argv});state.drafts[id]={code,stdin,argv};state.last_exercise=id;}
       if(current?.id===id&&revision===rev){dirty=false;setSaveLabel('All changes saved');}
     };
-    saveChain=saveChain.catch(()=>{}).then(task).catch(e=>{setSaveLabel('Not saved · retry by editing');throw e;});
-    return saveChain;
+    return queueSave('code:'+id,task).catch(e=>{setSaveLabel('Not saved · use Retry save');throw e;});
   }
   async function openExercise(id,inExam=false){
     if(activeJob){notice('Stop the running program first.');return;}
-    try{await flushDraft();}catch(e){notice(e.message);return;}
+    try{await flushDraft();await waitForSaves();}catch(e){notice(e.message);return;}
     const e=exerciseOf(id);if(!e){notice('Exercise not found.');return;}
     current=e;examContext=inExam;dirty=false;revision++;clearInterval(timer);
-    const saved=inExam?{code:state.active_exam.answers[id]}:state.drafts[id];
+    const saved=inExam?{code:state.active_exam.answers[id],...state.active_exam.inputs?.[id]}:state.drafts[id];
     show(`<div class="workspace-top"><div><button class="text-button" id="back">← ${inExam?'Back to Grand Test':view==='puzzle'?'All puzzles':'All exercises'}</button><h2>${escape(e.title)}</h2></div><div>${inExam?'<span class="exam-timer" id="countdown"></span>':'<small>One focused step forward.</small>'}</div></div><div class="mobile-workspace-tabs" role="tablist" aria-label="Workspace panels"><button class="active" data-pane="question" role="tab" aria-selected="true">Question</button><button data-pane="code" role="tab" aria-selected="false">Code</button><button data-pane="results" role="tab" aria-selected="false">Results</button></div><div class="workspace" data-pane="question"><section class="question-panel" aria-label="Problem description">${badge(e.difficulty)}<h2>${escape(e.title)}</h2><p>${escape(e.problem)}</p><div class="lesson">${escape(e.lesson)}</div><h3>Input & output</h3><p class="muted">${escape(e.io)}</p>${e.examples.map(ex=>`<div class="example"><span class="example-label">Example input</span><pre>${escape(ex.input)||'(No standard input)'}</pre><span class="example-label">Expected output</span><pre>${escape(ex.output)||'(Empty output)'}</pre></div>`).join('')}${Object.keys(e.files).length?`<h3>Exercise files</h3>${Object.entries(e.files).map(([name,content])=>`<details><summary>${escape(name)}</summary><pre>${escape(content)}</pre></details>`).join('')}`:''}${inExam?'':`<details><summary>A nudge in the right direction</summary><ol class="hint-list">${e.hints.map(h=>`<li>${escape(h)}</li>`).join('')}</ol></details><button class="text-button" id="reveal">Reveal explained solution</button><div id="solution"></div>`}<h3>Keep exploring</h3><a href="${moduleOf(e.module).notes}" target="_blank" rel="noopener">Read official chapter notes ↗</a><br><a href="${moduleOf(e.module).video}" target="_blank" rel="noopener">Watch the full course ↗</a></section><section class="editor-panel" aria-label="Python editor"><div class="editor-bar"><strong>▧ &nbsp; main.py</strong><span id="save-status" class="save-label" role="status">All changes saved</span></div><textarea id="code" aria-label="Python code editor" spellcheck="false"></textarea><div class="editor-controls"><button id="run" class="secondary">▷ Run</button><button id="stop" class="danger" disabled>□ Stop</button><button id="submit" class="primary">${inExam?'Save answer':'Submit solution'} →</button><button id="reset">↺ Reset</button></div><div class="input-area"><label for="stdin">STANDARD INPUT · ONE VALUE PER LINE</label><textarea id="stdin" rows="2" placeholder="Values for input()"></textarea><label for="argv">COMMAND-LINE ARGUMENTS · JSON ARRAY</label><input id="argv" value="${escape(JSON.stringify(e.argv))}" aria-label="Command-line arguments"></div><section class="results-panel" aria-label="Execution results" aria-live="polite"><h3>Output & tests</h3><div id="output"><p class="muted">Run your code to explore. ${inExam?'Save your answer for final grading.':'Submit when you’re ready for all test cases.'}</p><small class="muted">10 sec · 128 MiB · 16 KiB output · Ctrl/⌘ + Enter to run</small></div></section></section></div>`);
     $('#code').value=saved?.code??e.starter;
     $('#stdin').value=saved?.stdin??e.examples[0]?.input??'';
+    $('#argv').value=JSON.stringify(saved?.argv??e.argv);
+    $('#save-status').insertAdjacentHTML('afterend','<button class="text-button" id="retry-save">Retry save</button>');
+    $('#retry-save').onclick=retrySaves;
     if(window.CodeMirror){editor=CodeMirror.fromTextArea($('#code'),{mode:'python',lineNumbers:true,indentUnit:4,tabSize:4,indentWithTabs:false,lineWrapping:true,viewportMargin:20,extraKeys:{'Ctrl-Enter':()=>run('run'),'Cmd-Enter':()=>run('run'),Tab:cm=>cm.somethingSelected()?cm.indentSelection('add'):cm.replaceSelection('    '),Esc:cm=>cm.getInputField().blur()}});editor.on('change',changed);editor.getInputField().setAttribute('aria-label','Python code editor');}
     else{$('#code').oninput=changed;$('#code').onkeydown=event=>{if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();run('run');}};}
-    $('#stdin').oninput=changed;
-    $('#run').onclick=()=>run('run');$('#submit').onclick=()=>inExam?flushDraft().then(()=>notice('Answer saved for final grading.')).catch(e=>notice(e.message)):run('submit');
+    $('#stdin').oninput=changed;$('#argv').oninput=changed;
+    $('#run').onclick=()=>run('run');$('#submit').onclick=()=>{if(inExam){changed();flushDraft().then(()=>notice('Answer saved for final grading.')).catch(e=>notice(e.message));}else run('submit');};
     $('#stop').onclick=async()=>{if(activeJob){try{await api(`jobs/${activeJob}/stop`,{});notice('Stopping your program…');}catch(e){notice(e.message);}}};
     $('#reset').onclick=()=>{if(!confirm('Replace this draft with the starter code?'))return;if(editor)editor.setValue(e.starter);else{$('#code').value=e.starter;changed();}};
     $('#back').onclick=()=>navigate(inExam?'exam':view==='puzzle'?'puzzle':'practice');
     $('#reveal')?.addEventListener('click',async()=>{if(!confirm('Reveal the reference solution and explanation? Try a hint first if you want another attempt.'))return;try{const solution=await api('solution/'+id,{});$('#solution').innerHTML=`<div class="lesson"><strong>One possible solution</strong><pre>${escape(solution.code)}</pre><p>${escape(solution.explanation)}</p></div>`;}catch(error){notice(error.message);}});
     $$('[data-pane]',main).filter(b=>b.tagName==='BUTTON').forEach(b=>b.onclick=()=>setPane(b.dataset.pane));
-    if(inExam)startTimer();
+    if(state.active_exam?.status==='active')startTimer();
     history.replaceState(null,'',`#${inExam?'exam-code':'exercise'}/${id}`);
   }
   function setPane(pane){$('.workspace').dataset.pane=pane;$$('button[data-pane]').forEach(b=>{b.classList.toggle('active',b.dataset.pane===pane);b.setAttribute('aria-selected',b.dataset.pane===pane);});if(pane==='code')setTimeout(()=>editor?.refresh(),0);}
@@ -117,10 +139,11 @@
   async function run(kind){
     if(activeJob)return;
     try{
-      await flushDraft();
+      await flushDraft();await waitForSaves();
       let argv;try{argv=JSON.parse($('#argv').value);}catch(_){throw new Error('Command-line arguments must be a JSON array, such as ["--count", "3", "hi"].');}
       busy(true);$('#output').innerHTML='<p class="muted"><span class="loader"></span> Starting Python…</p>';setPane('results');
-      const job=await api('jobs',{kind,exercise:current.id,code:getCode(),stdin:$('#stdin').value,argv});
+      const job=await api('jobs',{kind,exercise:current.id,code:getCode(),stdin:$('#stdin').value,argv,exam:examContext?state.active_exam.id:null});
+      sessionStorage.setItem('python-active-job',JSON.stringify({id:job.id,exercise:current.id,exam:examContext}));
       activeJob=job.id;pollJob(job.id,false);
     }catch(e){busy(false);$('#output').innerHTML=`<div class="result-banner error">${escape(e.message)}</div>`;}
   }
@@ -130,6 +153,7 @@
       const job=await api('jobs/'+id);
       if(job.status==='running'){pollTimer=setTimeout(()=>pollJob(id,isExam),450);return;}
       activeJob=null;busy(false);
+      sessionStorage.removeItem('python-active-job');
       if(job.status==='error')throw new Error(job.message);
       if(isExam){finishing=false;await refresh();renderExam();return;}
       renderOutput(job.result||{status:job.status});
@@ -150,26 +174,77 @@
   function renderOutput(result){
     const messages={ok:'Run complete',passed:'All tests passed — well done!',needs_work:'Not quite yet. Use the feedback below to refine your solution.',syntax_error:'Python could not parse your code. Check the line shown below.',runtime_error:'Your program encountered an error.',timeout:'Execution limit reached. Check for an infinite loop or reduce the work.',memory_limit:'Memory limit reached (128 MiB). Try using smaller data structures.',output_limit:'Output limit reached (16 KiB). Print less data.',stopped:'Execution stopped.'};
     $('#output').innerHTML=`<div class="result-banner ${['ok','passed'].includes(result.status)?'':'error'}">${escape(messages[result.status]||result.status)}</div>${result.duration_ms!==undefined?`<small class="muted">${result.duration_ms} ms</small>`:''}${result.stdout!==undefined?`<pre>${escape(result.stdout)||'(No output)'}</pre>`:''}${result.stderr?`<pre class="danger">${escape(result.stderr)}</pre>`:''}${(result.tests||[]).map(t=>`<div class="test-row ${t.passed?'':'failed'}"><strong>${t.passed?'✓':'×'} ${escape(t.name)}</strong> <span class="muted">${escape(t.status.replaceAll('_',' '))}</span>${!t.passed&&t.expected!==undefined?`<details><summary>Compare output</summary><div>Expected</div><pre>${escape(t.expected)||'(Empty)'}</pre><div>Your output</div><pre>${escape(t.actual)||'(Empty)'}</pre>${t.stderr?`<pre class="danger">${escape(t.stderr)}</pre>`:''}</details>`:''}</div>`).join('')}`;
-    if(result.status==='passed')$('#output').classList.add('success-pulse');
+    if(result.status==='passed'){
+      $('#output').classList.add('success-pulse');
+      const next=data.exercises.find(e=>e.mode===current.mode&&e.id!==current.id&&!completed(e)&&e.module===current.module)||data.exercises.find(e=>e.mode===current.mode&&e.id!==current.id&&!completed(e));
+      if(next){$('#output').insertAdjacentHTML('beforeend',`<button id="next-exercise" class="primary">Next: ${escape(next.title)} →</button>`);$('#next-exercise').onclick=()=>openExercise(next.id);}
+    }
   }
   function renderQuizzes(){
-    show(heading('Know it. Explain it. Remember it.','Quick checkpoints for every chapter: predict the output, spot an error, and test your understanding.','QUIZ CENTER')+`<div class="card-grid">${data.modules.map(m=>{const scores=state.quiz_results.filter(q=>q.module===m.id);const best=scores.length?Math.max(...scores.map(q=>Math.round(100*q.score/q.total)))+'%':'Not attempted';return `<section class="card"><span class="eyebrow">CHAPTER ${String(+m.id+1).padStart(2,'0')}</span><h3>${escape(m.title)}</h3><p>3 questions · Explained answers</p><small class="muted">Best score: ${best}</small><br><button data-quiz="${m.id}" class="secondary">Start quiz →</button></section>`;}).join('')}</div>`);
+    quizContext=null;
+    show(heading('Quiz Center','Check your understanding, review explanations, and retry the questions you missed.','CHAPTER CHECKPOINTS')+`<div class="card-grid">${data.modules.map(m=>{
+      const scores=state.quiz_results.filter(q=>q.module===m.id),latest=scores.at(-1),draft=state.quiz_drafts[m.id];
+      const best=scores.length?Math.max(...scores.map(q=>Math.round(100*q.score/q.total)))+'%':'Not attempted';
+      return `<section class="card"><span class="eyebrow">CHAPTER ${+m.id+1}</span><h3>${escape(m.title)}</h3><p>3 questions · Explained answers</p><small class="muted">Best score: ${best}${draft?` · ${Object.keys(draft.answers).length}/${draft.questions.length} answers saved`:''}</small><div class="quiz-actions"><button data-quiz="${m.id}" class="secondary">${draft?'Resume':'Start'} quiz →</button>${latest?`<button data-quiz-review="${m.id}">Review last attempt</button>`:''}${latest?.score<latest?.total?`<button data-quiz-missed="${m.id}">Retry missed questions</button>`:''}</div></section>`;
+    }).join('')}</div>`);
     $$('[data-quiz]',main).forEach(b=>b.onclick=()=>openQuiz(b.dataset.quiz));
+    $$('[data-quiz-missed]',main).forEach(b=>b.onclick=()=>openQuiz(b.dataset.quizMissed,'missed'));
+    $$('[data-quiz-review]',main).forEach(b=>b.onclick=()=>reviewQuiz(state.quiz_results.filter(q=>q.module===b.dataset.quizReview).at(-1)));
   }
-  function quizQuestion(q,selected,disabled=false){return `<section class="quiz-question" data-question="${q.id}"><span class="eyebrow">${escape(q.kind)}</span><h3>${escape(q.question)}</h3><div class="options">${q.options.map((option,index)=>`<label class="option"><input type="radio" name="${q.id}" value="${index}" ${selected===index?'checked':''} ${disabled?'disabled':''}><span>${escape(option)}</span></label>`).join('')}</div><div class="feedback"></div></section>`;}
-  function openQuiz(module){
-    const questions=data.quizzes.filter(q=>q.module===module);
-    show(`<div class="quiz-sheet"><button class="text-button" id="quiz-back">← All quizzes</button>${heading(escape(moduleOf(module).title),'Choose one answer for every question. Explanations appear after you submit.','CHAPTER CHECKPOINT')}<form id="quiz-form">${questions.map(q=>quizQuestion(q)).join('')}<button class="primary" type="submit">Check my answers →</button></form><div id="quiz-result" aria-live="polite"></div></div>`);
-    $('#quiz-back').onclick=renderQuizzes;
-    $('#quiz-form').onsubmit=async event=>{event.preventDefault();const answers={};for(const q of questions){const checked=$(`input[name="${q.id}"]:checked`);if(!checked){notice('Answer every question before submitting.');return;}answers[q.id]=+checked.value;}const button=$('button[type="submit"]');button.disabled=true;try{const {result}=await api('quiz',{module,answers});state.quiz_results.push(result);for(const d of result.details){const q=questions.find(q=>q.id===d.id);$(`[data-question="${d.id}"] .feedback`).innerHTML=`<div class="answer-feedback"><strong>${d.correct?'✓ Correct':'The correct answer: '+escape(q.options[d.answer])}</strong><p>${escape(d.explanation)}</p></div>`;}$$('input[type="radio"]',main).forEach(i=>i.disabled=true);$('#quiz-result').innerHTML=`<div class="exam-summary"><div class="score-ring">${result.score}/${result.total}</div><div><h2>Checkpoint complete</h2><p>Your score is saved. Review the explanations, then keep practicing.</p><button id="quiz-done">Back to quizzes →</button></div></div>`;$('#quiz-done').onclick=renderQuizzes;button.textContent='Score saved ✓';}catch(e){notice(e.message);button.disabled=false;}};
+  function quizQuestion(q,selected,disabled=false){return `<section class="quiz-question" id="question-${q.id}" data-question="${q.id}"><span class="eyebrow">${escape(q.kind)}</span><h3>${escape(q.question)}</h3><fieldset class="options"><legend class="sr-only">${escape(q.question)}</legend>${q.options.map((option,index)=>`<label class="option"><input type="radio" name="${q.id}" value="${index}" ${selected===index?'checked':''} ${disabled?'disabled':''}><span>${escape(option)}</span></label>`).join('')}</fieldset><div class="feedback"></div></section>`;}
+  async function openQuiz(module,mode='resume'){
+    try{
+      await waitForSaves();
+      const {draft}=await api('quiz/start',{module,mode});state.quiz_drafts[module]=draft;quizContext={module,draft};
+      const questions=draft.questions.map(id=>data.quizzes.find(q=>q.id===id));
+      show(`<div class="quiz-sheet"><button class="text-button" id="quiz-back">← All quizzes</button>${heading(escape(moduleOf(module).title),draft.mode==='missed'?'Retry missed questions. This attempt receives its own score.':'Choose one answer for every question. Your selections save automatically.','CHAPTER CHECKPOINT')}<div class="review-toolbar"><span id="quiz-save" role="status"></span><button id="quiz-retry-save">Retry save</button></div><form id="quiz-form">${questions.map(q=>quizQuestion(q,draft.answers[q.id])).join('')}<button class="primary" type="submit">Check my answers →</button></form></div>`);
+      history.replaceState(null,'',`#quiz/${module}`);
+      const savedLabel=()=>{if($('#quiz-save'))$('#quiz-save').textContent=`${Object.keys(draft.answers).length} / ${questions.length} answered · All changes saved`;};savedLabel();
+      $('#quiz-back').onclick=()=>navigate('quiz');$('#quiz-retry-save').onclick=retrySaves;
+      $$('input[type="radio"]',main).forEach(input=>input.onchange=()=>{
+        draft.answers[input.name]=+input.value;const answers={...draft.answers};$('#quiz-save').textContent='Saving…';
+        queueSave('quiz:'+module,async()=>{await api('quiz/draft',{module,attempt:draft.id,answers});if(quizContext?.draft===draft)savedLabel();}).catch(e=>{if($('#quiz-save'))$('#quiz-save').textContent='Not saved · use Retry save';notice(e.message);});
+      });
+      $('#quiz-form').onsubmit=async event=>{
+        event.preventDefault();if(questions.some(q=>draft.answers[q.id]===undefined)){notice('Answer every question before submitting.');return;}
+        const button=$('button[type="submit"]');button.disabled=true;
+        try{await waitForSaves();const {result}=await api('quiz',{module,attempt:draft.id,answers:draft.answers});delete state.quiz_drafts[module];state.quiz_results.push(result);reviewQuiz(result);}
+        catch(e){notice(e.message);button.disabled=false;}
+      };
+    }catch(e){notice(e.message);}
+  }
+  function reviewQuiz(result){
+    quizContext=null;
+    show(`<div class="quiz-sheet">${heading(escape(moduleOf(result.module).title),'Review each answer and its explanation. This result is saved in your progress.','QUIZ REVIEW')}<div class="exam-summary"><div class="score-ring">${result.score}/${result.total}</div><div><h2>Checkpoint complete</h2><p>${result.score===result.total?'All answers correct.':'Use the explanations below to work through your mistakes.'}</p></div></div>${result.details.map(d=>{const q=data.quizzes.find(q=>q.id===d.id);return `${quizQuestion(q,d.selected,true)}<div class="answer-feedback"><strong>${d.correct?'✓ Correct':'Correct answer: '+escape(q.options[d.answer])}</strong><p>${escape(d.explanation)}</p></div>`;}).join('')}<div class="quiz-actions"><button id="quiz-done">Back to quizzes</button><button id="quiz-practice">Practice this topic →</button><button id="quiz-again">Take full quiz again</button>${result.score<result.total?'<button id="quiz-missed" class="primary">Retry missed questions →</button>':''}</div></div>`);
+    $('#quiz-done').onclick=()=>navigate('quiz');$('#quiz-again').onclick=()=>openQuiz(result.module,'all');
+    $('#quiz-missed')?.addEventListener('click',()=>openQuiz(result.module,'missed'));
+    $('#quiz-practice').onclick=()=>{selectedModule=result.module;navigate('practice');};
+  }
+  const answered=(exam,id)=>typeof exam.answers[id]==='number'||(typeof exam.answers[id]==='string'&&!!exam.answers[id].trim());
+  function examChecklist(exam){
+    const ids=[...exam.quizzes,...exam.codes],flags=exam.flags||[];
+    return `<section class="review-toolbar" aria-label="Assessment review"><strong>${ids.filter(id=>answered(exam,id)).length} / ${ids.length} answered · ${flags.length} flagged</strong><div class="question-jump">${ids.map((id,i)=>`<button data-jump="${id}" class="${answered(exam,id)?'answered':''}" aria-label="Question ${i+1}: ${answered(exam,id)?'answered':'unanswered'}${flags.includes(id)?', flagged for review':''}">${i+1}${flags.includes(id)?' ⚑':''}</button>`).join('')}</div><p class="muted">Select a number to revisit a question. Flag questions to review before finishing.</p><button id="exam-retry-save">Retry save</button></section>`;
+  }
+  function bindExamChecklist(exam){
+    $$('[data-jump]',main).forEach(b=>b.onclick=()=>{const id=b.dataset.jump;if(exam.codes.includes(id))openExercise(id,true);else $('#question-'+id)?.scrollIntoView({block:'center'});});
+    $('#exam-retry-save').onclick=retrySaves;
   }
   function renderExam(){
-    current=null;editor=null;examContext=false;clearInterval(timer);
+    current=null;editor=null;examContext=false;clearInterval(timer);$('#assessment-banner').hidden=!state.active_exam||state.active_exam.status!=='active';
     const exam=state.active_exam;
     if(exam){
       if(exam.status==='grading'){show(heading('Your work is being reviewed.','We’re checking each coding answer against the example and hidden tests. Your answers are saved.','GRAND TEST')+'<div class="loading-state"><span class="loader"></span><p>Grading your assessment…</p></div>');activeJob=exam.job;finishing=true;pollJob(exam.job,true);return;}
-      show(`<div class="workspace-top"><div>${heading('Your Grand Test','20 questions. Ten chapters. Bring everything together.','ASSESSMENT IN PROGRESS')}</div><span id="countdown" class="exam-timer"></span></div><p class="muted">Answers save automatically. Each question contributes equally; coding questions receive partial credit for passed tests. Missing answers score zero.</p><h2>Part 1 · Knowledge checks</h2><div class="exam-questions" style="margin:20px 0 32px">${exam.quizzes.map(id=>quizQuestion(data.quizzes.find(q=>q.id===id),exam.answers[id])).join('')}</div><h2>Part 2 · Put it into code</h2><div class="card-grid" style="margin:20px 0">${exam.codes.map(id=>{const e=exerciseOf(id);return `<div class="card"><span class="eyebrow">${escape(moduleOf(e.module).title)}</span><h3>${escape(e.title)}</h3><p>${exam.answers[id]?'Answer saved ✓':'Ready when you are'}</p><button data-exam-code="${id}">Open coding problem →</button></div>`;}).join('')}</div><button class="primary" id="finish-exam">Finish & grade my test →</button>`);
-      $$('input[type="radio"]',main).forEach(input=>input.onchange=async()=>{try{await api('exam/answer',{exam:exam.id,id:input.name,answer:+input.value});exam.answers[input.name]=+input.value;notice('Answer saved.');}catch(e){notice(e.message);input.checked=false;}});
+      show(`<div class="workspace-top"><div>${heading('Your Grand Test','20 questions covering all ten chapters.','ASSESSMENT IN PROGRESS')}</div><span id="countdown" class="exam-timer"></span></div><div id="exam-checklist">${examChecklist(exam)}</div><p class="muted">Each question contributes equally; coding questions receive partial credit for passed tests. Missing answers score zero.</p><h2>Part 1 · Knowledge checks</h2><div class="exam-questions" style="margin:20px 0 32px">${exam.quizzes.map(id=>quizQuestion(data.quizzes.find(q=>q.id===id),exam.answers[id])).join('')}</div><h2>Part 2 · Put it into code</h2><div class="card-grid" style="margin:20px 0">${exam.codes.map(id=>{const e=exerciseOf(id);return `<div class="card" data-question="${id}"><span class="eyebrow">${escape(moduleOf(e.module).title)}</span><h3>${escape(e.title)}</h3><p>${answered(exam,id)?'Answer saved ✓':'Unanswered'}</p><button data-exam-code="${id}">Open coding problem →</button></div>`;}).join('')}</div><button class="primary" id="finish-exam">Review & finish my test →</button>`);
+      const updateChecklist=()=>{if($('#exam-checklist')){$('#exam-checklist').innerHTML=examChecklist(exam);bindExamChecklist(exam);}};bindExamChecklist(exam);
+      $$('input[type="radio"]',main).forEach(input=>input.onchange=()=>{
+        const id=input.name,answer=+input.value;
+        queueSave('exam:'+id,async()=>{await api('exam/answer',{exam:exam.id,id,answer});exam.answers[id]=answer;updateChecklist();}).catch(e=>notice(e.message));
+      });
+      $$('[data-question]',main).forEach(section=>{const id=section.dataset.question;section.insertAdjacentHTML('beforeend',`<label class="review-flag"><input type="checkbox" data-flag="${id}" ${(exam.flags||[]).includes(id)?'checked':''}> Flag for review</label>`);});
+      $$('[data-flag]',main).forEach(input=>input.onchange=()=>{
+        const id=input.dataset.flag,flagged=input.checked;
+        queueSave('flag:'+id,async()=>{await api('exam/flag',{exam:exam.id,id,flagged});exam.flags=(exam.flags||[]).filter(f=>f!==id);if(flagged)exam.flags.push(id);updateChecklist();}).catch(e=>notice(e.message));
+      });
       $$('[data-exam-code]',main).forEach(b=>b.onclick=()=>openExercise(b.dataset.examCode,true));
       $('#finish-exam').onclick=()=>finishExam(false);startTimer();return;
     }
@@ -179,12 +254,25 @@
   }
   function startTimer(){
     clearInterval(timer);
-    const tick=()=>{const exam=state.active_exam;if(!exam)return;const node=$('#countdown');if(!exam.deadline){if(node)node.textContent='Untimed · answers saved';return;}const remaining=Math.max(0,Math.ceil(exam.deadline-(Date.now()+serverOffset)/1000));if(node)node.textContent=`${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')} remaining`;if(remaining===0&&!finishing){clearInterval(timer);dirty=false;clearTimeout(draftTimer);notice('Time is up. Grading your saved answers.');finishExam(true);}};tick();timer=setInterval(tick,1000);
+    const tick=()=>{
+      const exam=state.active_exam,banner=$('#assessment-banner');
+      if(!exam||exam.status!=='active'){if(banner)banner.hidden=true;clearInterval(timer);return;}
+      const remaining=exam.deadline?Math.max(0,Math.ceil(exam.deadline-(Date.now()+serverOffset)/1000)):null;
+      const label=remaining===null?'Untimed test in progress':`${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')} remaining`;
+      if($('#countdown'))$('#countdown').textContent=label;
+      if(banner){banner.hidden=false;$('#assessment-clock').textContent=label;$('#assessment-save').textContent=saveTasks.size?'Answers saving or needing retry':'Answers saved';}
+      if(remaining===0&&!finishing){clearInterval(timer);dirty=false;clearTimeout(draftTimer);notice('Time is up. Grading the answers saved before the deadline.');finishExam(true);}
+    };tick();timer=setInterval(tick,1000);
   }
   async function finishExam(automatic){
     if(finishing)return;
-    if(!automatic&&!confirm('Finish this assessment? Unanswered questions receive zero points.'))return;
-    try{if(!automatic)await flushDraft();finishing=true;if(activeJob){await api('jobs/'+activeJob+'/stop',{});notice('Stopping the running program before final grading…');finishing=false;setTimeout(()=>finishExam(true),800);return;}const job=await api('exam/finish',{});state.active_exam.status='grading';state.active_exam.job=job.id;current=null;dirty=false;renderExam();}catch(e){finishing=false;notice(e.message);}
+    try{
+      if(!automatic){await flushDraft();await waitForSaves();const exam=state.active_exam,ids=[...exam.quizzes,...exam.codes];const missing=ids.filter(id=>!answered(exam,id)).length;if(!confirm(`Finish this assessment? ${missing} unanswered question(s) receive zero points. ${(exam.flags||[]).length} question(s) are flagged for review.`))return;}
+      finishing=true;
+      if(activeJob){await api('jobs/'+activeJob+'/stop',{});notice('Stopping the running program before final grading…');finishing=false;setTimeout(()=>finishExam(true),800);return;}
+      await saveChain.catch(()=>{});
+      const job=await api('exam/finish',{});state.active_exam.status='grading';state.active_exam.job=job.id;current=null;dirty=false;quizContext=null;saveTasks.clear();$('#assessment-banner').hidden=true;renderExam();
+    }catch(e){finishing=false;notice(e.message);}
   }
   function examReport(result){return `<section class="exam-summary"><div class="score-ring">${result.score}%</div><div><span class="eyebrow">ASSESSMENT COMPLETE</span><h2>${result.score>=80?'Look how far you’ve come.':'A clear path to your next breakthrough.'}</h2><p class="muted">${result.earned.toFixed(1)} of ${result.total} points · ${result.timed?'Timed':'Untimed'} · ${new Date(result.finished*1000).toLocaleDateString()}</p><p>${result.revise.length?'Revisit: '+escape(result.revise.join(', ')):'Strong work across every topic.'}</p></div></section><details><summary>See topic scores and explained answers</summary><div class="progress-grid">${Object.entries(result.topics).map(([id,t])=>`<div><div class="progress-line"><span>${escape(t.title)}</span><strong>${t.earned.toFixed(1)} / ${t.total}</strong></div><div class="mini-progress"><span style="width:${100*t.earned/t.total}%"></span></div></div>`).join('')}</div>${result.items.map(item=>{const q=data.quizzes.find(q=>q.id===item.id),e=exerciseOf(item.id);return `<div class="test-row"><strong>${item.earned===1?'✓':'○'} ${escape(q?.question||e?.title)}</strong>${q?`<p>Answer: ${escape(q.options[item.answer])}</p><p>${escape(item.explanation)}</p>`:`<p>${item.earned.toFixed(2)} / 1 point · ${(item.tests||[]).map(t=>`${escape(t.name)}: ${t.passed?'passed':escape(t.status.replaceAll('_',' '))}`).join(' · ')}</p>`}</div>`;}).join('')}</details>`;}
   function renderProgress(){
@@ -194,11 +282,13 @@
     $$('[data-history]',main).forEach(b=>b.onclick=()=>{const s=state.submissions[+b.dataset.history];$('#history-code').innerHTML=`<details open><summary>Submitted code · ${escape(exerciseOf(s.exercise)?.title)}</summary><pre>${escape(s.code)}</pre></details>`;});
   }
   $$('[data-view]').forEach(b=>b.onclick=()=>navigate(b.dataset.view));
+  $('#resume-exam').onclick=()=>navigate('exam');
+  $('#retry-pending').onclick=retrySaves;
   $('#runtime-info').onclick=()=>$('#info-dialog').showModal();
-  window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
+  window.addEventListener('beforeunload',event=>{if(dirty||saveTasks.size){event.preventDefault();event.returnValue='';}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)flushDraft().catch(()=>{});});
   async function boot(){
-    try{await refresh();const hash=location.hash.slice(1).split('/');if(hash[0]==='exercise'&&exerciseOf(hash[1])){view=exerciseOf(hash[1]).mode==='puzzle'?'puzzle':'practice';await openExercise(hash[1]);}else if(hash[0]==='exam-code'&&state.active_exam?.codes.includes(hash[1]))await openExercise(hash[1],true);else await navigate(names[hash[0]]?hash[0]:'practice');if(!data.runtime_ready)notice('Python execution needs server setup. Learning content and saved progress are available.');}
+    try{await refresh();const hash=location.hash.slice(1).split('/');if(hash[0]==='exercise'&&exerciseOf(hash[1])){view=exerciseOf(hash[1]).mode==='puzzle'?'puzzle':'practice';await openExercise(hash[1]);}else if(hash[0]==='exam-code'&&state.active_exam?.codes.includes(hash[1]))await openExercise(hash[1],true);else if(hash[0]==='quiz'&&data.modules.some(m=>m.id===hash[1])){view='quiz';await openQuiz(hash[1]);}else await navigate(names[hash[0]]?hash[0]:'practice');if(state.active_exam?.status==='active')startTimer();const job=JSON.parse(sessionStorage.getItem('python-active-job')||'null');if(job&&current?.id===job.exercise){activeJob=job.id;busy(true);setPane('results');pollJob(job.id,false);}if(!data.runtime_ready)notice('Python execution needs server setup. Learning content and saved progress are available.');}
     catch(e){show(`<div class="loading-state"><h2>We couldn’t open your learning space.</h2><p>${escape(e.message)}</p><button id="retry" class="primary">Try again</button><p><a href="/user/login">Sign in to your account</a></p></div>`);$('#retry').onclick=boot;}
   }
   boot();

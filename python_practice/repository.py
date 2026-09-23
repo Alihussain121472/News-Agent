@@ -46,7 +46,7 @@ def transaction():
 
 
 def defaults():
-    return dict(drafts={}, completed={}, submissions=[], quiz_results=[], exams=[], active_exam=None, last_exercise='welcome')
+    return dict(drafts={}, completed={}, submissions=[], quiz_results=[], quiz_drafts={}, exams=[], active_exam=None, last_exercise='welcome')
 
 
 @contextmanager

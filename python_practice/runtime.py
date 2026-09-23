@@ -1,6 +1,7 @@
 """Real CPython in a capability-restricted WASI instance; never host exec()."""
 import json
 import os
+import re
 from pathlib import Path
 import threading
 import time
@@ -78,7 +79,9 @@ def execute(code, stdin='', files=None, argv=None, cancel=None):
         store.set_fuel(10_000_000_000)
         store.set_epoch_deadline(1)
         wasi = wasmtime.WasiConfig()
-        wasi.argv = ['python', '-B', '-c', source]
+        # A trap skips CPython shutdown: flush each write so Stop, a timeout,
+        # or an output limit cannot discard output already produced.
+        wasi.argv = ['python', '-u', '-B', '-c', source]
         wasi.stdout_custom = sink(output)
         wasi.stderr_custom = sink(errors)
         packages = RUNTIME / 'packages'
@@ -109,10 +112,12 @@ def execute(code, stdin='', files=None, argv=None, cancel=None):
                 stopped.set()
                 watcher.join()
     stderr = errors.decode('utf-8', 'replace')
-    if status == 'runtime_error' and ('SyntaxError' in stderr or 'IndentationError' in stderr):
-        status = 'syntax_error'
-    if 'MemoryError' in stderr:
-        status = 'memory_limit'
+    if status == 'runtime_error':
+        last_line = stderr.rstrip().split('\n')[-1]
+        if re.match(r'^(SyntaxError|IndentationError|TabError):', last_line):
+            status = 'syntax_error'
+        elif re.match(r'^MemoryError(?::|$)', last_line):
+            status = 'memory_limit'
     if reason:
         status = reason[0]
     return {'status': status, 'stdout': output.decode('utf-8', 'replace'), 'stderr': stderr,

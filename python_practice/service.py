@@ -4,6 +4,7 @@ import threading
 import time
 import uuid
 import json
+import secrets
 
 from . import repository as repo, runtime
 from .content import EXERCISES, QUIZZES, MODULES
@@ -60,7 +61,7 @@ def exam_result(exam, cancel):
         result = grade(exercise, code, cancel) if code.strip() else dict(score=0,status='unanswered',tests=[])
         topics[exercise['module']]['earned'] += result['score']
         topics[exercise['module']]['total'] += 1
-        items.append(dict(id=id,earned=result['score'],**{k:v for k,v in result.items() if k!='score'}))
+        items.append(dict(id=id,code=code,earned=result['score'],**{k:v for k,v in result.items() if k!='score'}))
     earned = sum(t['earned'] for t in topics.values())
     total = len(exam['quizzes'])+len(exam['codes'])
     return dict(id=exam['id'],score=round(100*earned/total),earned=earned,total=total,topics=topics,items=items,
@@ -100,7 +101,7 @@ def work(email, job):
             else:
                 result = grade(exercise,job['code'],cancel)
         if cancel.is_set():
-            repo.update_job(email,job['id'],dict(status='stopped',result={'status':'stopped'}))
+            repo.update_job(email,job['id'],dict(status='stopped',result=dict(result,status='stopped')))
             if kind=='exam':
                 with repo.state(email) as state:
                     if state['active_exam'] and state['active_exam']['id']==job['exam']['id']:
@@ -133,5 +134,10 @@ def work(email, job):
 
 def new_exam(timed):
     now=time.time()
+    # Keep full topic coverage while allowing a fresh assessment on each attempt.
+    codes = [secrets.choice([e['id'] for e in EXERCISES.values()
+                            if e['module']==m['id'] and e['mode']=='practice'
+                            and e['difficulty']!='Beginner']) for m in MODULES]
+    quizzes = [secrets.choice([q['id'] for q in QUIZZES.values() if q['module']==m['id']]) for m in MODULES]
     return dict(id=str(uuid.uuid4()),started=now,deadline=now+5400 if timed else None,
-                codes=ASSESSMENT_CODES,quizzes=ASSESSMENT_QUIZZES,answers={},status='active')
+                codes=codes,quizzes=quizzes,answers={},flags=[],inputs={},status='active')

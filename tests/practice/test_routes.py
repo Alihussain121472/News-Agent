@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from flask import Flask
 from python_practice import routes, repository
-from python_practice.content import QUIZZES
+from python_practice.content import QUIZZES, EXERCISES
 
 
 class PracticeRouteTests(unittest.TestCase):
@@ -93,6 +93,57 @@ class PracticeRouteTests(unittest.TestCase):
         job = self.post('jobs', {'kind': 'run', 'exercise': 'welcome', 'code': 'print(1)'}).json
         self.assertEqual(200, self.client.get('/api/python/jobs/' + job['id']).status_code)
         self.assertEqual(404, self.client_for('other@example.com').get('/api/python/jobs/' + job['id']).status_code)
+
+    def test_quiz_resume_retry_and_duplicate_submission(self):
+        draft=self.post('quiz/start',{'module':'0'}).json['draft']
+        ids=draft['questions']
+        answers={id:QUIZZES[id]['answer'] for id in ids}
+        answers[ids[0]]=(answers[ids[0]]+1)%len(QUIZZES[ids[0]]['options'])
+        self.assertEqual(200,self.post('quiz/draft',{'module':'0','attempt':draft['id'],'answers':answers}).status_code)
+        restored=self.client_for('learner@example.com').get('/api/python/bootstrap').json['state']['quiz_drafts']['0']
+        self.assertEqual(answers,restored['answers'])
+        self.assertEqual(draft['id'],self.post('quiz/start',{'module':'0'}).json['draft']['id'])
+        other=self.client_for('other@example.com')
+        self.assertEqual(400,self.post('quiz/draft',{'module':'0','attempt':draft['id'],'answers':answers},other).status_code)
+        submission={'module':'0','attempt':draft['id'],'answers':answers}
+        self.assertEqual(2,self.post('quiz',submission).json['result']['score'])
+        self.assertEqual(2,self.post('quiz',submission).json['result']['score'])
+        self.assertEqual(1,len(self.states['learner@example.com']['quiz_results']))
+        retry=self.post('quiz/start',{'module':'0','mode':'missed'}).json['draft']
+        self.assertEqual([ids[0]],retry['questions'])
+        self.assertEqual(400,self.post('quiz/draft',{'module':'0','attempt':draft['id'],'answers':answers}).status_code)
+        result=self.post('quiz',{'module':'0','attempt':retry['id'],'answers':{ids[0]:QUIZZES[ids[0]]['answer']}}).json['result']
+        self.assertEqual((1,1),(result['score'],result['total']))
+        self.assertEqual({},self.states['learner@example.com']['quiz_drafts'])
+
+    def test_run_inputs_and_exam_drafts_remain_separate(self):
+        draft={'code':'print("practice")','stdin':'practice input','argv':['one','two']}
+        self.assertEqual(200,self.post('draft/welcome',draft).status_code)
+        saved=self.states['learner@example.com']['drafts']['welcome'].copy()
+        self.assertEqual(draft['argv'],saved['argv'])
+        exam=self.post('exam/start',{'timed':False}).json['exam']
+        id=exam['codes'][0]
+        self.assertEqual(200,self.post('draft/'+id,draft).status_code)
+        self.assertEqual(202,self.post('jobs',{'kind':'run','exercise':id,'exam':exam['id'],'code':'print(2)','stdin':'exam input','argv':['exam']}).status_code)
+        state=self.states['learner@example.com']
+        self.assertEqual(draft['code'],state['drafts'][id]['code'])
+        self.assertEqual('print(2)',state['active_exam']['answers'][id])
+        self.assertEqual(['exam'],state['active_exam']['inputs'][id]['argv'])
+        self.assertEqual(400,self.post('jobs',{'kind':'submit','exercise':id,'code':'print(2)'}).status_code)
+        self.assertEqual(400,self.post('quiz/start',{'module':'0'}).status_code)
+
+    def test_exam_coverage_flags_and_deadline(self):
+        exam=self.post('exam/start',{'timed':True}).json['exam']
+        self.assertEqual(set(map(str,range(10))),{EXERCISES[id]['module'] for id in exam['codes']})
+        self.assertEqual(set(map(str,range(10))),{QUIZZES[id]['module'] for id in exam['quizzes']})
+        flag={'exam':exam['id'],'id':exam['codes'][0],'flagged':True}
+        self.assertEqual(200,self.post('exam/flag',flag).status_code)
+        restored=self.client_for('learner@example.com').get('/api/python/bootstrap').json['state']['active_exam']
+        self.assertEqual([flag['id']],restored['flags'])
+        self.assertEqual(400,self.post('exam/flag',flag,self.client_for('other@example.com')).status_code)
+        self.states['learner@example.com']['active_exam']['deadline']=time.time()-1
+        self.assertEqual(400,self.post('exam/flag',flag).status_code)
+        self.assertEqual(400,self.post('jobs',{'kind':'run','exercise':flag['id'],'exam':exam['id'],'code':'print(2)'}).status_code)
 
     def test_timed_exam_persists_deadline_and_answers(self):
         exam = self.post('exam/start', {'timed': True}).json['exam']

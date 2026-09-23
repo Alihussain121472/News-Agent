@@ -17,6 +17,45 @@ class RuntimeTests(unittest.TestCase):
         self.assertEqual('runtime_error',execute('print(1 / 0)')['status'])
         self.assertEqual('timeout',execute('while True: pass')['status'])
 
+    def test_output_survives_timeout_and_error_labels_are_precise(self):
+        result=execute('print("before timeout")\nwhile True: pass')
+        self.assertEqual('timeout',result['status'])
+        self.assertEqual('before timeout\n',result['stdout'])
+        result=execute('import sys\nprint("MemoryError", file=sys.stderr)')
+        self.assertEqual('ok',result['status'])
+        self.assertEqual('MemoryError\n',result['stderr'])
+        self.assertEqual('runtime_error',execute('raise ValueError("SyntaxError is only text")')['status'])
+        self.assertEqual('  café 🐍\n\nend',execute('print("  café 🐍\\n")\nprint("end", end="")')['stdout'])
+
+    def test_virtual_files_follow_python_text_file_rules(self):
+        code='''from pathlib import Path
+with open('test.txt', 'x', encoding='utf-8') as f:
+    f.write('café')
+try:
+    open('test.txt', 'x')
+except FileExistsError:
+    print('exists')
+with open('test.txt', 'a') as f:
+    f.seek(0)
+    f.write('!')
+print(Path('test.txt').read_text())
+with open('test.txt', 'w') as f:
+    try:
+        f.read()
+    except OSError:
+        print('write only')
+    print(repr(open('test.txt').read()))
+with open('test.txt', 'r+') as f:
+    f.write('12345')
+    f.truncate(3)
+print(open('./test.txt').read())
+'''
+        result=execute(code)
+        self.assertEqual('ok',result['status'],result)
+        self.assertEqual("exists\ncafé!\nwrite only\n''\n123\n",result['stdout'])
+        self.assertEqual('runtime_error',execute('open("test.txt")')['status'])
+        self.assertEqual('runtime_error',execute('open("x", "rw")')['status'])
+
     def test_memory_and_output_limits(self):
         result=execute('x = bytearray(200 * 1024 * 1024)')
         self.assertEqual('memory_limit',result['status'],result)
