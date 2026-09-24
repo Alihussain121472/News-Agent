@@ -66,7 +66,7 @@ If NO, respond with ONLY: {{"is_program": false}}"""
         try:
             headers = {"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"}
             payload = {
-                "model": "llama-3.3-70b-versatile",
+                "model": os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.1,
                 "response_format": {"type": "json_object"}

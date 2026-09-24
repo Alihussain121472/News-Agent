@@ -234,6 +234,8 @@ def search_ai_news(limit: int = 5) -> List[Dict[str, Any]]:
 import concurrent.futures
 
 EMAIL_EXECUTOR = concurrent.futures.ThreadPoolExecutor(max_workers=10, thread_name_prefix='email_worker')
+DEFAULT_GROQ_MODEL = 'openai/gpt-oss-120b'
+_email_provider_notice_logged = False
 
 
 def _smtp_credentials() -> List[Tuple[str, str, str]]:
@@ -256,6 +258,36 @@ def _smtp_credentials() -> List[Tuple[str, str, str]]:
         seen.add(identity)
         credentials.append((label, sender, clean_password))
     return credentials
+
+
+def _delivery_smtp_credentials() -> List[Tuple[str, str, str]]:
+    """Return SMTP credentials that satisfy the production sender policy."""
+    credentials = _smtp_credentials()
+    if _official_sender_required():
+        credentials = [item for item in credentials if item[1].endswith('@novabrief.tech')]
+    return credentials
+
+
+def _resend_ready() -> bool:
+    api_key = get_env_value('RESEND_API_KEY')
+    sender = _branded_from_address(get_env_value('RESEND_FROM_EMAIL'))
+    return bool(api_key and not api_key.lower().startswith('re_your_') and sender)
+
+
+def email_provider_ready() -> bool:
+    """Whether a configured provider can send from the production sender identity."""
+    return _resend_ready() or bool(_delivery_smtp_credentials())
+
+
+def _log_email_provider_unavailable() -> None:
+    global _email_provider_notice_logged
+    if _email_provider_notice_logged:
+        return
+    _email_provider_notice_logged = True
+    logger.info(
+        'Transactional email is disabled until RESEND_API_KEY plus a verified '
+        'RESEND_FROM_EMAIL, or official @novabrief.tech SMTP credentials, are configured.'
+    )
 
 
 def is_deliverable_user_email(email: str) -> bool:
@@ -338,23 +370,20 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
     if not recipient or '\n' in recipient or '\r' in recipient or '@' not in recipient:
         logger.error('Refusing to send email to an invalid recipient address.')
         return False
-    if get_env_value('RESEND_API_KEY') and get_env_value('RESEND_FROM_EMAIL'):
+    resend_ready = _resend_ready()
+    credentials = _delivery_smtp_credentials()
+    if not resend_ready and not credentials:
+        _log_email_provider_unavailable()
+        return False
+    if resend_ready:
         if _send_via_resend(recipient, subject, html_content):
             return True
         if _official_sender_required():
             logger.warning('Official Resend delivery failed; attempting official SMTP fallback.')
         else:
             logger.warning('Primary email provider failed; attempting the SMTP fallback.')
-    elif _official_sender_required():
-        logger.warning('Official NovaBrief Tech email delivery is not configured. Falling back to SMTP.')
-    credentials = _smtp_credentials()
-    if _official_sender_required():
-        credentials = [
-            item for item in credentials
-            if item[1].endswith('@novabrief.tech')
-        ]
     if not credentials:
-        logger.error('No official NovaBrief Tech email credentials are configured.')
+        logger.error('Configured email provider rejected the message and no SMTP fallback is available.')
         return False
 
     context = ssl.create_default_context()
@@ -463,6 +492,9 @@ def deliver_welcome_email(db: NewsDatabase, to_email: str, name: str = None, use
     if not is_deliverable_user_email(email):
         logger.warning('Skipped welcome email for invalid recipient.')
         return False
+    if not email_provider_ready():
+        _log_email_provider_unavailable()
+        return False
     user = user or db.get_user_by_email(email) or {}
     if user.get('welcome_email_sent_at'):
         return True
@@ -526,6 +558,9 @@ def send_program_welcome_email(to_email: str, name: str = None, program_title: s
 
 def send_welcome_to_registered_users() -> Dict[str, int]:
     """Send one welcome message to each eligible active user who has not received one."""
+    if not email_provider_ready():
+        _log_email_provider_unavailable()
+        return {'total': 0, 'eligible': 0, 'sent': 0, 'failed': 0, 'skipped': 0}
     db = NewsDatabase()
     recipients = db.get_users_pending_welcome_email()
     sent = failed = skipped = 0
@@ -533,12 +568,13 @@ def send_welcome_to_registered_users() -> Dict[str, int]:
         email = (user.get('email') or '').strip().lower()
         if not is_deliverable_user_email(email):
             skipped += 1
-            logger.warning('Skipped a reserved or invalid address during the welcome-email run.')
             continue
         if deliver_welcome_email(db, email, user.get('name'), user=user):
             sent += 1
         else:
             failed += 1
+    if skipped:
+        logger.info('Skipped %s reserved or invalid address(es) during the welcome-email run.', skipped)
     return {
         'total': len(recipients),
         'eligible': len(recipients) - skipped,
@@ -696,6 +732,9 @@ def send_contact_notification_email(name: str, email: str, subject: str, message
 
 def send_program_notifications() -> int:
     """Check for programs that need notifications and send them to all subscribers."""
+    if not email_provider_ready():
+        _log_email_provider_unavailable()
+        return 0
     db = NewsDatabase()
     programs = db.get_programs_to_notify()
     if not programs:
@@ -772,6 +811,9 @@ def fetch_latest_news_hourly() -> int:
 def run_news_digest() -> bool:
     logger.info('=' * 60)
     logger.info('Starting technology morning briefing...')
+    if not email_provider_ready():
+        _log_email_provider_unavailable()
+        return False
     db = NewsDatabase()
     today_key = datetime.now().strftime('%Y-%m-%d')
 

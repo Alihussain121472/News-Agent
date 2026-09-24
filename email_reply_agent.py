@@ -2,7 +2,7 @@ import os
 import requests
 import threading
 import logging
-from ai_news_agent import send_email
+from ai_news_agent import DEFAULT_GROQ_MODEL, email_provider_ready, send_email
 from markupsafe import escape
 
 logger = logging.getLogger(__name__)
@@ -100,7 +100,7 @@ def generate_reply_text(name: str, subject: str, message: str) -> str:
     }
     
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        "model": os.environ.get('GROQ_MODEL', DEFAULT_GROQ_MODEL).strip(),
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": user_context}
@@ -175,12 +175,17 @@ def process_and_reply_to_contact_message(name: str, email: str, subject: str, me
 
 def spawn_automated_reply(name: str, email: str, subject: str, message: str, msg_id: int = None):
     """Helper to start the background thread."""
+    if not email_provider_ready():
+        logger.info('Automated contact reply deferred because transactional email is not configured.')
+        return
     thread = threading.Thread(target=process_and_reply_to_contact_message, args=(name, email, subject, message, msg_id), daemon=True)
     thread.start()
 
 
 def retry_pending_contact_replies(limit: int = 100) -> int:
     """Retry automated replies for messages left open by a failed worker."""
+    if not email_provider_ready():
+        return 0
     import database
 
     db = database.NewsDatabase()

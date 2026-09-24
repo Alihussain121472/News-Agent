@@ -21,7 +21,7 @@ def generate_with_llama(prompt):
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "llama-3.3-70b-versatile",
+        "model": os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
         "messages": [{"role": "system", "content": prompt}],
         "temperature": 0.7,
         "max_tokens": 2048

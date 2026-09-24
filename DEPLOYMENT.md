@@ -42,6 +42,8 @@ git push origin main
    RESEND_API_KEY=your-resend-api-key
    RESEND_FROM_EMAIL=NovaBrief Tech <support@novabrief.tech>
    RESEND_REPLY_TO=support@novabrief.tech
+   GROQ_API_KEY=your-groq-api-key
+   GROQ_MODEL=openai/gpt-oss-120b
    # Optional SMTP fallback; the account must also be @novabrief.tech in production.
    SMTP_USERNAME=support@novabrief.tech
    SMTP_PASSWORD=your-smtp-password
@@ -78,6 +80,8 @@ git push origin main
    RESEND_API_KEY=your-resend-api-key
    RESEND_FROM_EMAIL=NovaBrief Tech <support@novabrief.tech>
    RESEND_REPLY_TO=support@novabrief.tech
+   GROQ_API_KEY=your-groq-api-key
+   GROQ_MODEL=openai/gpt-oss-120b
    SMTP_USERNAME=support@novabrief.tech
    SMTP_PASSWORD=your-smtp-password
    NEWSAPI_KEY=your-newsapi-key

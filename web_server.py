@@ -1016,7 +1016,7 @@ def summarize_news():
             "Content-Type": "application/json"
         }
         payload = {
-            "model": "llama-3.3-70b-versatile",
+            "model": os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
             "messages": [
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": "Please generate the professional summary now."}
@@ -1066,7 +1066,7 @@ def handle_ai_chat():
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "llama-3.3-70b-versatile",
+                "model": os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
                 "messages": [{"role": "system", "content": prompt}],
                 "temperature": 0.7,
                 "max_tokens": 150
@@ -1188,7 +1188,7 @@ def summarize_article():
             'https://api.groq.com/openai/v1/chat/completions',
             headers={'Authorization': f'Bearer {api_key}', 'Content-Type': 'application/json'},
             json={
-                'model': 'llama-3.3-70b-versatile',
+                'model': os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
                 'messages': [
                     {'role': 'system', 'content': 'You are an expert technology analyst. Provide a quick, highly readable summary of the provided article in 3 to 4 bullet points. Focus on the most important takeaways. Do not include introductory fluff.'},
                     {'role': 'user', 'content': f'Summarize this article:\n\n{text}'}

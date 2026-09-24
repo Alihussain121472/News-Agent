@@ -315,7 +315,7 @@ The content must be Markdown. The three list fields must be JSON arrays of strin
     }
     
     try:
-        model_name = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile').strip()
+        model_name = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b').strip()
             
         payload = {
             'model': model_name,

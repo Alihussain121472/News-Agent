@@ -59,7 +59,7 @@ def studio_status():
         'status': 'ready' if os.environ.get('GROQ_API_KEY') else 'needs_configuration',
         'version': SOCIAL_STUDIO_VERSION,
         'cloud': _is_cloud_hosted(),
-        'model': os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'model': os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b'),
     })
 
 
@@ -104,7 +104,7 @@ Return ONLY a valid JSON object with the keys: "twitter", "linkedin", "facebook"
     }
     
     try:
-        model_name = os.environ.get('GROQ_MODEL', 'llama-3.3-70b-versatile').strip()
+        model_name = os.environ.get('GROQ_MODEL', 'openai/gpt-oss-120b').strip()
             
         payload = {
             'model': model_name,
