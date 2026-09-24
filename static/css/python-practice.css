@@ -14,3 +14,11 @@ fieldset.options{border:0;padding:0;margin:0;min-width:0}
 .assessment-banner{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:var(--pale);border-bottom:1px solid var(--border);padding:12px 26px;font-size:12px}.assessment-banner[hidden]{display:none}.assessment-banner button{padding:6px 12px;font-size:12px}.assessment-banner strong{font-variant-numeric:tabular-nums}.assessment-banner span{margin-right:auto}
 .quiz-sheet>.answer-feedback{margin-top:-8px;margin-bottom:24px}
 #retry-save{padding:4px 6px;font-size:10px}
+.option.correct-answer{border-color:var(--green);background:var(--pale);color:var(--green)}
+.option.wrong-answer{border-color:var(--red);background:var(--hover);color:var(--red)}
+.option.correct-answer>span::after{content:'  ✓ Correct answer';font-size:10px;font-weight:700;color:var(--green)}
+.option.wrong-answer>span::after{content:'  ✕ Your answer';font-size:10px;font-weight:700;color:var(--red)}
+.option.correct-answer input{accent-color:var(--green)}
+.option.wrong-answer input{accent-color:var(--red)}
+.answer-feedback.is-correct{border-left:3px solid var(--green);color:var(--green)}
+.answer-feedback.is-wrong{border-left:3px solid var(--red);color:var(--red)}
