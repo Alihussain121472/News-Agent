@@ -53,7 +53,7 @@
   function stats() {
     const done = data.exercises.filter(completed).length;
     const mastered = data.modules.filter(m => {const p=moduleProgress(m.id);return p.done===p.total;}).length;
-    const scores = state.quiz_results;
+    const scores = state.quiz_results.filter(q=>q.total===data.quizzes.filter(item=>item.module===q.module).length);
     const average = scores.length ? Math.round(100*scores.reduce((n,q)=>n+q.score/q.total,0)/scores.length)+'%' : '—';
     return `<div class="stats">${[['✓',done,'Exercises completed'],['▦',`${mastered} / 10`,'Modules completed'],['◎',average,'Average quiz score'],['↗',`${Math.round(100*done/data.exercises.length)}%`,'Overall progress']].map(([icon,n,label])=>`<div class="stat"><span class="stat-icon">${icon}</span><div><strong>${n}</strong><small>${label}</small></div></div>`).join('')}</div>`;
   }
@@ -184,7 +184,8 @@
     quizContext=null;
     show(heading('Quiz Center','Check your understanding, review explanations, and retry the questions you missed.','CHAPTER CHECKPOINTS')+`<div class="card-grid">${data.modules.map(m=>{
       const scores=state.quiz_results.filter(q=>q.module===m.id),latest=scores.at(-1),draft=state.quiz_drafts[m.id];
-      const best=scores.length?Math.max(...scores.map(q=>Math.round(100*q.score/q.total)))+'%':'Not attempted';
+      const fullScores=scores.filter(q=>q.total===data.quizzes.filter(item=>item.module===m.id).length);
+      const best=fullScores.length?Math.max(...fullScores.map(q=>Math.round(100*q.score/q.total)))+'%':'Not attempted';
       return `<section class="card"><span class="eyebrow">CHAPTER ${+m.id+1}</span><h3>${escape(m.title)}</h3><p>3 questions · Explained answers</p><small class="muted">Best score: ${best}${draft?` · ${Object.keys(draft.answers).length}/${draft.questions.length} answers saved`:''}</small><div class="quiz-actions"><button data-quiz="${m.id}" class="secondary">${draft?'Resume':'Start'} quiz →</button>${latest?`<button data-quiz-review="${m.id}">Review last attempt</button>`:''}${latest?.score<latest?.total?`<button data-quiz-missed="${m.id}">Retry missed questions</button>`:''}</div></section>`;
     }).join('')}</div>`);
     $$('[data-quiz]',main).forEach(b=>b.onclick=()=>openQuiz(b.dataset.quiz));
@@ -288,7 +289,19 @@
   window.addEventListener('beforeunload',event=>{if(dirty||saveTasks.size){event.preventDefault();event.returnValue='';}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty)flushDraft().catch(()=>{});});
   async function boot(){
-    try{await refresh();const hash=location.hash.slice(1).split('/');if(hash[0]==='exercise'&&exerciseOf(hash[1])){view=exerciseOf(hash[1]).mode==='puzzle'?'puzzle':'practice';await openExercise(hash[1]);}else if(hash[0]==='exam-code'&&state.active_exam?.codes.includes(hash[1]))await openExercise(hash[1],true);else if(hash[0]==='quiz'&&data.modules.some(m=>m.id===hash[1])){view='quiz';await openQuiz(hash[1]);}else await navigate(names[hash[0]]?hash[0]:'practice');if(state.active_exam?.status==='active')startTimer();const job=JSON.parse(sessionStorage.getItem('python-active-job')||'null');if(job&&current?.id===job.exercise){activeJob=job.id;busy(true);setPane('results');pollJob(job.id,false);}if(!data.runtime_ready)notice('Python execution needs server setup. Learning content and saved progress are available.');}
+    try{
+      await refresh();const hash=location.hash.slice(1).split('/');
+      if(state.active_exam?.status==='grading'){await navigate('exam');return;}
+      if(hash[0]==='exercise'&&exerciseOf(hash[1])){view=exerciseOf(hash[1]).mode==='puzzle'?'puzzle':'practice';await openExercise(hash[1]);}
+      else if(hash[0]==='exam-code'&&state.active_exam?.codes.includes(hash[1]))await openExercise(hash[1],true);
+      else if(hash[0]==='quiz'&&state.active_exam)await navigate('exam');
+      else if(hash[0]==='quiz'&&data.modules.some(m=>m.id===hash[1])){view='quiz';await openQuiz(hash[1]);}
+      else await navigate(names[hash[0]]?hash[0]:'practice');
+      let job;try{job=JSON.parse(sessionStorage.getItem('python-active-job')||'null');}catch(_){sessionStorage.removeItem('python-active-job');}
+      if(job&&current?.id===job.exercise){activeJob=job.id;busy(true);setPane('results');pollJob(job.id,false);}
+      if(state.active_exam?.status==='active')startTimer();
+      if(!data.runtime_ready)notice('Python execution needs server setup. Learning content and saved progress are available.');
+    }
     catch(e){show(`<div class="loading-state"><h2>We couldn’t open your learning space.</h2><p>${escape(e.message)}</p><button id="retry" class="primary">Try again</button><p><a href="/user/login">Sign in to your account</a></p></div>`);$('#retry').onclick=boot;}
   }
   boot();
