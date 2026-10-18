@@ -1,25 +1,10 @@
 {
-  "name": "expense-tracker-agent",
+  "name": "novabrief-web",
   "version": "1.0.0",
-  "description": "Automated expense tracking with daily Gmail reports",
+  "description": "NovaBrief AI Platform & Website",
   "type": "module",
-  "main": "send-expense-report.js",
   "scripts": {
-    "send-report": "node send-expense-report.js",
-    "test": "node send-expense-report.js"
-  },
-  "keywords": [
-    "expense",
-    "tracker",
-    "automation",
-    "gmail",
-    "reports"
-  ],
-  "author": "Ali Hussain",
-  "license": "MIT",
-  "dependencies": {
-    "dotenv": "^16.3.1",
-    "nodemailer": "^9.0.6"
+    "build:css": "tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --minify"
   },
   "devDependencies": {
     "tailwindcss": "^3.4.19"

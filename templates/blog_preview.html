@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova Brief | Technology Insights & Guides</title>
+  <meta name="description" content="Actionable software engineering guides, AI architectures, and student career roadmaps from Nova Brief.">
+  <link rel="icon" href="/static/favicon.ico" sizes="any">
+  <link rel="icon" href="/static/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+
+  <!-- Google AdSense Verification & Loader -->
+  <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="30s"></script>
+
+  <!-- Typography & Design System -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+
+  <!-- Shared Theme & Navigation Scripts -->
+  {% include "theme_head.html" ignore missing %}
+  <script defer src="/static/js/mobile-nav.js"></script>
+</head>
+
+<body>
+  <!-- 1. Top Navigation Bar -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="navbar-brand">
+        <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="navbar-logo" width="32" height="32">
+        <span class="navbar-wordmark">Nova Brief</span>
+      </a>
+
+      <!-- Desktop Navigation Menu -->
+      <nav aria-label="Main Navigation">
+        <ul class="navbar-menu">
+          <li><a href="/" class="navbar-link">Home</a></li>
+          <li><a href="/news" class="navbar-link">News</a></li>
+          <li><a href="/blog" class="navbar-link is-active" aria-current="page">Blog</a></li>
+          <li><a href="/#programs" class="navbar-link">Programs</a></li>
+          <li><a href="/about" class="navbar-link">About Us</a></li>
+          <li><a href="/contact" class="navbar-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <!-- Right-side Action CTAs -->
+      <div class="navbar-actions">
+        <a href="/user/login" class="navbar-signin">Sign In</a>
+        <a href="/#subscribe" class="btn-subscribe">Subscribe</a>
+        <button class="navbar-toggle" data-nav-toggle aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileNavDrawer">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <nav id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation Drawer">
+      <ul class="mobile-nav-list">
+        <li><a href="/" class="mobile-nav-link">Home</a></li>
+        <li><a href="/news" class="mobile-nav-link">News</a></li>
+        <li><a href="/blog" class="mobile-nav-link" aria-current="page">Blog</a></li>
+        <li><a href="/#programs" class="mobile-nav-link">Programs</a></li>
+        <li><a href="/about" class="mobile-nav-link">About Us</a></li>
+        <li><a href="/contact" class="mobile-nav-link">Contact</a></li>
+      </ul>
+      <div class="mobile-nav-actions">
+        <a href="/user/login" class="mobile-nav-link">Sign In</a>
+        <a href="/#subscribe" class="btn-subscribe">Subscribe</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Page Main Container -->
+  <div class="page-container">
+    <!-- 2. Page Header -->
+    <header class="page-header">
+      <span class="eyebrow">Editorial Library</span>
+      <h1 class="page-title">Technology Insights & Guides</h1>
+      <p class="page-subtitle">Actionable software engineering guides, AI architectures, and student career roadmaps.</p>
+    </header>
+
+    <!-- Content Grid (Desktop: 2 columns; Mobile: 1 column) -->
+    <div class="layout-grid">
+      <!-- 3. Main Column: Article List -->
+      <main class="main-column">
+        <div class="section-heading-row">
+          <h2 class="section-heading-title">Published Articles (3)</h2>
+          <span class="section-heading-caption">Peer-reviewed educational content</span>
+        </div>
+
+        <section class="article-list" aria-label="Published Articles">
+          <!-- Article Card 1 -->
+          <article class="article-card">
+            <div class="article-meta">
+              <time datetime="2026-10-15">2026-10-15</time>
+              <span class="meta-bullet" aria-hidden="true">&bull;</span>
+              <span class="article-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Verified Guide
+              </span>
+            </div>
+            <h2 class="article-title">
+              <a href="/blog/cloud-student-credits-aws-gcp-azure-2026">AWS vs Google Cloud vs Azure: Free Student Credits & Cloud Architecture Guide</a>
+            </h2>
+            <p class="article-excerpt">
+              A comprehensive breakdown of free cloud credit tiers, credential verification steps, and enterprise architecture patterns for student engineers deploying production workloads.
+            </p>
+            <div class="article-card-footer">
+              <a href="/blog/cloud-student-credits-aws-gcp-azure-2026" class="read-more-link">
+                <span>Read full article</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+              <span class="reading-length">800–1500 words</span>
+            </div>
+          </article>
+
+          <!-- Article Card 2 -->
+          <article class="article-card">
+            <div class="article-meta">
+              <time datetime="2026-10-12">2026-10-12</time>
+              <span class="meta-bullet" aria-hidden="true">&bull;</span>
+              <span class="article-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Verified Guide
+              </span>
+            </div>
+            <h2 class="article-title">
+              <a href="/blog/enterprise-rag-vector-search-postgresql-pgvector">Production RAG Architecture: Vector Search & Hybrid Retrieval with PostgreSQL</a>
+            </h2>
+            <p class="article-excerpt">
+              How to architect production-ready Retrieval-Augmented Generation using pgvector, hybrid semantic search, and context ranking without runaway vector database costs.
+            </p>
+            <div class="article-card-footer">
+              <a href="/blog/enterprise-rag-vector-search-postgresql-pgvector" class="read-more-link">
+                <span>Read full article</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+              <span class="reading-length">800–1500 words</span>
+            </div>
+          </article>
+
+          <!-- Article Card 3 -->
+          <article class="article-card">
+            <div class="article-meta">
+              <time datetime="2026-10-08">2026-10-08</time>
+              <span class="meta-bullet" aria-hidden="true">&bull;</span>
+              <span class="article-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                Verified Guide
+              </span>
+            </div>
+            <h2 class="article-title">
+              <a href="/blog/tech-student-fellowship-guide-google-meta-nasa-2026">Elite Tech Fellowships 2026: Application Strategies for Google, NASA, and Meta</a>
+            </h2>
+            <p class="article-excerpt">
+              Proven interview playbooks, portfolio project standards, and verified application timelines for top undergraduate software engineering and research programs.
+            </p>
+            <div class="article-card-footer">
+              <a href="/blog/tech-student-fellowship-guide-google-meta-nasa-2026" class="read-more-link">
+                <span>Read full article</span>
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+              <span class="reading-length">800–1500 words</span>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <!-- 4. Sidebar -->
+      <aside class="sidebar" aria-label="Editorial Sidebar">
+        <!-- Ad Slot Widget -->
+        <section class="sidebar-widget ad-slot-widget" aria-label="Advertisement">
+          <span class="ad-label">Advertisement</span>
+          <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block; min-height:600px;"
+                 data-ad-client="ca-pub-1036052096443002"
+                 data-ad-slot="5910293846"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+          </div>
+        </section>
+
+        <!-- Widget: Student Tech Programs -->
+        <section class="sidebar-widget widget-programs" aria-labelledby="programs-widget-title">
+          <h3 id="programs-widget-title" class="widget-title">Student Tech Programs</h3>
+          <p class="widget-caption">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
+
+          <div class="program-list">
+            <!-- Program Card 1 -->
+            <div class="program-card">
+              <div class="program-company">Google</div>
+              <h4 class="program-name">Google Summer of Code & AI Student Fellowships</h4>
+              <div class="program-launch-date">Launches: 2026-11-01</div>
+              <a href="/#programs" class="btn-apply">Apply Now</a>
+            </div>
+
+            <!-- Program Card 2 -->
+            <div class="program-card">
+              <div class="program-company">NASA</div>
+              <h4 class="program-name">NASA L'SPACE Virtual Academy & Aerospace Internships</h4>
+              <div class="program-launch-date">Launches: 2026-11-15</div>
+              <a href="/#programs" class="btn-apply">Apply Now</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Widget: Editorial Navigation -->
+        <section class="sidebar-widget" aria-labelledby="editorial-nav-title">
+          <h3 id="editorial-nav-title" class="widget-title">Editorial Navigation</h3>
+          <ul class="editorial-nav-list">
+            <li class="editorial-nav-item"><a href="/news">&rarr; Live Tech News Feed</a></li>
+            <li class="editorial-nav-item"><a href="/about">&rarr; About Our Editorial Team</a></li>
+            <li class="editorial-nav-item"><a href="/contact">&rarr; Submit a Program or Story</a></li>
+            <li class="editorial-nav-item"><a href="/disclaimer">&rarr; Editorial Disclaimer</a></li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 5. Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <nav class="footer-links" aria-label="Footer Navigation">
+        <a href="/" class="footer-link">Home</a>
+        <a href="/news" class="footer-link">News</a>
+        <a href="/blog" class="footer-link" aria-current="page">Blog</a>
+        <a href="/about" class="footer-link">About Us</a>
+        <a href="/contact" class="footer-link">Contact</a>
+        <a href="/privacy" class="footer-link">Privacy Policy</a>
+        <a href="/terms" class="footer-link">Terms of Service</a>
+        <a href="/disclaimer" class="footer-link">Disclaimer</a>
+      </nav>
+      <p class="footer-copyright">&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

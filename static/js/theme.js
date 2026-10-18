@@ -70,22 +70,11 @@
     leaderboard: '8293847563'
   };
 
-  // 1. Ensure <meta name="google-adsense-account"> exists in <head>
-  if (document.head && !document.querySelector('meta[name="google-adsense-account"]')) {
-    const metaAdsense = document.createElement('meta');
-    metaAdsense.name = 'google-adsense-account';
-    metaAdsense.content = PUB_ID;
-    document.head.appendChild(metaAdsense);
-  }
-
-  // 2. Tune existing adsbygoogle.js script attributes for bottom-only anchor & optimal frequency
-  const adScript = document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
-  if (adScript && typeof adScript.setAttribute === 'function') {
-    adScript.setAttribute('data-overlays', 'bottom');
-    adScript.setAttribute('data-ad-frequency-hint', '30s');
-  }
-
-  function pushAdUnit() {
+  // Safe push function preventing duplicate push errors on already-filled slots
+  function pushAdUnit(ins) {
+    if (ins && typeof ins.getAttribute === 'function' && (ins.getAttribute('data-adsbygoogle-status') || ins.getAttribute('data-ad-status'))) {
+      return;
+    }
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (_) {}
@@ -93,6 +82,27 @@
 
   function initNovaMonetization() {
     const path = (window.location && window.location.pathname) || '/';
+
+    // 1. Ensure <meta name="google-adsense-account"> exists in <head>
+    if (document.head && !document.querySelector('meta[name="google-adsense-account"]')) {
+      const metaAdsense = document.createElement('meta');
+      metaAdsense.name = 'google-adsense-account';
+      metaAdsense.content = PUB_ID;
+      document.head.appendChild(metaAdsense);
+    }
+
+    // 2. Tune existing adsbygoogle.js script attributes for bottom-only anchor & optimal frequency
+    const adScript = document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
+    if (adScript && typeof adScript.setAttribute === 'function') {
+      if (!adScript.getAttribute('data-overlays')) {
+        adScript.setAttribute('data-overlays', 'bottom');
+      }
+      if (!adScript.getAttribute('data-ad-frequency-hint')) {
+        adScript.setAttribute('data-ad-frequency-hint', '30s');
+      }
+    }
+
+    // Never place ads on legal, auth, or internal admin/analytics screens
     if (
       path.startsWith('/privacy') ||
       path.startsWith('/terms') ||
@@ -101,7 +111,7 @@
       path.startsWith('/admin') ||
       path.startsWith('/analytics')
     ) {
-      return; // Never place ads on legal, auth, or admin screens
+      return;
     }
 
     // 3. Fix all broken <ins class="adsbygoogle" data-ad-slot="auto"> units across /news, /blog, /blog/*
@@ -115,7 +125,7 @@
         if (ins.style) {
           ins.style.minHeight = layout === 'in-article' ? '260px' : '280px';
         }
-        pushAdUnit();
+        pushAdUnit(ins);
       }
     });
 
@@ -139,26 +149,49 @@
           '<a href="/#programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Explore Verified Student Offers &rarr;</a>';
         headings[0].nextElementSibling.insertAdjacentElement('afterend', affBox);
 
-        const topAdWrapper = document.createElement('div');
-        topAdWrapper.className = 'my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
-        topAdWrapper.style.minHeight = '260px';
-        topAdWrapper.innerHTML =
-          '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>' +
-          '<ins class="adsbygoogle" style="display:block; text-align:center; min-height:250px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
-        affBox.insertAdjacentElement('afterend', topAdWrapper);
-        pushAdUnit();
+        if (!document.getElementById('nova-inarticle-ad-1')) {
+          const topAdWrapper = document.createElement('div');
+          topAdWrapper.id = 'nova-inarticle-ad-1';
+          topAdWrapper.className = 'my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
+          topAdWrapper.style.minHeight = '260px';
+          topAdWrapper.innerHTML =
+            '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>' +
+            '<ins class="adsbygoogle" style="display:block; text-align:center; min-height:250px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
+          affBox.insertAdjacentElement('afterend', topAdWrapper);
+          const topIns = topAdWrapper.querySelector('ins.adsbygoogle');
+          pushAdUnit(topIns);
+        }
+      } else if (!headings[0] && !document.getElementById('nova-auto-affiliate')) {
+        // Fallback for articles without H2: inject after 2nd paragraph if available
+        const paragraphs = articleBody.querySelectorAll('p');
+        if (paragraphs.length >= 2 && paragraphs[1].nextElementSibling) {
+          const affBox = document.createElement('aside');
+          affBox.id = 'nova-auto-affiliate';
+          affBox.className = 'my-8 p-6 bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl';
+          affBox.innerHTML =
+            '<div class="flex flex-wrap items-center justify-between gap-2 mb-2 text-xs text-slate-500">' +
+              '<span>Verified Engineering Resource · Student & Developer Partner</span>' +
+              '<span>Partner Disclosure</span>' +
+            '</div>' +
+            '<h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Claim $200 Free Cloud Credits & Accredited Engineering Certificates</h3>' +
+            '<p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Deploy production workloads or audit official AWS, Google Cloud, and Cybersecurity tracks curated for Nova Brief readers.</p>' +
+            '<a href="/#programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Explore Verified Student Offers &rarr;</a>';
+          paragraphs[1].insertAdjacentElement('afterend', affBox);
+        }
       }
 
       // Inject Mid-Article Ad after H2 #2
-      if (headings[1] && headings[1].nextElementSibling) {
+      if (headings[1] && headings[1].nextElementSibling && !document.getElementById('nova-inarticle-ad-2')) {
         const midAdWrapper = document.createElement('div');
+        midAdWrapper.id = 'nova-inarticle-ad-2';
         midAdWrapper.className = 'my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
         midAdWrapper.style.minHeight = '260px';
         midAdWrapper.innerHTML =
           '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>' +
           '<ins class="adsbygoogle" style="display:block; text-align:center; min-height:250px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
         headings[1].nextElementSibling.insertAdjacentElement('afterend', midAdWrapper);
-        pushAdUnit();
+        const midIns = midAdWrapper.querySelector('ins.adsbygoogle');
+        pushAdUnit(midIns);
       }
     }
 
@@ -167,14 +200,18 @@
       const newsCards = document.querySelectorAll('article[id^="article-"]');
       newsCards.forEach((card, idx) => {
         if ((idx + 1) % 3 === 0 && typeof card.insertAdjacentElement === 'function') {
+          if (card.nextElementSibling && card.nextElementSibling.classList.contains('nova-infeed-ad')) {
+            return; // Already injected
+          }
           const feedAd = document.createElement('div');
-          feedAd.className = 'bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl my-6';
+          feedAd.className = 'nova-infeed-ad bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl my-6';
           feedAd.style.minHeight = '180px';
           feedAd.innerHTML =
             '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Sponsored Briefing</span>' +
             '<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inFeed + '"></ins>';
           card.insertAdjacentElement('afterend', feedAd);
-          pushAdUnit();
+          const feedIns = feedAd.querySelector('ins.adsbygoogle');
+          pushAdUnit(feedIns);
         }
       });
     }

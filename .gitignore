@@ -90,8 +90,12 @@ coverage.xml
 # mypy
 .mypy_cache/
 
-# Node
+# Node & Frontend Build Artifacts
 node_modules/
+**/node_modules/
+**/release/
+**/.next/
+**/.pnpm-store/
 npm-debug.log*
 
 # Sensitive data - keep recipients private
@@ -99,3 +103,8 @@ recipients.json
 
 # Claude settings
 .claude/
+
+# Local personal scratch folders and nested git repositories
+portfolio-review/
+agent specilist/
+social media expert/

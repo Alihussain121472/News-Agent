@@ -10,149 +10,191 @@
 
     <meta name="description" content="In-depth technology guides, artificial intelligence tutorials, cloud computing roadmaps, and career strategies for students from Nova Brief.">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="30s"></script>
 
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% include "theme_head.html" %}
+    <script defer src="/static/js/mobile-nav.js"></script>
 </head>
 
-<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
-    <!-- Navbar -->
-    <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 fixed w-full top-0 z-50 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <a href="/" class="flex items-center gap-3">
-                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
-                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Nova Brief</span>
-                </a>
-                <div class="hidden md:flex items-center gap-6">
-                    <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
-                    <a href="/news" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">News</a>
-                    <a href="/blog" class="text-blue-600 dark:text-blue-400 font-bold text-sm">Blog</a>
-                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
-                    <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
-                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
-                        <i class="fas fa-moon dark:hidden"></i>
-                        <i class="fas fa-sun hidden dark:inline"></i>
-                    </button>
-                    <a href="/user/login" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium text-sm">Sign In</a>
-                    <a href="/#subscribe" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition">Subscribe</a>
-                </div>
+<body class="nova-site">
+    <!-- 1. Top Navigation Bar -->
+    <header class="navbar">
+        <div class="navbar-inner">
+            <a href="/" class="navbar-brand">
+                <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="navbar-logo" width="32" height="32">
+                <span class="navbar-wordmark">Nova Brief</span>
+            </a>
+
+            <!-- Desktop Navigation Menu -->
+            <nav aria-label="Main Navigation">
+                <ul class="navbar-menu">
+                    <li><a href="/" class="navbar-link">Home</a></li>
+                    <li><a href="/news" class="navbar-link">News</a></li>
+                    <li><a href="/blog" class="navbar-link is-active" aria-current="page">Blog</a></li>
+                    <li><a href="/#programs" class="navbar-link">Programs</a></li>
+                    <li><a href="/about" class="navbar-link">About Us</a></li>
+                    <li><a href="/contact" class="navbar-link">Contact</a></li>
+                </ul>
+            </nav>
+
+            <!-- Right-side Action CTAs -->
+            <div class="navbar-actions">
+                <button data-theme-toggle aria-label="Switch to dark mode" class="navbar-toggle" title="Switch theme">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+                <a href="/user/login" class="navbar-signin">Sign In</a>
+                <a href="/#subscribe" class="btn-subscribe">Subscribe</a>
+                <button class="navbar-toggle md:hidden" data-nav-toggle aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileNavDrawer">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
             </div>
         </div>
-    </nav>
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-20">
-        <header class="mb-12">
-            <span class="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-full inline-block mb-3">Editorial Library</span>
-            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-3">Technology Insights & Guides</h1>
-            <p class="text-lg text-slate-600 dark:text-slate-400">Actionable software engineering guides, AI architectures, and student career roadmaps.</p>
+        <!-- Mobile Navigation Drawer -->
+        <nav id="mobileNavDrawer" class="mobile-nav-drawer" aria-label="Mobile Navigation Drawer">
+            <ul class="mobile-nav-list">
+                <li><a href="/" class="mobile-nav-link">Home</a></li>
+                <li><a href="/news" class="mobile-nav-link">News</a></li>
+                <li><a href="/blog" class="mobile-nav-link" aria-current="page">Blog</a></li>
+                <li><a href="/#programs" class="mobile-nav-link">Programs</a></li>
+                <li><a href="/about" class="mobile-nav-link">About Us</a></li>
+                <li><a href="/contact" class="mobile-nav-link">Contact</a></li>
+            </ul>
+            <div class="mobile-nav-actions">
+                <a href="/user/login" class="mobile-nav-link">Sign In</a>
+                <a href="/#subscribe" class="btn-subscribe">Subscribe</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Page Main Container -->
+    <div class="page-container">
+        <!-- 2. Page Header -->
+        <header class="page-header">
+            <span class="eyebrow">Editorial Library</span>
+            <h1 class="page-title">Technology Insights & Guides</h1>
+            <p class="page-subtitle">Actionable software engineering guides, AI architectures, and student career roadmaps.</p>
         </header>
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-neutral-800">
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-white">Published Articles ({{ posts|length }})</h2>
-                    <span class="text-xs text-slate-500">Peer-reviewed educational content</span>
+        <!-- Content Grid (Desktop: 2 columns; Mobile: 1 column) -->
+        <div class="layout-grid">
+            <!-- 3. Main Column: Article List -->
+            <main class="main-column">
+                <div class="section-heading-row">
+                    <h2 class="section-heading-title">Published Articles ({{ posts|length }})</h2>
+                    <span class="section-heading-caption">Peer-reviewed educational content</span>
                 </div>
 
-                {% for post in posts %}
-                <article class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-7 md:p-8 rounded-2xl shadow-sm hover:shadow-md transition">
-                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-2">
-                        <span><i class="far fa-calendar-alt mr-1"></i> {{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}</span>
-                        <span>&bull;</span>
-                        <span class="text-emerald-600 dark:text-emerald-400 font-semibold"><i class="fas fa-check-circle text-[10px]"></i> Verified Guide</span>
+                <section class="article-list" aria-label="Published Articles">
+                    {% for post in posts %}
+                    <article class="article-card">
+                        <div class="article-meta">
+                            <time datetime="{{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}"><i class="far fa-calendar-alt"></i> {{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}</time>
+                            <span class="meta-bullet" aria-hidden="true">&bull;</span>
+                            <span class="article-badge">
+                                <i class="fas fa-check-circle"></i> Verified Guide
+                            </span>
+                        </div>
+                        <h2 class="article-title">
+                            <a href="/blog/{{ post.slug }}">{{ post.title }}</a>
+                        </h2>
+                        <p class="article-excerpt">{{ post.meta_description }}</p>
+                        <div class="article-card-footer">
+                            <a href="/blog/{{ post.slug }}" class="read-more-link">
+                                <span>Read full article</span>
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
+                            <span class="reading-length">800–1500 words</span>
+                        </div>
+                    </article>
+                    {% else %}
+                    <div class="sidebar-widget text-center py-12">
+                        <p class="text-slate-500">More articles coming soon!</p>
                     </div>
-                    <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-3 leading-snug">
-                        <a href="/blog/{{ post.slug }}" class="hover:text-blue-600 transition">{{ post.title }}</a>
-                    </h2>
-                    <p class="text-slate-600 dark:text-slate-300 leading-relaxed mb-4 text-sm md:text-base">{{ post.meta_description }}</p>
-                    <div class="pt-3 border-t border-slate-100 dark:border-neutral-800 flex items-center justify-between">
-                        <a href="/blog/{{ post.slug }}" class="text-blue-600 dark:text-blue-400 font-bold text-sm hover:underline inline-flex items-center gap-1.5">
-                            <span>Read full article</span>
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </a>
-                        <span class="text-xs text-slate-400">800–1500 words</span>
-                    </div>
-                </article>
-                {% else %}
-                <div class="text-center py-12 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl">
-                    <p class="text-slate-500">More articles coming soon!</p>
-                </div>
-                {% endfor %}
-            </div>
+                    {% endfor %}
+                </section>
+            </main>
             
-            <div class="lg:col-span-1 space-y-6">
-                <!-- AdSense Unit on editorial index -->
-                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-5 rounded-2xl">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>
-                    <ins class="adsbygoogle"
-                         style="display:block; min-height:600px;"
-                         data-ad-client="ca-pub-1036052096443002"
-                         data-ad-slot="5910293846"
-                         data-ad-format="auto"
-                         data-full-width-responsive="true"></ins>
-                    <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({});
-                    </script>
-                </div>
+            <!-- 4. Sidebar -->
+            <aside class="sidebar" aria-label="Editorial Sidebar">
+                <!-- Ad Slot Widget -->
+                <section class="sidebar-widget ad-slot-widget" aria-label="Advertisement">
+                    <span class="ad-label">Advertisement</span>
+                    <div class="ad-container">
+                        <ins class="adsbygoogle"
+                             style="display:block; min-height:600px;"
+                             data-ad-client="ca-pub-1036052096443002"
+                             data-ad-slot="5910293846"
+                             data-ad-format="auto"
+                             data-full-width-responsive="true"></ins>
+                        <script>
+                             (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
+                    </div>
+                </section>
 
                 <!-- Student Tech Programs -->
-                <div class="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60 p-6 rounded-2xl">
-                    <h3 class="text-lg font-bold text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-2">
-                        <i class="fas fa-rocket text-blue-600"></i> Student Tech Programs
+                <section class="sidebar-widget widget-programs" aria-labelledby="programs-widget-title">
+                    <h3 id="programs-widget-title" class="widget-title">
+                        <i class="fas fa-rocket"></i> Student Tech Programs
                     </h3>
-                    <p class="text-xs text-blue-800 dark:text-blue-400 mb-5">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
+                    <p class="widget-caption">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
                     
-                    <div class="space-y-4">
+                    <div class="program-list">
                         {% for prog in programs %}
-                        <div class="bg-white dark:bg-neutral-900 p-4 rounded-xl shadow-sm border border-blue-100 dark:border-neutral-800 hover:border-blue-300 transition">
-                            <div class="text-[11px] font-bold text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">{{ prog.company }}</div>
-                            <h4 class="font-bold text-slate-900 dark:text-white mb-2 leading-tight text-sm">{{ prog.title }}</h4>
-                            <div class="text-xs text-slate-500 mb-3"><i class="far fa-calendar-alt mr-1"></i> Launches: {{ prog.launch_date[:10] if prog.launch_date else 'TBD' }}</div>
-                            <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="inline-block w-full text-center bg-blue-600 text-white text-xs font-bold py-2 rounded-lg hover:bg-blue-700 transition">Apply Now</a>
+                        <div class="program-card">
+                            <div class="program-company">{{ prog.company }}</div>
+                            <h4 class="program-name">{{ prog.title }}</h4>
+                            <div class="program-launch-date"><i class="far fa-calendar-alt"></i> Launches: {{ prog.launch_date[:10] if prog.launch_date else 'TBD' }}</div>
+                            <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply">Apply Now</a>
                         </div>
                         {% else %}
-                        <p class="text-xs text-slate-600 dark:text-slate-400">No active program alerts right now.</p>
+                        <p class="widget-caption">No active program alerts right now.</p>
                         {% endfor %}
                     </div>
-                </div>
+                </section>
 
-                <!-- Quick Links -->
-                <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                        <i class="fas fa-compass text-slate-500"></i> Editorial Navigation
+                <!-- Editorial Navigation -->
+                <section class="sidebar-widget" aria-labelledby="editorial-nav-title">
+                    <h3 id="editorial-nav-title" class="widget-title">
+                        <i class="fas fa-compass"></i> Editorial Navigation
                     </h3>
-                    <ul class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                        <li><a href="/news" class="hover:text-blue-600">&rarr; Live Tech News Feed</a></li>
-                        <li><a href="/about" class="hover:text-blue-600">&rarr; About Our Editorial Team</a></li>
-                        <li><a href="/contact" class="hover:text-blue-600">&rarr; Submit a Program or Story</a></li>
-                        <li><a href="/disclaimer" class="hover:text-blue-600">&rarr; Editorial Disclaimer</a></li>
+                    <ul class="editorial-nav-list">
+                        <li class="editorial-nav-item"><a href="/news">&rarr; Live Tech News Feed</a></li>
+                        <li class="editorial-nav-item"><a href="/about">&rarr; About Our Editorial Team</a></li>
+                        <li class="editorial-nav-item"><a href="/contact">&rarr; Submit a Program or Story</a></li>
+                        <li class="editorial-nav-item"><a href="/disclaimer">&rarr; Editorial Disclaimer</a></li>
                     </ul>
-                </div>
-            </div>
+                </section>
+            </aside>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 py-12 text-center text-sm text-slate-500">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-wrap justify-center gap-6 mb-6">
-                <a href="/" class="hover:text-blue-600">Home</a>
-                <a href="/news" class="hover:text-blue-600">News</a>
-                <a href="/blog" class="text-blue-600 font-bold">Blog</a>
-                <a href="/about" class="hover:text-blue-600">About Us</a>
-                <a href="/contact" class="hover:text-blue-600">Contact</a>
-                <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
-                <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
-                <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
-            </div>
-            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+    <!-- 5. Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <nav class="footer-links" aria-label="Footer Navigation">
+                <a href="/" class="footer-link">Home</a>
+                <a href="/news" class="footer-link">News</a>
+                <a href="/blog" class="footer-link" aria-current="page">Blog</a>
+                <a href="/about" class="footer-link">About Us</a>
+                <a href="/contact" class="footer-link">Contact</a>
+                <a href="/privacy" class="footer-link">Privacy Policy</a>
+                <a href="/terms" class="footer-link">Terms of Service</a>
+                <a href="/disclaimer" class="footer-link">Disclaimer</a>
+            </nav>
+            <p class="footer-copyright">&copy; 2026 Nova Brief Tech. All rights reserved.</p>
         </div>
     </footer>
 </body>

@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import patch
 
@@ -8,7 +9,7 @@ from social_media_agent.routes import social_bp
 
 class SocialStudioIntegrationTests(unittest.TestCase):
     def setUp(self):
-        app = Flask(__name__, template_folder='templates')
+        app = Flask(__name__, template_folder=os.path.abspath('templates'))
         app.config.update(TESTING=True, SECRET_KEY='test-only-secret')
 
         @app.route('/admin/login', endpoint='admin_login_page')

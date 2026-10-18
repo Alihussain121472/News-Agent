@@ -1,3 +1,4 @@
+import os
 import unittest
 from datetime import datetime
 from unittest.mock import patch
@@ -9,7 +10,7 @@ from growth_seo_agent.routes import seo_bp
 
 class SeoRouteTests(unittest.TestCase):
     def setUp(self):
-        self.app = Flask(__name__, template_folder='templates')
+        self.app = Flask(__name__, template_folder=os.path.abspath('templates'))
         self.app.secret_key = 'test-secret'
         self.app.testing = True
         self.app.register_blueprint(seo_bp, url_prefix='/seo')

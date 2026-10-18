@@ -83,7 +83,7 @@ class AdSenseServiceTests(unittest.TestCase):
 
 class RevenueRouteTests(unittest.TestCase):
     def setUp(self):
-        self.app = Flask(__name__, template_folder='templates')
+        self.app = Flask(__name__, template_folder=os.path.abspath('templates'))
         self.app.secret_key = 'test-secret'
         self.app.testing = True
         self.app.register_blueprint(analytics_bp, url_prefix='/analytics')
