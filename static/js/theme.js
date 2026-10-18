@@ -213,6 +213,17 @@
           const feedIns = feedAd.querySelector('ins.adsbygoogle');
           pushAdUnit(feedIns);
         }
+    // 6. Ad blocker fallback: collapse empty ad slots after 3 seconds
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          document.querySelectorAll('.ad-slot, .ad-slot-widget').forEach((slot) => {
+            const ad = slot.querySelector('ins.adsbygoogle');
+            if (!ad || ad.dataset.adStatus !== 'filled') {
+              slot.style.display = 'none';
+            }
+          });
+        }, 3000);
       });
     }
   }

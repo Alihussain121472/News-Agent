@@ -40,8 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reset if window resized into desktop breakpoint
   window.addEventListener('resize', () => {
-    if (window.innerWidth >= 768 && toggleBtn.getAttribute('aria-expanded') === 'true') {
+    if (window.innerWidth >= 1024 && toggleBtn.getAttribute('aria-expanded') === 'true') {
       setDrawerOpen(false);
     }
   });
+});
+
+// Fallback for ad blockers: hide empty ad slots if no ad filled them after 3 seconds
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.querySelectorAll('.ad-slot, .ad-slot-widget').forEach((slot) => {
+      const ad = slot.querySelector('ins.adsbygoogle');
+      if (!ad || ad.dataset.adStatus !== 'filled') {
+        slot.style.display = 'none';
+      }
+    });
+  }, 3000);
 });
