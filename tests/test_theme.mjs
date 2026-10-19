@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import vm from 'node:vm';
 
-const source = readFileSync(new URL('./static/js/theme.js', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../static/js/theme.js', import.meta.url), 'utf8');
 function environment(saved, blocked = false) {
   const values = new Map(saved === undefined ? [] : [['color-theme', saved]]);
   const classes = new Set();

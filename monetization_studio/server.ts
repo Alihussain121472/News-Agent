@@ -99,11 +99,20 @@ async function startServer() {
   app.get('/api/verify-live-site', async (_req, res) => {
     try {
       const { repoSlug, branch } = parseGitHubRepoEnv();
-      const [themeRes, newsRes, blogPostRes, ghCommitRes] = await Promise.all([
+      const [themeRes, stylesRes, mobileNavRes, newsRes, blogListRes, blogPostRes, ghCommitRes] = await Promise.all([
         fetch('https://www.novabrief.tech/static/js/theme.js', {
           headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
         }),
+        fetch('https://www.novabrief.tech/static/css/styles.css', {
+          headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+        }),
+        fetch('https://www.novabrief.tech/static/js/mobile-nav.js', {
+          headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+        }),
         fetch('https://www.novabrief.tech/news', {
+          headers: { 'Cache-Control': 'no-cache' },
+        }),
+        fetch('https://www.novabrief.tech/blog', {
           headers: { 'Cache-Control': 'no-cache' },
         }),
         fetch('https://www.novabrief.tech/blog/cloud-architecture-aws-azure-gcp-guide', {
@@ -113,12 +122,16 @@ async function startServer() {
           headers: {
             Accept: 'application/vnd.github+json',
             'User-Agent': 'NovaBrief-Monetization-Studio',
+            ...(process.env.GITHUB_TOKEN
+              ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN.trim()}` }
+              : {}),
           },
         }),
       ]);
 
       const themeText = await themeRes.text();
       const newsHtml = await newsRes.text();
+      const blogListHtml = await blogListRes.text();
       const blogPostHtml = await blogPostRes.text();
 
       let latestGitHubCommitSha = 'ecc5aa6';
@@ -141,6 +154,11 @@ async function startServer() {
         themeText.includes('initNovaMonetization') ||
         themeText.includes('NovaBrief Master Theme + Autonomous AdSense');
 
+      const isEditorialDesignLive =
+        stylesRes.ok &&
+        mobileNavRes.ok &&
+        blogListHtml.includes('/static/css/styles.css');
+
       const newsAutoSlots = (newsHtml.match(/data-ad-slot="auto"/g) || []).length;
       const blogAutoSlots = (blogPostHtml.match(/data-ad-slot="auto"/g) || []).length;
       const newsHasAdsenseMeta = newsHtml.includes('name="google-adsense-account"');
@@ -153,6 +171,7 @@ async function startServer() {
         themeJsBytes: themeText.length,
         themeJsLineCount: themeText.split('\n').length,
         isAutonomousPatchLive,
+        isEditorialDesignLive,
         brokenAutoSlotsCount: newsAutoSlots + blogAutoSlots,
         newsHasAdsenseMeta,
         githubSecretConfigured: Boolean(process.env.GITHUB_TOKEN),
@@ -187,7 +206,9 @@ async function startServer() {
 
     try {
       const projectRoot = path.join(process.cwd(), 'Nova-Brief-Project');
-      const branchesToUpdate = Array.from(new Set([branch, 'main']));
+      const branchesToUpdate = Array.from(
+        new Set([branch, 'main', 'render-role-dashboards', 'render-blueprint-fix', 'render-deploy-setup'])
+      );
       let lastCommitSha = '';
       let lastCommitUrl = `https://github.com/${repoSlug}/tree/${branch}`;
 

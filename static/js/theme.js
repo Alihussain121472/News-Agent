@@ -213,6 +213,9 @@
           const feedIns = feedAd.querySelector('ins.adsbygoogle');
           pushAdUnit(feedIns);
         }
+      });
+    }
+
     // 6. Ad blocker fallback: collapse empty ad slots after 3 seconds
     if (typeof window.addEventListener === 'function') {
       window.addEventListener('load', () => {
