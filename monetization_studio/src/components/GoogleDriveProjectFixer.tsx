@@ -442,7 +442,7 @@ export const GoogleDriveProjectFixer: React.FC<GoogleDriveProjectFixerProps> = (
                       : 'border-slate-200 bg-white hover:bg-slate-50'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 font-mono text-xs font-bold text-slate-900">
                       <FileCode2 className="w-4 h-4 text-blue-600 shrink-0" />
                       <span>{file.relativePath}</span>
