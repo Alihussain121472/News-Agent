@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nova Brief{% endblock %}</title>
+    {% include "theme_head.html" %}
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="nova-site bg-[#070B14] text-slate-100 font-sans min-h-screen" data-scene="{% block scene %}calm{% endblock %}">
+    {% block background_canvas %}
+    <canvas id="nova-bg-canvas" aria-hidden="true"></canvas>
+    {% endblock %}
+    {% block content %}{% endblock %}
+</body>
+</html>

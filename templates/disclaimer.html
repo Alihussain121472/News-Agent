@@ -29,10 +29,11 @@
         .legal-page li { margin-bottom: 0.5rem; }
     </style>
 
+    {% set disable_3d_bg = true %}
     {% include "theme_head.html" %}
 </head>
 
-<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen">
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 font-sans text-slate-800 dark:text-neutral-100 min-h-screen" data-scene="none">
     <!-- Navbar -->
     <nav class="bg-white/80 dark:bg-[#020817]/90 backdrop-blur-lg border-b border-neutral-200 dark:border-white/5 sticky top-0 z-50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

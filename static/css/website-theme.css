@@ -89,3 +89,7 @@ html.dark [data-theme-toggle] .fa-sun, html.dark #themeToggleBtn .fa-sun, html[d
 @media(max-width:639px) { .nova-profile-copy { display:none; } .nova-site .nova-profile-chip { padding:4px; } }
 @media(min-width:768px) { .nova-theme-mobile { display:none; } }
 @media(prefers-reduced-motion:reduce) { .nova-site,.nova-site * { transition:none!important; scroll-behavior:auto!important; } }
+
+/* 3D Animated Background Canvas Layering */
+#nova-bg-canvas { position:fixed; inset:0; width:100vw; height:100vh; z-index:0; pointer-events:none; display:block; transition:opacity .25s ease; }
+.nova-site > :not(#nova-bg-canvas):not(.navbar):not(header.sticky):not(nav.fixed):not(nav.sticky) { position:relative; z-index:1; }
