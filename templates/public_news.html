@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Latest Artificial Intelligence and Technology News - Curated daily briefings, machine learning developments, and tech career updates from Nova Brief.">
+    <meta name="description" content="Latest Artificial Intelligence and Technology News - Curated daily briefings, engineering takeaways, and student career updates from Nova Brief.">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
-    <title>Live Tech & AI News - Nova Brief</title>
+    <title>Live Tech &amp; AI News Briefings - Nova Brief</title>
+    <link rel="canonical" href="https://www.novabrief.tech/news">
     <link rel="icon" href="/static/favicon.ico" sizes="any">
     <link rel="icon" href="/static/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -16,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="30s"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="120s"></script>
 
     {% include "theme_head.html" %}
 </head>
@@ -33,10 +34,10 @@
                 <div class="hidden md:flex items-center gap-6">
                     <a href="/" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Home</a>
                     <a href="/news" class="text-blue-600 dark:text-blue-400 font-bold text-sm">News</a>
+                    <a href="/programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Student Programs</a>
+                    <a href="/learn-python" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Python Hub</a>
                     <a href="/blog" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Blog</a>
-                    <a href="/#programs" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Programs</a>
                     <a href="/about" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">About Us</a>
-                    <a href="/contact" class="text-neutral-600 dark:text-neutral-300 hover:text-blue-600 transition text-sm font-medium">Contact</a>
                 </div>
                 <div class="flex items-center gap-4">
                     <button data-theme-toggle aria-label="Switch to dark mode" class="text-neutral-500 dark:text-neutral-400 hover:text-blue-600 p-2 rounded-lg">
@@ -50,14 +51,50 @@
         </div>
     </nav>
 
-    <!-- Header -->
-    <header class="py-14 text-center bg-gradient-to-b from-blue-500/5 to-transparent border-b border-slate-200 dark:border-neutral-800/80">
-        <div class="max-w-4xl mx-auto px-4">
+    <!-- Header & Search / Topic Filter -->
+    <header class="py-12 bg-gradient-to-b from-blue-500/5 to-transparent border-b border-slate-200 dark:border-neutral-800/80">
+        <div class="max-w-5xl mx-auto px-4 text-center">
             <span class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-xs uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full mb-4">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Verified News Feed
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Verified Engineering &amp; AI Intelligence
             </span>
-            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Live Technology & AI Intelligence</h1>
-            <p class="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Vetted daily developments in artificial intelligence, software engineering, space tech, and student career opportunities.</p>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Live Technology &amp; Student Impact Briefings</h1>
+            <p class="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-6">
+                Every story is analyzed for technical significance, industry direction, and how computer science students should prepare.
+            </p>
+
+            <!-- Search Bar -->
+            <form method="get" action="/news" class="max-w-2xl mx-auto flex gap-2 mb-5">
+                {% if selected_topic %}
+                <input type="hidden" name="topic" value="{{ selected_topic }}">
+                {% endif %}
+                <div class="relative flex-grow">
+                    <i class="fas fa-search absolute left-3.5 top-3.5 text-slate-400 text-sm"></i>
+                    <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search NVIDIA, OpenAI, Python, cybersecurity, internships..."
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                    Search
+                </button>
+                {% if search_query or selected_topic %}
+                <a href="/news" class="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-semibold flex items-center">
+                    Clear
+                </a>
+                {% endif %}
+            </form>
+
+            <!-- Topic Filter Pills -->
+            {% if available_topics %}
+            <div class="flex flex-wrap justify-center gap-2">
+                <a href="/news" class="px-3 py-1.5 rounded-full text-xs font-semibold transition {% if not selected_topic %}bg-blue-600 text-white{% else %}bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-slate-300 hover:border-blue-500{% endif %}">
+                    All Topics
+                </a>
+                {% for top in available_topics[:8] %}
+                <a href="/news?topic={{ top | urlencode }}" class="px-3 py-1.5 rounded-full text-xs font-semibold transition {% if selected_topic == top %}bg-blue-600 text-white{% else %}bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-slate-300 hover:border-blue-500{% endif %}">
+                    {{ top }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </header>
 
@@ -68,53 +105,100 @@
             <div class="lg:col-span-2 space-y-6">
                 {% for item in articles %}
                 <article id="article-{{ item.id }}" class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 md:p-7 rounded-2xl shadow-sm hover:shadow-md transition">
-                    <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mb-3">
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-3">
                         <span class="font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-md">
                             <i class="fas fa-newspaper mr-1"></i> {{ item.source or 'Tech News' }}
                         </span>
-                        <span>&bull;</span>
-                        <span><i class="far fa-calendar-alt mr-1"></i> {{ (item.published_at|string)[:10] if item.published_at else ((item.fetched_at|string)[:10] if item.fetched_at else 'Recent') }}</span>
+                        {% for comp in (item.companies or [])[:2] %}
+                        <a href="/news?q={{ comp | urlencode }}" class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-semibold hover:underline">
+                            {{ comp }}
+                        </a>
+                        {% endfor %}
+                        {% for top in (item.news_topics or [])[:2] %}
+                        <a href="/news?topic={{ top | urlencode }}" class="px-2 py-0.5 rounded bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-slate-300 font-medium hover:underline">
+                            {{ top }}
+                        </a>
+                        {% endfor %}
+                        <span class="ml-auto"><i class="far fa-calendar-alt mr-1"></i> {{ (item.published_at|string)[:10] if item.published_at else ((item.fetched_at|string)[:10] if item.fetched_at else 'Recent') }}</span>
                     </div>
 
                     <h2 class="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-3 leading-snug hover:text-blue-600 transition">
-                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+                        <a href="/news/{{ item.id }}">{{ item.title }}</a>
                     </h2>
 
-                    <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-5">
-                        {{ item.summary or 'Full coverage and source analysis available via the primary publication.' }}
+                    <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-4">
+                        {{ (item.summary or 'Full coverage and engineering analysis available in our student briefing.') | striptags | truncate(240) }}
                     </p>
 
-                    <div class="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-neutral-800/80 text-xs">
-                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1.5">
-                            <span>Read Original Source</span>
+                    {% if item.why_important or item.why_care %}
+                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-neutral-800/60 border border-slate-100 dark:border-neutral-800 mb-4 space-y-1.5 text-xs">
+                        {% if item.why_important %}
+                        <p class="text-slate-700 dark:text-slate-200"><strong class="text-blue-600 dark:text-blue-400"><i class="fas fa-bolt mr-1"></i>Why It Matters:</strong> {{ item.why_important }}</p>
+                        {% endif %}
+                        {% if item.why_care %}
+                        <p class="text-slate-600 dark:text-slate-300"><strong class="text-emerald-600 dark:text-emerald-400"><i class="fas fa-user-graduate mr-1"></i>Student Takeaway:</strong> {{ item.why_care }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-neutral-800/80 text-xs">
+                        <a href="/news/{{ item.id }}" class="font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition inline-flex items-center gap-1.5">
+                            <span>Read Full Student Briefing</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                        {% if item.url and item.url != '#' %}
+                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="font-medium text-slate-500 hover:text-blue-600 dark:text-slate-400 inline-flex items-center gap-1">
+                            <span>Original Source</span>
                             <i class="fas fa-external-link-alt text-[10px]"></i>
                         </a>
-                        <span class="text-slate-400">Verified Article #{{ item.id }}</span>
+                        {% endif %}
                     </div>
                 </article>
                 {% else %}
                 <div class="text-center py-16 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-8">
                     <i class="fas fa-satellite-dish text-4xl text-slate-400 mb-4"></i>
-                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">Gathering Intelligence</h3>
-                    <p class="text-slate-500 text-sm">New technology articles are refreshed hourly. Please check back shortly.</p>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">No Briefings Matched Your Filter</h3>
+                    <p class="text-slate-500 text-sm mb-4">Try clearing your search or selecting another technology topic.</p>
+                    <a href="/news" class="inline-flex px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">Show All News</a>
                 </div>
                 {% endfor %}
             </div>
 
             <!-- Sidebar -->
             <div class="lg:col-span-1 space-y-6">
-                <!-- Google AdSense in content sidebar (compliant placement) -->
+                <!-- Live Upcoming Student Deadlines -->
+                {% if programs %}
                 <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-3">Advertisement</span>
-                    <ins class="adsbygoogle"
-                         style="display:block; min-height:600px;"
-                         data-ad-client="ca-pub-1036052096443002"
-                         data-ad-slot="5910293846"
-                         data-ad-format="auto"
-                         data-full-width-responsive="true"></ins>
-                    <script>
-                         (adsbygoogle = window.adsbygoogle || []).push({});
-                    </script>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-emerald-600"></i> Open Student Deadlines
+                        </h3>
+                        <a href="/programs" class="text-xs font-bold text-blue-600 hover:underline">All &rarr;</a>
+                    </div>
+                    <div class="space-y-3">
+                        {% for prog in programs[:5] %}
+                        <div class="p-3 rounded-xl bg-slate-50 dark:bg-neutral-800/60 border border-slate-100 dark:border-neutral-800 text-xs">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-bold text-blue-600 dark:text-blue-400">{{ prog.company }}</span>
+                                <span class="px-2 py-0.5 rounded-full font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">{{ prog.countdown_label }}</span>
+                            </div>
+                            <a href="/programs?q={{ prog.title | urlencode }}" class="font-bold text-slate-900 dark:text-white hover:text-blue-600 block leading-snug">{{ prog.title }}</a>
+                            <div class="flex items-center justify-between mt-1.5 text-slate-500">
+                                <span>Due: {{ prog.deadline or 'Open' }}</span>
+                                <a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 hover:underline"><i class="far fa-calendar-plus mr-1"></i>.ics</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Interactive Python Practice Hub Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white p-6 rounded-2xl border border-blue-800/40">
+                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Free CS50P Sandbox</span>
+                    <h3 class="text-lg font-bold mt-1 mb-2">Practice Python in Your Browser</h3>
+                    <p class="text-xs text-slate-300 mb-4 leading-relaxed">Solve 42+ hands-on coding exercises, 30 concept quizzes, and 10 debugging labs with instant feedback.</p>
+                    <a href="/learn-python" class="block w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl text-xs transition">Open Python Practice Hub &rarr;</a>
                 </div>
 
                 <!-- Deep Dive Guides Box -->
@@ -136,7 +220,7 @@
                         </li>
                         <li>
                             <a href="/blog/nasa-open-science-student-guide" class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium block leading-snug">
-                                &rarr; NASA Open Science: Official Badges & Data
+                                &rarr; NASA Open Science: Official Badges &amp; Data
                             </a>
                         </li>
                         <li>
@@ -146,14 +230,28 @@
                         </li>
                     </ul>
                     <div class="mt-4 pt-4 border-t border-slate-100 dark:border-neutral-800">
-                        <a href="/blog" class="text-xs font-bold text-blue-600 hover:underline">View All 20+ Articles &rarr;</a>
+                        <a href="/blog" class="text-xs font-bold text-blue-600 hover:underline">View All Engineering Guides &rarr;</a>
                     </div>
+                </div>
+
+                <!-- Google AdSense in content sidebar (compliant placement) -->
+                <div class="ad-slot bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-3">Advertisement</span>
+                    <ins class="adsbygoogle"
+                         style="display:block;"
+                         data-ad-client="ca-pub-1036052096443002"
+                         data-ad-slot="5910293846"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                 </div>
 
                 <!-- Newsletter CTA -->
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
                     <h3 class="text-lg font-bold mb-2">Get Daily Tech Briefings</h3>
-                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">Join thousands of students and engineers receiving daily AI breakthroughs and early application deadlines directly in their inbox.</p>
+                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">Join students across Pakistan and South Asia tracking daily AI breakthroughs and verified opportunity deadlines directly in their inbox.</p>
                     <a href="/#subscribe" class="block w-full text-center bg-white text-blue-600 font-bold py-2.5 rounded-xl text-sm hover:bg-blue-50 transition">Subscribe Free</a>
                 </div>
             </div>
@@ -166,6 +264,8 @@
             <div class="flex flex-wrap justify-center gap-6 mb-6">
                 <a href="/" class="hover:text-blue-600">Home</a>
                 <a href="/news" class="text-blue-600 font-bold">News</a>
+                <a href="/programs" class="hover:text-blue-600">Student Programs</a>
+                <a href="/learn-python" class="hover:text-blue-600">Python Hub</a>
                 <a href="/blog" class="hover:text-blue-600">Blog</a>
                 <a href="/about" class="hover:text-blue-600">About Us</a>
                 <a href="/contact" class="hover:text-blue-600">Contact</a>
@@ -173,7 +273,7 @@
                 <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
                 <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
             </div>
-            <p>&copy; 2026 Nova Brief Tech. All rights reserved.</p>
+            <p>&copy; 2026 Nova Brief. Curated Technology &amp; Student Opportunity Intelligence.</p>
         </div>
     </footer>
 </body>

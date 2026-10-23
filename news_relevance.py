@@ -231,7 +231,7 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
 
     # One clear company/topic match is the main signal. Additional name-dropping
     # adds only a small amount so clickbait headlines do not outrank real reporting.
-    score = 2 if companies else 0
+    score = 3 if companies else 0
     score += min(max(len(companies) - 1, 0), 2)
     score += 4 if topics else 0
     score += min(max(len(topics) - 1, 0), 2) * 2
@@ -251,7 +251,8 @@ def assess_news_relevance(article: Dict[str, Any]) -> Dict[str, Any]:
     has_technology_event = any(_contains(text, term) for term in TECH_EVENT_TERMS)
     is_finance_only = bool(finance_matches and not has_technology_event)
     is_off_topic = bool(off_topic_matches and not topics)
-    relevant = bool(title and has_editorial_anchor and score >= 4 and not is_finance_only and not is_off_topic)
+    is_package_spam = source in ("pypi.org", "npmjs.com", "crates.io")
+    relevant = bool(title and has_editorial_anchor and score >= 4 and not is_finance_only and not is_off_topic and not is_package_spam)
 
     return {
         "is_relevant": relevant,

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Brief Editorial Blog - Tech News, AI Guides & Careers</title>
+    <title>Nova Brief Editorial Blog - Tech News, AI Guides &amp; Careers</title>
+    <link rel="canonical" href="https://www.novabrief.tech/blog">
     <link rel="icon" href="/static/favicon.ico" sizes="any">
     <link rel="icon" href="/static/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -14,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="30s"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002" crossorigin="anonymous" data-overlays="bottom" data-ad-frequency-hint="120s"></script>
 
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
@@ -36,10 +37,10 @@
                 <ul class="navbar-menu">
                     <li><a href="/" class="navbar-link">Home</a></li>
                     <li><a href="/news" class="navbar-link">News</a></li>
+                    <li><a href="/programs" class="navbar-link">Student Programs</a></li>
+                    <li><a href="/learn-python" class="navbar-link">Python Hub</a></li>
                     <li><a href="/blog" class="navbar-link is-active" aria-current="page">Blog</a></li>
-                    <li><a href="/#programs" class="navbar-link">Programs</a></li>
                     <li><a href="/about" class="navbar-link">About Us</a></li>
-                    <li><a href="/contact" class="navbar-link">Contact</a></li>
                 </ul>
             </nav>
 
@@ -66,8 +67,9 @@
             <ul class="mobile-nav-list">
                 <li><a href="/" class="mobile-nav-link">Home</a></li>
                 <li><a href="/news" class="mobile-nav-link">News</a></li>
+                <li><a href="/programs" class="mobile-nav-link">Student Programs</a></li>
+                <li><a href="/learn-python" class="mobile-nav-link">Python Hub</a></li>
                 <li><a href="/blog" class="mobile-nav-link" aria-current="page">Blog</a></li>
-                <li><a href="/#programs" class="mobile-nav-link">Programs</a></li>
                 <li><a href="/about" class="mobile-nav-link">About Us</a></li>
                 <li><a href="/contact" class="mobile-nav-link">Contact</a></li>
             </ul>
@@ -80,11 +82,33 @@
 
     <!-- Page Main Container -->
     <div class="page-container container">
-        <!-- 2. Page Header -->
+        <!-- 2. Page Header + Search & Category Filters -->
         <header class="page-header">
             <span class="eyebrow">Editorial Library</span>
-            <h1 class="page-title">Technology Insights & Guides</h1>
+            <h1 class="page-title">Technology Insights &amp; Engineering Guides</h1>
             <p class="page-subtitle">Actionable software engineering guides, AI architectures, and student career roadmaps.</p>
+
+            <!-- Search Bar -->
+            <form method="get" action="/blog" style="max-width: 640px; margin: 1.5rem auto 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+                {% endif %}
+                <input type="text" name="q" value="{{ search_query or '' }}" placeholder="Search Python, GSoC, Generative AI, Cloud, Certifications..."
+                       style="flex: 1; min-width: 220px; padding: 0.7rem 1rem; border-radius: 0.75rem; border: 1px solid rgba(148,163,184,0.4); background: inherit; color: inherit;">
+                <button type="submit" class="btn-subscribe" style="cursor: pointer; border: none;">Search Guides</button>
+                {% if search_query or selected_category %}
+                <a href="/blog" class="navbar-signin" style="display: inline-flex; align-items: center; padding: 0.6rem 0.9rem;">Clear</a>
+                {% endif %}
+            </form>
+
+            {% if categories %}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+                <a href="/blog" class="article-badge" style="text-decoration: none; {% if not selected_category %}background:#2563eb;color:#fff;{% endif %}">All Guides</a>
+                {% for cat in categories %}
+                <a href="/blog?category={{ cat | urlencode }}" class="article-badge" style="text-decoration: none; {% if selected_category == cat %}background:#2563eb;color:#fff;{% endif %}">{{ cat }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
         </header>
         
         <!-- Content Grid (Desktop: 2 columns; Mobile: 1 column) -->
@@ -93,7 +117,7 @@
             <main class="main-column">
                 <div class="section-heading-row">
                     <h2 class="section-heading-title">Published Articles ({{ posts|length }})</h2>
-                    <span class="section-heading-caption">Peer-reviewed educational content</span>
+                    <span class="section-heading-caption">Practical Guides for Tech Students</span>
                 </div>
 
                 <section class="article-list" aria-label="Published Articles">
@@ -103,24 +127,24 @@
                             <time datetime="{{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}"><i class="far fa-calendar-alt"></i> {{ (post.published_at|string)[:10] if post.published_at else 'Recent' }}</time>
                             <span class="meta-bullet" aria-hidden="true">&bull;</span>
                             <span class="article-badge">
-                                <i class="fas fa-check-circle"></i> Verified Guide
+                                <i class="fas fa-book-open"></i> {{ post.category or 'Student Guide' }}
                             </span>
                         </div>
                         <h2 class="article-title">
                             <a href="/blog/{{ post.slug }}">{{ post.title }}</a>
                         </h2>
-                        <p class="article-excerpt">{{ post.meta_description }}</p>
+                        <p class="article-excerpt">{{ post.summary or post.meta_description }}</p>
                         <div class="article-card-footer">
                             <a href="/blog/{{ post.slug }}" class="read-more-link">
                                 <span>Read full article</span>
                                 <span aria-hidden="true">&rarr;</span>
                             </a>
-                            <span class="reading-length">800–1500 words</span>
+                            <span class="reading-length">{{ post.read_minutes or 5 }} min read{% if post.word_count %} &middot; {{ post.word_count }} words{% endif %}</span>
                         </div>
                     </article>
                     {% else %}
                     <div class="sidebar-widget text-center py-12">
-                        <p class="text-slate-500">More articles coming soon!</p>
+                        <p class="text-slate-500">No guides matched your search. <a href="/blog">View all articles</a>.</p>
                     </div>
                     {% endfor %}
                 </section>
@@ -128,12 +152,48 @@
             
             <!-- 4. Sidebar -->
             <aside class="sidebar" aria-label="Editorial Sidebar">
+                <!-- Student Tech Programs -->
+                <section class="sidebar-widget widget-programs" aria-labelledby="programs-widget-title">
+                    <h3 id="programs-widget-title" class="widget-title">
+                        <i class="fas fa-rocket"></i> Verified Student Deadlines
+                    </h3>
+                    <p class="widget-caption">Active fellowships, internships &amp; cloud credits for CS students.</p>
+                    
+                    <div class="program-list">
+                        {% for prog in programs[:5] %}
+                        <div class="program-card">
+                            <div class="program-company">{{ prog.company }} &middot; {{ prog.countdown_label }}</div>
+                            <h4 class="program-name">{{ prog.title }}</h4>
+                            <div class="program-launch-date"><i class="far fa-calendar-alt"></i> Deadline: {{ prog.deadline[:10] if prog.deadline else 'Open' }}</div>
+                            <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
+                                <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply">Official Portal</a>
+                                <a href="/programs/{{ prog.id }}/calendar.ics" class="btn-apply" style="background:transparent; border:1px solid currentColor; color:inherit;">+ .ics</a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="widget-caption">No active program alerts right now.</p>
+                        {% endfor %}
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <a href="/programs" class="read-more-link">Browse all student opportunities &rarr;</a>
+                    </div>
+                </section>
+
+                <!-- Interactive Python Practice Hub Widget -->
+                <section class="sidebar-widget" aria-labelledby="python-widget-title">
+                    <h3 id="python-widget-title" class="widget-title">
+                        <i class="fas fa-terminal"></i> Interactive Python Hub
+                    </h3>
+                    <p class="widget-caption">Practice 10 CS50P modules, 42+ coding exercises, and debugging puzzles directly in your browser.</p>
+                    <a href="/learn-python" class="btn-apply" style="display:inline-block; margin-top:0.5rem;">Open Python Practice Hub &rarr;</a>
+                </section>
+
                 <!-- Ad Slot Widget -->
                 <section class="sidebar-widget ad-slot-widget ad-slot" aria-label="Advertisement">
                     <span class="ad-label">Advertisement</span>
                     <div class="ad-container">
                         <ins class="adsbygoogle"
-                             style="display:block; min-height:250px;"
+                             style="display:block;"
                              data-ad-client="ca-pub-1036052096443002"
                              data-ad-slot="5910293846"
                              data-ad-format="auto"
@@ -144,27 +204,6 @@
                     </div>
                 </section>
 
-                <!-- Student Tech Programs -->
-                <section class="sidebar-widget widget-programs" aria-labelledby="programs-widget-title">
-                    <h3 id="programs-widget-title" class="widget-title">
-                        <i class="fas fa-rocket"></i> Student Tech Programs
-                    </h3>
-                    <p class="widget-caption">Newly launched programs by big companies (NASA, Google, Meta, etc.) for students.</p>
-                    
-                    <div class="program-list">
-                        {% for prog in programs %}
-                        <div class="program-card">
-                            <div class="program-company">{{ prog.company }}</div>
-                            <h4 class="program-name">{{ prog.title }}</h4>
-                            <div class="program-launch-date"><i class="far fa-calendar-alt"></i> Launches: {{ prog.launch_date[:10] if prog.launch_date else 'TBD' }}</div>
-                            <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply">Apply Now</a>
-                        </div>
-                        {% else %}
-                        <p class="widget-caption">No active program alerts right now.</p>
-                        {% endfor %}
-                    </div>
-                </section>
-
                 <!-- Editorial Navigation -->
                 <section class="sidebar-widget" aria-labelledby="editorial-nav-title">
                     <h3 id="editorial-nav-title" class="widget-title">
@@ -172,9 +211,10 @@
                     </h3>
                     <ul class="editorial-nav-list">
                         <li class="editorial-nav-item"><a href="/news">&rarr; Live Tech News Feed</a></li>
+                        <li class="editorial-nav-item"><a href="/programs">&rarr; Student Opportunities &amp; Deadlines</a></li>
+                        <li class="editorial-nav-item"><a href="/learn-python">&rarr; CS50P Python Practice Hub</a></li>
                         <li class="editorial-nav-item"><a href="/about">&rarr; About Our Editorial Team</a></li>
                         <li class="editorial-nav-item"><a href="/contact">&rarr; Submit a Program or Story</a></li>
-                        <li class="editorial-nav-item"><a href="/disclaimer">&rarr; Editorial Disclaimer</a></li>
                     </ul>
                 </section>
             </aside>
@@ -187,6 +227,8 @@
             <nav class="footer-links" aria-label="Footer Navigation">
                 <a href="/" class="footer-link">Home</a>
                 <a href="/news" class="footer-link">News</a>
+                <a href="/programs" class="footer-link">Student Programs</a>
+                <a href="/learn-python" class="footer-link">Python Hub</a>
                 <a href="/blog" class="footer-link" aria-current="page">Blog</a>
                 <a href="/about" class="footer-link">About Us</a>
                 <a href="/contact" class="footer-link">Contact</a>

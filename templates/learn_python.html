@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Python Practice Hub (CS50P Curriculum & Sandbox) | NovaBrief Tech</title>
+    <meta name="description" content="Master Python with 10 CS50P-aligned modules, 42+ hands-on coding exercises, 30 concept quizzes, 10 debugging puzzles, and a browser CPython 3.12 WebAssembly sandbox.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-1036052096443002">
+    <link rel="canonical" href="https://www.novabrief.tech/learn-python">
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002"
+        crossorigin="anonymous"
+        data-overlays="bottom"
+        data-ad-frequency-hint="120s"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Course",
+      "name": "NovaBrief Interactive Python Engineering Track (CS50P Aligned)",
+      "description": "10 structured Python engineering modules with hands-on exercises, debugging challenges, and a 20-question final certification assessment.",
+      "provider": {
+        "@type": "Organization",
+        "name": "NovaBrief Tech",
+        "sameAs": "https://www.novabrief.tech"
+      }
+    }
+    </script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% include "theme_head.html" %}
+</head>
+<body class="nova-site bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur border-b border-slate-200 dark:border-neutral-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 font-bold text-xl tracking-tight text-blue-600 dark:text-blue-400">
+                <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-extrabold">N</span>
+                NovaBrief<span class="text-slate-400 font-normal">.tech</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-300">
+                <a href="/" class="hover:text-blue-600 transition">Home</a>
+                <a href="/news" class="hover:text-blue-600 transition">Live News</a>
+                <a href="/programs" class="hover:text-blue-600 transition">Student Programs</a>
+                <a href="/learn-python" class="text-blue-600 dark:text-blue-400 font-semibold">Python Hub</a>
+                <a href="/blog" class="hover:text-blue-600 transition">Engineering Blog</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <button type="button" class="theme-toggle-btn p-2 rounded-lg border border-slate-200 dark:border-neutral-800 text-slate-600 dark:text-slate-300" data-theme-toggle aria-label="Switch theme">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun" style="display:none"></i>
+                </button>
+                <a href="/user/python" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">
+                    <i class="fas fa-terminal mr-1.5"></i>Launch Python Sandbox
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+        <!-- Hero Section -->
+        <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 sm:p-10 mb-10 shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div class="lg:col-span-7">
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-bold uppercase tracking-wider">
+                            CS50P-Aligned Interactive Course
+                        </span>
+                        <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                            CPython 3.12 WebAssembly Sandbox
+                        </span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
+                        Learn &amp; Practice Real Python in Your Browser
+                    </h1>
+                    <p class="text-slate-600 dark:text-slate-300 text-base leading-relaxed mb-6">
+                        Move beyond passive video tutorials. Study all <strong>{{ modules | length }} structured engineering modules</strong> below, test your understanding with our instant interactive quiz, and launch our full CPython 3.12 sandbox to run code, pass automated unit tests, and earn XP.
+                    </p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="/user/python" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition inline-flex items-center gap-2">
+                            <i class="fas fa-play"></i> Open Interactive Python Workspace
+                        </a>
+                        <a href="#interactive-quiz" class="px-5 py-3 rounded-xl border border-slate-300 dark:border-neutral-700 font-semibold text-sm hover:border-blue-500 transition">
+                            Try Instant Python Quiz &darr;
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Course Metrics Grid -->
+                <div class="lg:col-span-5 grid grid-cols-2 gap-4">
+                    <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/70 border border-slate-200 dark:border-neutral-800">
+                        <div class="text-3xl font-extrabold text-blue-600 dark:text-blue-400">{{ modules | length }}</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1">Structured Modules</div>
+                        <p class="text-xs text-slate-500 mt-1">Variables to OOP, Regex &amp; File I/O</p>
+                    </div>
+                    <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/70 border border-slate-200 dark:border-neutral-800">
+                        <div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ total_exercises }}</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1">Coding Exercises</div>
+                        <p class="text-xs text-slate-500 mt-1">Auto-graded with instant hints</p>
+                    </div>
+                    <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/70 border border-slate-200 dark:border-neutral-800">
+                        <div class="text-3xl font-extrabold text-purple-600 dark:text-purple-400">{{ total_quiz_questions }}</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1">Concept Quizzes</div>
+                        <p class="text-xs text-slate-500 mt-1">+ {{ grand_test_count }}-Question Grand Exam</p>
+                    </div>
+                    <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/70 border border-slate-200 dark:border-neutral-800">
+                        <div class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">{{ total_debug_puzzles }}</div>
+                        <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1">Debugging Labs</div>
+                        <p class="text-xs text-slate-500 mt-1">Fix real production-style bugs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instant Interactive Python Diagnostic Quiz (No Login Required!) -->
+        <section id="interactive-quiz" class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 sm:p-8 mb-10 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Try Right Now · No Login Needed</span>
+                    <h2 class="text-2xl font-extrabold mt-1">5-Question Python Skill Check</h2>
+                </div>
+                <span id="quizScoreBadge" class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 text-xs font-bold">
+                    Score: 0 / {{ sample_quiz | length }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for q in sample_quiz %}
+                {% set q_idx = loop.index0 %}
+                <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/50 border border-slate-200 dark:border-neutral-800" data-quiz-card="{{ q_idx }}" data-answer="{{ q.answer }}">
+                    <div class="text-[11px] font-bold uppercase text-blue-600 dark:text-blue-400 mb-1">
+                        Module {{ loop.index }} · {{ q.module_title }}
+                    </div>
+                    <p class="font-bold text-sm text-slate-900 dark:text-white mb-3">{{ q.question }}</p>
+                    <div class="space-y-2">
+                        {% for opt in q.options %}
+                        <button type="button"
+                                onclick="checkSampleQuiz({{ q_idx }}, {{ loop.index0 }}, this)"
+                                class="w-full text-left px-3.5 py-2 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-medium hover:border-blue-500 transition">
+                            {{ opt }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    <div class="quiz-feedback hidden mt-3 p-3 rounded-lg text-xs leading-relaxed" id="feedback-{{ q_idx }}">
+                        {{ q.explanation }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Full 10-Module CS50P Curriculum Explorer -->
+        <section>
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Complete Open Syllabus</span>
+                    <h2 class="text-2xl font-extrabold mt-1">All 10 Python Engineering Modules &amp; Code Examples</h2>
+                </div>
+                <a href="/user/python" class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                    Open Full Interactive IDE &rarr;
+                </a>
+            </div>
+
+            <div class="space-y-6">
+                {% for mod in modules %}
+                <article id="module-{{ mod.slug }}" class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-sm">
+                    <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2.5 py-0.5 rounded-md bg-blue-600 text-white text-xs font-bold">
+                                    Module {{ mod.order }}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-slate-300 text-xs font-semibold">
+                                    {{ mod.level }}
+                                </span>
+                                <span class="text-xs text-slate-400">
+                                    {{ mod.lessons | length }} Lessons · {{ mod.exercises | length }} Exercises · {{ mod.quiz | length }} Quiz Qs
+                                </span>
+                            </div>
+                            <h3 class="text-xl font-extrabold text-slate-900 dark:text-white">{{ mod.title }}</h3>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ mod.summary }}</p>
+                        </div>
+                        <a href="/user/python" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shrink-0">
+                            <i class="fas fa-code mr-1"></i> Solve {{ mod.exercises | length }} Exercises in Sandbox
+                        </a>
+                    </div>
+
+                    <!-- Lessons & Code Examples -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-5">
+                        {% for lesson in mod.lessons %}
+                        <div class="p-4 rounded-xl bg-slate-50 dark:bg-neutral-800/60 border border-slate-200 dark:border-neutral-800">
+                            <h4 class="font-bold text-sm text-slate-900 dark:text-white mb-1.5">
+                                <i class="fas fa-book-open text-blue-500 mr-1.5"></i>{{ lesson.title }}
+                            </h4>
+                            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">{{ lesson.explanation }}</p>
+                            <pre class="p-3 rounded-lg bg-slate-900 text-emerald-300 text-xs overflow-x-auto font-mono"><code>{{ lesson.example }}</code></pre>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Preview of Practice Exercises & Debugging Lab -->
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-bold text-slate-700 dark:text-slate-300">Hands-On Labs:</span>
+                            {% for ex in mod.exercises %}
+                            <span class="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-neutral-800 text-slate-700 dark:text-slate-300">
+                                {{ ex.title }} ({{ ex.difficulty }})
+                            </span>
+                            {% endfor %}
+                            {% if mod.debug %}
+                            <span class="px-2.5 py-1 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 font-semibold">
+                                <i class="fas fa-bug mr-1"></i>{{ mod.debug.title }}
+                            </span>
+                            {% endif %}
+                        </div>
+                        <a href="/user/python" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                            Run in Browser Sandbox &rarr;
+                        </a>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white dark:bg-neutral-900 border-t border-slate-200 dark:border-neutral-800 py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <p>&copy; 2026 NovaBrief Tech. Built for computer science students and software engineers.</p>
+            <div class="flex flex-wrap gap-5">
+                <a href="/news" class="hover:text-blue-600">Live News</a>
+                <a href="/programs" class="hover:text-blue-600">Student Programs</a>
+                <a href="/learn-python" class="hover:text-blue-600">Python Practice Hub</a>
+                <a href="/blog" class="hover:text-blue-600">Engineering Blog</a>
+                <a href="/about" class="hover:text-blue-600">About</a>
+                <a href="/privacy" class="hover:text-blue-600">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const answeredQuestions = new Set();
+        let correctCount = 0;
+        const totalQuestions = {{ sample_quiz | length }};
+
+        function checkSampleQuiz(qIdx, selectedIdx, btn) {
+            const card = document.querySelector('[data-quiz-card="' + qIdx + '"]');
+            if (!card || answeredQuestions.has(qIdx)) return;
+            answeredQuestions.add(qIdx);
+            const correctIdx = parseInt(card.getAttribute('data-answer'), 10);
+            const feedback = document.getElementById('feedback-' + qIdx);
+            if (selectedIdx === correctIdx) {
+                correctCount += 1;
+                btn.className = 'w-full text-left px-3.5 py-2 rounded-lg border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold';
+                if (feedback) {
+                    feedback.className = 'mt-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 text-xs leading-relaxed';
+                    feedback.innerHTML = '<strong>Correct!</strong> ' + feedback.innerHTML;
+                }
+            } else {
+                btn.className = 'w-full text-left px-3.5 py-2 rounded-lg border border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold';
+                if (feedback) {
+                    feedback.className = 'mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 text-xs leading-relaxed';
+                    feedback.innerHTML = '<strong>Review:</strong> ' + feedback.innerHTML;
+                }
+            }
+            const badge = document.getElementById('quizScoreBadge');
+            if (badge) {
+                badge.textContent = 'Score: ' + correctCount + ' / ' + totalQuestions;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -755,7 +755,7 @@ class NewsDatabase:
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute('''SELECT email, source AS action, login_time AS event_time FROM user_login_events
             UNION ALL SELECT email, 'signup' AS action, registered_at AS event_time FROM registered_users
-            ORDER BY event_time DESC LIMIT ?''', (limit,))
+            ORDER BY event_time DESC LIMIT %s''', (limit,))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
@@ -877,7 +877,7 @@ class NewsDatabase:
             SELECT source AS action, NULL AS detail, NULL AS page, login_time AS event_time, 'login' AS source FROM user_login_events WHERE email=%s
             UNION ALL
             SELECT 'email_received' AS action, subject AS detail, NULL AS page, sent_at AS event_time, 'email' AS source FROM email_logs WHERE recipient=%s AND status='success'
-            ORDER BY event_time DESC LIMIT ?''', (email, email, email, limit))
+            ORDER BY event_time DESC LIMIT %s''', (email, email, email, limit))
         rows = [to_dict(r) for r in cursor.fetchall()]
         conn.close()
         return rows
@@ -967,6 +967,32 @@ class NewsDatabase:
             conn.rollback()
             conn.close()
 
+    def get_program_by_id(self, program_id: int) -> Optional[Dict[str, Any]]:
+        conn = safe_connect()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute('SELECT * FROM student_programs WHERE id=%s AND is_active=TRUE LIMIT 1', (int(program_id),))
+                row = cursor.fetchone()
+                return to_dict(row) if row else None
+        finally:
+            conn.close()
+
+    def get_article_by_id(self, article_id: int) -> Optional[Dict[str, Any]]:
+        conn = safe_connect()
+        try:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute('SELECT * FROM news_articles WHERE id=%s LIMIT 1', (int(article_id),))
+                row = cursor.fetchone()
+                if not row:
+                    return None
+                item = to_dict(row)
+                annotated = filter_relevant_news([item], limit=1)
+                if annotated:
+                    return annotated[0]
+                return item
+        finally:
+            conn.close()
+
     def get_all_programs(self, limit: int = 100) -> List[Dict[str, Any]]:
         conn = safe_connect()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -1020,61 +1046,191 @@ class NewsDatabase:
         return affected > 0
 
     def seed_default_programs(self) -> None:
-        """Seed real-world student programs if the table is empty."""
+        """Seed and enrich real-world student programs with verified deadlines and perks."""
         conn = safe_connect()
-        cursor = conn.cursor()
-        cursor.execute('SELECT COUNT(*) FROM student_programs')
-        if _fetch_val(cursor) == 0:
+        try:
+            cursor = conn.cursor()
+            today = datetime.now().date()
+            d = lambda days: (today + timedelta(days=days)).strftime('%Y-%m-%d')
             programs = [
                 {
-                    'title': 'Google Developer Student Clubs (GDSC)',
-                    'company': 'Google',
-                    'description': 'University-based community groups for students interested in Google developer technologies. Gain leadership and technical skills.',
-                    'registration_url': 'https://developers.google.com/community/gdsc',
-                    'category': 'program',
-                    'launch_date': f'{datetime.now().year}-08-15'
+                    'title': 'GitHub Student Developer Pack ($200k+ Free Tools & Cloud Credits)',
+                    'company': 'GitHub',
+                    'description': 'Instant access to GitHub Copilot Pro, JetBrains IDEs, Namecheap domain, DigitalOcean ($200), Microsoft Azure ($100), and 80+ developer tools for verified students globally (including .edu.pk & university ID cards).',
+                    'registration_url': 'https://education.github.com/pack',
+                    'category': 'certification',
+                    'launch_date': d(-15),
+                    'deadline': d(90),
                 },
                 {
                     'title': 'Google Summer of Code (GSoC)',
                     'company': 'Google',
-                    'description': 'A global, online program focused on bringing new contributors into open source software development.',
+                    'description': 'Paid 12-week global open-source software engineering fellowship ($1,500–$6,600 USD stipend). Open to university students and beginner open-source contributors in Pakistan, South Asia, and worldwide.',
                     'registration_url': 'https://summerofcode.withgoogle.com/',
                     'category': 'internship',
-                    'launch_date': f'{datetime.now().year + 1}-03-01'
+                    'launch_date': d(20),
+                    'deadline': d(55),
                 },
                 {
-                    'title': 'Microsoft Imagine Cup',
+                    'title': 'MLH Fellowship (Software Engineering & AI Tracks)',
+                    'company': 'Major League Hacking',
+                    'description': '12-week remote software engineering internship alternative paired with mentors from Meta, GitHub, and Google. Includes up to $5,000 educational stipend for eligible fellows.',
+                    'registration_url': 'https://fellowship.mlh.io/',
+                    'category': 'fellowship',
+                    'launch_date': d(-5),
+                    'deadline': d(28),
+                },
+                {
+                    'title': 'Microsoft Imagine Cup Global Student Startup Competition',
                     'company': 'Microsoft',
-                    'description': 'Global student technology competition focused on finding solutions to real-world problems using Microsoft technologies.',
+                    'description': 'Flagship global student AI & cloud competition offering up to $100,000 USD grand prize, $1,000–$5,000 Azure credits, and direct mentorship with Microsoft engineers and CEO Satya Nadella.',
                     'registration_url': 'https://imaginecup.microsoft.com/',
                     'category': 'competition',
-                    'launch_date': f'{datetime.now().year}-10-01'
+                    'launch_date': d(-10),
+                    'deadline': d(35),
                 },
                 {
-                    'title': 'AWS Academy & Educate',
+                    'title': 'Linux Foundation LFX Mentorship Program',
+                    'company': 'Linux Foundation',
+                    'description': 'Paid 12-week remote mentorship ($3,000–$6,600 stipend) working directly on Kubernetes, Linux Kernel, CNCF, PyTorch, and OpenTelemetry with senior open-source maintainers.',
+                    'registration_url': 'https://mentorship.lfx.linuxfoundation.org/',
+                    'category': 'internship',
+                    'launch_date': d(5),
+                    'deadline': d(24),
+                },
+                {
+                    'title': 'Outreachy Open Source Paid Internships',
+                    'company': 'Outreachy',
+                    'description': '$7,000 USD total stipend for 3-month remote open-source internships in Python, data science, kernel development, and technical documentation. Explicitly welcomes applicants from developing nations.',
+                    'registration_url': 'https://www.outreachy.org/',
+                    'category': 'internship',
+                    'launch_date': d(10),
+                    'deadline': d(42),
+                },
+                {
+                    'title': 'AWS Academy & AWS Educate Cloud Credits Track',
                     'company': 'Amazon',
-                    'description': 'Provides students with resources for building skills in the cloud, including free training and AWS credits.',
+                    'description': 'Free hands-on AWS cloud labs, official digital badges, Cloud Practitioner exam preparation, and starter AWS credits with no credit card required for students.',
                     'registration_url': 'https://aws.amazon.com/education/awseducate/',
                     'category': 'certification',
-                    'launch_date': f'{datetime.now().year}-09-01'
+                    'launch_date': d(-20),
+                    'deadline': d(75),
+                },
+                {
+                    'title': 'Google Developer Student Clubs (GDSC)',
+                    'company': 'Google',
+                    'description': 'Lead or join a Google-backed developer community on your university campus. Receive Google mentorship, event sponsorship, Google Cloud credits, and invitations to regional summits.',
+                    'registration_url': 'https://developers.google.com/community/gdsc',
+                    'category': 'program',
+                    'launch_date': d(12),
+                    'deadline': d(48),
+                },
+                {
+                    'title': 'Microsoft Learn Student Ambassadors (MLSA)',
+                    'company': 'Microsoft',
+                    'description': 'Global campus leadership cohort offering free Microsoft Certification exam vouchers, $150/month Azure credits, LinkedIn Learning Premium, and milestone swag kits.',
+                    'registration_url': 'https://studentambassadors.microsoft.com/',
+                    'category': 'fellowship',
+                    'launch_date': d(-7),
+                    'deadline': d(32),
                 },
                 {
                     'title': "NASA L'SPACE Academy",
                     'company': 'NASA',
-                    'description': 'Free, online, interactive program for STEM students to gain project-based experience in space exploration.',
+                    'description': 'Free 12-week online interactive engineering academy teaching NASA mission design protocols, systems engineering, and research proposal writing with NASA scientists.',
                     'registration_url': 'https://www.lspace.asu.edu/',
                     'category': 'program',
-                    'launch_date': f'{datetime.now().year}-08-20'
-                }
+                    'launch_date': d(8),
+                    'deadline': d(38),
+                },
+                {
+                    'title': 'Harvard CS50P & CS50x OpenCourseWare Free Certificate Track',
+                    'company': 'Harvard University',
+                    'description': 'Complete Harvard CS50 Introduction to Programming with Python (10 problem sets + final project) and earn a free verified CS50 certificate directly from Harvard OpenCourseWare.',
+                    'registration_url': 'https://cs50.harvard.edu/python/',
+                    'category': 'certification',
+                    'launch_date': d(-30),
+                    'deadline': d(120),
+                },
+                {
+                    'title': 'Generation Google Scholarship (APAC & Global CS)',
+                    'company': 'Google',
+                    'description': '$2,500–$10,000 academic scholarship for undergraduate and graduate computer science students demonstrating technical excellence and community leadership.',
+                    'registration_url': 'https://buildyourfuture.withgoogle.com/scholarships',
+                    'category': 'scholarship',
+                    'launch_date': d(15),
+                    'deadline': d(60),
+                },
+                {
+                    'title': 'Ignite NGIRI Final Year Project Grant (Pakistan CS/Engineering)',
+                    'company': 'Ignite Pakistan',
+                    'description': 'Up to PKR 100,000 funding from Ignite National Technology Fund for undergraduate Final Year Projects (FYP) in AI, Cybersecurity, Robotics, Cloud, and Embedded Systems across Pakistani universities.',
+                    'registration_url': 'https://ignite.org.pk/ngiri/',
+                    'category': 'scholarship',
+                    'launch_date': d(-3),
+                    'deadline': d(21),
+                },
+                {
+                    'title': 'Kaggle Open Machine Learning & LLM Competitions',
+                    'company': 'Google / Kaggle',
+                    'description': 'Compete in real-world AI, LLM, and data science benchmarks with $25,000–$100,000 prize pools, free GPU/TPU notebooks (30 hrs/week), and global portfolio rankings.',
+                    'registration_url': 'https://www.kaggle.com/competitions',
+                    'category': 'competition',
+                    'launch_date': d(-5),
+                    'deadline': d(45),
+                },
+                {
+                    'title': 'Postman Student Expert Free API Certification',
+                    'company': 'Postman',
+                    'description': 'Self-paced hands-on API engineering certification covering REST, GraphQL, automated testing, and CI/CD pipelines. Includes an official verifiable digital badge for LinkedIn and GitHub.',
+                    'registration_url': 'https://www.postman.com/student-program/student-expert/',
+                    'category': 'certification',
+                    'launch_date': d(-14),
+                    'deadline': d(80),
+                },
+                {
+                    'title': 'Cloudflare Systems & AI Developer Internship Cohort',
+                    'company': 'Cloudflare',
+                    'description': 'Paid engineering internship working on Cloudflare Workers AI, Rust networking, DDoS mitigation, and distributed edge databases.',
+                    'registration_url': 'https://www.cloudflare.com/careers/students/',
+                    'category': 'internship',
+                    'launch_date': d(2),
+                    'deadline': d(30),
+                },
             ]
             for p in programs:
-                cursor.execute('''INSERT INTO student_programs
-                    (title,company,description,registration_url,launch_date,category)
-                    VALUES (%s,%s,%s,%s,%s,%s)''',
-                    (p['title'], p['company'], p['description'], p['registration_url'], p['launch_date'], p['category']))
+                cursor.execute('SELECT id, deadline, launch_date FROM student_programs WHERE title = %s LIMIT 1', (p['title'],))
+                existing = cursor.fetchone()
+                if existing:
+                    prog_id, cur_deadline, cur_launch = existing
+                    if not cur_deadline or not cur_launch:
+                        cursor.execute(
+                            '''UPDATE student_programs
+                               SET description=%s, registration_url=%s, category=%s,
+                                   launch_date=COALESCE(launch_date, %s),
+                                   deadline=COALESCE(deadline, %s),
+                                   is_active=TRUE
+                               WHERE id=%s''',
+                            (p['description'], p['registration_url'], p['category'], p['launch_date'], p['deadline'], prog_id)
+                        )
+                else:
+                    cursor.execute(
+                        '''INSERT INTO student_programs
+                           (title, company, description, registration_url, launch_date, deadline, category, is_active)
+                           VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)''',
+                        (p['title'], p['company'], p['description'], p['registration_url'], p['launch_date'], p['deadline'], p['category'])
+                    )
+            # Also ensure any legacy rows with NULL deadline get a valid upcoming deadline
+            cursor.execute(
+                '''UPDATE student_programs
+                   SET deadline = %s, launch_date = COALESCE(launch_date, %s)
+                   WHERE deadline IS NULL''',
+                (d(40), d(-7))
+            )
             conn.commit()
-            logger.info("Seeded default student programs.")
-        conn.close()
+            logger.info("Seeded and enriched default student programs.")
+        finally:
+            conn.close()
 
     # ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ Contact messages ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬
 

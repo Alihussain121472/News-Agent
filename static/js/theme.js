@@ -98,7 +98,7 @@
         adScript.setAttribute('data-overlays', 'bottom');
       }
       if (!adScript.getAttribute('data-ad-frequency-hint')) {
-        adScript.setAttribute('data-ad-frequency-hint', '30s');
+        adScript.setAttribute('data-ad-frequency-hint', '120s');
       }
     }
 
@@ -122,9 +122,6 @@
       if (!currentSlot || currentSlot === 'auto') {
         const replacementSlot = layout === 'in-article' ? SLOTS.inArticle : SLOTS.sidebar;
         ins.setAttribute('data-ad-slot', replacementSlot);
-        if (ins.style) {
-          ins.style.minHeight = layout === 'in-article' ? '260px' : '280px';
-        }
         pushAdUnit(ins);
       }
     });
@@ -141,22 +138,24 @@
         affBox.className = 'my-8 p-6 bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl';
         affBox.innerHTML =
           '<div class="flex flex-wrap items-center justify-between gap-2 mb-2 text-xs text-slate-500">' +
-            '<span>Verified Engineering Resource · Student & Developer Partner</span>' +
-            '<span>Partner Disclosure</span>' +
+            '<span>Verified Engineering Resource · Student & Developer Toolkit</span>' +
+            '<span>Free Access</span>' +
           '</div>' +
-          '<h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Claim $200 Free Cloud Credits & Accredited Engineering Certificates</h3>' +
-          '<p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Deploy production workloads or audit official AWS, Google Cloud, and Cybersecurity tracks curated for Nova Brief readers.</p>' +
-          '<a href="/#programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Explore Verified Student Offers &rarr;</a>';
+          '<h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Claim $200+ Cloud Credits, Stipends & Interactive Python Labs</h3>' +
+          '<p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Track verified GSoC, Microsoft, AWS & GitHub Student Pack deadlines or practice hands-on Python in our CS50P-aligned browser sandbox.</p>' +
+          '<div class="flex flex-wrap gap-2">' +
+            '<a href="/programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Browse Student Programs &rarr;</a>' +
+            '<a href="/learn-python" class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-neutral-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition">Practice Python Free</a>' +
+          '</div>';
         headings[0].nextElementSibling.insertAdjacentElement('afterend', affBox);
 
         if (!document.getElementById('nova-inarticle-ad-1')) {
           const topAdWrapper = document.createElement('div');
           topAdWrapper.id = 'nova-inarticle-ad-1';
-          topAdWrapper.className = 'my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
-          topAdWrapper.style.minHeight = '260px';
+          topAdWrapper.className = 'ad-slot my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
           topAdWrapper.innerHTML =
             '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>' +
-            '<ins class="adsbygoogle" style="display:block; text-align:center; min-height:250px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
+            '<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
           affBox.insertAdjacentElement('afterend', topAdWrapper);
           const topIns = topAdWrapper.querySelector('ins.adsbygoogle');
           pushAdUnit(topIns);
@@ -170,12 +169,15 @@
           affBox.className = 'my-8 p-6 bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-xl';
           affBox.innerHTML =
             '<div class="flex flex-wrap items-center justify-between gap-2 mb-2 text-xs text-slate-500">' +
-              '<span>Verified Engineering Resource · Student & Developer Partner</span>' +
-              '<span>Partner Disclosure</span>' +
+              '<span>Verified Engineering Resource · Student & Developer Toolkit</span>' +
+              '<span>Free Access</span>' +
             '</div>' +
-            '<h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Claim $200 Free Cloud Credits & Accredited Engineering Certificates</h3>' +
-            '<p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Deploy production workloads or audit official AWS, Google Cloud, and Cybersecurity tracks curated for Nova Brief readers.</p>' +
-            '<a href="/#programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Explore Verified Student Offers &rarr;</a>';
+            '<h3 class="text-base font-bold text-slate-900 dark:text-white mb-1.5">Claim $200+ Cloud Credits, Stipends & Interactive Python Labs</h3>' +
+            '<p class="text-sm text-slate-600 dark:text-slate-300 mb-4">Track verified GSoC, Microsoft, AWS & GitHub Student Pack deadlines or practice hands-on Python in our CS50P-aligned browser sandbox.</p>' +
+            '<div class="flex flex-wrap gap-2">' +
+              '<a href="/programs" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition">Browse Student Programs &rarr;</a>' +
+              '<a href="/learn-python" class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-neutral-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg transition">Practice Python Free</a>' +
+            '</div>';
           paragraphs[1].insertAdjacentElement('afterend', affBox);
         }
       }
@@ -184,28 +186,26 @@
       if (headings[1] && headings[1].nextElementSibling && !document.getElementById('nova-inarticle-ad-2')) {
         const midAdWrapper = document.createElement('div');
         midAdWrapper.id = 'nova-inarticle-ad-2';
-        midAdWrapper.className = 'my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
-        midAdWrapper.style.minHeight = '260px';
+        midAdWrapper.className = 'ad-slot my-8 py-4 border-y border-slate-100 dark:border-neutral-800 text-center';
         midAdWrapper.innerHTML =
           '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Advertisement</span>' +
-          '<ins class="adsbygoogle" style="display:block; text-align:center; min-height:250px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
+          '<ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inArticle + '"></ins>';
         headings[1].nextElementSibling.insertAdjacentElement('afterend', midAdWrapper);
         const midIns = midAdWrapper.querySelector('ins.adsbygoogle');
         pushAdUnit(midIns);
       }
     }
 
-    // 5. Inject Native In-Feed Ad every 3rd article card on /news
+    // 5. Inject Native In-Feed Ad every 4th article card on /news
     if (path.startsWith('/news')) {
       const newsCards = document.querySelectorAll('article[id^="article-"]');
       newsCards.forEach((card, idx) => {
-        if ((idx + 1) % 3 === 0 && typeof card.insertAdjacentElement === 'function') {
+        if ((idx + 1) % 4 === 0 && typeof card.insertAdjacentElement === 'function') {
           if (card.nextElementSibling && card.nextElementSibling.classList.contains('nova-infeed-ad')) {
             return; // Already injected
           }
           const feedAd = document.createElement('div');
-          feedAd.className = 'nova-infeed-ad bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl my-6';
-          feedAd.style.minHeight = '180px';
+          feedAd.className = 'ad-slot nova-infeed-ad bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl my-6';
           feedAd.innerHTML =
             '<span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Sponsored Briefing</span>' +
             '<ins class="adsbygoogle" style="display:block" data-ad-format="fluid" data-ad-layout-key="-fb+5w+4e-db+86" data-ad-client="' + PUB_ID + '" data-ad-slot="' + SLOTS.inFeed + '"></ins>';
@@ -220,7 +220,7 @@
     if (typeof window.addEventListener === 'function') {
       window.addEventListener('load', () => {
         setTimeout(() => {
-          document.querySelectorAll('.ad-slot, .ad-slot-widget').forEach((slot) => {
+          document.querySelectorAll('.ad-slot, .ad-slot-widget, .nova-infeed-ad').forEach((slot) => {
             const ad = slot.querySelector('ins.adsbygoogle');
             if (!ad || ad.dataset.adStatus !== 'filled') {
               slot.style.display = 'none';
