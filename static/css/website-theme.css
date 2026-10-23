@@ -70,11 +70,11 @@ html.dark .nova-site {
 .nova-site :is(.st-application,.st-opportunity):hover { border-color: var(--theme-edge); }
 .nova-site .st-button.st-primary { color: #fff; }
 .nova-site .nova-profile-chip { display:flex; align-items:center; gap:10px; padding:7px 11px; border:1px solid var(--theme-line); border-radius:12px; background:var(--theme-surface); box-shadow:0 2px 7px rgb(15 23 42 / 5%); }
-.nova-site .nova-profile-avatar { display:grid; place-items:center; flex-shrink:0; width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,#2563eb,#047857); color:#fff; font-weight:750; }
+.nova-site .nova-profile-avatar { display:grid; place-items:center; flex-shrink:0; width:34px; height:34px; border-radius:.5rem; background:linear-gradient(135deg,#2563eb,#047857); color:#fff; font-weight:750; }
 .nova-site .nova-profile-copy { min-width:0; max-width:190px; }
 .nova-site .nova-profile-name { font-size:13px; font-weight:650; color:var(--theme-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .nova-site .nova-profile-email { font-size:11px; color:var(--theme-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.nova-site [data-theme-toggle] { color:var(--theme-muted); background:var(--theme-surface); border:1px solid var(--theme-line); border-radius:10px; min-width:38px; min-height:38px; display:inline-flex; align-items:center; justify-content:center; }
+.nova-site [data-theme-toggle] { color:var(--theme-muted); background:var(--theme-surface); border:1px solid var(--theme-line); border-radius:.5rem; min-width:38px; min-height:38px; display:inline-flex; align-items:center; justify-content:center; }
 .nova-site [data-theme-toggle]:hover { color:var(--theme-blue); background:var(--theme-tint); }
 
 /* Theme toggle icon switching: display only one icon at a time */
