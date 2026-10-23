@@ -70,13 +70,13 @@
   --space-4xl: 3rem;     /* 48px */
   --space-5xl: 4rem;     /* 64px */
 
-  /* Radii */
-  --radius-xs: 0.25rem;  /* 4px */
-  --radius-sm: 0.375rem; /* 6px */
+  /* Radii - Unified 4-step scale (8px, 12px, 16px, 9999px) */
+  --radius-xs: 0.5rem;   /* 8px */
+  --radius-sm: 0.5rem;   /* 8px */
   --radius-md: 0.5rem;   /* 8px */
   --radius-lg: 0.75rem;  /* 12px */
   --radius-xl: 1rem;     /* 16px */
-  --radius-2xl: 1.25rem; /* 20px */
+  --radius-2xl: 1rem;    /* 16px */
   --radius-full: 9999px;
 
   /* Shadows */
@@ -350,7 +350,7 @@ input:focus-visible {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   border: none;
   cursor: pointer;
   transition: background-color var(--transition-fast);
@@ -457,9 +457,8 @@ input:focus-visible {
 .eyebrow {
   display: inline-block;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-extrabold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.02em;
   color: var(--color-primary);
   background-color: var(--color-primary-light);
   border: 1px solid var(--color-primary-border);
@@ -710,9 +709,7 @@ input:focus-visible {
 
 .program-company {
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   margin-bottom: var(--space-2xs);
 }
