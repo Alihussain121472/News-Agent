@@ -1,5 +1,4 @@
 ﻿import os, json, logging, requests
-from datetime import datetime, timedelta
 from database import NewsDatabase
 
 logger = logging.getLogger(__name__)
@@ -35,7 +34,8 @@ def hunt_for_new_programs():
         return 0
 
     db = NewsDatabase()
-    added_count = 0
+    candidate_count = 0
+    seen_candidate_titles = set()
     
     # Process with Groq
     for article in articles[:10]: # Limit to prevent API rate limits
@@ -52,15 +52,16 @@ Title: {title}
 Description: {desc}
 URL: {url}
 
-Does this announce a specific student program, grant, fellowship, or free certificate by a major organization (like NASA, Google, Gemini Fund, etc)?
+        Does this article report a specific student program, grant, fellowship, or free certificate by an organization?
 If YES, respond with ONLY a valid JSON object matching this schema, nothing else:
 {{
   "is_program": true,
   "title": "Program Name",
   "company": "Company Name",
-  "description": "Short summary of the program and what students get (goodies, badges, etc)",
-  "registration_url": "{url}"
+  "description": "Short factual summary using only the article text",
+  "article_source_url": "{url}"
 }}
+Do not invent benefits, eligibility, deadlines, or application links. This article URL is only a source for human review, not an application URL.
 If NO, respond with ONLY: {{"is_program": false}}"""
 
         try:
@@ -76,35 +77,42 @@ If NO, respond with ONLY: {{"is_program": false}}"""
                 content = resp.json()['choices'][0]['message']['content']
                 result = json.loads(content)
                 
-                if result.get('is_program') and result.get('title') and result.get('company'):
-                    # Check if already exists to prevent duplicates
+                if result.get('is_program'):
+                    # A news article URL is not an application URL. Queue candidates for human review.
                     existing = db.get_all_programs()
-                    is_dup = any(result['title'].lower() in p['title'].lower() for p in existing)
+                    candidate_title = str(result.get('title') or '').strip()
+                    company = str(result.get('company') or '').strip()
+                    if not candidate_title or not company:
+                        continue
+                    normalized_title = candidate_title.casefold()
+                    is_dup = (
+                        normalized_title in seen_candidate_titles
+                        or any(normalized_title in str(p.get('title') or '').casefold() for p in existing)
+                    )
                     if not is_dup:
-                        logger.info(f"Hunter found new program: {result['title']}")
-                        db.add_student_program(
-                            title=result['title'],
-                            company=result['company'],
-                            description=result['description'],
-                            registration_url=result.get('registration_url') or url,
-                            deadline=None,
-                            launch_date=datetime.now().strftime('%Y-%m-%d'),
-                            category='program',
-                            notify_before_days=1
+                        seen_candidate_titles.add(normalized_title)
+                        source_url = result.get('article_source_url') or url
+                        message = (
+                            f"Program candidate needs review: {candidate_title} ({company}). "
+                            f"Confirm the official application page, current status, eligibility, and deadline before publishing. "
+                            f"Article source: {source_url}"
                         )
-                        added_count += 1
+                        db.log_agent_event(
+                            'program_candidate_review',
+                            message,
+                            details=json.dumps({
+                                'title': candidate_title,
+                                'company': company,
+                                'description': str(result.get('description') or '').strip(),
+                                'article_source_url': source_url,
+                            }),
+                        )
+                        logger.info(message)
+                        candidate_count += 1
         except Exception as e:
             logger.error(f"Groq error in program hunter: {e}")
             
-    # Trigger notifications immediately if we found any
-    if added_count > 0:
-        try:
-            from ai_news_agent import send_program_notifications
-            send_program_notifications()
-        except Exception as e:
-            logger.error(f"Failed to trigger notifications from hunter: {e}")
-            
-    return added_count
+    return candidate_count
 
 if __name__ == '__main__':
     from dotenv import load_dotenv

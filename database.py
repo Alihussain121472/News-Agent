@@ -1046,187 +1046,186 @@ class NewsDatabase:
         return affected > 0
 
     def seed_default_programs(self) -> None:
-        """Seed and enrich real-world student programs with verified deadlines and perks."""
+        """Seed useful program links without inventing launch dates or deadlines."""
         conn = safe_connect()
         try:
             cursor = conn.cursor()
-            today = datetime.now().date()
-            d = lambda days: (today + timedelta(days=days)).strftime('%Y-%m-%d')
             programs = [
                 {
-                    'title': 'GitHub Student Developer Pack ($200k+ Free Tools & Cloud Credits)',
+                    'title': 'GitHub Student Developer Pack',
                     'company': 'GitHub',
-                    'description': 'Instant access to GitHub Copilot Pro, JetBrains IDEs, Namecheap domain, DigitalOcean ($200), Microsoft Azure ($100), and 80+ developer tools for verified students globally (including .edu.pk & university ID cards).',
+                    'description': 'A collection of developer tools and learning resources for eligible students. Included offers and eligibility can change, so check GitHub’s official page for current details.',
                     'registration_url': 'https://education.github.com/pack',
                     'category': 'certification',
-                    'launch_date': d(-15),
-                    'deadline': d(90),
+                    'legacy_schedule': (-15, 90),
+                    'legacy_titles': ('GitHub Student Developer Pack ($200k+ Free Tools & Cloud Credits)',),
                 },
                 {
                     'title': 'Google Summer of Code (GSoC)',
                     'company': 'Google',
-                    'description': 'Paid 12-week global open-source software engineering fellowship ($1,500–$6,600 USD stipend). Open to university students and beginner open-source contributors in Pakistan, South Asia, and worldwide.',
+                    'description': 'A global open-source program. Project terms, applicant eligibility, and dates vary by cycle; check the official site for current rules.',
                     'registration_url': 'https://summerofcode.withgoogle.com/',
                     'category': 'internship',
-                    'launch_date': d(20),
-                    'deadline': d(55),
+                    'legacy_schedule': (20, 55),
                 },
                 {
                     'title': 'MLH Fellowship (Software Engineering & AI Tracks)',
                     'company': 'Major League Hacking',
-                    'description': '12-week remote software engineering internship alternative paired with mentors from Meta, GitHub, and Google. Includes up to $5,000 educational stipend for eligible fellows.',
+                    'description': 'Remote fellowship cohorts offer practical software development experience. Cohort dates, eligibility, and any compensation vary; check the current official listing.',
                     'registration_url': 'https://fellowship.mlh.io/',
                     'category': 'fellowship',
-                    'launch_date': d(-5),
-                    'deadline': d(28),
+                    'legacy_schedule': (-5, 28),
                 },
                 {
                     'title': 'Microsoft Imagine Cup Global Student Startup Competition',
                     'company': 'Microsoft',
-                    'description': 'Flagship global student AI & cloud competition offering up to $100,000 USD grand prize, $1,000–$5,000 Azure credits, and direct mentorship with Microsoft engineers and CEO Satya Nadella.',
+                    'description': 'A student startup competition. Themes, eligibility, awards, and application dates can change between seasons; check Microsoft’s official page for current details.',
                     'registration_url': 'https://imaginecup.microsoft.com/',
                     'category': 'competition',
-                    'launch_date': d(-10),
-                    'deadline': d(35),
+                    'legacy_schedule': (-10, 35),
                 },
                 {
                     'title': 'Linux Foundation LFX Mentorship Program',
                     'company': 'Linux Foundation',
-                    'description': 'Paid 12-week remote mentorship ($3,000–$6,600 stipend) working directly on Kubernetes, Linux Kernel, CNCF, PyTorch, and OpenTelemetry with senior open-source maintainers.',
+                    'description': 'Open-source mentorship opportunities are offered in project cycles. Active projects, dates, eligibility, and stipends vary; check the official portal.',
                     'registration_url': 'https://mentorship.lfx.linuxfoundation.org/',
                     'category': 'internship',
-                    'launch_date': d(5),
-                    'deadline': d(24),
+                    'legacy_schedule': (5, 24),
                 },
                 {
                     'title': 'Outreachy Open Source Paid Internships',
                     'company': 'Outreachy',
-                    'description': '$7,000 USD total stipend for 3-month remote open-source internships in Python, data science, kernel development, and technical documentation. Explicitly welcomes applicants from developing nations.',
+                    'description': 'Remote internships contribute to open-source projects. Application rounds, eligibility, projects, and stipend details are set by Outreachy; confirm the current information on its official site.',
                     'registration_url': 'https://www.outreachy.org/',
                     'category': 'internship',
-                    'launch_date': d(10),
-                    'deadline': d(42),
+                    'legacy_schedule': (10, 42),
                 },
                 {
                     'title': 'AWS Academy & AWS Educate Cloud Credits Track',
                     'company': 'Amazon',
-                    'description': 'Free hands-on AWS cloud labs, official digital badges, Cloud Practitioner exam preparation, and starter AWS credits with no credit card required for students.',
+                    'description': 'AWS education and learning resources for students. Current courses, credits, badges, and eligibility depend on the specific offering; check AWS’s official education pages.',
                     'registration_url': 'https://aws.amazon.com/education/awseducate/',
                     'category': 'certification',
-                    'launch_date': d(-20),
-                    'deadline': d(75),
+                    'legacy_schedule': (-20, 75),
                 },
                 {
-                    'title': 'Google Developer Student Clubs (GDSC)',
+                    'title': 'Google Developer Groups on Campus',
                     'company': 'Google',
-                    'description': 'Lead or join a Google-backed developer community on your university campus. Receive Google mentorship, event sponsorship, Google Cloud credits, and invitations to regional summits.',
-                    'registration_url': 'https://developers.google.com/community/gdsc',
+                    'description': 'Campus communities help students learn and build with developer technologies. Check Google’s community page for current options and participation details.',
+                    'registration_url': 'https://developers.google.com/community',
                     'category': 'program',
-                    'launch_date': d(12),
-                    'deadline': d(48),
+                    'legacy_schedule': (12, 48),
+                    'legacy_titles': ('Google Developer Student Clubs (GDSC)',),
                 },
                 {
                     'title': 'Microsoft Learn Student Ambassadors (MLSA)',
                     'company': 'Microsoft',
-                    'description': 'Global campus leadership cohort offering free Microsoft Certification exam vouchers, $150/month Azure credits, LinkedIn Learning Premium, and milestone swag kits.',
+                    'description': 'Check Microsoft’s official page to confirm whether applications are open and what participation currently includes.',
                     'registration_url': 'https://studentambassadors.microsoft.com/',
                     'category': 'fellowship',
-                    'launch_date': d(-7),
-                    'deadline': d(32),
+                    'legacy_schedule': (-7, 32),
                 },
                 {
                     'title': "NASA L'SPACE Academy",
                     'company': 'NASA',
-                    'description': 'Free 12-week online interactive engineering academy teaching NASA mission design protocols, systems engineering, and research proposal writing with NASA scientists.',
+                    'description': 'A student learning program hosted by Arizona State University. Check the official program page for upcoming cycles, eligibility, costs, and requirements.',
                     'registration_url': 'https://www.lspace.asu.edu/',
                     'category': 'program',
-                    'launch_date': d(8),
-                    'deadline': d(38),
+                    'legacy_schedule': (8, 38),
                 },
                 {
                     'title': 'Harvard CS50P & CS50x OpenCourseWare Free Certificate Track',
                     'company': 'Harvard University',
-                    'description': 'Complete Harvard CS50 Introduction to Programming with Python (10 problem sets + final project) and earn a free verified CS50 certificate directly from Harvard OpenCourseWare.',
+                    'description': 'Self-paced computer science and Python course materials. Review CS50’s official policies for current completion and certificate options.',
                     'registration_url': 'https://cs50.harvard.edu/python/',
                     'category': 'certification',
-                    'launch_date': d(-30),
-                    'deadline': d(120),
+                    'legacy_schedule': (-30, 120),
                 },
                 {
                     'title': 'Generation Google Scholarship (APAC & Global CS)',
                     'company': 'Google',
-                    'description': '$2,500–$10,000 academic scholarship for undergraduate and graduate computer science students demonstrating technical excellence and community leadership.',
+                    'description': 'Scholarship availability and eligibility vary by region and application cycle. Check Google’s official scholarship page for current opportunities.',
                     'registration_url': 'https://buildyourfuture.withgoogle.com/scholarships',
                     'category': 'scholarship',
-                    'launch_date': d(15),
-                    'deadline': d(60),
+                    'legacy_schedule': (15, 60),
                 },
                 {
                     'title': 'Ignite NGIRI Final Year Project Grant (Pakistan CS/Engineering)',
                     'company': 'Ignite Pakistan',
-                    'description': 'Up to PKR 100,000 funding from Ignite National Technology Fund for undergraduate Final Year Projects (FYP) in AI, Cybersecurity, Robotics, Cloud, and Embedded Systems across Pakistani universities.',
+                    'description': 'A Pakistan-based final-year project funding program. Calls, eligibility, covered subjects, and funding terms may change; confirm details on Ignite’s official site.',
                     'registration_url': 'https://ignite.org.pk/ngiri/',
                     'category': 'scholarship',
-                    'launch_date': d(-3),
-                    'deadline': d(21),
+                    'legacy_schedule': (-3, 21),
                 },
                 {
                     'title': 'Kaggle Open Machine Learning & LLM Competitions',
                     'company': 'Google / Kaggle',
-                    'description': 'Compete in real-world AI, LLM, and data science benchmarks with $25,000–$100,000 prize pools, free GPU/TPU notebooks (30 hrs/week), and global portfolio rankings.',
+                    'description': 'Browse data science and machine learning competitions. Rules, prizes, deadlines, and eligibility are specific to each competition.',
                     'registration_url': 'https://www.kaggle.com/competitions',
                     'category': 'competition',
-                    'launch_date': d(-5),
-                    'deadline': d(45),
+                    'legacy_schedule': (-5, 45),
                 },
                 {
                     'title': 'Postman Student Expert Free API Certification',
                     'company': 'Postman',
-                    'description': 'Self-paced hands-on API engineering certification covering REST, GraphQL, automated testing, and CI/CD pipelines. Includes an official verifiable digital badge for LinkedIn and GitHub.',
+                    'description': 'Explore Postman’s student learning resources and API program. Check the official page for current status, requirements, and credentials.',
                     'registration_url': 'https://www.postman.com/student-program/student-expert/',
                     'category': 'certification',
-                    'launch_date': d(-14),
-                    'deadline': d(80),
+                    'legacy_schedule': (-14, 80),
                 },
                 {
                     'title': 'Cloudflare Systems & AI Developer Internship Cohort',
                     'company': 'Cloudflare',
-                    'description': 'Paid engineering internship working on Cloudflare Workers AI, Rust networking, DDoS mitigation, and distributed edge databases.',
+                    'description': 'Browse Cloudflare’s student and early-career roles. Openings, locations, eligibility, and deadlines vary by job posting.',
                     'registration_url': 'https://www.cloudflare.com/careers/students/',
                     'category': 'internship',
-                    'launch_date': d(2),
-                    'deadline': d(30),
+                    'legacy_schedule': (2, 30),
                 },
             ]
             for p in programs:
-                cursor.execute('SELECT id, deadline, launch_date FROM student_programs WHERE title = %s LIMIT 1', (p['title'],))
+                cursor.execute('SELECT id, deadline, launch_date, created_at FROM student_programs WHERE title = %s LIMIT 1', (p['title'],))
                 existing = cursor.fetchone()
+                legacy_title = None
+                if not existing:
+                    for old_title in p.get('legacy_titles', ()):
+                        cursor.execute('SELECT id, deadline, launch_date, created_at FROM student_programs WHERE title = %s LIMIT 1', (old_title,))
+                        existing = cursor.fetchone()
+                        if existing:
+                            legacy_title = old_title
+                            break
                 if existing:
-                    prog_id, cur_deadline, cur_launch = existing
+                    prog_id, cur_deadline, cur_launch, created_at = existing
+                    if legacy_title:
+                        cursor.execute(
+                            'UPDATE student_programs SET title=%s, company=%s WHERE id=%s',
+                            (p['title'], p['company'], prog_id)
+                        )
+                    created_day = created_at.date() if isinstance(created_at, datetime) else created_at if isinstance(created_at, date) else None
+                    old_launch_offset, old_deadline_offset = p.get('legacy_schedule', (None, None))
+                    if created_day and old_launch_offset is not None and old_deadline_offset is not None:
+                        old_launch = created_day + timedelta(days=old_launch_offset)
+                        old_deadline = created_day + timedelta(days=old_deadline_offset)
+                        if cur_launch == old_launch and cur_deadline == old_deadline:
+                            cursor.execute(
+                                'UPDATE student_programs SET launch_date=NULL, deadline=NULL WHERE id=%s',
+                                (prog_id,)
+                            )
+                            cur_launch = cur_deadline = None
                     if not cur_deadline or not cur_launch:
                         cursor.execute(
                             '''UPDATE student_programs
                                SET description=%s, registration_url=%s, category=%s,
-                                   launch_date=COALESCE(launch_date, %s),
-                                   deadline=COALESCE(deadline, %s),
                                    is_active=TRUE
                                WHERE id=%s''',
-                            (p['description'], p['registration_url'], p['category'], p['launch_date'], p['deadline'], prog_id)
+                            (p['description'], p['registration_url'], p['category'], prog_id)
                         )
                 else:
                     cursor.execute(
                         '''INSERT INTO student_programs
                            (title, company, description, registration_url, launch_date, deadline, category, is_active)
                            VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)''',
-                        (p['title'], p['company'], p['description'], p['registration_url'], p['launch_date'], p['deadline'], p['category'])
+                        (p['title'], p['company'], p['description'], p['registration_url'], None, None, p['category'])
                     )
-            # Also ensure any legacy rows with NULL deadline get a valid upcoming deadline
-            cursor.execute(
-                '''UPDATE student_programs
-                   SET deadline = %s, launch_date = COALESCE(launch_date, %s)
-                   WHERE deadline IS NULL''',
-                (d(40), d(-7))
-            )
             conn.commit()
             logger.info("Seeded and enriched default student programs.")
         finally:

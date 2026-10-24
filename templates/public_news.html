@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Latest Artificial Intelligence and Technology News. Curated daily briefings, engineering takeaways, and student career updates from Nova Brief.">
+    <meta name="description" content="Read recent artificial intelligence and technology updates with links to source coverage, plus student career resources from Nova Brief.">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
-    <title>Live Tech &amp; AI News Briefings | Nova Brief</title>
+    <title>Recent Tech &amp; AI News Summaries | Nova Brief</title>
     <link rel="canonical" href="https://www.novabrief.tech/news">
     <link rel="icon" href="/static/favicon.ico" sizes="any">
     <link rel="icon" href="/static/icon-192.png" type="image/png">
@@ -55,11 +55,11 @@
     <header class="py-12 bg-gradient-to-b from-blue-500/5 to-transparent border-b border-slate-200 dark:border-neutral-800/80">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <span class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold text-xs bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-3 py-1 rounded-full mb-4">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span> Verified Engineering &amp; AI Intelligence
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></span> Technology &amp; AI Updates
             </span>
-            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Live Technology &amp; Student Impact Briefings</h1>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Recent Technology &amp; AI News</h1>
             <p class="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-6">
-                Every story is analyzed for technical significance, industry direction, and how computer science students should prepare.
+                Short summaries link to original reporting. For practical student resources, explore the program listings and career guides.
             </p>
 
             <!-- Search Bar -->
@@ -127,7 +127,7 @@
                     </h2>
 
                     <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-4">
-                        {{ (item.summary or 'Full coverage and engineering analysis available in our student briefing.') | striptags | truncate(240) }}
+                        {{ (item.summary or 'A publisher summary is not available. Open the original report for the full story.') | striptags | truncate(240) }}
                     </p>
 
                     {% if item.why_important or item.why_care %}
@@ -143,7 +143,7 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-neutral-800/80 text-xs">
                         <a href="/news/{{ item.id }}" class="font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition inline-flex items-center gap-1.5">
-                            <span>Read Full Student Briefing</span>
+                            <span>Read Short Summary</span>
                             <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                         {% if item.url and item.url != '#' %}
@@ -171,7 +171,7 @@
                 <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fas fa-calendar-check text-emerald-600"></i> Open Student Deadlines
+                            <i class="fas fa-calendar-check text-emerald-600"></i> Student Programs
                         </h3>
                         <a href="/programs" class="text-xs font-bold text-blue-600 hover:underline">All &rarr;</a>
                     </div>
@@ -184,8 +184,8 @@
                             </div>
                             <a href="/programs?q={{ prog.title | urlencode }}" class="font-bold text-slate-900 dark:text-white hover:text-blue-600 block leading-snug">{{ prog.title }}</a>
                             <div class="flex items-center justify-between mt-1.5 text-slate-500">
-                                <span>Due: {{ prog.deadline or 'Open' }}</span>
-                                <a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 hover:underline"><i class="far fa-calendar-plus mr-1"></i>.ics</a>
+                                <span>Due: {{ prog.deadline or 'Check official page' }}</span>
+                                {% if prog.deadline %}<a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 hover:underline"><i class="far fa-calendar-plus mr-1"></i>.ics</a>{% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -250,8 +250,8 @@
 
                 <!-- Newsletter CTA -->
                 <div class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white p-6 rounded-2xl">
-                    <h3 class="text-lg font-bold mb-2">Get Daily Tech Briefings</h3>
-                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">Join students across Pakistan and South Asia tracking daily AI breakthroughs and verified opportunity deadlines directly in their inbox.</p>
+                    <h3 class="text-lg font-bold mb-2">Get Nova Brief Email Updates</h3>
+                    <p class="text-xs text-blue-100 mb-4 leading-relaxed">Receive technology news and student program updates. Check each organizer’s page for current deadlines and eligibility.</p>
                     <a href="/#subscribe" class="block w-full text-center bg-white text-blue-600 font-bold py-2.5 rounded-xl text-sm hover:bg-blue-50 transition">Subscribe Free</a>
                 </div>
             </div>
@@ -269,6 +269,7 @@
                 <a href="/blog" class="hover:text-blue-600">Blog</a>
                 <a href="/about" class="hover:text-blue-600">About Us</a>
                 <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/advertise" class="hover:text-blue-600">Advertise &amp; Partnerships</a>
                 <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
                 <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
                 <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>

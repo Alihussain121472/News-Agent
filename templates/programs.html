@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verified Student Programs, Internships, Cloud Credits & Deadlines | NovaBrief Tech</title>
-    <meta name="description" content="Track 15+ verified student developer programs, paid open source internships (GSoC, Outreachy, LFX, MLH), scholarships, and $200+ free cloud credits with live deadlines and one click calendar export.">
+    <title>Tech Internships &amp; Student Programs in Pakistan | Nova Brief Tech</title>
+    <meta name="description" content="Browse tech internships, fellowships, scholarships, and student programs for Pakistani students. Check official application links for current dates and eligibility.">
     <meta name="robots" content="index, follow">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
     <link rel="canonical" href="https://www.novabrief.tech/programs">
+    <meta property="og:title" content="Tech Internships &amp; Student Programs in Pakistan | Nova Brief Tech">
+    <meta property="og:description" content="Browse tech internships, fellowships, scholarships, and student programs for Pakistani students. Check official links for current dates and eligibility.">
+    <meta property="og:url" content="https://www.novabrief.tech/programs">
+    <meta property="og:image" content="https://www.novabrief.tech/static/logo.jpg">
+    <meta name="twitter:card" content="summary_large_image">
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1036052096443002"
         crossorigin="anonymous"
@@ -41,7 +46,7 @@
                 {% if is_logged_in %}
                 <a href="/user/dashboard?tab=planner" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">Open My Planner</a>
                 {% else %}
-                <a href="/user/register" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">Save & Get Deadline Alerts</a>
+                <a href="/user/register" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition">Save &amp; Get Alerts</a>
                 {% endif %}
             </div>
         </div>
@@ -52,18 +57,19 @@
         <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 sm:p-10 mb-8 shadow-sm">
             <div class="flex flex-wrap items-center gap-2 mb-3">
                 <span class="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
-                    <i class="fas fa-check-circle mr-1"></i> {{ total_programs }} Verified Opportunities Active
+                    <i class="fas fa-list-check mr-1"></i> {{ total_programs }} Opportunity Listings
                 </span>
                 <span class="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 text-xs font-semibold">
-                    Global & Pakistan / South Asia Eligible
+                    Opportunities for a global and South Asian audience
                 </span>
             </div>
             <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">
-                Deadline First Student Opportunities &amp; Cloud Credits Hub
+                Tech Internships &amp; Student Programs for Pakistani Students
             </h1>
             <p class="text-slate-600 dark:text-slate-400 max-w-3xl text-base leading-relaxed mb-6">
-                Every internship, open source fellowship, academic grant, and free developer pack below is verified with official application links, deadline countdowns, and one click <code>.ics</code> calendar export, with no login required to browse or export reminders.
+                Listings include organizer links and a deadline when one is available. Program status, eligibility, and dates can change; confirm them on the official page before applying. Calendar reminders are available for listings with a known date.
             </p>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">New to internship applications? <a href="/guides/tech-internships-pakistan" class="font-semibold text-blue-700 dark:text-blue-300 hover:underline">Read the Pakistan student application guide</a>.</p>
 
             <!-- Search & Deadline Filter Form -->
             <form method="get" action="/programs" class="grid grid-cols-1 sm:grid-cols-12 gap-3">
@@ -137,16 +143,16 @@
 
                 <div class="pt-4 border-t border-slate-100 dark:border-neutral-800 space-y-3">
                     <div class="flex items-center justify-between text-xs text-slate-500">
-                        <span><strong>Application Deadline:</strong> {{ prog.deadline or 'Rolling' }}</span>
-                        <a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline" title="Download iCalendar reminder (.ics)">
+                        <span><strong>Application Deadline:</strong> {{ prog.deadline or 'Check official portal' }}</span>
+                        {% if prog.deadline %}<a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 dark:text-blue-400 font-semibold hover:underline" title="Download iCalendar reminder (.ics)">
                             <i class="far fa-calendar-plus mr-1"></i>Add to Calendar
-                        </a>
+                        </a>{% endif %}
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer"
                            class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition">
-                            Official Portal <i class="fas fa-external-link-alt text-[10px]"></i>
+                            Check Program <i class="fas fa-external-link-alt text-[10px]"></i>
                         </a>
                         <a href="{% if is_logged_in %}/user/dashboard?tab=planner{% else %}/user/register{% endif %}"
                            class="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 hover:border-blue-500 text-slate-700 dark:text-slate-200 text-xs font-semibold transition">
@@ -182,13 +188,14 @@
 
     <footer class="bg-white dark:bg-neutral-900 border-t border-slate-200 dark:border-neutral-800 py-8 mt-16">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-            <p>&copy; 2026 NovaBrief Tech. Empowering CS students with verified deadlines and hands on engineering tools.</p>
+            <p>&copy; 2026 NovaBrief Tech. Helping students explore opportunities and hands-on engineering tools.</p>
             <div class="flex flex-wrap gap-5">
                 <a href="/news" class="hover:text-blue-600">Live News</a>
                 <a href="/programs" class="hover:text-blue-600">Student Programs</a>
                 <a href="/learn-python" class="hover:text-blue-600">Python Practice Hub</a>
                 <a href="/blog" class="hover:text-blue-600">Engineering Blog</a>
                 <a href="/about" class="hover:text-blue-600">About</a>
+                <a href="/advertise" class="hover:text-blue-600">Advertise &amp; Partnerships</a>
                 <a href="/privacy" class="hover:text-blue-600">Privacy</a>
             </div>
         </div>

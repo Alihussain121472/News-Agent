@@ -120,6 +120,13 @@
                     <span class="section-heading-caption">Practical Guides for Tech Students</span>
                 </div>
 
+                <article class="article-card">
+                    <div class="article-meta"><span class="article-badge"><i class="fas fa-map-marker-alt"></i> Pakistan Student Guide</span></div>
+                    <h2 class="article-title"><a href="/guides/tech-internships-pakistan">How to Find and Apply for Tech Internships in Pakistan</a></h2>
+                    <p class="article-excerpt">A practical checklist for checking eligibility, preparing a portfolio, and applying through official sources.</p>
+                    <div class="article-card-footer"><a href="/guides/tech-internships-pakistan" class="read-more-link"><span>Read the application guide</span><span aria-hidden="true">&rarr;</span></a></div>
+                </article>
+
                 <section class="article-list" aria-label="Published Articles">
                     {% for post in posts %}
                     <article class="article-card">
@@ -155,7 +162,7 @@
                 <!-- Student Tech Programs -->
                 <section class="sidebar-widget widget-programs" aria-labelledby="programs-widget-title">
                     <h3 id="programs-widget-title" class="widget-title">
-                        <i class="fas fa-rocket"></i> Verified Student Deadlines
+                        <i class="fas fa-rocket"></i> Student Programs
                     </h3>
                     <p class="widget-caption">Active fellowships, internships &amp; cloud credits for CS students.</p>
                     
@@ -164,10 +171,10 @@
                         <div class="program-card">
                             <div class="program-company">{{ prog.company }} &middot; {{ prog.countdown_label }}</div>
                             <h4 class="program-name">{{ prog.title }}</h4>
-                            <div class="program-launch-date"><i class="far fa-calendar-alt"></i> Deadline: {{ prog.deadline[:10] if prog.deadline else 'Open' }}</div>
+                            <div class="program-launch-date"><i class="far fa-calendar-alt"></i> Deadline: {{ prog.deadline[:10] if prog.deadline else 'Check official page' }}</div>
                             <div style="display:flex; gap:0.5rem; margin-top:0.5rem; flex-wrap:wrap;">
-                                <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply">Official Portal</a>
-                                <a href="/programs/{{ prog.id }}/calendar.ics" class="btn-apply" style="background:transparent; border:1px solid currentColor; color:inherit;">+ .ics</a>
+                                <a href="{{ prog.registration_url }}" target="_blank" rel="noopener noreferrer" class="btn-apply">Check official page</a>
+                                {% if prog.deadline %}<a href="/programs/{{ prog.id }}/calendar.ics" class="btn-apply" style="background:transparent; border:1px solid currentColor; color:inherit;">+ .ics</a>{% endif %}
                             </div>
                         </div>
                         {% else %}
@@ -232,6 +239,7 @@
                 <a href="/blog" class="footer-link" aria-current="page">Blog</a>
                 <a href="/about" class="footer-link">About Us</a>
                 <a href="/contact" class="footer-link">Contact</a>
+                <a href="/advertise" class="footer-link">Advertise &amp; Partnerships</a>
                 <a href="/privacy" class="footer-link">Privacy Policy</a>
                 <a href="/terms" class="footer-link">Terms of Service</a>
                 <a href="/disclaimer" class="footer-link">Disclaimer</a>

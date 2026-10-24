@@ -6,6 +6,7 @@
     <meta name="description" content="Contact Nova Brief Tech - Get in touch with our editorial and support team for inquiries, corrections, program submissions, or partnerships.">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
     <title>Contact Us | Nova Brief</title>
+    <link rel="canonical" href="https://www.novabrief.tech/contact">
     <link rel="icon" href="/static/favicon.ico" sizes="any">
     <link rel="icon" href="/static/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
@@ -54,7 +55,7 @@
         <div class="max-w-4xl mx-auto px-4">
             <span class="text-blue-600 dark:text-blue-400 font-black text-xs uppercase tracking-widest bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 px-3 py-1 rounded-full inline-block mb-4">Direct Communication</span>
             <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-4">Contact Nova Brief</h1>
-            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Have a question, feedback, program tip, or opportunity submission? Reach out directly and we will respond within 24 to 48 hours.</p>
+            <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Have a question, feedback, program tip, or opportunity submission? Reach out and we will review your message as soon as we can.</p>
         </div>
     </header>
 
@@ -79,7 +80,13 @@
                         <i class="fas fa-clock"></i>
                     </div>
                     <h3 class="font-bold text-slate-900 dark:text-white text-base mb-1">Response Time</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed">All messages are reviewed by Syed Ali Hussain. Expect a personal response within <strong>24 to 48 hours</strong>.</p>
+                    <p class="text-xs text-slate-500 leading-relaxed">Messages are reviewed by the Nova Brief team. Response times vary.</p>
+                </div>
+
+                <div class="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 p-6 rounded-2xl">
+                    <h3 class="font-bold text-slate-900 dark:text-white text-base mb-2">Represent a tech company or program?</h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">See sponsorship formats and request current placement options.</p>
+                    <a href="/advertise" class="text-sm font-bold text-blue-700 dark:text-blue-300 hover:underline">Advertise &amp; partner with us <i class="fas fa-arrow-right text-xs ml-1"></i></a>
                 </div>
 
                 <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
@@ -141,6 +148,7 @@
                 <a href="/blog" class="hover:text-blue-600">Blog</a>
                 <a href="/about" class="hover:text-blue-600">About Us</a>
                 <a href="/contact" class="text-blue-600 font-bold">Contact</a>
+                <a href="/advertise" class="hover:text-blue-600">Advertise &amp; Partnerships</a>
                 <a href="/privacy" class="hover:text-blue-600">Privacy Policy</a>
                 <a href="/terms" class="hover:text-blue-600">Terms of Service</a>
                 <a href="/disclaimer" class="hover:text-blue-600">Disclaimer</a>
@@ -150,6 +158,11 @@
     </footer>
 
     <script>
+    const requestedSubject = new URLSearchParams(window.location.search).get('subject');
+    if (requestedSubject) {
+        document.getElementById('contactSubject').value = requestedSubject.slice(0, 120);
+    }
+
     document.getElementById('publicContactForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const btn = document.getElementById('contactSubmitBtn');

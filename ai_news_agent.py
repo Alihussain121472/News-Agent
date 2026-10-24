@@ -81,7 +81,8 @@ def _brand_header(title: str, subtitle: str = '') -> str:
 
 def _brand_footer() -> str:
     return f'''<p style="margin:0 0 8px;font-weight:700;color:#475569;">Sent by {BRAND_NAME}</p>
-    <p style="margin:0;"><a href="{SITE_URL}" style="color:#4f46e5;text-decoration:none;">novabrief.tech</a> &bull; <a href="{SITE_URL}/privacy" style="color:#64748b;text-decoration:none;">Privacy</a> &bull; <a href="{SITE_URL}/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>'''
+    <p style="margin:0;"><a href="{SITE_URL}" style="color:#4f46e5;text-decoration:none;">novabrief.tech</a> &bull; <a href="{SITE_URL}/privacy" style="color:#64748b;text-decoration:none;">Privacy</a> &bull; <a href="{SITE_URL}/terms" style="color:#64748b;text-decoration:none;">Terms</a></p>
+    <p style="margin:8px 0 0;">To stop email updates, <a href="mailto:support@novabrief.tech?subject=Unsubscribe" style="color:#64748b;">email support</a>.</p>'''
 
 
 def build_briefing_notes(title: str, summary: str) -> Dict[str, str]:
@@ -398,7 +399,7 @@ def send_email(to_email: str, subject: str, html_content: str) -> bool:
         msg['Date'] = formatdate(localtime=False)
         msg['Message-ID'] = make_msgid(domain=sender.split('@')[-1])
         msg['Reply-To'] = sender
-        msg['List-Unsubscribe'] = f'<mailto:{sender}?subject=Unsubscribe>'
+        msg['List-Unsubscribe'] = '<mailto:support@novabrief.tech?subject=Unsubscribe>'
         msg.attach(MIMEText(html_content, 'html', 'utf-8'))
 
         for port in dict.fromkeys(ports):
@@ -446,26 +447,26 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
           <tr>
             <td style="padding:40px;text-align:left;">
               {brand_header}
-              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your account has been successfully verified and activated. You are now subscribed to receive our enterprise-grade daily AI intelligence briefings and elite student program alerts.</p>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>You’re subscribed to Nova Brief technology updates and student program notices. Program details can change, so confirm current dates and eligibility with the organizer.</p>
               
               <div style="background-color:#f3f4f6;border-radius:6px;padding:24px;margin-bottom:24px;">
                 <h2 style="margin:0 0 16px 0;font-size:14px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em;">What to Expect</h2>
                 <div style="margin-bottom:16px;font-size:14px;color:#4b5563;line-height:1.5;">
-                  <strong style="color:#111827;">Daily AI Briefing (8:00 AM)</strong><br>
-                  The top 5 AI industry developments summarized with actionable analysis on market impact.
+                  <strong style="color:#111827;">Technology updates</strong><br>
+                  Concise technology summaries with links to their sources.
                 </div>
                 <div style="margin-bottom:16px;font-size:14px;color:#4b5563;line-height:1.5;">
-                  <strong style="color:#111827;">Early Program Alerts</strong><br>
-                  Advance notifications for Google, Microsoft, AWS, and Meta student programs with direct application links.
+                  <strong style="color:#111827;">Student program notices</strong><br>
+                  Opportunity links and available dates to help you check details with each organizer.
                 </div>
                 <div style="font-size:14px;color:#4b5563;line-height:1.5;">
-                  <strong style="color:#111827;">Intelligence Dashboard</strong><br>
-                  Access your personal portal to track applications, monitor activity, and search global tech news.
+                  <strong style="color:#111827;">Organizer links</strong><br>
+                  Check current eligibility, dates, and application details on the official program page.
                 </div>
               </div>
               
               <div style="text-align:center;margin:32px 0;">
-                <a href="https://www.novabrief.tech/user/dashboard" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Dashboard</a>
+                <a href="https://www.novabrief.tech/programs" style="background-color:#0f172a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Browse Student Programs</a>
               </div>
             </td>
           </tr>
@@ -483,7 +484,7 @@ def format_welcome_email(subscriber_email: str, name: str = None) -> str:
 
 
 def send_welcome_email(to_email: str, name: str = None) -> bool:
-    return send_email(to_email, 'Welcome to Nova Brief — Daily AI & Student Program Alerts', format_welcome_email(to_email, name))
+    return send_email(to_email, 'Welcome to Nova Brief Updates', format_welcome_email(to_email, name))
 
 
 def deliver_welcome_email(db: NewsDatabase, to_email: str, name: str = None, user: Dict[str, Any] = None) -> bool:
@@ -513,8 +514,8 @@ def deliver_welcome_email(db: NewsDatabase, to_email: str, name: str = None, use
 
 def format_program_welcome_email(subscriber_email: str, name: str = None, program_title: str = None) -> str:
     greeting = f"Hello {name}," if name else "Hello,"
-    prog_text = f"specifically for <strong>{program_title}</strong> and other elite programs" if program_title else "for elite student programs"
-    brand_header = _brand_header('Program Alerts Activated')
+    prog_text = f"about <strong>{program_title}</strong>" if program_title else "about student programs"
+    brand_header = _brand_header('Program Updates Confirmed')
     brand_footer = _brand_footer()
     return f"""<!DOCTYPE html>
 <html>
@@ -527,14 +528,14 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
           <tr>
             <td style="padding:40px;text-align:left;">
               {brand_header}
-              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>Your alert configuration has been successfully provisioned {prog_text}. You will now receive priority notifications before these applications officially open to the public.</p>
+              <p style="margin:0 0 24px 0;font-size:16px;color:#4b5563;line-height:1.6;">{greeting}<br><br>You’re subscribed to email updates {prog_text}. Availability, dates, and eligibility can change; check the organizer’s page before applying.</p>
               
               <div style="background-color:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:16px;margin-bottom:24px;color:#166534;font-size:14px;line-height:1.5;">
-                <strong>Status: Active</strong><br>Your email ({subscriber_email}) is secured in our priority notification queue.
+                <strong>Subscription active</strong><br>Program updates will be sent to {subscriber_email} when available.
               </div>
               
               <div style="text-align:center;margin:32px 0;">
-                <a href="https://www.novabrief.tech/user/dashboard" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">View Program Dashboard</a>
+                <a href="https://www.novabrief.tech/programs" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Browse Student Programs</a>
               </div>
             </td>
           </tr>
@@ -552,7 +553,7 @@ def format_program_welcome_email(subscriber_email: str, name: str = None, progra
 
 
 def send_program_welcome_email(to_email: str, name: str = None, program_title: str = None) -> bool:
-    subject = 'Welcome to Student Program Alerts — Nova Brief' if not program_title else f'Program Alert Confirmation: {program_title}'
+    subject = 'Student Program Updates — Nova Brief' if not program_title else f'Program Update Subscription: {program_title}'
     return send_email(to_email, subject, format_program_welcome_email(to_email, name, program_title))
 
 
@@ -664,11 +665,11 @@ def format_news_email(news_items: List[Dict[str, Any]]) -> str:
 
 
 def format_program_email(program: Dict[str, Any]) -> str:
-    """Format student program notification email with direct registration link."""
+    """Format a student program notice that directs readers to verify with organizers."""
     today = datetime.now().strftime('%A, %B %d, %Y')
     deadline_text = f"<strong>Application Deadline:</strong> {program.get('deadline', 'Refer to official portal')}<br>" if program.get('deadline') else ''
     launch_text = f"<strong>Launch Date:</strong> {program.get('launch_date', 'Imminent')}<br>" if program.get('launch_date') else ''
-    brand_header = _brand_header('Priority Student Program Alert', today)
+    brand_header = _brand_header('Student Program Update', today)
     brand_footer = _brand_footer()
 
     return f"""<!DOCTYPE html>
@@ -682,18 +683,18 @@ def format_program_email(program: Dict[str, Any]) -> str:
           <tr>
             <td style="padding:40px;text-align:left;">
               {brand_header}
-              <div style="font-size:12px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Priority Application Alert</div>
+              <div style="font-size:12px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Student Program Notice</div>
               <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:600;color:#111827;">{program.get('title', 'New Program')}</h1>
               <p style="margin:0 0 24px 0;font-size:15px;color:#6b7280;">Offered by <strong>{program.get('company', 'Corporate Partner')}</strong></p>
               
               <div style="background-color:#f9fafb;border-radius:6px;padding:24px;margin-bottom:24px;font-size:15px;color:#374151;line-height:1.6;border:1px solid #e5e7eb;">
                 {launch_text}
                 {deadline_text}
-                <div style="margin-top:16px;"><strong>Program Details:</strong><br>{program.get('description', 'A new elite opportunity has opened for students. Review the official portal for comprehensive details.')}</div>
+                <div style="margin-top:16px;"><strong>Program Details:</strong><br>{program.get('description', 'Check the organizer’s page for current details.')}</div>
               </div>
               
               <div style="text-align:center;margin:32px 0;">
-                <a href="{program.get('registration_url', 'https://novabrief-web.onrender.com')}" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Access Official Application</a>
+                <a href="{program.get('registration_url', 'https://www.novabrief.tech/programs')}" style="background-color:#059669;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:6px;font-size:16px;font-weight:600;display:inline-block;">Check Organizer’s Page</a>
               </div>
             </td>
           </tr>
@@ -931,9 +932,8 @@ def main() -> None:
             scheduler = BackgroundScheduler()
             scheduler.add_job(run_news_digest, 'cron', hour=8, minute=0, id='ai_morning_brief')
             scheduler.add_job(send_program_notifications, 'cron', hour=9, minute=0, id='program_notifications')
-            scheduler.add_job(generate_daily_seo_blog, 'cron', hour=10, minute=0, id='auto_blog_agent')
             scheduler.start()
-            logger.info('Scheduler started. Daily brief 8AM, Programs 9AM, Auto-Blog 10AM.')
+            logger.info('Scheduler started for email briefings and student program notifications.')
             try:
                 while True:
                     pass
@@ -947,58 +947,10 @@ def main() -> None:
     run_news_digest()
 
 
-import random
-import psycopg2
-import psycopg2.extras
-import os
-import re
-
 def generate_daily_seo_blog():
-    db = NewsDatabase()
-    topics = [
-        "The Ultimate Guide to AI Automation for Students",
-        "Top 10 Free Google Certifications to Boost Your Tech Career",
-        "How Generative AI is Changing the Software Engineering Landscape",
-        "Why Every College Student Needs to Learn Python in 2026",
-        "Maximizing Productivity: How to Use AI Tools to Study Faster"
-    ]
-    
-    title = random.choice(topics)
-    slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-    
-    # Generate SEO optimized HTML content
-    content = f'''
-    <p class="mb-4">The tech industry is evolving faster than ever. <strong>{title}</strong> is a topic that is dominating discussions across Silicon Valley and university campuses alike.</p>
-    <h2 class="text-2xl font-bold mt-6 mb-3 text-slate-800">Why This Matters Now</h2>
-    <p class="mb-4">Recent data shows that individuals who leverage these modern tools are 40% more productive than their peers. Whether you are trying to land a prestigious internship or build your own startup, understanding this is critical to your long-term success.</p>
-    <h2 class="text-2xl font-bold mt-6 mb-3 text-slate-800">Actionable Steps to Get Started</h2>
-    <ul class="list-disc pl-5 mb-4 space-y-2">
-        <li><strong>Research:</strong> Spend at least 30 minutes a day reading up on the latest industry trends.</li>
-        <li><strong>Apply:</strong> Use tools like Nova Brief to track essential news and updates.</li>
-        <li><strong>Certify:</strong> Look for free online certifications to prove your knowledge to employers.</li>
-    </ul>
-    <p>By staying ahead of the curve, you guarantee yourself a place in the future of work. Don't wait until the industry passes you byâ€”start building your skills today.</p>
-    '''
-    
-    meta_desc = f"Learn about {title}. Discover how students and professionals are leveraging technology for massive career growth."
-    
-    try:
-        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
-        cursor = conn.cursor()
-        
-        # Check if slug exists to prevent duplicates
-        cursor.execute("SELECT id FROM blog_posts WHERE slug=%s", (slug,))
-        if cursor.fetchone():
-            conn.close()
-            return
-            
-        cursor.execute('''INSERT INTO blog_posts (title, slug, content, meta_description)
-                          VALUES (%s, %s, %s, %s)''', (title, slug, content, meta_desc))
-        conn.commit()
-        conn.close()
-        logger.info(f"Auto-Blogging Agent published new SEO article: {title}")
-    except Exception as e:
-        logger.error(f"Auto-blogging failed: {e}")
+    """Disable unreviewed generic SEO article publishing."""
+    logger.info('Automatic SEO article publishing is disabled; publish source-backed guides after editorial review.')
+    return False
 
 
 if __name__ == '__main__':

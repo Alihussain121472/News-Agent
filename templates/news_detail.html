@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ article.title }} | NovaBrief Executive Briefing</title>
-    <meta name="description" content="{{ (article.why_important or article.summary or article.title) | striptags | truncate(155) }}">
-    <meta name="robots" content="index, follow">
+    <title>{{ article.title }} | Source Summary | Nova Brief</title>
+    <meta name="description" content="{{ (article.summary or article.title) | striptags | truncate(155) }}">
+    <meta name="robots" content="noindex, follow">
     <meta name="google-adsense-account" content="ca-pub-1036052096443002">
     <link rel="canonical" href="https://www.novabrief.tech/news/{{ article.id }}">
 
     <!-- Open Graph -->
     <meta property="og:title" content="{{ article.title }} | NovaBrief Tech">
-    <meta property="og:description" content="{{ (article.why_important or article.summary or article.title) | striptags | truncate(155) }}">
+    <meta property="og:description" content="{{ (article.summary or article.title) | striptags | truncate(155) }}">
     <meta property="og:url" content="https://www.novabrief.tech/news/{{ article.id }}">
     <meta property="og:type" content="article">
 
@@ -19,31 +19,6 @@
         crossorigin="anonymous"
         data-overlays="bottom"
         data-ad-frequency-hint="120s"></script>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "NewsArticle",
-      "headline": {{ article.title | tojson }},
-      "datePublished": {{ (article.published_at or article.fetched_at or "2026-01-01") | tojson }},
-      "author": {
-        "@type": "Organization",
-        "name": "NovaBrief Editorial & AI Intelligence"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "NovaBrief Tech",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://www.novabrief.tech/static/favicon.svg"
-        }
-      },
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "https://www.novabrief.tech/news/{{ article.id }}"
-      }
-    }
-    </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% include "theme_head.html" %}
@@ -85,11 +60,11 @@
         </nav>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-            <!-- Left Column: Full Briefing -->
+            <!-- Left Column: Source Summary -->
             <article class="lg:col-span-8 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 sm:p-10 shadow-sm">
                 <div class="flex flex-wrap items-center gap-2 mb-4">
                     <span class="px-3 py-1 bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 rounded-full text-xs font-semibold">
-                        {{ article.source or 'Verified Tech Report' }}
+                        {{ article.source or 'Technology update' }}
                     </span>
                     {% for comp in (article.companies or []) %}
                     <a href="/news?q={{ comp | urlencode }}" class="px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full text-xs font-semibold hover:underline">
@@ -113,15 +88,16 @@
                 <!-- Executive Summary Lead -->
                 <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/60 border-l-4 border-blue-600 mb-8">
                     <div class="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                        <i class="fas fa-bolt mr-1"></i> Core Story Summary
+                        <i class="fas fa-newspaper mr-1"></i> Source Summary
                     </div>
                     <p class="text-base text-slate-700 dark:text-slate-200 leading-relaxed">
                         {{ (article.summary or article.description or article.title) | striptags }}
                     </p>
                 </div>
 
-                <!-- 3-Pillar Student & Engineering Intelligence Breakdown -->
+                {% if article.has_original_analysis %}
                 <div class="space-y-6 mb-8 article-body">
+                    {% if article.why_important %}
                     <section class="p-6 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
                         <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
                             <span class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm"><i class="fas fa-microchip"></i></span>
@@ -131,7 +107,9 @@
                             {{ article.why_important }}
                         </p>
                     </section>
+                    {% endif %}
 
+                    {% if article.future_change %}
                     <section class="p-6 rounded-xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900">
                         <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
                             <span class="w-7 h-7 rounded-lg bg-purple-100 dark:bg-purple-950 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm"><i class="fas fa-chart-line"></i></span>
@@ -141,7 +119,9 @@
                             {{ article.future_change }}
                         </p>
                     </section>
+                    {% endif %}
 
+                    {% if article.why_care %}
                     <section class="p-6 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20">
                         <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
                             <span class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-sm"><i class="fas fa-user-graduate"></i></span>
@@ -159,7 +139,13 @@
                             </a>
                         </div>
                     </section>
+                    {% endif %}
                 </div>
+                {% else %}
+                <p class="mb-8 rounded-xl border border-slate-200 dark:border-neutral-800 bg-slate-50 dark:bg-neutral-800/50 p-5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    This page is a short summary of coverage from {{ article.source or 'the original publisher' }}. Open the publisher’s report below for the full story and context.
+                </p>
+                {% endif %}
 
                 <!-- Action Bar & Source Attribution -->
                 <div class="pt-6 border-t border-slate-200 dark:border-neutral-800 flex flex-wrap items-center justify-between gap-4">
@@ -170,7 +156,7 @@
                         </a>
                         {% endif %}
                         <a href="/news" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 text-sm font-medium hover:border-blue-500 transition">
-                            &larr; All Briefings
+                            &larr; All News Summaries
                         </a>
                     </div>
                 </div>
@@ -184,7 +170,7 @@
                         <a href="/news/{{ rel.id }}" class="p-4 rounded-xl border border-slate-200 dark:border-neutral-800 hover:border-blue-500 transition block">
                             <span class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">{{ rel.source or 'Tech News' }}</span>
                             <h4 class="font-bold text-sm text-slate-900 dark:text-white mt-1 line-clamp-2">{{ rel.title }}</h4>
-                            <span class="text-xs text-slate-500 mt-2 inline-block">Read student briefing &rarr;</span>
+                            <span class="text-xs text-slate-500 mt-2 inline-block">Read source summary &rarr;</span>
                         </a>
                         {% endfor %}
                     </div>
@@ -196,7 +182,7 @@
             <aside class="lg:col-span-4 space-y-6">
                 <div class="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Open Deadlines</span>
+                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Student Programs</span>
                         <a href="/programs" class="text-xs font-semibold text-blue-600 hover:underline">View all &rarr;</a>
                     </div>
                     <h3 class="text-base font-bold mb-4">Upcoming Student Programs</h3>
@@ -213,10 +199,10 @@
                                 {{ prog.title }}
                             </a>
                             <div class="flex items-center justify-between mt-2 text-xs text-slate-500">
-                                <span>Due: {{ prog.deadline or 'Open' }}</span>
-                                <a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                                <span>Due: {{ prog.deadline or 'Check official page' }}</span>
+                                {% if prog.deadline %}<a href="/programs/{{ prog.id }}/calendar.ics" class="text-blue-600 dark:text-blue-400 font-medium hover:underline">
                                     <i class="far fa-calendar-plus mr-1"></i>Add .ics
-                                </a>
+                                </a>{% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -261,6 +247,7 @@
                 <a href="/blog" class="hover:text-blue-600">Engineering Blog</a>
                 <a href="/about" class="hover:text-blue-600">About</a>
                 <a href="/contact" class="hover:text-blue-600">Contact</a>
+                <a href="/advertise" class="hover:text-blue-600">Advertise &amp; Partnerships</a>
                 <a href="/privacy" class="hover:text-blue-600">Privacy</a>
             </div>
         </div>
