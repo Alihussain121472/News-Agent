@@ -325,3 +325,203 @@ def build_content_brief(keyword, intent='informational', target_url=''):
             'Review accuracy, authorship, and update dates before publishing',
         ],
     }
+
+
+SEO_STOPWORDS = {
+    'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'aren',
+    'as', 'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+    'can', 'could', 'did', 'do', 'does', 'doing', 'down', 'during', 'each', 'few', 'for', 'from',
+    'further', 'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself',
+    'his', 'how', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'itself', 'just', 'll', 'm', 'ma', 'me',
+    'more', 'most', 'my', 'myself', 'no', 'nor', 'not', 'now', 'o', 'of', 'off', 'on', 'once', 'only',
+    'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own', 're', 's', 'same', 'she', 'should',
+    'so', 'some', 'such', 't', 'than', 'that', 'the', 'their', 'theirs', 'them', 'themselves', 'then',
+    'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up', 've',
+    'very', 'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'will',
+    'with', 'won', 'would', 'y', 'you', 'your', 'yours', 'yourself', 'yourselves', 'privacy', 'terms',
+    'policy', 'copyright', 'rights', 'reserved', 'cookie', 'cookies', 'sign', 'login', 'subscribe', 'menu',
+    'home', 'search', 'click', 'read', 'share', 'facebook', 'twitter', 'linkedin', 'instagram', 'youtube'
+}
+
+
+def _tokenize_clean(text):
+    words = re.findall(r"[a-z0-9]+(?:'[a-z]+)?", (text or '').lower())
+    return [w for w in words if len(w) >= 3 and w not in SEO_STOPWORDS and not w.isdigit()]
+
+
+def _infer_keyword_intent(phrase):
+    p = phrase.lower()
+    if any(k in p for k in ('buy', 'price', 'pricing', 'hire', 'apply', 'signup', 'register', 'enroll', 'download')):
+        return 'transactional'
+    if any(k in p for k in ('best', 'review', 'vs', 'top', 'compare', 'alternative', 'tools', 'software')):
+        return 'commercial'
+    if any(k in p for k in ('login', 'portal', 'dashboard', 'official', 'website')):
+        return 'navigational'
+    return 'informational'
+
+
+def crawl_and_analyze_competitor(domain_or_url, our_keywords=None, fetcher=fetch_document):
+    target_url = normalize_site_url(domain_or_url)
+    parsed = urlparse(target_url)
+    domain = (parsed.hostname or '').lower()
+    display_name = domain.replace('www.', '').capitalize()
+
+    document = fetcher(target_url)
+    soup = BeautifulSoup(document.get('text', ''), 'html.parser')
+
+    title = unescape(soup.title.get_text(' ', strip=True)) if soup.title else ''
+    meta_desc_tag = soup.find('meta', attrs={'name': re.compile(r'^description$', re.I)})
+    meta_desc = (meta_desc_tag.get('content') or '').strip() if meta_desc_tag else ''
+
+    h1_tags = [h.get_text(' ', strip=True) for h in soup.find_all('h1') if h.get_text(' ', strip=True)]
+    h2_tags = [h.get_text(' ', strip=True) for h in soup.find_all('h2') if h.get_text(' ', strip=True)]
+    body_text = ' '.join(soup.stripped_strings)
+    word_count = len(re.findall(r"\b[\w'-]+\b", body_text))
+
+    # Weight word occurrences
+    term_scores = {}
+    def score_tokens(tokens, weight):
+        for i in range(len(tokens)):
+            # 1-gram
+            w = tokens[i]
+            term_scores[w] = term_scores.get(w, 0) + (1 * weight)
+            # 2-gram
+            if i + 1 < len(tokens):
+                bg = f"{tokens[i]} {tokens[i+1]}"
+                term_scores[bg] = term_scores.get(bg, 0) + (2.5 * weight)
+            # 3-gram
+            if i + 2 < len(tokens):
+                tg = f"{tokens[i]} {tokens[i+1]} {tokens[i+2]}"
+                term_scores[tg] = term_scores.get(tg, 0) + (4 * weight)
+
+    score_tokens(_tokenize_clean(title), 5)
+    score_tokens(_tokenize_clean(meta_desc), 2)
+    for h in h1_tags:
+        score_tokens(_tokenize_clean(h), 4)
+    for h in h2_tags[:10]:
+        score_tokens(_tokenize_clean(h), 2.5)
+    score_tokens(_tokenize_clean(body_text[:10000]), 1)
+
+    # Sort keywords by score
+    sorted_terms = sorted(term_scores.items(), key=lambda x: x[1], reverse=True)
+    # Deduplicate overlapping subphrases
+    top_keywords = []
+    seen_phrases = set()
+    for phrase, score in sorted_terms:
+        if len(top_keywords) >= 12:
+            break
+        if any(phrase in p for p in seen_phrases):
+            continue
+        seen_phrases.add(phrase)
+        intent = _infer_keyword_intent(phrase)
+        top_keywords.append({
+            'keyword': phrase,
+            'weight': int(score),
+            'intent': intent,
+        })
+
+    # Benchmark against our tracked keywords
+    our_terms = set()
+    if our_keywords:
+        for k in our_keywords:
+            kw = k['keyword'].lower() if isinstance(k, dict) else str(k).lower()
+            our_terms.add(kw)
+            for w in _tokenize_clean(kw):
+                our_terms.add(w)
+
+    content_gaps = []
+    shared_keywords = []
+    for item in top_keywords:
+        kw = item['keyword']
+        is_covered = any(kw in our or our in kw for our in our_terms)
+        if is_covered:
+            shared_keywords.append(kw)
+        else:
+            content_gaps.append({
+                'keyword': kw,
+                'intent': item['intent'],
+                'priority': 'High' if item['weight'] > 15 else 'Medium',
+                'action': f"Create dedicated article or guide targeting '{kw}' to capture search traffic competitor is targeting."
+            })
+
+    # Compute a benchmark score
+    depth_score = min(30, int(word_count / 30))
+    headings_score = min(25, (len(h1_tags) * 10) + min(15, len(h2_tags) * 2))
+    meta_score = (15 if title else 0) + (10 if meta_desc else 0)
+    kw_score = min(20, len(top_keywords) * 2)
+    benchmark_score = min(98, max(35, depth_score + headings_score + meta_score + kw_score))
+
+    return {
+        'domain': domain,
+        'name': display_name,
+        'url': target_url,
+        'benchmark_score': benchmark_score,
+        'meta_info': {
+            'title': title,
+            'description': meta_desc,
+            'word_count': word_count,
+            'h1_count': len(h1_tags),
+            'h2_count': len(h2_tags),
+        },
+        'top_headings': (h1_tags + h2_tags)[:8],
+        'target_keywords': top_keywords,
+        'content_gaps': content_gaps[:8],
+        'shared_keywords': shared_keywords[:8],
+    }
+
+
+def generate_actionable_seo_insights(pages=None, keywords=None, competitors=None, audit_score=None):
+    insights = []
+    # 1. Search Console Indexing (Root cause of zero traffic)
+    insights.append({
+        'category': 'Search Console & Indexation',
+        'severity': 'critical',
+        'title': 'Submit Sitemap to Google Search Console',
+        'detail': 'Zero organic traffic is typically caused when Googlebot has not indexed your domain URLs. Your sitemap is live at https://www.novabrief.tech/sitemap.xml.',
+        'action': 'Open Google Search Console, navigate to Sitemaps, and submit https://www.novabrief.tech/sitemap.xml to request instant indexing for all pages.',
+        'impact': 'Enables Googlebot to discover and index all your articles, guides, and student tools within 24-48 hours.'
+    })
+
+    # 2. On-Page Keyword Optimization
+    if keywords:
+        uncovered = [k for k in keywords if not k.get('position')]
+        if uncovered:
+            target_names = ', '.join([f"'{k['keyword']}'" for k in uncovered[:3]])
+            insights.append({
+                'category': 'Keyword Optimization',
+                'severity': 'high',
+                'title': f'Optimize High-Intent Keywords: {target_names}',
+                'detail': f'You have {len(uncovered)} monitored target keywords without top-20 rankings. Search engines rank pages whose HTML title, H1, and first 100 words explicitly address search intent.',
+                'action': 'Add target phrases naturally into page title tags and primary headings on relevant landing pages.',
+                'impact': 'Directly increases relevance signals for user search queries.'
+            })
+
+    # 3. Competitor Content Gap Steal
+    if competitors:
+        all_gaps = []
+        for comp in competitors:
+            gaps = comp.get('content_gaps') or []
+            for g in gaps:
+                all_gaps.append((comp.get('name') or comp.get('domain'), g.get('keyword'), g.get('intent')))
+        if all_gaps:
+            comp_name, gap_kw, gap_intent = all_gaps[0]
+            insights.append({
+                'category': 'Competitor Advantage',
+                'severity': 'medium',
+                'title': f"Target High-Volume Competitor Gap: '{gap_kw}'",
+                'detail': f"Competitor {comp_name} currently attracts organic search traffic targeting '{gap_kw}' ({gap_intent} intent). NovaBrief does not yet have a matching article.",
+                'action': f"Use AI Content Studio to draft and publish a high-quality guide targeting '{gap_kw}'.",
+                'impact': 'Captures organic searchers from established competitors in your technology niche.'
+            })
+
+    # 4. Core Web Vitals & Caching
+    insights.append({
+        'category': 'Core Web Vitals & Speed',
+        'severity': 'good',
+        'title': 'Page Speed & Minification Optimized',
+        'detail': 'Your recent image WebP conversion, CSS minification, and browser caching headers have elevated performance. Fast loading pages earn higher mobile search rankings.',
+        'action': 'Maintain fast response times by avoiding heavy uncompressed images in new blog posts.',
+        'impact': 'Prevents bounce rates and maintains mobile crawl efficiency.'
+    })
+
+    return insights

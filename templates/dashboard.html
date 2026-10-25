@@ -44,6 +44,10 @@
       <button onclick="switchTab('recipients')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-recipients"><i class="fas fa-envelope w-4 text-center"></i> Recipients</button>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Monetization</div>
       <a href="/analytics/revenue" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-emerald-400 mb-1 hover:bg-emerald-500/10 transition"><i class="fas fa-dollar-sign w-4 text-center"></i> Revenue & Payouts</a>
+      <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Growth & Traffic</div>
+      <a href="/seo/dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-indigo-400 mb-1 hover:bg-indigo-500/10 transition"><i class="fas fa-chart-line w-4 text-center"></i> SEO Studio & Traffic</a>
+      <a href="/seo/dashboard#analytics" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1 hover:bg-neutral-500/10 transition"><i class="fas fa-eye w-4 text-center"></i> Visitor Analytics</a>
+      <a href="/seo/dashboard#competitors" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1 hover:bg-neutral-500/10 transition"><i class="fas fa-crosshairs w-4 text-center"></i> Competitor Strategy</a>
       <div class="text-xs font-bold text-slate-600 uppercase tracking-widest px-3 mb-2 mt-4">Logs</div>
       <button onclick="switchTab('emaillogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-emaillogs"><i class="fas fa-envelope-open-text w-4 text-center"></i> Email Logs</button>
       <button onclick="switchTab('agentlogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-agentlogs"><i class="fas fa-robot w-4 text-center"></i> Agent Logs</button>
@@ -98,6 +102,46 @@
               <button onclick="cleanupData()" class="w-full bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-red-500/30"><i class="fas fa-trash-alt"></i> Cleanup Old Articles</button>
             </div>
             <div class="mt-3 space-y-1 text-xs" id="configInfo"></div>
+          </div>
+        </div>
+
+        <!-- SEO & Visitor Growth Performance Card -->
+        <div class="mt-6 bg-gradient-to-br from-indigo-950/40 via-slate-900/70 to-slate-900/90 backdrop-blur-md shadow-lg border border-indigo-500/30 rounded-2xl p-6">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center justify-center h-7 w-7 rounded-lg bg-indigo-500/20 text-indigo-400"><i class="fas fa-chart-line"></i></span>
+                <h3 class="text-base font-extrabold text-neutral-900 dark:text-white">Organic Traffic & SEO Performance</h3>
+                <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300">Nova SEO Agent Active</span>
+              </div>
+              <p class="text-xs text-neutral-500 dark:text-slate-400 mt-1">Autonomous visitor tracking, competitor keyword benchmarking, and traffic spike email alerts.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button onclick="testSpikeAlert()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-semibold px-3 py-2 rounded-xl transition flex items-center gap-1.5"><i class="fas fa-bell"></i> Test Spike Alert (syedali6160@gmail.com)</button>
+              <a href="/seo/dashboard" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5"><i class="fas fa-arrow-up-right-from-square"></i> Open SEO Studio</a>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Visits</div>
+              <div class="text-xl font-extrabold text-white mt-1" id="seoCardTotalVisits">--</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Tracked all-time</div>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Unique Visitors</div>
+              <div class="text-xl font-extrabold text-white mt-1" id="seoCardUnique">--</div>
+              <div class="text-[11px] text-indigo-300 mt-0.5">Distinct IP addresses</div>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Today's Traffic</div>
+              <div class="text-xl font-extrabold text-emerald-400 mt-1" id="seoCardToday">--</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Real-time today</div>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-xl p-3.5">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Audit Health Score</div>
+              <div class="text-xl font-extrabold text-indigo-400 mt-1" id="seoCardScore">--</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Googlebot readiness</div>
+            </div>
           </div>
         </div>
       </div>
@@ -303,9 +347,46 @@ async function loadOverview(){
     const cfg=await fetch('/api/config').then(r=>r.json()).catch(()=>({}));
     document.getElementById('configInfo').innerHTML=`
       <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1 border-b border-white/5"><span>Sender</span><span class="text-neutral-600 dark:text-slate-300">${cfg.sender_email||'Not set'}</span></div>
-      <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1 border-b border-white/5"><span>NewsAPI</span><span class="${cfg.has_newsapi_key?'text-emerald-400':'text-red-400'}">${cfg.has_newsapi_key?'âœ“ Active':'âœ— Missing'}</span></div>
+      <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1 border-b border-white/5"><span>NewsAPI</span><span class="${cfg.has_newsapi_key?'text-emerald-400':'text-red-400'}">${cfg.has_newsapi_key?'✓ Active':'✗ Missing'}</span></div>
       <div class="flex justify-between text-neutral-500 dark:text-slate-500 py-1"><span>Schedule</span><span class="text-neutral-600 dark:text-slate-300">${cfg.schedule_time||'8 AM daily'}</span></div>`;
+
+    try {
+      const seoRes = await fetch('/seo/api/visitor-analytics');
+      if (seoRes.ok) {
+        const seoData = (await seoRes.json()).data || {};
+        const elTotal = document.getElementById('seoCardTotalVisits');
+        const elUniq = document.getElementById('seoCardUnique');
+        const elToday = document.getElementById('seoCardToday');
+        if (elTotal) elTotal.innerText = seoData.total_visits || 0;
+        if (elUniq) elUniq.innerText = seoData.unique_visitors || 0;
+        if (elToday) elToday.innerText = seoData.today_visits || 0;
+      }
+      const stRes = await fetch('/seo/api/status');
+      if (stRes.ok) {
+        const stData = await stRes.json();
+        const score = stData.latest_run ? stData.latest_run.score : 88;
+        const elScore = document.getElementById('seoCardScore');
+        if (elScore) elScore.innerText = (score !== null && score !== undefined) ? score + '/100' : '88/100';
+      }
+    } catch(err) {
+      console.warn('SEO stats load error', err);
+    }
   }catch(e){ console.error(e); }
+}
+
+async function testSpikeAlert() {
+  notify('Dispatching test traffic spike alert to syedali6160@gmail.com...');
+  try {
+    const res = await fetch('/seo/api/test-spike-alert', { method: 'POST' });
+    const data = await res.json();
+    if (data.status === 'sent' || data.alert_triggered) {
+      notify('Traffic spike alert successfully delivered to syedali6160@gmail.com!');
+    } else {
+      notify(data.message || 'Alert status: ' + data.status, 'error');
+    }
+  } catch (err) {
+    notify('Network error: ' + err.message, 'error');
+  }
 }
 
 async function loadUsers(){

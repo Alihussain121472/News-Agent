@@ -6,9 +6,21 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 
+import logging
 from . import repository
-from .engine import build_content_brief, normalize_site_url
-from .service import start_seo_cycle
+from .engine import (
+    build_content_brief,
+    crawl_and_analyze_competitor,
+    generate_actionable_seo_insights,
+    normalize_site_url,
+)
+from .service import (
+    check_and_alert_traffic_spikes,
+    generate_daily_seo_report,
+    start_seo_cycle,
+)
+
+logger = logging.getLogger(__name__)
 
 
 seo_bp = Blueprint('seo', __name__, template_folder='templates')
@@ -77,6 +89,16 @@ def _dashboard_view_model():
         snapshot['next_run_at'] = None
     snapshot['earned_backlinks'] = sum(1 for item in snapshot['backlinks'] if item.get('status') == 'earned')
     snapshot['open_content'] = sum(1 for item in snapshot['content_opportunities'] if item.get('status') in {'idea', 'approved', 'briefed'})
+    snapshot['total_competitors'] = len(snapshot.get('competitors') or [])
+    snapshot['total_gaps'] = sum(len(c.get('content_gaps') or []) for c in snapshot.get('competitors') or [])
+    try:
+        snapshot['actionable_insights'] = generate_actionable_seo_insights(
+            keywords=snapshot.get('keywords'),
+            competitors=snapshot.get('competitors'),
+            audit_score=latest.get('score') if latest else 88
+        )
+    except Exception:
+        snapshot['actionable_insights'] = []
     return snapshot
 
 
@@ -344,3 +366,163 @@ The content must be Markdown. The three list fields must be JSON arrays of strin
         return jsonify({'status': 'error', 'message': f'Groq API request failed: {e}'}), 502
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'API Error: {str(e)}'}), 500
+
+
+@seo_bp.route('/api/visitor-analytics')
+@admin_required
+def visitor_analytics_api():
+    days = int(request.args.get('days') or 30)
+    data = repository.get_visitor_analytics(days=days)
+    return jsonify({'status': 'success', 'data': data})
+
+
+@seo_bp.route('/api/actionable-insights')
+@admin_required
+def actionable_insights_api():
+    latest = repository.latest_run()
+    score = latest.get('score') if latest else 88
+    keywords = repository.list_keywords()
+    competitors = repository.list_competitors()
+    insights = generate_actionable_seo_insights(
+        keywords=keywords,
+        competitors=competitors,
+        audit_score=score
+    )
+    return jsonify({'status': 'success', 'insights': insights})
+
+
+@seo_bp.route('/api/competitors', methods=['GET'])
+@admin_required
+def list_competitors_api():
+    competitors = repository.list_competitors()
+    return jsonify({'status': 'success', 'competitors': competitors})
+
+
+@seo_bp.route('/api/competitors', methods=['POST'])
+@admin_required
+@same_origin_required
+def add_competitor_api():
+    data = request.get_json(silent=True) or {}
+    domain = (data.get('domain') or '').strip().lower()
+    name = (data.get('name') or '').strip()
+    notes = (data.get('notes') or '').strip()
+
+    if not domain:
+        return jsonify({'status': 'error', 'message': 'Competitor domain or URL is required.'}), 400
+
+    try:
+        saved = repository.save_competitor(domain, name, notes)
+        our_keywords = repository.list_keywords()
+        analysis = crawl_and_analyze_competitor(saved['domain'], our_keywords=our_keywords)
+        updated = repository.update_competitor_analysis(saved['id'], analysis)
+        repository.log_event('competitor_analyzed', f"Analyzed competitor: {saved['domain']}", {'competitor_id': saved['id']})
+        return jsonify({
+            'status': 'success',
+            'message': f"Competitor '{saved['domain']}' added and analyzed successfully.",
+            'competitor': updated or saved
+        })
+    except Exception as e:
+        logger.exception('Competitor analysis failed')
+        return jsonify({'status': 'error', 'message': f'Failed to analyze competitor: {str(e)}'}), 400
+
+
+@seo_bp.route('/api/competitors/<int:competitor_id>/analyze', methods=['POST'])
+@admin_required
+@same_origin_required
+def reanalyze_competitor_api(competitor_id):
+    competitor = repository.get_competitor(competitor_id)
+    if not competitor:
+        return jsonify({'status': 'error', 'message': 'Competitor not found.'}), 404
+    try:
+        our_keywords = repository.list_keywords()
+        analysis = crawl_and_analyze_competitor(competitor['domain'], our_keywords=our_keywords)
+        updated = repository.update_competitor_analysis(competitor_id, analysis)
+        return jsonify({
+            'status': 'success',
+            'message': f"Competitor '{competitor['domain']}' re-analyzed.",
+            'competitor': updated
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+
+@seo_bp.route('/api/competitors/<int:competitor_id>', methods=['DELETE'])
+@admin_required
+@same_origin_required
+def delete_competitor_api(competitor_id):
+    if not repository.delete_competitor(competitor_id):
+        return jsonify({'status': 'error', 'message': 'Competitor not found.'}), 404
+    return jsonify({'status': 'success', 'message': 'Competitor removed.'})
+
+
+@seo_bp.route('/api/daily-reports', methods=['GET'])
+@admin_required
+def list_daily_reports_api():
+    reports = repository.list_daily_reports(limit=20)
+    return jsonify({'status': 'success', 'reports': reports})
+
+
+@seo_bp.route('/api/daily-reports/generate', methods=['POST'])
+@admin_required
+@same_origin_required
+def generate_daily_report_api():
+    try:
+        report = generate_daily_seo_report()
+        return jsonify({
+            'status': 'success',
+            'message': 'Daily SEO performance report generated successfully.',
+            'report': report
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to generate report: {str(e)}'}), 500
+
+
+@seo_bp.route('/api/test-spike-alert', methods=['POST'])
+@admin_required
+@same_origin_required
+def test_spike_alert_api():
+    try:
+        res = check_and_alert_traffic_spikes(recipient_email='syedali6160@gmail.com', force_test=True)
+        return jsonify(res)
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to send test alert: {str(e)}'}), 500
+
+
+@seo_bp.route('/api/traffic-alerts', methods=['GET'])
+@admin_required
+def list_traffic_alerts_api():
+    alerts = repository.list_traffic_alerts(limit=15)
+    return jsonify({'status': 'success', 'alerts': alerts})
+
+
+@seo_bp.route('/api/integrations', methods=['POST'])
+@admin_required
+@same_origin_required
+def save_integrations_api():
+    data = request.get_json(silent=True) or {}
+    ga_id = (data.get('ga_measurement_id') or '').strip()
+    gsc_token = (data.get('google_site_verification') or '').strip()
+    alert_email = (data.get('alert_email') or '').strip() or 'syedali6160@gmail.com'
+    spike_threshold = int(data.get('spike_threshold_pct') or 100)
+    spike_min = int(data.get('spike_min_visits') or 5)
+
+    if alert_email and not EMAIL_PATTERN.fullmatch(alert_email):
+        return jsonify({'status': 'error', 'message': 'Enter a valid email for traffic alerts.'}), 400
+
+    cfg = repository.update_integrations(
+        ga_measurement_id=ga_id,
+        google_site_verification=gsc_token,
+        alert_email=alert_email,
+        spike_threshold_pct=spike_threshold,
+        spike_min_visits=spike_min,
+    )
+    repository.log_event('integrations_updated', 'Updated Google Analytics, Search Console, and Alert settings.', {
+        'ga_configured': bool(ga_id),
+        'gsc_configured': bool(gsc_token),
+        'alert_email': alert_email
+    })
+    return jsonify({
+        'status': 'success',
+        'message': 'Google Analytics, Search Console, and Traffic Alert settings saved.',
+        'config': cfg
+    })

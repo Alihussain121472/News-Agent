@@ -1,16 +1,16 @@
 {% extends "base_saas.html" %}
-{% block title %}SEO Studio - Nova OS{% endblock %}
-{% block page_title %}SEO Studio{% endblock %}
-{% block page_subtitle %}Continuous technical audits, keyword planning, content opportunities, and earned-link monitoring.{% endblock %}
+{% block title %}SEO Studio & Visitor Analytics - Nova OS{% endblock %}
+{% block page_title %}SEO & Growth Studio{% endblock %}
+{% block page_subtitle %}Autonomous search indexation, competitor keyword intelligence, visitor analytics, and traffic spike monitoring.{% endblock %}
 
 {% block content %}
 <section class="surface-card overflow-hidden">
   <div class="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
     <div class="flex min-w-0 items-start gap-4">
-      <div class="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-emerald-100 bg-emerald-50 text-lg text-emerald-600"><i class="fas fa-chart-line"></i></div>
+      <div class="grid h-12 w-12 flex-none place-items-center rounded-2xl border border-indigo-100 bg-indigo-50 text-lg text-indigo-600"><i class="fas fa-chart-line"></i></div>
       <div class="min-w-0">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="text-lg font-extrabold tracking-tight text-slate-900">Continuous search monitoring</h2>
+          <h2 class="text-lg font-extrabold tracking-tight text-slate-900">Continuous search & traffic growth</h2>
           <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider {% if config.enabled %}bg-emerald-50 text-emerald-700{% else %}bg-slate-100 text-slate-500{% endif %}">
             <span class="h-1.5 w-1.5 rounded-full {% if config.enabled %}bg-emerald-500{% else %}bg-slate-400{% endif %}"></span>
             {% if config.enabled %}Monitoring active{% else %}Monitoring paused{% endif %}
@@ -25,47 +25,58 @@
         </p>
       </div>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <button type="button" onclick="switchSeoTab('settings')" class="secondary-action"><i class="fas fa-sliders"></i> Configure</button>
+    <div class="flex flex-wrap items-center gap-2">
+      <button type="button" onclick="testSpikeAlertNow()" class="secondary-action !border-amber-300 !text-amber-800 bg-amber-50 hover:bg-amber-100"><i class="fas fa-bell text-amber-600"></i> Test Spike Alert</button>
+      <button type="button" onclick="generateDailyReportNow()" class="secondary-action"><i class="fas fa-file-invoice"></i> Daily Report</button>
       <button id="run-audit-button" type="button" onclick="runSeoAudit()" class="primary-action"><i class="fas fa-play"></i> Run audit now</button>
     </div>
   </div>
-  <div class="border-t border-amber-100 bg-amber-50/60 px-5 py-3 text-[11px] leading-5 text-amber-900 sm:px-6">
-    <i class="fas fa-shield-halved mr-2 text-amber-600"></i>SEO Studio follows people-first and anti-spam practices. Rankings cannot be guaranteed, and backlink outreach always stays under your approval.
+  <div class="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 text-[11px] leading-5 text-indigo-950 sm:px-6 flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <i class="fas fa-shield-halved mr-2 text-indigo-600"></i><strong>Alert Target:</strong> Traffic spike alerts deliver automatically to <strong>{{ config.alert_email or 'syedali6160@gmail.com' }}</strong> if visits surge &gt; {{ config.spike_threshold_pct or 100 }}% over 48h baseline.
+    </div>
+    <a href="#integrations" onclick="switchSeoTab('integrations')" class="font-bold text-indigo-600 hover:underline">Google & Alert Settings →</a>
   </div>
 </section>
 
+<!-- KPI Cards -->
 <section class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="SEO performance summary">
-  <article class="kpi-card">
+  <article class="kpi-card cursor-pointer" onclick="switchSeoTab('overview')">
     <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Audit health</p>
     <div class="mt-3 flex items-end gap-2"><span class="text-3xl font-extrabold tracking-tight text-slate-900">{{ latest_run.score if latest_run and latest_run.score is not none else '—' }}</span>{% if latest_run and latest_run.score is not none %}<span class="mb-1 text-xs font-bold text-slate-400">/100</span>{% endif %}</div>
-    <p class="mt-3 text-[11px] text-slate-500">Evidence from the latest crawl</p>
+    <p class="mt-3 text-[11px] text-slate-500">{{ latest_run.pages_checked if latest_run else 0 }} pages audited</p>
   </article>
-  <article class="kpi-card">
-    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Pages checked</p>
-    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ latest_run.pages_checked if latest_run else 0 }}</div>
-    <p class="mt-3 text-[11px] text-slate-500">Up to {{ config.max_pages }} pages per cycle</p>
+  <article class="kpi-card cursor-pointer" onclick="switchSeoTab('analytics')">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Visitor Traffic</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ visitor_analytics.total_visits }}</div>
+    <p class="mt-3 text-[11px] text-indigo-600 font-semibold">{{ visitor_analytics.unique_visitors }} unique visitors</p>
   </article>
-  <article class="kpi-card">
-    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Open findings</p>
-    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ issues|length }}</div>
-    <p class="mt-3 text-[11px] {% if latest_run and latest_run.critical_count %}text-red-600{% else %}text-slate-500{% endif %}">{{ latest_run.critical_count if latest_run else 0 }} critical · {{ latest_run.warning_count if latest_run else 0 }} warnings</p>
+  <article class="kpi-card cursor-pointer" onclick="switchSeoTab('keywords')">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Tracked Keywords</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ keywords|length }}</div>
+    <p class="mt-3 text-[11px] text-slate-500">Search intent optimized</p>
   </article>
-  <article class="kpi-card">
-    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Earned links</p>
-    <div class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900">{{ earned_backlinks }}</div>
-    <p class="mt-3 text-[11px] text-slate-500">{{ backlinks|length }} prospects monitored</p>
+  <article class="kpi-card cursor-pointer" onclick="switchSeoTab('competitors')">
+    <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Competitor Gaps</p>
+    <div class="mt-3 text-3xl font-extrabold tracking-tight text-emerald-600">{{ total_gaps }}</div>
+    <p class="mt-3 text-[11px] text-slate-500">{{ total_competitors }} competitors tracked</p>
   </article>
 </section>
 
+<!-- Tab Navigation -->
 <nav class="mt-5 flex gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm" aria-label="SEO Studio sections">
   <button type="button" class="seo-tab active" data-seo-tab="overview" onclick="switchSeoTab('overview')"><i class="fas fa-gauge-high"></i> Overview</button>
-  <button type="button" class="seo-tab" data-seo-tab="keywords" onclick="switchSeoTab('keywords')"><i class="fas fa-key"></i> Keywords <span class="seo-tab-count">{{ keywords|length }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="analytics" onclick="switchSeoTab('analytics')"><i class="fas fa-eye"></i> Visitor Analytics</button>
+  <button type="button" class="seo-tab" data-seo-tab="keywords" onclick="switchSeoTab('keywords')"><i class="fas fa-key"></i> Keywords & Strategy <span class="seo-tab-count">{{ keywords|length }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="competitors" onclick="switchSeoTab('competitors')"><i class="fas fa-crosshairs"></i> Competitors <span class="seo-tab-count">{{ total_competitors }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="reports" onclick="switchSeoTab('reports')"><i class="fas fa-file-invoice"></i> Daily Reports & Alerts</button>
+  <button type="button" class="seo-tab" data-seo-tab="integrations" onclick="switchSeoTab('integrations')"><i class="fab fa-google"></i> Google & Alerts</button>
   <button type="button" class="seo-tab" data-seo-tab="backlinks" onclick="switchSeoTab('backlinks')"><i class="fas fa-link"></i> Backlinks <span class="seo-tab-count">{{ backlinks|length }}</span></button>
-  <button type="button" class="seo-tab" data-seo-tab="content" onclick="switchSeoTab('content')"><i class="fas fa-file-lines"></i> Content <span class="seo-tab-count">{{ open_content }}</span></button>
+  <button type="button" class="seo-tab" data-seo-tab="content" onclick="switchSeoTab('content')"><i class="fas fa-pen-nib"></i> AI Content Writer <span class="seo-tab-count">{{ open_content }}</span></button>
   <button type="button" class="seo-tab" data-seo-tab="settings" onclick="switchSeoTab('settings')"><i class="fas fa-sliders"></i> Settings</button>
 </nav>
 
+<!-- ==================== TAB 1: OVERVIEW ==================== -->
 <div id="seo-panel-overview" class="seo-panel mt-5">
   <div class="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
     <section class="surface-card overflow-hidden">
@@ -115,36 +126,510 @@
   </div>
 </div>
 
+<!-- ==================== TAB 2: VISITOR ANALYTICS ==================== -->
+<div id="seo-panel-analytics" class="seo-panel mt-5 hidden">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="surface-card p-4">
+      <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Visits (All-Time)</div>
+      <div class="text-2xl font-black text-slate-900 mt-1">{{ visitor_analytics.total_visits }}</div>
+      <div class="text-[11px] text-slate-500 mt-0.5">Tracked pageviews</div>
+    </div>
+    <div class="surface-card p-4">
+      <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Unique Visitors</div>
+      <div class="text-2xl font-black text-indigo-600 mt-1">{{ visitor_analytics.unique_visitors }}</div>
+      <div class="text-[11px] text-slate-500 mt-0.5">Distinct user IP addresses</div>
+    </div>
+    <div class="surface-card p-4">
+      <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Today's Visits</div>
+      <div class="text-2xl font-black text-emerald-600 mt-1">{{ visitor_analytics.today_visits }}</div>
+      <div class="text-[11px] text-slate-500 mt-0.5">{{ visitor_analytics.today_unique }} unique today</div>
+    </div>
+    <div class="surface-card p-4">
+      <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Yesterday's Traffic</div>
+      <div class="text-2xl font-black text-slate-700 mt-1">{{ visitor_analytics.yesterday_visits }}</div>
+      <div class="text-[11px] text-slate-500 mt-0.5">Avg: {{ visitor_analytics.avg_daily_visits }}/day</div>
+    </div>
+  </div>
+
+  <!-- Traffic Chart -->
+  <section class="surface-card p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fas fa-chart-area text-indigo-600"></i> 30-Day Visitor Traffic Growth</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Daily pageviews and unique visitors over the last 30 days</p>
+      </div>
+      <span class="badge badge-green"><i class="fas fa-circle-dot"></i> Real-time</span>
+    </div>
+    <div class="relative w-full h-64">
+      <canvas id="trafficChart"></canvas>
+    </div>
+  </section>
+
+  <!-- Top Pages & Referrers Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Top Pages -->
+    <section class="surface-card overflow-hidden">
+      <div class="border-b border-slate-100 px-5 py-4">
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fas fa-file text-blue-600"></i> Top Landing Pages</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="py-2.5 px-4">Page</th>
+              <th class="py-2.5 px-4 text-right">Visits</th>
+              <th class="py-2.5 px-4 text-right">Unique</th>
+              <th class="py-2.5 px-4 text-right">Share</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for p in visitor_analytics.top_pages %}
+            <tr class="hover:bg-slate-50/50">
+              <td class="py-3 px-4 font-bold text-slate-800 truncate max-w-xs"><a href="{{ p.page }}" target="_blank" class="text-blue-600 hover:underline">{{ p.page }}</a></td>
+              <td class="py-3 px-4 text-right font-extrabold text-slate-900">{{ p.count }}</td>
+              <td class="py-3 px-4 text-right text-slate-500">{{ p.unique }}</td>
+              <td class="py-3 px-4 text-right font-semibold text-emerald-600">{{ p.percentage }}%</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="py-8 text-center text-slate-400">No page visit data recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Top Referrers -->
+    <section class="surface-card overflow-hidden">
+      <div class="border-b border-slate-100 px-5 py-4">
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fas fa-compass text-emerald-600"></i> Traffic Sources & Referrers</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="py-2.5 px-4">Source</th>
+              <th class="py-2.5 px-4 text-right">Visits</th>
+              <th class="py-2.5 px-4 text-right">Share</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for r in visitor_analytics.top_referrers %}
+            <tr class="hover:bg-slate-50/50">
+              <td class="py-3 px-4 font-bold text-slate-800 truncate max-w-xs">{{ r.source }}</td>
+              <td class="py-3 px-4 text-right font-extrabold text-slate-900">{{ r.count }}</td>
+              <td class="py-3 px-4 text-right font-semibold text-indigo-600">{{ r.percentage }}%</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" class="py-8 text-center text-slate-400">No referrer data recorded yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Devices & Browsers breakdown -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <section class="surface-card p-5">
+      <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3"><i class="fas fa-mobile-screen mr-1 text-slate-500"></i> Device Distribution</h3>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Desktop</span><span>{{ visitor_analytics.devices.desktop }}</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden"><div class="bg-indigo-600 h-2 rounded-full" style="width: {{ (visitor_analytics.devices.desktop / max(1, visitor_analytics.devices.desktop + visitor_analytics.devices.mobile + visitor_analytics.devices.tablet) * 100)|round }}%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Mobile</span><span>{{ visitor_analytics.devices.mobile }}</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden"><div class="bg-emerald-500 h-2 rounded-full" style="width: {{ (visitor_analytics.devices.mobile / max(1, visitor_analytics.devices.desktop + visitor_analytics.devices.mobile + visitor_analytics.devices.tablet) * 100)|round }}%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Tablet</span><span>{{ visitor_analytics.devices.tablet }}</span></div>
+          <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden"><div class="bg-amber-500 h-2 rounded-full" style="width: {{ (visitor_analytics.devices.tablet / max(1, visitor_analytics.devices.desktop + visitor_analytics.devices.mobile + visitor_analytics.devices.tablet) * 100)|round }}%"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="surface-card p-5">
+      <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3"><i class="fas fa-window-restore mr-1 text-slate-500"></i> Top Browsers</h3>
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-slate-400 text-[10px] font-bold">Chrome</div><div class="text-lg font-black text-slate-800">{{ visitor_analytics.browsers.chrome }}</div></div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-slate-400 text-[10px] font-bold">Safari</div><div class="text-lg font-black text-slate-800">{{ visitor_analytics.browsers.safari }}</div></div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-slate-400 text-[10px] font-bold">Firefox</div><div class="text-lg font-black text-slate-800">{{ visitor_analytics.browsers.firefox }}</div></div>
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="text-slate-400 text-[10px] font-bold">Edge & Other</div><div class="text-lg font-black text-slate-800">{{ visitor_analytics.browsers.edge + visitor_analytics.browsers.other }}</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ==================== TAB 3: KEYWORDS & STRATEGY ==================== -->
 <div id="seo-panel-keywords" class="seo-panel mt-5 hidden">
+  <!-- Actionable Insights Banner -->
+  <section class="mb-5 surface-card p-5 border-l-4 border-l-indigo-600 bg-gradient-to-r from-indigo-50/50 to-white">
+    <div class="flex items-center gap-2 mb-3">
+      <i class="fas fa-lightbulb text-amber-500 text-base"></i>
+      <h3 class="text-sm font-extrabold text-slate-900">Actionable Organic Ranking Recommendations</h3>
+    </div>
+    <div class="space-y-3">
+      {% for ins in actionable_insights %}
+      <div class="p-3 bg-white rounded-xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-0.5 text-[9px] font-black rounded uppercase tracking-wider {% if ins.severity == 'critical' %}bg-red-100 text-red-700{% elif ins.severity == 'high' %}bg-amber-100 text-amber-800{% else %}bg-indigo-100 text-indigo-800{% endif %}">{{ ins.category }}</span>
+          <h4 class="text-xs font-extrabold text-slate-900">{{ ins.title }}</h4>
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed">{{ ins.detail }}</p>
+        <div class="mt-2 text-[11px] font-semibold text-indigo-700 flex items-center gap-1"><i class="fas fa-arrow-right text-[10px]"></i> <span>Action: {{ ins.action }}</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Tracked Keywords Table -->
   <section class="surface-card overflow-hidden">
     <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <div><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Search demand</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Tracked keyword portfolio</h2></div>
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Search demand & intents</p>
+        <h2 class="mt-1 text-sm font-extrabold text-slate-900">Tracked Keyword Portfolio</h2>
+      </div>
       <button type="button" onclick="toggleElement('keyword-form')" class="primary-action"><i class="fas fa-plus"></i> Add keyword</button>
     </div>
     <form id="keyword-form" class="hidden border-b border-slate-100 bg-slate-50/70 p-5" onsubmit="saveKeyword(event)">
       <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-        <label class="field-label xl:col-span-2">Keyword<input id="keyword" required maxlength="160" class="field-input" placeholder="e.g. AI news for students"></label>
+        <label class="field-label xl:col-span-2">Keyword<input id="keyword" required maxlength="160" class="field-input" placeholder="e.g. AI tools for students"></label>
         <label class="field-label">Search intent<select id="keyword-intent" class="field-input"><option value="informational">Informational</option><option value="commercial">Commercial</option><option value="transactional">Transactional</option><option value="navigational">Navigational</option></select></label>
         <label class="field-label">Priority<select id="keyword-priority" class="field-input"><option value="1">1 — Highest</option><option value="2">2 — High</option><option value="3" selected>3 — Normal</option><option value="4">4 — Low</option><option value="5">5 — Later</option></select></label>
         <label class="field-label xl:col-span-2">Target URL<input id="keyword-target" type="url" class="field-input" placeholder="https://www.novabrief.tech/page"></label>
         <label class="field-label">Current position <span>(optional)</span><input id="keyword-position" type="number" min="1" class="field-input" placeholder="Manual/Search Console"></label>
         <label class="field-label">Monthly volume <span>(optional)</span><input id="keyword-volume" type="number" min="0" class="field-input" placeholder="Verified estimate"></label>
       </div>
-      <label class="field-label mt-3">Notes<textarea id="keyword-notes" rows="2" class="field-input resize-none" placeholder="Audience, country, or content angle"></textarea></label>
+      <label class="field-label mt-3">Notes<textarea id="keyword-notes" rows="2" class="field-input resize-none" placeholder="Audience, target region, or content focus"></textarea></label>
       <div class="mt-4 flex justify-end gap-2"><button type="button" onclick="toggleElement('keyword-form', false)" class="secondary-action">Cancel</button><button id="save-keyword-button" class="primary-action">Save keyword</button></div>
     </form>
     <div class="overflow-x-auto">
       <table class="w-full min-w-[760px] text-left">
-        <thead class="border-b border-slate-100 bg-slate-50/60 text-[9px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th class="px-5 py-3">Keyword</th><th class="px-4 py-3">Intent</th><th class="px-4 py-3 text-center">Priority</th><th class="px-4 py-3 text-center">Position</th><th class="px-4 py-3 text-right">Volume</th><th class="px-5 py-3 text-right">Action</th></tr></thead>
+        <thead class="border-b border-slate-100 bg-slate-50/60 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+          <tr>
+            <th class="px-5 py-3">Keyword</th>
+            <th class="px-4 py-3">Intent</th>
+            <th class="px-4 py-3 text-center">Priority</th>
+            <th class="px-4 py-3 text-center">Rank</th>
+            <th class="px-4 py-3 text-right">Volume</th>
+            <th class="px-5 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
         <tbody class="divide-y divide-slate-100">
-          {% for keyword in keywords %}<tr class="text-xs text-slate-600 hover:bg-slate-50/60"><td class="px-5 py-4"><div class="font-extrabold text-slate-800">{{ keyword.keyword }}</div>{% if keyword.target_url %}<a href="{{ keyword.target_url }}" target="_blank" rel="noopener" class="mt-1 block max-w-xs truncate text-[10px] text-blue-600">{{ keyword.target_url }}</a>{% endif %}</td><td class="px-4 py-4 capitalize">{{ keyword.intent }}</td><td class="px-4 py-4 text-center font-bold">{{ keyword.priority }}</td><td class="px-4 py-4 text-center font-bold">{{ '#' ~ keyword.position if keyword.position else '—' }}</td><td class="px-4 py-4 text-right">{{ keyword.search_volume or '—' }}</td><td class="px-5 py-4 text-right"><button type="button" onclick="deleteKeyword({{ keyword.id }})" class="rounded-lg px-2.5 py-2 text-red-500 transition hover:bg-red-50" aria-label="Remove {{ keyword.keyword }}"><i class="fas fa-trash"></i></button></td></tr>
-          {% else %}<tr><td colspan="6" class="px-6 py-14 text-center text-xs text-slate-400">No tracked keywords.</td></tr>{% endfor %}
+          {% for keyword in keywords %}
+          <tr class="text-xs text-slate-600 hover:bg-slate-50/60">
+            <td class="px-5 py-4">
+              <div class="font-extrabold text-slate-800">{{ keyword.keyword }}</div>
+              {% if keyword.target_url %}<a href="{{ keyword.target_url }}" target="_blank" rel="noopener" class="mt-1 block max-w-xs truncate text-[10px] text-blue-600">{{ keyword.target_url }}</a>{% endif %}
+            </td>
+            <td class="px-4 py-4">
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full {% if keyword.intent == 'commercial' %}bg-purple-100 text-purple-700{% elif keyword.intent == 'transactional' %}bg-emerald-100 text-emerald-700{% else %}bg-blue-100 text-blue-700{% endif %}">{{ keyword.intent|capitalize }}</span>
+            </td>
+            <td class="px-4 py-4 text-center font-bold">{{ keyword.priority }}</td>
+            <td class="px-4 py-4 text-center font-bold">{{ '#' ~ keyword.position if keyword.position else '—' }}</td>
+            <td class="px-4 py-4 text-right">{{ keyword.search_volume or '—' }}</td>
+            <td class="px-5 py-4 text-right space-x-1">
+              <button type="button" onclick="generateAiForKeyword('{{ keyword.keyword }}')" class="rounded-lg px-2.5 py-1.5 text-xs font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition"><i class="fas fa-pen-nib mr-1"></i>Draft</button>
+              <button type="button" onclick="deleteKeyword({{ keyword.id }})" class="rounded-lg px-2.5 py-2 text-red-500 transition hover:bg-red-50"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="px-6 py-14 text-center text-xs text-slate-400">No tracked keywords yet.</td></tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
   </section>
 </div>
 
+<!-- ==================== TAB 4: COMPETITORS ==================== -->
+<div id="seo-panel-competitors" class="seo-panel mt-5 hidden">
+  <section class="surface-card overflow-hidden mb-6">
+    <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Market intelligence & benchmarking</p>
+        <h2 class="mt-1 text-sm font-extrabold text-slate-900">Competitor Keyword Strategies & Content Gaps</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Crawl competitor domains to discover high-value search terms and gaps where you can outrank them.</p>
+      </div>
+      <button type="button" onclick="toggleElement('competitor-form')" class="primary-action"><i class="fas fa-plus"></i> Add Competitor</button>
+    </div>
+
+    <!-- Add Competitor Form -->
+    <form id="competitor-form" class="hidden border-b border-slate-100 bg-slate-50/70 p-5" onsubmit="saveCompetitor(event)">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="field-label">Domain or URL<input id="comp-domain" required class="field-input" placeholder="e.g. techcrunch.com or tldr.tech"></label>
+        <label class="field-label">Company / Publication Name<input id="comp-name" class="field-input" placeholder="e.g. TechCrunch"></label>
+        <label class="field-label">Notes<input id="comp-notes" class="field-input" placeholder="e.g. Primary technology newsletter competitor"></label>
+      </div>
+      <div class="mt-4 flex justify-end gap-2">
+        <button type="button" onclick="toggleElement('competitor-form', false)" class="secondary-action">Cancel</button>
+        <button id="save-competitor-button" class="primary-action"><i class="fas fa-magnifying-glass"></i> Crawl & Analyze</button>
+      </div>
+    </form>
+
+    <!-- Competitors List -->
+    <div class="p-5 space-y-6">
+      {% for comp in competitors %}
+      <div class="border border-slate-200 rounded-2xl p-5 bg-white shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-base font-extrabold text-slate-900">{{ comp.name }}</h3>
+              <span class="px-2 py-0.5 text-[10px] font-black rounded-full bg-slate-100 text-slate-600 font-mono">{{ comp.domain }}</span>
+              <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-50 text-indigo-700">Benchmark Score: {{ comp.benchmark_score or 50 }}/100</span>
+            </div>
+            {% if comp.meta_info and comp.meta_info.description %}
+            <p class="text-xs text-slate-500 mt-1 italic">"{{ comp.meta_info.description }}"</p>
+            {% endif %}
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="reanalyzeCompetitor({{ comp.id }})" class="secondary-action !py-1.5 !text-xs"><i class="fas fa-rotate"></i> Re-analyze</button>
+            <button onclick="deleteCompetitor({{ comp.id }})" class="rounded-lg px-2.5 py-1.5 text-red-500 hover:bg-red-50"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-4">
+          <!-- Content Gaps to Steal -->
+          <div>
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 mb-2.5 flex items-center gap-1.5">
+              <i class="fas fa-bullseye"></i> High-Value Content Gaps (Competitor Focuses, You Don't)
+            </h4>
+            <div class="space-y-2">
+              {% for gap in comp.content_gaps %}
+              <div class="flex items-center justify-between p-2.5 bg-emerald-50/50 rounded-xl border border-emerald-100 text-xs">
+                <div>
+                  <span class="font-extrabold text-slate-800">{{ gap.keyword }}</span>
+                  <span class="ml-2 text-[9px] uppercase px-1.5 py-0.5 rounded font-bold bg-white text-emerald-800 border border-emerald-200">{{ gap.intent }}</span>
+                </div>
+                <button onclick="quickAddCompetitorKeyword('{{ gap.keyword }}', '{{ gap.intent }}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] px-2.5 py-1 rounded-lg transition"><i class="fas fa-plus mr-1"></i>Track &amp; Target</button>
+              </div>
+              {% else %}
+              <div class="p-3 bg-slate-50 rounded-xl text-xs text-slate-400">Click "Re-analyze" to crawl and discover content gaps for this competitor.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Competitor Target Keywords & Headings -->
+          <div>
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+              <i class="fas fa-tags"></i> Top Extracted Keywords & Headings
+            </h4>
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              {% for kw in comp.target_keywords[:10] %}
+              <span class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-semibold text-slate-700">{{ kw.keyword }} <span class="text-[10px] text-slate-400">({{ kw.weight }})</span></span>
+              {% else %}
+              <span class="text-xs text-slate-400">No keyword data extracted yet.</span>
+              {% endfor %}
+            </div>
+            {% if comp.top_headings %}
+            <div class="text-[11px] text-slate-500 space-y-1">
+              <div class="font-bold text-slate-700 text-xs">Key Headings Used:</div>
+              {% for h in comp.top_headings[:4] %}
+              <div class="truncate text-slate-600">• {{ h }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="px-6 py-14 text-center text-xs text-slate-400">No competitors monitored yet. Click "Add Competitor" to start benchmarking.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<!-- ==================== TAB 5: DAILY REPORTS & ALERTS ==================== -->
+<div id="seo-panel-reports" class="seo-panel mt-5 hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Active Alert Settings Banner -->
+    <div class="lg:col-span-1 surface-card p-5 bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white">
+      <div class="flex items-center gap-2 mb-3">
+        <i class="fas fa-bell text-amber-400 text-lg"></i>
+        <h3 class="text-sm font-extrabold">Automated Spike Protection</h3>
+      </div>
+      <p class="text-xs text-indigo-200 leading-relaxed mb-4">
+        Our hourly background monitor evaluates real-time traffic spikes against your 48-hour baseline. Alerts dispatch directly to your inbox with surge analytics.
+      </p>
+      <div class="p-3 bg-white/10 rounded-xl text-xs space-y-2 mb-4">
+        <div class="flex justify-between"><span class="text-indigo-300">Recipient:</span> <span class="font-bold text-white font-mono">{{ config.alert_email or 'syedali6160@gmail.com' }}</span></div>
+        <div class="flex justify-between"><span class="text-indigo-300">Trigger:</span> <span class="font-bold text-amber-300">&gt; {{ config.spike_threshold_pct or 100 }}% Surge Rate</span></div>
+        <div class="flex justify-between"><span class="text-indigo-300">Cooldown:</span> <span class="text-indigo-200">6 hours</span></div>
+      </div>
+      <button onclick="testSpikeAlertNow()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-900 font-extrabold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg"><i class="fas fa-paper-plane"></i> Send Test Spike Alert to syedali6160@gmail.com</button>
+    </div>
+
+    <!-- Recent Alerts Table -->
+    <div class="lg:col-span-2 surface-card overflow-hidden">
+      <div class="border-b border-slate-100 px-5 py-4">
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fas fa-list text-indigo-600"></i> Traffic Spike Alert History</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-extrabold uppercase tracking-wider text-slate-400">
+            <tr>
+              <th class="py-2.5 px-4">Time</th>
+              <th class="py-2.5 px-4">Hourly Traffic</th>
+              <th class="py-2.5 px-4">Baseline</th>
+              <th class="py-2.5 px-4">Surge %</th>
+              <th class="py-2.5 px-4">Recipient</th>
+              <th class="py-2.5 px-4 text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            {% for a in traffic_alerts %}
+            <tr class="hover:bg-slate-50/50">
+              <td class="py-3 px-4 font-mono text-slate-600"><time data-time="{{ a.alert_time.isoformat() }}">{{ a.alert_time }}</time></td>
+              <td class="py-3 px-4 font-extrabold text-slate-900">{{ a.hourly_visits }} visits</td>
+              <td class="py-3 px-4 text-slate-500">{{ a.baseline_avg_visits }} /hr</td>
+              <td class="py-3 px-4 font-extrabold text-emerald-600">+{{ a.surge_percentage }}%</td>
+              <td class="py-3 px-4 font-mono text-[11px] text-slate-600">{{ a.recipient_email }}</td>
+              <td class="py-3 px-4 text-right"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">{{ a.status|upper }}</span></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6" class="py-8 text-center text-slate-400">No spike alerts triggered yet. Click "Send Test Spike Alert" to verify inbox delivery.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily Performance Reports Section -->
+  <section class="surface-card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+      <div>
+        <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2"><i class="fas fa-file-lines text-indigo-600"></i> Daily Performance Reports</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Automated end-of-day snapshots of organic traffic, audit scores, and growth actions.</p>
+      </div>
+      <button onclick="generateDailyReportNow()" class="primary-action !py-2 !text-xs"><i class="fas fa-plus"></i> Compile Today's Report</button>
+    </div>
+    <div class="divide-y divide-slate-100">
+      {% for rep in daily_reports %}
+      <div class="p-5 hover:bg-slate-50/40 transition">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div class="flex items-center gap-3">
+            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 font-extrabold text-xs rounded-lg">{{ rep.report_date }}</span>
+            <span class="text-xs font-bold text-slate-700">Health Score: <strong class="text-indigo-600">{{ rep.seo_score }}/100</strong></span>
+          </div>
+          <div class="flex items-center gap-4 text-xs font-semibold text-slate-600">
+            <span><strong>{{ rep.total_visits }}</strong> visits</span>
+            <span><strong>{{ rep.unique_visitors }}</strong> unique visitors</span>
+          </div>
+        </div>
+
+        {% if rep.actionable_recommendations %}
+        <div class="mt-3 bg-slate-50 p-3.5 rounded-xl border border-slate-100 text-xs">
+          <div class="font-extrabold text-slate-700 mb-2 uppercase text-[10px] tracking-wider">Prioritized Actions from this Report:</div>
+          <ul class="space-y-1.5 text-slate-600">
+            {% for r in rep.actionable_recommendations[:3] %}
+            <li class="flex items-start gap-2">
+              <i class="fas fa-check-circle text-emerald-500 mt-0.5 text-[11px]"></i>
+              <div><strong>{{ r.title }}</strong>: {{ r.action }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div class="p-10 text-center text-slate-400 text-xs">No daily performance reports yet. Click "Compile Today's Report" to create the first daily snapshot.</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+
+<!-- ==================== TAB 6: GOOGLE INTEGRATIONS ==================== -->
+<div id="seo-panel-integrations" class="seo-panel mt-5 hidden">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Google Analytics & Search Console Settings -->
+    <section class="surface-card p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 grid place-items-center text-lg"><i class="fab fa-google"></i></div>
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900">Google Platform Integration</h3>
+          <p class="text-xs text-slate-500">Injects official Google tags dynamically on all pages without editing code.</p>
+        </div>
+      </div>
+
+      <form onsubmit="saveIntegrations(event)" class="space-y-4">
+        <div>
+          <label class="field-label">Google Analytics 4 (GA4) Measurement ID <span>(e.g. G-XXXXXXXXXX)</span>
+            <input id="int-ga-id" class="field-input font-mono" placeholder="G-XXXXXXXXXX" value="{{ config.ga_measurement_id or '' }}">
+          </label>
+          <p class="text-[11px] text-slate-500 mt-1">When set, Google Analytics tag (gtag.js) loads asynchronously on all public NovaBrief templates.</p>
+        </div>
+
+        <div>
+          <label class="field-label">Google Search Console Verification Token <span>(meta tag content)</span>
+            <input id="int-gsc-token" class="field-input font-mono" placeholder="e.g. abcdefghijklmnopqrstuvwxyz1234567890" value="{{ config.google_site_verification or '' }}">
+          </label>
+          <p class="text-[11px] text-slate-500 mt-1">Injects <code>&lt;meta name="google-site-verification" content="..."&gt;</code> into &lt;head&gt; for one-click site ownership verification.</p>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100">
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-3"><i class="fas fa-bell mr-1 text-amber-500"></i> Traffic Spike Alert Config</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="field-label">Alert Recipient Email
+              <input id="int-alert-email" type="email" required class="field-input" value="{{ config.alert_email or 'syedali6160@gmail.com' }}">
+            </label>
+            <label class="field-label">Spike Surge Threshold %
+              <input id="int-spike-pct" type="number" min="20" max="1000" class="field-input" value="{{ config.spike_threshold_pct or 100 }}">
+            </label>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-3">
+          <button id="save-integrations-button" type="submit" class="primary-action"><i class="fas fa-floppy-disk"></i> Save Integrations</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Sitemap Submission & Zero-Traffic Fix Guide -->
+    <section class="surface-card p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center text-lg"><i class="fas fa-sitemap"></i></div>
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900">Sitemap & Indexing Roadmap</h3>
+          <p class="text-xs text-slate-500">Step-by-step roadmap to eliminate 0-traffic and rank in Google.</p>
+        </div>
+      </div>
+
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 mb-4">
+        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Your Live XML Sitemap</div>
+        <div class="flex items-center justify-between gap-2">
+          <code class="text-xs font-mono font-bold text-blue-600 truncate">https://www.novabrief.tech/sitemap.xml</code>
+          <a href="https://www.novabrief.tech/sitemap.xml" target="_blank" rel="noopener" class="text-xs font-bold text-indigo-600 hover:underline flex-shrink-0">View XML →</a>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600">
+        <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100">
+          <span class="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center flex-shrink-0">1</span>
+          <div>
+            <strong class="text-slate-800">Add property in Google Search Console:</strong> Go to <a href="https://search.google.com/search-console" target="_blank" class="text-blue-600 underline font-semibold">search.google.com/search-console</a> and add <code>https://www.novabrief.tech</code> as a URL Prefix property.
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100">
+          <span class="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center flex-shrink-0">2</span>
+          <div>
+            <strong class="text-slate-800">Verify Ownership:</strong> Choose the "HTML Tag" method in Search Console, copy the token, paste it in the box on the left, click Save, then click "Verify" in Search Console.
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3 p-3 bg-white rounded-xl border border-slate-100">
+          <span class="h-6 w-6 rounded-full bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center flex-shrink-0">3</span>
+          <div>
+            <strong class="text-slate-800">Submit Sitemap:</strong> In Search Console, navigate to <strong>Sitemaps</strong> in the left sidebar, enter <code>sitemap.xml</code>, and click <strong>Submit</strong>. Googlebot will begin indexing your content within 24 hours.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ==================== TAB 7: BACKLINKS ==================== -->
 <div id="seo-panel-backlinks" class="seo-panel mt-5 hidden">
   <section class="surface-card overflow-hidden">
     <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -175,30 +660,32 @@
   </section>
 </div>
 
+<!-- ==================== TAB 8: AI CONTENT WRITER ==================== -->
 <div id="seo-panel-content" class="seo-panel mt-5 hidden">
-<div class="surface-card mb-5 overflow-hidden">
-<div class="border-b border-slate-800 bg-slate-900/50 px-5 py-4 sm:px-6">
-<h3 class="text-base font-extrabold text-white"><i class="fas fa-robot text-blue-400 mr-2"></i> AI SEO Article Writer</h3>
-<p class="mt-1 text-sm text-slate-400">Generate a fully formatted, SEO-optimized article with Meta Tags instantly.</p>
-</div>
-<div class="p-5 sm:p-6">
-<div class="flex gap-3 items-end">
-<div class="flex-1">
-<label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target Keyword</label>
-<input type="text" id="ai-keyword" placeholder="e.g. Free AI certifications for college students" class="block w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
-</div>
-<button type="button" onclick="generateAiArticle()" id="ai-generate-btn" class="primary-action"><i class="fas fa-pen-nib"></i> Generate Article</button>
-</div>
-<div id="ai-writer-results" class="mt-6 hidden">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-<div><label class="block text-xs font-bold text-slate-400 mb-1">SEO Title Tag</label><input type="text" id="ai-res-title" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
-<div><label class="block text-xs font-bold text-slate-400 mb-1">URL Slug</label><input type="text" id="ai-res-slug" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
-<div class="md:col-span-2"><label class="block text-xs font-bold text-slate-400 mb-1">Meta Description</label><textarea id="ai-res-meta" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm h-16" readonly></textarea></div>
-</div>
-<div><label class="block text-xs font-bold text-slate-400 mb-1">Markdown Content (H1, H2, H3)</label><textarea id="ai-res-content" class="w-full rounded bg-slate-900 text-white border-slate-700 p-4 text-sm h-64 font-mono" readonly></textarea></div>
-</div>
-</div>
-</div>
+  <div class="surface-card mb-5 overflow-hidden">
+    <div class="border-b border-slate-800 bg-slate-900/50 px-5 py-4 sm:px-6">
+      <h3 class="text-base font-extrabold text-white"><i class="fas fa-robot text-blue-400 mr-2"></i> AI SEO Article Writer</h3>
+      <p class="mt-1 text-sm text-slate-400">Generate a fully formatted, SEO-optimized article with Meta Tags and Search Intent targeting.</p>
+    </div>
+    <div class="p-5 sm:p-6">
+      <div class="flex gap-3 items-end">
+        <div class="flex-1">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Target Keyword</label>
+          <input type="text" id="ai-keyword" placeholder="e.g. Free AI certifications for college students" class="block w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-white focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <button type="button" onclick="generateAiArticle()" id="ai-generate-btn" class="primary-action"><i class="fas fa-pen-nib"></i> Generate Article</button>
+      </div>
+      <div id="ai-writer-results" class="mt-6 hidden">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">SEO Title Tag</label><input type="text" id="ai-res-title" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
+          <div><label class="block text-xs font-bold text-slate-400 mb-1">URL Slug</label><input type="text" id="ai-res-slug" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm" readonly></div>
+          <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-400 mb-1">Meta Description</label><textarea id="ai-res-meta" class="w-full rounded bg-slate-900 text-white border-slate-700 p-2 text-sm h-16" readonly></textarea></div>
+        </div>
+        <div><label class="block text-xs font-bold text-slate-400 mb-1">Markdown Content (H1, H2, H3)</label><textarea id="ai-res-content" class="w-full rounded bg-slate-900 text-white border-slate-700 p-4 text-sm h-64 font-mono" readonly></textarea></div>
+      </div>
+    </div>
+  </div>
+
   <section class="surface-card overflow-hidden">
     <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">People-first publishing</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Content opportunity queue</h2><p class="mt-1 text-[10px] text-slate-400">Opportunities come from tracked search intent that is not clearly covered in audited titles or headings.</p></div>
     <div class="grid grid-cols-1 gap-4 p-5 lg:grid-cols-2">
@@ -211,7 +698,9 @@
       {% else %}<div class="col-span-full px-6 py-14 text-center text-xs text-slate-400">Add tracked keywords or run an audit to create content opportunities.</div>{% endfor %}
     </div>
   </section>
+</div>
 
+<!-- ==================== TAB 9: SETTINGS ==================== -->
 <div id="seo-panel-settings" class="seo-panel mt-5 hidden">
   <section class="surface-card max-w-3xl overflow-hidden">
     <div class="border-b border-slate-100 px-5 py-4"><p class="text-[10px] font-extrabold uppercase tracking-[0.12em] text-slate-400">Automation control</p><h2 class="mt-1 text-sm font-extrabold text-slate-900">Monitoring settings</h2></div>
@@ -221,12 +710,13 @@
         <label class="field-label">Audit frequency<select id="seo-schedule" class="field-input">{% for hours, label in [(1,'Every hour'),(3,'Every 3 hours'),(6,'Every 6 hours'),(12,'Every 12 hours'),(24,'Every 24 hours')] %}<option value="{{ hours }}" {% if config.schedule_hours == hours %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
         <label class="field-label">Pages per audit<select id="seo-max-pages" class="field-input">{% for count in [5,10,20,30,50] %}<option value="{{ count }}" {% if config.max_pages == count %}selected{% endif %}>Up to {{ count }} pages</option>{% endfor %}</select></label>
       </div>
-      <label class="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4"><input id="seo-enabled" type="checkbox" {% if config.enabled %}checked{% endif %} class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600"><span><span class="block text-xs font-extrabold text-slate-800">Keep continuous monitoring active</span><span class="mt-1 block text-[11px] leading-5 text-slate-500">The hourly scheduler checks whether the selected interval is due and avoids duplicate runs across workers.</span></span></label>
+      <label class="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-4"><input id="seo-enabled" type="checkbox" {% if config.enabled %}checked{% endif %} class="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600"><span><span class="block text-xs font-extrabold text-slate-800">Keep continuous monitoring active</span><span class="mt-1 block text-[11px] leading-5 text-slate-500">The background scheduler checks whether the selected interval is due and avoids duplicate runs across workers.</span></span></label>
       <div class="mt-5 flex justify-end"><button id="save-config-button" class="primary-action"><i class="fas fa-floppy-disk"></i> Save settings</button></div>
     </form>
   </section>
 </div>
 
+<!-- Modal -->
 <div id="seo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="seo-modal-title">
   <div class="max-h-[88vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
     <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4"><h2 id="seo-modal-title" class="text-sm font-extrabold text-slate-900">SEO Studio</h2><button type="button" onclick="closeSeoModal()" class="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close"><i class="fas fa-xmark"></i></button></div>
@@ -254,6 +744,7 @@
 <script>
   let modalCopyText = '';
   const initialSeoRunId = {{ latest_run.id if latest_run else 'null' }};
+  const visitorTrendData = {{ visitor_analytics.daily_trend|tojson }};
 
   function showToast(message, success = true) {
     const toast = document.getElementById('seo-toast');
@@ -273,9 +764,64 @@
   function switchSeoTab(name) {
     document.querySelectorAll('.seo-panel').forEach(panel => panel.classList.add('hidden'));
     document.querySelectorAll('.seo-tab').forEach(tab => tab.classList.remove('active'));
-    document.getElementById(`seo-panel-${name}`)?.classList.remove('hidden');
-    document.querySelector(`[data-seo-tab="${name}"]`)?.classList.add('active');
-    history.replaceState(null, '', `#${name}`);
+    const targetPanel = document.getElementById(`seo-panel-${name}`);
+    if (targetPanel) {
+      targetPanel.classList.remove('hidden');
+      document.querySelector(`[data-seo-tab="${name}"]`)?.classList.add('active');
+      history.replaceState(null, '', `#${name}`);
+      if (name === 'analytics') {
+        renderTrafficChart();
+      }
+    }
+  }
+
+  function renderTrafficChart() {
+    const canvas = document.getElementById('trafficChart');
+    if (!canvas || window.trafficChartInstance) return;
+    const labels = (visitorTrendData && visitorTrendData.length) ? visitorTrendData.map(d => d.date) : ['No traffic yet'];
+    const visits = (visitorTrendData && visitorTrendData.length) ? visitorTrendData.map(d => d.visits) : [0];
+    const uniques = (visitorTrendData && visitorTrendData.length) ? visitorTrendData.map(d => d.unique) : [0];
+
+    window.trafficChartInstance = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Pageviews',
+            data: visits,
+            borderColor: '#4f46e5',
+            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3
+          },
+          {
+            label: 'Unique Visitors',
+            data: uniques,
+            borderColor: '#10b981',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            tension: 0.35,
+            pointRadius: 2.5
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top', labels: { font: { family: 'Manrope', size: 11 } } },
+          tooltip: { padding: 10, cornerRadius: 8 }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
   }
 
   async function apiRequest(url, options = {}) {
@@ -283,6 +829,113 @@
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || 'The action could not be completed.');
     return data;
+  }
+
+  async function testSpikeAlertNow() {
+    showToast('Triggering spike alert test to syedali6160@gmail.com...');
+    try {
+      const res = await apiRequest('/seo/api/test-spike-alert', { method: 'POST' });
+      showToast(res.message || 'Alert sent!', res.status === 'sent' || res.alert_triggered);
+    } catch (err) {
+      showToast(err.message, false);
+    }
+  }
+
+  async function generateDailyReportNow() {
+    showToast('Compiling today’s SEO performance report...');
+    try {
+      const res = await apiRequest('/seo/api/daily-reports/generate', { method: 'POST' });
+      showToast(res.message);
+      setTimeout(() => location.reload(), 900);
+    } catch (err) {
+      showToast(err.message, false);
+    }
+  }
+
+  async function saveCompetitor(event) {
+    event.preventDefault();
+    const btn = document.getElementById('save-competitor-button');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Crawling...';
+    try {
+      const domain = document.getElementById('comp-domain').value.trim();
+      const name = document.getElementById('comp-name').value.trim();
+      const notes = document.getElementById('comp-notes').value.trim();
+      const res = await apiRequest('/seo/api/competitors', {
+        method: 'POST',
+        body: JSON.stringify({ domain, name, notes })
+      });
+      showToast(res.message);
+      setTimeout(() => location.reload(), 800);
+    } catch (err) {
+      showToast(err.message, false);
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    }
+  }
+
+  async function reanalyzeCompetitor(id) {
+    showToast('Re-analyzing competitor...');
+    try {
+      const res = await apiRequest(`/seo/api/competitors/${id}/analyze`, { method: 'POST' });
+      showToast(res.message);
+      setTimeout(() => location.reload(), 700);
+    } catch (err) {
+      showToast(err.message, false);
+    }
+  }
+
+  async function deleteCompetitor(id) {
+    if (!confirm('Remove this competitor from monitoring?')) return;
+    try {
+      const res = await apiRequest(`/seo/api/competitors/${id}`, { method: 'DELETE' });
+      showToast(res.message);
+      setTimeout(() => location.reload(), 500);
+    } catch (err) {
+      showToast(err.message, false);
+    }
+  }
+
+  async function quickAddCompetitorKeyword(keyword, intent) {
+    showToast(`Adding '${keyword}' to your tracked keywords...`);
+    try {
+      const res = await apiRequest('/seo/api/keywords', {
+        method: 'POST',
+        body: JSON.stringify({
+          keyword: keyword,
+          intent: intent || 'informational',
+          priority: 2,
+          notes: 'Discovered from competitor content gap analysis'
+        })
+      });
+      showToast(res.message);
+      setTimeout(() => switchSeoTab('keywords'), 700);
+    } catch (err) {
+      showToast(err.message, false);
+    }
+  }
+
+  async function saveIntegrations(event) {
+    event.preventDefault();
+    const btn = document.getElementById('save-integrations-button');
+    btn.disabled = true;
+    try {
+      const res = await apiRequest('/seo/api/integrations', {
+        method: 'POST',
+        body: JSON.stringify({
+          ga_measurement_id: document.getElementById('int-ga-id').value.trim(),
+          google_site_verification: document.getElementById('int-gsc-token').value.trim(),
+          alert_email: document.getElementById('int-alert-email').value.trim(),
+          spike_threshold_pct: document.getElementById('int-spike-pct').value
+        })
+      });
+      showToast(res.message);
+      setTimeout(() => location.reload(), 800);
+    } catch (err) {
+      showToast(err.message, false);
+      btn.disabled = false;
+    }
   }
 
   async function runSeoAudit() {
@@ -299,7 +952,10 @@
         checks += 1;
         try {
           const status = await apiRequest('/seo/api/status');
-          if (status.latest_run && status.latest_run.id !== initialSeoRunId && status.latest_run.status !== 'running') { clearInterval(poll); location.reload(); }
+          if (status.latest_run && status.latest_run.id !== initialSeoRunId && status.latest_run.status !== 'running') {
+            clearInterval(poll);
+            location.reload();
+          }
         } catch (error) {}
         if (checks >= 24) { clearInterval(poll); button.disabled = false; button.innerHTML = original; }
       }, 5000);
@@ -315,8 +971,17 @@
     const button = document.getElementById('save-config-button');
     button.disabled = true;
     try {
-      const result = await apiRequest('/seo/api/config', { method: 'POST', body: JSON.stringify({ site_url: document.getElementById('seo-site-url').value, schedule_hours: document.getElementById('seo-schedule').value, max_pages: document.getElementById('seo-max-pages').value, enabled: document.getElementById('seo-enabled').checked }) });
-      showToast(result.message); setTimeout(() => location.reload(), 700);
+      const result = await apiRequest('/seo/api/config', {
+        method: 'POST',
+        body: JSON.stringify({
+          site_url: document.getElementById('seo-site-url').value,
+          schedule_hours: document.getElementById('seo-schedule').value,
+          max_pages: document.getElementById('seo-max-pages').value,
+          enabled: document.getElementById('seo-enabled').checked
+        })
+      });
+      showToast(result.message);
+      setTimeout(() => location.reload(), 700);
     } catch (error) { showToast(error.message, false); button.disabled = false; }
   }
 
@@ -332,6 +997,15 @@
   async function deleteKeyword(id) {
     if (!confirm('Remove this keyword from monitoring?')) return;
     try { const result = await apiRequest(`/seo/api/keywords/${id}`, { method: 'DELETE' }); showToast(result.message); setTimeout(() => location.reload(), 500); } catch (error) { showToast(error.message, false); }
+  }
+
+  function generateAiForKeyword(keyword) {
+    switchSeoTab('content');
+    const input = document.getElementById('ai-keyword');
+    if (input) {
+      input.value = keyword;
+      input.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 
   async function saveBacklink(event) {
@@ -379,42 +1053,48 @@
     } catch (error) { showToast(error.message, false); }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const requestedTab = location.hash.replace('#', '');
-    if (['overview', 'keywords', 'backlinks', 'content', 'settings'].includes(requestedTab)) switchSeoTab(requestedTab);
-    document.querySelectorAll('[data-time]').forEach(element => { const date = new Date(element.dataset.time); if (!Number.isNaN(date.getTime())) element.textContent = date.toLocaleString(); });
-  });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSeoModal(); });
-async function generateAiArticle() {
+  async function generateAiArticle() {
     const keyword = document.getElementById('ai-keyword').value.trim();
     if (!keyword) { alert('Please enter a target keyword.'); return; }
-    
     const btn = document.getElementById('ai-generate-btn');
     btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Writing...';
     btn.disabled = true;
-    
     try {
-        const res = await fetch('/seo/api/generate-article', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({keyword: keyword})
-        });
-        const data = await res.json();
-        if (data.status === 'success') {
-            document.getElementById('ai-writer-results').classList.remove('hidden');
-            document.getElementById('ai-res-title').value = data.data.title;
-            document.getElementById('ai-res-meta').value = data.data.meta_description;
-            document.getElementById('ai-res-slug').value = data.data.slug;
-            document.getElementById('ai-res-content').value = data.data.content;
-        } else {
-            alert(data.message || 'Error generating article.');
-        }
+      const res = await fetch('/seo/api/generate-article', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({keyword: keyword})
+      });
+      const data = await res.json();
+      if (data.status === 'success') {
+        document.getElementById('ai-writer-results').classList.remove('hidden');
+        document.getElementById('ai-res-title').value = data.data.title;
+        document.getElementById('ai-res-meta').value = data.data.meta_description;
+        document.getElementById('ai-res-slug').value = data.data.slug;
+        document.getElementById('ai-res-content').value = data.data.content;
+      } else {
+        alert(data.message || 'Error generating article.');
+      }
     } catch (e) {
-        alert('Network error.');
+      alert('Network error.');
     }
-    
     btn.innerHTML = '<i class="fas fa-pen-nib"></i> Generate Article';
     btn.disabled = false;
-}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const validTabs = ['overview', 'analytics', 'keywords', 'competitors', 'reports', 'integrations', 'backlinks', 'content', 'settings'];
+    const requestedTab = location.hash.replace('#', '');
+    if (validTabs.includes(requestedTab)) {
+      switchSeoTab(requestedTab);
+    } else {
+      switchSeoTab('overview');
+    }
+    document.querySelectorAll('[data-time]').forEach(element => {
+      const date = new Date(element.dataset.time);
+      if (!Number.isNaN(date.getTime())) element.textContent = date.toLocaleString();
+    });
+  });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSeoModal(); });
 </script>
 {% endblock %}

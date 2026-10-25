@@ -15,6 +15,7 @@ DEFAULT_KEYWORDS = [
     ('student internship alerts', 'transactional', 2),
 ]
 RUN_LOCK_ID = 67190311
+_schema_ensured = False
 
 
 @contextmanager
@@ -33,6 +34,9 @@ def _connection(dict_rows=False):
 
 
 def ensure_schema():
+    global _schema_ensured
+    if _schema_ensured:
+        return
     statements = [
         '''CREATE TABLE IF NOT EXISTS seo_agent_config (
             id INTEGER PRIMARY KEY,
@@ -118,6 +122,43 @@ def ensure_schema():
             details JSONB,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )''',
+        '''CREATE TABLE IF NOT EXISTS seo_competitors (
+            id SERIAL PRIMARY KEY,
+            domain TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            target_keywords JSONB,
+            top_headings JSONB,
+            meta_info JSONB,
+            content_gaps JSONB,
+            benchmark_score INTEGER DEFAULT 50,
+            notes TEXT,
+            last_crawled_at TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''',
+        '''CREATE TABLE IF NOT EXISTS seo_daily_reports (
+            id SERIAL PRIMARY KEY,
+            report_date DATE UNIQUE NOT NULL,
+            total_visits INTEGER DEFAULT 0,
+            unique_visitors INTEGER DEFAULT 0,
+            seo_score INTEGER DEFAULT 0,
+            top_pages JSONB,
+            top_referrers JSONB,
+            keyword_summary JSONB,
+            competitor_insights JSONB,
+            actionable_recommendations JSONB,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )''',
+        '''CREATE TABLE IF NOT EXISTS seo_traffic_alerts (
+            id SERIAL PRIMARY KEY,
+            alert_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            hourly_visits INTEGER NOT NULL,
+            baseline_avg_visits NUMERIC(8,2) NOT NULL,
+            surge_percentage NUMERIC(8,2) NOT NULL,
+            recipient_email TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'sent',
+            details JSONB
+        )''',
     ]
 
     with _connection() as (conn, cursor):
@@ -127,12 +168,25 @@ def ensure_schema():
         cursor.execute('ALTER TABLE seo_keywords ADD COLUMN IF NOT EXISTS target_url TEXT')
         cursor.execute('ALTER TABLE seo_keywords ADD COLUMN IF NOT EXISTS priority INTEGER DEFAULT 3')
         cursor.execute('ALTER TABLE seo_keywords ADD COLUMN IF NOT EXISTS notes TEXT')
-        cursor.execute('''INSERT INTO seo_agent_config (id, site_url, enabled, schedule_hours, max_pages)
-            VALUES (1, %s, TRUE, 6, 20) ON CONFLICT (id) DO NOTHING''', (DEFAULT_SITE_URL,))
+        cursor.execute('ALTER TABLE seo_agent_config ADD COLUMN IF NOT EXISTS ga_measurement_id TEXT')
+        cursor.execute('ALTER TABLE seo_agent_config ADD COLUMN IF NOT EXISTS google_site_verification TEXT')
+        cursor.execute("ALTER TABLE seo_agent_config ADD COLUMN IF NOT EXISTS alert_email TEXT DEFAULT 'syedali6160@gmail.com'")
+        cursor.execute('ALTER TABLE seo_agent_config ADD COLUMN IF NOT EXISTS spike_threshold_pct INTEGER DEFAULT 100')
+        cursor.execute('ALTER TABLE seo_agent_config ADD COLUMN IF NOT EXISTS spike_min_visits INTEGER DEFAULT 5')
+        cursor.execute('ALTER TABLE site_visits ADD COLUMN IF NOT EXISTS referrer TEXT')
+        cursor.execute('''INSERT INTO seo_agent_config (id, site_url, enabled, schedule_hours, max_pages, alert_email)
+            VALUES (1, %s, TRUE, 6, 20, 'syedali6160@gmail.com') ON CONFLICT (id) DO NOTHING''', (DEFAULT_SITE_URL,))
         for keyword, intent, priority in DEFAULT_KEYWORDS:
             cursor.execute('''INSERT INTO seo_keywords (keyword, intent, priority)
                 VALUES (%s, %s, %s) ON CONFLICT (keyword) DO NOTHING''', (keyword, intent, priority))
+        cursor.execute('''INSERT INTO seo_competitors (domain, name, notes)
+            VALUES ('techcrunch.com', 'TechCrunch', 'Leading global tech and startup journalism benchmark')
+            ON CONFLICT (domain) DO NOTHING''')
+        cursor.execute('''INSERT INTO seo_competitors (domain, name, notes)
+            VALUES ('tldr.tech', 'TLDR Tech', 'Curated daily technology and developer newsletter benchmark')
+            ON CONFLICT (domain) DO NOTHING''')
         conn.commit()
+        _schema_ensured = True
 
 
 def get_config():
@@ -388,14 +442,284 @@ def list_events(limit=12):
         return [dict(row) for row in cursor.fetchall()]
 
 
+def list_competitors():
+    ensure_schema()
+    with _connection(dict_rows=True) as (_, cursor):
+        cursor.execute('SELECT * FROM seo_competitors ORDER BY updated_at DESC, id DESC')
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def get_competitor(competitor_id):
+    ensure_schema()
+    with _connection(dict_rows=True) as (_, cursor):
+        cursor.execute('SELECT * FROM seo_competitors WHERE id = %s', (competitor_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def save_competitor(domain, name, notes=None):
+    ensure_schema()
+    clean_domain = (domain or '').strip().lower()
+    clean_name = (name or '').strip() or clean_domain
+    with _connection(dict_rows=True) as (conn, cursor):
+        cursor.execute('''INSERT INTO seo_competitors (domain, name, notes)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (domain) DO UPDATE SET
+                name=EXCLUDED.name,
+                notes=COALESCE(EXCLUDED.notes, seo_competitors.notes),
+                updated_at=CURRENT_TIMESTAMP
+            RETURNING *''', (clean_domain, clean_name, (notes or '').strip() or None))
+        row = dict(cursor.fetchone())
+        conn.commit()
+        return row
+
+
+def update_competitor_analysis(competitor_id, analysis_data):
+    ensure_schema()
+    with _connection(dict_rows=True) as (conn, cursor):
+        cursor.execute('''UPDATE seo_competitors SET
+            target_keywords=%s,
+            top_headings=%s,
+            meta_info=%s,
+            content_gaps=%s,
+            benchmark_score=%s,
+            last_crawled_at=CURRENT_TIMESTAMP,
+            updated_at=CURRENT_TIMESTAMP
+            WHERE id=%s RETURNING *''', (
+                psycopg2.extras.Json(analysis_data.get('target_keywords') or []),
+                psycopg2.extras.Json(analysis_data.get('top_headings') or []),
+                psycopg2.extras.Json(analysis_data.get('meta_info') or {}),
+                psycopg2.extras.Json(analysis_data.get('content_gaps') or []),
+                int(analysis_data.get('benchmark_score') or 50),
+                competitor_id,
+            ))
+        row = cursor.fetchone()
+        conn.commit()
+        return dict(row) if row else None
+
+
+def delete_competitor(competitor_id):
+    ensure_schema()
+    with _connection() as (conn, cursor):
+        cursor.execute('DELETE FROM seo_competitors WHERE id=%s', (competitor_id,))
+        deleted = cursor.rowcount > 0
+        conn.commit()
+        return deleted
+
+
+def save_daily_report(report_date, total_visits, unique_visitors, seo_score, top_pages, top_referrers, keyword_summary, competitor_insights, actionable_recommendations):
+    ensure_schema()
+    with _connection(dict_rows=True) as (conn, cursor):
+        cursor.execute('''INSERT INTO seo_daily_reports
+            (report_date, total_visits, unique_visitors, seo_score, top_pages, top_referrers, keyword_summary, competitor_insights, actionable_recommendations)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (report_date) DO UPDATE SET
+                total_visits=EXCLUDED.total_visits,
+                unique_visitors=EXCLUDED.unique_visitors,
+                seo_score=EXCLUDED.seo_score,
+                top_pages=EXCLUDED.top_pages,
+                top_referrers=EXCLUDED.top_referrers,
+                keyword_summary=EXCLUDED.keyword_summary,
+                competitor_insights=EXCLUDED.competitor_insights,
+                actionable_recommendations=EXCLUDED.actionable_recommendations,
+                created_at=CURRENT_TIMESTAMP
+            RETURNING *''', (
+                report_date, total_visits, unique_visitors, seo_score,
+                psycopg2.extras.Json(top_pages or []),
+                psycopg2.extras.Json(top_referrers or []),
+                psycopg2.extras.Json(keyword_summary or {}),
+                psycopg2.extras.Json(competitor_insights or {}),
+                psycopg2.extras.Json(actionable_recommendations or [])
+            ))
+        row = dict(cursor.fetchone())
+        conn.commit()
+        return row
+
+
+def list_daily_reports(limit=14):
+    ensure_schema()
+    with _connection(dict_rows=True) as (_, cursor):
+        cursor.execute('SELECT * FROM seo_daily_reports ORDER BY report_date DESC LIMIT %s', (max(1, min(limit, 60)),))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def latest_daily_report():
+    reports = list_daily_reports(limit=1)
+    return reports[0] if reports else None
+
+
+def record_traffic_alert(hourly_visits, baseline_avg, surge_percentage, recipient_email, status='sent', details=None):
+    ensure_schema()
+    with _connection(dict_rows=True) as (conn, cursor):
+        cursor.execute('''INSERT INTO seo_traffic_alerts
+            (hourly_visits, baseline_avg_visits, surge_percentage, recipient_email, status, details)
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING *''', (
+                hourly_visits, baseline_avg, surge_percentage, recipient_email, status,
+                psycopg2.extras.Json(details or {})
+            ))
+        row = dict(cursor.fetchone())
+        conn.commit()
+        return row
+
+
+def list_traffic_alerts(limit=10):
+    ensure_schema()
+    with _connection(dict_rows=True) as (_, cursor):
+        cursor.execute('SELECT * FROM seo_traffic_alerts ORDER BY alert_time DESC LIMIT %s', (max(1, min(limit, 50)),))
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def recent_alert_count(hours=6):
+    ensure_schema()
+    with _connection() as (_, cursor):
+        cursor.execute("SELECT COUNT(*) FROM seo_traffic_alerts WHERE alert_time >= CURRENT_TIMESTAMP - INTERVAL '%s hours' AND status='sent'", (hours,))
+        return cursor.fetchone()[0] or 0
+
+
+def update_integrations(ga_measurement_id=None, google_site_verification=None, alert_email=None, spike_threshold_pct=100, spike_min_visits=5):
+    ensure_schema()
+    with _connection(dict_rows=True) as (conn, cursor):
+        cursor.execute('''UPDATE seo_agent_config SET
+            ga_measurement_id=%s,
+            google_site_verification=%s,
+            alert_email=COALESCE(%s, alert_email),
+            spike_threshold_pct=%s,
+            spike_min_visits=%s,
+            updated_at=CURRENT_TIMESTAMP
+            WHERE id=1 RETURNING *''', (
+                (ga_measurement_id or '').strip() or None,
+                (google_site_verification or '').strip() or None,
+                (alert_email or '').strip() or 'syedali6160@gmail.com',
+                int(spike_threshold_pct or 100),
+                int(spike_min_visits or 5),
+            ))
+        row = dict(cursor.fetchone())
+        conn.commit()
+        return row
+
+
+def get_visitor_analytics(days=30):
+    ensure_schema()
+    with _connection(dict_rows=True) as (_, cursor):
+        cursor.execute('''
+            SELECT
+                COUNT(*) as total,
+                COUNT(DISTINCT ip_address) as unique_ips,
+                COUNT(*) FILTER (WHERE visit_time >= CURRENT_DATE) as today_total,
+                COUNT(DISTINCT ip_address) FILTER (WHERE visit_time >= CURRENT_DATE) as today_unique,
+                COUNT(*) FILTER (WHERE visit_time >= CURRENT_DATE - INTERVAL '1 day' AND visit_time < CURRENT_DATE) as yest_total
+            FROM site_visits
+        ''')
+        totals_row = cursor.fetchone() or {}
+        total_visits = int(totals_row.get('total') or 0)
+        unique_visitors = int(totals_row.get('unique_ips') or 0)
+        today_visits = int(totals_row.get('today_total') or 0)
+        today_unique = int(totals_row.get('today_unique') or 0)
+        yesterday_visits = int(totals_row.get('yest_total') or 0)
+
+        cursor.execute('''
+            SELECT DATE(visit_time) as date, COUNT(*) as visits, COUNT(DISTINCT ip_address) as unique_visits
+            FROM site_visits
+            WHERE visit_time >= CURRENT_DATE - (%s || ' days')::INTERVAL
+            GROUP BY DATE(visit_time)
+            ORDER BY date ASC
+        ''', (int(days),))
+        daily_history = []
+        for r in cursor.fetchall():
+            daily_history.append({
+                'date': str(r['date']),
+                'visits': int(r.get('visits') or 0),
+                'unique': int(r.get('unique_visits') or 0)
+            })
+
+        cursor.execute('''
+            SELECT page, COUNT(*) as count, COUNT(DISTINCT ip_address) as unique_visits
+            FROM site_visits
+            GROUP BY page
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        top_pages = []
+        for r in cursor.fetchall():
+            cnt = int(r.get('count') or 0)
+            pct = round((cnt / max(1, total_visits)) * 100, 1)
+            top_pages.append({
+                'page': r.get('page') or '/',
+                'count': cnt,
+                'unique': int(r.get('unique_visits') or 0),
+                'percentage': pct
+            })
+
+        cursor.execute('''
+            SELECT COALESCE(NULLIF(referrer, ''), 'Direct / Bookmark') as source, COUNT(*) as count
+            FROM site_visits
+            GROUP BY source
+            ORDER BY count DESC
+            LIMIT 10
+        ''')
+        top_referrers = []
+        for r in cursor.fetchall():
+            cnt = int(r.get('count') or 0)
+            pct = round((cnt / max(1, total_visits)) * 100, 1)
+            top_referrers.append({
+                'source': r.get('source') or 'Direct',
+                'count': cnt,
+                'percentage': pct
+            })
+
+        cursor.execute('SELECT user_agent FROM site_visits ORDER BY id DESC LIMIT 500')
+        agents = [r.get('user_agent') or '' for r in cursor.fetchall()]
+
+        devices = {'desktop': 0, 'mobile': 0, 'tablet': 0}
+        browsers = {'chrome': 0, 'safari': 0, 'firefox': 0, 'edge': 0, 'other': 0}
+        for ua in agents:
+            ua_lower = ua.lower()
+            if 'mobile' in ua_lower or 'android' in ua_lower or 'iphone' in ua_lower:
+                devices['mobile'] += 1
+            elif 'ipad' in ua_lower or 'tablet' in ua_lower:
+                devices['tablet'] += 1
+            else:
+                devices['desktop'] += 1
+
+            if 'edg/' in ua_lower or 'edge/' in ua_lower:
+                browsers['edge'] += 1
+            elif 'chrome/' in ua_lower:
+                browsers['chrome'] += 1
+            elif 'safari/' in ua_lower and 'chrome' not in ua_lower:
+                browsers['safari'] += 1
+            elif 'firefox/' in ua_lower:
+                browsers['firefox'] += 1
+            else:
+                browsers['other'] += 1
+
+        return {
+            'total_visits': total_visits,
+            'unique_visitors': unique_visitors,
+            'today_visits': today_visits,
+            'today_unique': today_unique,
+            'yesterday_visits': yesterday_visits,
+            'avg_daily_visits': round(total_visits / max(1, len(daily_history) or 1), 1),
+            'daily_trend': daily_history,
+            'top_pages': top_pages,
+            'top_referrers': top_referrers,
+            'devices': devices,
+            'browsers': browsers,
+        }
+
+
 def dashboard_snapshot():
+    cfg = get_config()
     return {
-        'config': get_config(),
+        'config': cfg,
         'latest_run': latest_run(),
         'issues': latest_issues(),
         'keywords': list_keywords(),
         'backlinks': list_backlinks(),
         'content_opportunities': list_content_opportunities(),
+        'competitors': list_competitors(),
+        'daily_reports': list_daily_reports(limit=7),
+        'traffic_alerts': list_traffic_alerts(limit=5),
+        'visitor_analytics': get_visitor_analytics(days=30),
         'runs': list_runs(),
         'events': list_events(),
     }

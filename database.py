@@ -290,6 +290,8 @@ class NewsDatabase:
             'notified_at TIMESTAMP', 'notify_before_days INTEGER DEFAULT 7'])
         self._ensure_table_columns(conn, 'contact_messages', [
             'admin_reply TEXT', 'replied_at TIMESTAMP'])
+        self._ensure_table_columns(conn, 'site_visits', [
+            'referrer TEXT'])
 
         # Preserve one-time delivery for users who received a welcome before the
         # dedicated tracking column was introduced.
@@ -704,14 +706,30 @@ class NewsDatabase:
         conn.commit()
         conn.close()
 
-    def record_site_visit(self, page: str, ip_address: str = None, user_agent: str = None, email: str = None) -> None:
+    def record_site_visit(self, page: str, ip_address: str = None, user_agent: str = None, email: str = None, referrer: str = None) -> None:
         conn = safe_connect()
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO site_visits (page,ip_address,user_agent,email) VALUES (%s,%s,%s,%s)',
-                       (page or '/', ip_address or 'unknown', (user_agent or '')[:250],
-                        email.strip().lower() if email else None))
-        conn.commit()
-        conn.close()
+        try:
+            cursor.execute('INSERT INTO site_visits (page,ip_address,user_agent,email,referrer) VALUES (%s,%s,%s,%s,%s)',
+                           (page or '/', ip_address or 'unknown', (user_agent or '')[:250],
+                            email.strip().lower() if email else None,
+                            (referrer or '')[:500] if referrer else None))
+            conn.commit()
+        except Exception:
+            try:
+                conn.rollback()
+                cursor.execute('INSERT INTO site_visits (page,ip_address,user_agent,email) VALUES (%s,%s,%s,%s)',
+                               (page or '/', ip_address or 'unknown', (user_agent or '')[:250],
+                                email.strip().lower() if email else None))
+                conn.commit()
+            except Exception as e:
+                logger.warning('Fallback visit record failed: %s', e)
+        finally:
+            try:
+                cursor.close()
+            except Exception:
+                pass
+            conn.close()
 
     def get_visitor_stats(self) -> Dict[str, int]:
         conn = safe_connect()

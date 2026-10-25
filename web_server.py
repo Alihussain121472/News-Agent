@@ -50,6 +50,25 @@ app.config.update(
 def inject_agent_studios():
     return {'agent_studios': get_agent_studios()}
 
+
+@app.context_processor
+def inject_seo_integrations():
+    ga_id = os.getenv('GA_MEASUREMENT_ID', '').strip()
+    gsc_token = (os.getenv('GOOGLE_SITE_VERIFICATION') or os.getenv('GSC_VERIFICATION_TOKEN', '')).strip()
+    try:
+        from growth_seo_agent.repository import get_config
+        cfg = get_config()
+        if not ga_id and cfg.get('ga_measurement_id'):
+            ga_id = str(cfg['ga_measurement_id']).strip()
+        if not gsc_token and cfg.get('google_site_verification'):
+            gsc_token = str(cfg['google_site_verification']).strip()
+    except Exception:
+        pass
+    return {
+        'ga_measurement_id': ga_id or None,
+        'google_site_verification': gsc_token or None,
+    }
+
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -294,10 +313,11 @@ def track_visitor():
     user_agent = request.user_agent.string[:250]
     user_email = session.get('user_email')
     user_role = session.get('role')
+    referrer = request.referrer[:500] if request.referrer else None
 
     def persist_visit():
         try:
-            db.record_site_visit(page, remote_addr, user_agent, user_email)
+            db.record_site_visit(page, remote_addr, user_agent, user_email, referrer)
             if user_email and user_role == 'user':
                 db.log_user_activity(user_email, 'page_visit', None, page)
         except Exception as exc:
@@ -1989,6 +2009,23 @@ def _safe_run_seo_monitor():
     except Exception as e:
         logger.error(f'Scheduled SEO monitor failed: {e}')
 
+def _safe_check_traffic_spikes():
+    try:
+        from growth_seo_agent.service import check_and_alert_traffic_spikes
+        result = check_and_alert_traffic_spikes()
+        if result.get('alert_triggered'):
+            logger.info('Traffic spike detected and alert dispatched: %s', result.get('message'))
+    except Exception as e:
+        logger.error(f'Traffic spike monitoring failed: {e}')
+
+def _safe_generate_daily_seo_report():
+    try:
+        from growth_seo_agent.service import generate_daily_seo_report
+        report = generate_daily_seo_report()
+        logger.info('Daily SEO performance report generated for %s (id=%s).', report.get('report_date'), report.get('id'))
+    except Exception as e:
+        logger.error(f'Daily SEO performance reporting failed: {e}')
+
 def _safe_hunt_student_programs():
     try:
         db.seed_default_programs()
@@ -2051,6 +2088,14 @@ def start_background_scheduler():
         scheduler.add_job(
             _safe_run_seo_monitor, 'cron', minute=15,
             id='seo_monitor_due_check', replace_existing=True, misfire_grace_time=1800
+        )
+        scheduler.add_job(
+            _safe_check_traffic_spikes, 'interval', hours=1,
+            id='hourly_traffic_spike_check', replace_existing=True, misfire_grace_time=1800
+        )
+        scheduler.add_job(
+            _safe_generate_daily_seo_report, 'cron', hour=0, minute=5,
+            id='daily_seo_report_cron', replace_existing=True, misfire_grace_time=3600
         )
         scheduler.start()
         threading.Thread(target=_safe_send_pending_welcomes, daemon=True).start()
