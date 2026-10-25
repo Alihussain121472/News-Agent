@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.min.css') }}">
     <style>
         .legal-page {
             padding: 4rem 0;
@@ -150,7 +150,7 @@
         </div>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/main.min.js') }}"></script>
 
   <button type="button" data-theme-toggle aria-label="Switch theme" class="fixed top-4 right-4 z-50 p-2 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300"><i class="fas fa-moon"></i><i class="fas fa-sun" style="display:none"></i></button>
 </body>

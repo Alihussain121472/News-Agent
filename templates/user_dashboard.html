@@ -18,8 +18,10 @@
 
 
   <link rel="stylesheet" href="/static/css/tailwind.css">
-  <link rel="stylesheet" href="/static/css/student-tools.css">
-  <link rel="stylesheet" href="/static/css/python-entry.css">
+  <link rel="stylesheet" href="/static/css/student-tools.min.css">
+  <link rel="stylesheet" href="/static/css/python-entry.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script>
@@ -145,7 +147,7 @@ async function runSummarizer() {
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col overflow-y-auto hidden lg:flex">
     <div class="p-6 border-b border-neutral-200 dark:border-slate-800">
       <a href="/" class="flex items-center gap-3">
-        <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-9 h-9 rounded-xl object-cover" decoding="async" width="36" height="36">
+        <img src="/static/nova-logo.webp" alt="Nova Brief Logo" class="w-9 h-9 rounded-xl object-cover" decoding="async" width="36" height="36">
         <span class="font-bold text-neutral-900 dark:text-white">Nova Brief</span>
       </a>
     </div>
@@ -259,7 +261,7 @@ async function runSummarizer() {
             <div id="overviewArticles" class="space-y-3"></div>
           </section>
           <section class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5" aria-labelledby="overview-programs-title">
-            <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20" loading="lazy"/>
+            <img src="/static/images/student-programs-grid-v2.webp" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20" loading="lazy"/>
             <h2 id="overview-programs-title" class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
             <button type="button" onclick="switchTab('planner')" class="student-planner-shortcut">Organize applications &amp; study tasks <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
@@ -437,7 +439,7 @@ async function runSummarizer() {
   </main>
 </div>
 
-<script src="/static/js/student-tools.js"></script>
+<script defer src="/static/js/student-tools.min.js"></script>
 <script>
 const USER_NAME = {{ (user_name or 'User') | tojson }};
 const USER_EMAIL = {{ user_email | tojson }};
@@ -458,13 +460,13 @@ const dashboardTabMeta = {
 
 function getProgramImage(program) {
   const identity = `${program.company || ''} ${program.title || ''}`.toLowerCase();
-  if (identity.includes('google')) return '/static/images/google-student-club-v2.jpg';
-  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador-v2.jpg';
-  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning-v2.jpg';
-  if (identity.includes('meta')) return '/static/images/meta-engineering-internship-v2.jpg';
-  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship-v2.jpg';
-  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge-v2.jpg';
-  return '/static/images/student-programs-grid-v2.jpg';
+  if (identity.includes('google')) return '/static/images/google-student-club-v2.webp';
+  if (identity.includes('microsoft')) return '/static/images/microsoft-student-ambassador-v2.webp';
+  if (identity.includes('amazon') || identity.includes('aws')) return '/static/images/aws-cloud-learning-v2.webp';
+  if (identity.includes('meta')) return '/static/images/meta-engineering-internship-v2.webp';
+  if (identity.includes('ibm')) return '/static/images/ibm-skills-mentorship-v2.webp';
+  if (identity.includes('apple') || identity.includes('swift')) return '/static/images/apple-app-challenge-v2.webp';
+  return '/static/images/student-programs-grid-v2.webp';
 }
 
 // Both profile initials are rendered by the server, with no placeholder flash.

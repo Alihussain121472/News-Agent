@@ -1,5 +1,5 @@
 # Import Flask and necessary libraries to build the web server
-from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Response
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Response, send_from_directory
 from database import NewsDatabase
 from datetime import datetime, timedelta, timezone, date
 import concurrent.futures
@@ -60,9 +60,11 @@ def add_security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     if request.path.startswith('/static/'):
         response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        response.headers.setdefault('Vary', 'Accept-Encoding')
     elif request.method == 'GET' and response.status_code == 200 and not session.get('user_id') and not session.get('role'):
         if request.path in {'/', '/news', '/programs', '/learn-python', '/blog', '/about', '/contact', '/advertise', '/disclaimer'} or request.path.startswith('/blog/'):
-            response.headers.setdefault('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
+            response.headers['Cache-Control'] = 'public, max-age=120, s-maxage=600, stale-while-revalidate=1200'
+            response.headers['Vary'] = 'Accept-Encoding, Cookie'
 
     # Gzip response compression for text, scripts, styles, json, and svg
     if (response.status_code == 200
@@ -85,6 +87,16 @@ if IS_PRODUCTION:
 @app.route('/googleae48116c49ed7429.html')
 def google_verification():
     return 'google-site-verification: googleae48116c49ed7429.html'
+
+@app.route('/favicon.ico')
+def favicon():
+    response = send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.ico',
+        mimetype='image/vnd.microsoft.icon'
+    )
+    response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    return response
 
 try:
     from growth_seo_agent.routes import seo_bp
@@ -1730,7 +1742,7 @@ def _build_full_sitemap():
         logger.error(f'Failed to append blog posts to sitemap: {e}')
 
     xml.append('</urlset>')
-    return '\n'.join(xml), 200, {'Content-Type': 'application/xml'}
+    return '\n'.join(xml), 200, {'Content-Type': 'application/xml', 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400'}
 
 
 @app.route('/sitemap.xml')
@@ -1759,7 +1771,7 @@ def robots():
         "Disallow: /api/\n\n"
         f"Sitemap: {domain}/sitemap.xml"
     )
-    return robot_rules, 200, {'Content-Type': 'text/plain'}
+    return robot_rules, 200, {'Content-Type': 'text/plain', 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'}
 
 @app.route('/sitemap-static.xml')
 def sitemap_static():
@@ -1772,12 +1784,12 @@ def sitemap_news():
         '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">'
     ]
     xml.append('</urlset>')
-    return '\n'.join(xml), 200, {'Content-Type': 'application/xml'}
+    return '\n'.join(xml), 200, {'Content-Type': 'application/xml', 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400'}
 
 
 @app.route('/ads.txt')
 def adstxt():
-    return 'google.com, pub-1036052096443002, DIRECT, f08c47fec0942fa0', 200, {'Content-Type': 'text/plain'}
+    return 'google.com, pub-1036052096443002, DIRECT, f08c47fec0942fa0', 200, {'Content-Type': 'text/plain', 'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800'}
 
 
 @app.route('/user/forgot-password', methods=['GET', 'POST'])
