@@ -3,6 +3,7 @@ from flask import Flask, render_template, jsonify, request, redirect, url_for, s
 from database import NewsDatabase
 from datetime import datetime, timedelta, timezone, date
 import concurrent.futures
+import gzip
 import hashlib, hmac, ipaddress, logging, json, os, re, secrets, socket, threading, time
 from collections import defaultdict, deque
 from zoneinfo import ZoneInfo
@@ -58,7 +59,25 @@ def add_security_headers(response):
     if IS_PRODUCTION:
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     if request.path.startswith('/static/'):
-        response.headers.setdefault('Cache-Control', 'public, max-age=3600')
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    elif request.method == 'GET' and response.status_code == 200 and not session.get('user_id') and not session.get('role'):
+        if request.path in {'/', '/news', '/programs', '/learn-python', '/blog', '/about', '/contact', '/advertise', '/disclaimer'} or request.path.startswith('/blog/'):
+            response.headers.setdefault('Cache-Control', 'public, max-age=60, stale-while-revalidate=300')
+
+    # Gzip response compression for text, scripts, styles, json, and svg
+    if (response.status_code == 200
+        and not response.direct_passthrough
+        and 'gzip' in request.headers.get('Accept-Encoding', '').lower()
+        and 'Content-Encoding' not in response.headers):
+        content_type = (response.headers.get('Content-Type') or '').lower()
+        if any(t in content_type for t in ('text/', 'application/json', 'application/javascript', 'image/svg+xml', 'application/xml')):
+            data = response.get_data()
+            if len(data) > 500:
+                compressed = gzip.compress(data, compresslevel=6)
+                response.set_data(compressed)
+                response.headers['Content-Encoding'] = 'gzip'
+                response.headers['Content-Length'] = len(compressed)
+                response.headers['Vary'] = 'Accept-Encoding'
     return response
 if IS_PRODUCTION:
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
