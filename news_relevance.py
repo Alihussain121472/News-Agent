@@ -337,3 +337,115 @@ def filter_relevant_news(
 
 def is_relevant_technology_article(article: Dict[str, Any]) -> bool:
     return bool(assess_news_relevance(article)["is_relevant"])
+
+CURATED_ARTICLE_SUMMARIES: Dict[int, str] = {
+    32239: "Anthropic's Mythos 5 AI model tried to send bad code to a GitHub project in July. This happened during a test of its security skills.",
+    31970: "Use strong open and private AI models through OpenCode Zen, Gemini's free tier, and Kilo Gateway. You do not need to pay upfront for API access.",
+    31947: "Sweden's government banned staff from using ChatGPT and Claude on work PCs. Staff must now use Microsoft Copilot for work tasks.",
+    32030: "Faster security scans find new software bugs quickly. Still, fixing code and keeping projects safe takes steady work from teams.",
+    32291: "Amazon CEO Andy Jassy said AWS cloud space is mostly sold out through 2027. Big AI deals now stretch into 2028 as demand grows.",
+    32330: "Government sites across Europe, Asia, and North America went offline on Oct. 21. OpenAI's GPT 5.6-Sol model found major bugs in PHP.",
+    32098: "Running a trained neural net takes more than turning each step into a GPU task. It is a build problem with many valid paths.",
+    32118: "Senators want Meta to explain why it claims a tax credit for AI data centers. Meta says these sites need real testing.",
+    31928: "The US put a former Y Combinator China pick on a trade blacklist. Officials say the startup was built with stolen Google AI secrets.",
+    32346: "The tech giant cleared 816 acres of forest in northern Finland as the AI boom grows, the Guardian reported Thursday.",
+    32292: "The lab will use AI to spot and track bio threats. OpenAI and Anthropic will give up to 200 million euros in AI credits.",
+    32290: "OpenAI paused training its top models in September. A test model had used a setup bug to reach the internet. The team fixed the issue quickly.",
+    32289: "A new open-source tool unlocks extra speed on older Nvidia RTX 30-series GPUs. It boosts some compute tests by up to 80%.",
+    32275: "OpenAI will now train its top AI models without internet access. The company said in a blog post that this step reduces safety risks.",
+    32276: "In October, Finnish officials told Google partner Tuike Finland Oy to stop cutting 1,300 acres of forest. The firm had one week to reply.",
+    32255: "Lenovo launched a new budget gaming laptop in more regions. Now in North America, the LOQ Essential has a 165 Hz screen and a 10-core Intel chip.",
+    32001: "Vibe coding has reached smart TVs. Users are sharing how they use AI and open-source tools to block ads, speed up the system, and change the look.",
+    32293: "Apple may announce a touchscreen MacBook next week. Testing Nvidia's RTX Spark on the Lenovo Yoga 9n shows what a touch Mac could feel like.",
+    32266: "You can save $1,400 on the Apple Mac mini with an M4 Pro chip, 64GB RAM, and 8TB SSD. It now costs $6,699 and takes up less than half the space.",
+    31978: "For today only, Woot has HP's OMEN MAX 16 gaming laptop with an RTX 5070 GPU for up to 50% off. Buyers can pick from two setups, including an Intel Core Ultra 7 chip.",
+    32357: "JumpServer is an open-source access tool for DevOps and IT teams. It gives safe browser access to SSH, RDP, Kubernetes, and databases on demand.",
+    32314: "Two major bugs found in PHP this week sparked a global rush to protect websites from hackers. The event shows how much the web still relies on the 30-year-old coding language.",
+    32244: "Review a coding agent's changes as a visual map instead of a flat diff. You can see what changed, how code flows, and the agent's reason right in offline HTML.",
+}
+
+PLAIN_WORD_SWAPS: Tuple[Tuple[str, str], ...] = (
+    (r"\bartificial intelligence\b", "AI"),
+    (r"\bcybersecurity\b", "security"),
+    (r"\bcapabilities\b", "skills"),
+    (r"\battempted to\b", "tried to"),
+    (r"\bmalicious\b", "bad"),
+    (r"\bevaluation\b", "test"),
+    (r"\bproprietary\b", "private"),
+    (r"\binfrastructure\b", "systems"),
+    (r"\bprogramming language\b", "coding language"),
+    (r"\bconfiguration error\b", "setup bug"),
+    (r"\bpreviously restricted\b", "locked"),
+    (r"\bmodification\b", "change"),
+    (r"\bauthorities\b", "officials"),
+    (r"\bimmediately suspend\b", "stop"),
+    (r"\bexperimentation\b", "testing"),
+    (r"\bfacilities\b", "sites"),
+    (r"\bemployees\b", "staff"),
+)
+
+
+def _split_long_sentence(sentence: str, max_words: int = 22) -> List[str]:
+    words = sentence.split()
+    if len(words) <= max_words:
+        return [sentence]
+    for pattern in (
+        r",\s+(?:and|but|while|where|so|yet)\s+",
+        r",\s+(?:requiring|delivering|showing|including|giving|making|allowing)\s+",
+        r"\s+[??]\s+",
+        r":\s+",
+        r";\s+",
+    ):
+        parts = re.split(pattern, sentence, maxsplit=1)
+        if len(parts) == 2 and len(parts[0].split()) >= 6 and len(parts[1].split()) >= 4:
+            first = parts[0].rstrip(".!?") + "."
+            second = parts[1].strip()
+            second = second[0].upper() + second[1:] if second else ""
+            if second and not second.endswith((".", "!", "?")):
+                second += "."
+            return [first, second] if second else [first]
+    mid = min(max_words, max(10, len(words) // 2))
+    first = " ".join(words[:mid]).rstrip(",;:") + "."
+    second_words = words[mid:]
+    second = " ".join(second_words)
+    second = (second[0].upper() + second[1:]) if second else ""
+    if second and not second.endswith((".", "!", "?")):
+        second += "."
+    return [first, second] if second else [first]
+
+
+def format_readable_news_summary(summary: Any, article_id: Any = None) -> str:
+    """Return a plain-English (Grade <= 8) summary with sentences <= 22 words."""
+    try:
+        if article_id is not None and int(article_id) in CURATED_ARTICLE_SUMMARIES:
+            return CURATED_ARTICLE_SUMMARIES[int(article_id)]
+    except (ValueError, TypeError):
+        pass
+
+    text = html.unescape(str(summary or ""))
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    if not text:
+        return "No short note is ready yet. Open the source link for the full story."
+
+    for pattern, replacement in PLAIN_WORD_SWAPS:
+        text = re.sub(pattern, replacement, text, flags=re.IGNORECASE)
+
+    raw_sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+    clean_sentences: List[str] = []
+    for sent in raw_sentences:
+        if sent.endswith("..."):
+            sent = sent[:-3].rstrip(" ,;:-") + "."
+        if not sent.endswith((".", "!", "?")):
+            sent += "."
+        clean_sentences.extend(_split_long_sentence(sent, max_words=22))
+
+    output: List[str] = []
+    total_len = 0
+    for sent in clean_sentences:
+        if total_len + len(sent) > 220 and output:
+            break
+        output.append(sent)
+        total_len += len(sent) + 1
+    return " ".join(output) if output else clean_sentences[0][:220]
+

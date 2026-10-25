@@ -28,7 +28,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <a href="/" class="flex items-center gap-3">
-                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover">
+                    <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-8 h-8 rounded-lg object-cover" decoding="async" width="32" height="32">
                     <span class="text-lg font-bold text-neutral-900 dark:text-white tracking-tight">Nova Brief</span>
                 </a>
                 <div class="hidden md:flex items-center gap-6">
@@ -59,7 +59,7 @@
             </span>
             <h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mb-3">Recent Technology &amp; AI News</h1>
             <p class="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mb-6">
-                Short summaries link to original reporting. For practical student resources, explore the program listings and career guides.
+                Each short note links to the full news story. You can also browse our student programs and career guides.
             </p>
 
             <!-- Search Bar -->
@@ -127,7 +127,7 @@
                     </h2>
 
                     <p class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed mb-4">
-                        {{ (item.summary or 'A publisher summary is not available. Open the original report for the full story.') | striptags | truncate(240) }}
+                        {{ item.summary or 'No short note is ready yet. Open the source link for the full story.' }}
                     </p>
 
                     {% if item.why_important or item.why_care %}

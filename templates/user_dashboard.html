@@ -145,7 +145,7 @@ async function runSummarizer() {
   <aside class="sidebar w-64 flex-shrink-0 flex flex-col overflow-y-auto hidden lg:flex">
     <div class="p-6 border-b border-neutral-200 dark:border-slate-800">
       <a href="/" class="flex items-center gap-3">
-        <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-9 h-9 rounded-xl object-cover">
+        <img src="/static/nova-logo.png" alt="Nova Brief Logo" class="w-9 h-9 rounded-xl object-cover" decoding="async" width="36" height="36">
         <span class="font-bold text-neutral-900 dark:text-white">Nova Brief</span>
       </a>
     </div>
@@ -259,7 +259,7 @@ async function runSummarizer() {
             <div id="overviewArticles" class="space-y-3"></div>
           </section>
           <section class="hover-card bg-white dark:bg-slate-900/70 backdrop-blur-md border border-neutral-200 dark:border-slate-700/50 rounded-2xl p-5" aria-labelledby="overview-programs-title">
-            <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20"/>
+            <img src="/static/images/student-programs-grid-v2.jpg" alt="Students learning, presenting and building technology projects" width="1536" height="1024" decoding="async" class="w-full h-32 object-cover rounded-xl mb-4 border border-emerald-500/20" loading="lazy"/>
             <h2 id="overview-programs-title" class="font-bold text-neutral-900 dark:text-white mb-4 flex items-center gap-2"><i class="fas fa-graduation-cap text-emerald-400"></i> Student Opportunities</h2>
             <div id="overviewPrograms" class="space-y-3"></div>
             <button type="button" onclick="switchTab('planner')" class="student-planner-shortcut">Organize applications &amp; study tasks <i class="fas fa-arrow-right" aria-hidden="true"></i></button>

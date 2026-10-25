@@ -18,7 +18,7 @@ ARTICLES = [
     {
         "title": "Complete Roadmap to Generative AI for Computer Science Students in 2026",
         "slug": "generative-ai-roadmap-students-2026",
-        "meta_description": "A comprehensive step-by-step technical guide for university students looking to master Large Language Models, PyTorch, LangChain, and Agentic AI workflows in 2026.",
+        "meta_description": "A step-by-step guide for college students to learn AI in 2026. Master large language models, PyTorch, and AI agents.",
         "content": """
 <div class="article-body">
     <p class="lead">Artificial Intelligence is no longer an elective or niche specialization; it has become the fundamental substrate of modern software engineering. For computer science students and self-taught developers navigating 2026, understanding how to construct, evaluate, and deploy applications powered by foundation models is the single most valuable technical skill you can cultivate.</p>
@@ -70,7 +70,7 @@ ARTICLES = [
     {
         "title": "Top 10 High-Paying Remote Tech Internships for Global & Student Developers",
         "slug": "top-remote-tech-internships-students",
-        "meta_description": "Discover high-paying, verified remote engineering internships and student fellowships from Google, Microsoft, GitHub, and top startups open to international applicants.",
+        "meta_description": "Find paid remote tech internships from Google, Microsoft, and GitHub. Open to students around the world.",
         "content": """
 <div class="article-body">
     <p class="lead">Landing a software engineering internship at a premier technology company is the most accelerated pathway to securing a six-figure starting salary upon graduation. In 2026, the rise of asynchronous engineering teams has unlocked unprecedented opportunities for students outside North America and Western Europe to earn Silicon Valley compensation from their dorm rooms.</p>
@@ -138,7 +138,7 @@ ARTICLES = [
     {
         "title": "NASA Open Science & Space Tech: How Students Can Earn Official Badges & Certificates",
         "slug": "nasa-open-science-student-guide",
-        "meta_description": "Learn how university students can participate in NASA's Open Science 101 initiative, access free space satellite data, and earn official NASA digital badges.",
+        "meta_description": "See how students can join NASA's Open Science course. Use free space data and earn official NASA badges.",
         "content": """
 <div class="article-body">
     <p class="lead">Through its Transform to Open Science (TOPS) initiative, NASA has committed $40 million to empower researchers, developers, and students to access government scientific data. Here is everything you need to know about participating in the NASA Open Science curriculum, earning official verified badges, and leveraging real NASA datasets in your computing projects.</p>
@@ -179,7 +179,7 @@ ARTICLES = [
     {
         "title": "Google Gemini API & Developer Fund: A Step-by-Step Guide for Student Builders",
         "slug": "google-gemini-api-student-guide",
-        "meta_description": "Master Google's Gemini 2.5 Flash and Pro APIs using Python. Learn how students can build multimodal AI applications and access Google developer funding.",
+        "meta_description": "Learn how to use Google's Gemini API in Python. Build smart apps with text, code, and images.",
         "content": """
 <div class="article-body">
     <p class="lead">Google's Gemini ecosystem has emerged as one of the most powerful multimodal foundation model suites in the world. With context windows extending up to 2 million tokens and native understanding of audio, video, images, and text, building on Gemini gives student developers a massive competitive advantage.</p>
@@ -237,7 +237,7 @@ response = client.models.generate_content(
     {
         "title": "Demystifying Cloud Architecture: AWS vs Azure vs Google Cloud for Beginners",
         "slug": "cloud-architecture-aws-azure-gcp-guide",
-        "meta_description": "A clear, unbiased architectural comparison of Amazon Web Services, Microsoft Azure, and Google Cloud Platform tailored for computer science students.",
+        "meta_description": "A clear side-by-side look at AWS, Azure, and Google Cloud. Built for computer science students.",
         "content": """
 <div class="article-body">
     <p class="lead">Every modern application runs in the cloud. Whether you are hosting a personal portfolio, deploying a distributed microservice, or serving machine learning inference pipelines, understanding the architectural primitives of Amazon Web Services (AWS), Microsoft Azure, and Google Cloud Platform (GCP) is essential for any modern software engineer.</p>
@@ -282,7 +282,7 @@ response = client.models.generate_content(
     {
         "title": "Open-Source Contribution Guide: From First Pull Request to Major Maintainer",
         "slug": "open-source-contribution-student-guide",
-        "meta_description": "Learn how to find beginner-friendly open-source projects on GitHub, submit clean pull requests, communicate professionally, and build an unbeatable developer reputation.",
+        "meta_description": "Learn how to find beginner issues on GitHub. Send clean pull requests and grow your coding skills.",
         "content": """
 <div class="article-body">
     <p class="lead">Open-source software (OSS) is the greatest meritocracy in tech. When you submit code to a public repository used by thousands of developers, your skills are verified by real-world peer review. A single merged pull request to an established library like Django, FastAPI, or NumPy carries more weight with hiring managers than any automated certificate.</p>
@@ -315,7 +315,7 @@ response = client.models.generate_content(
     {
         "title": "The Modern Web Development Stack in 2026: TypeScript, Next.js, and Edge Computing",
         "slug": "modern-web-stack-2026-guide",
-        "meta_description": "Explore the prevailing web development architecture of 2026: TypeScript, React Server Components, Tailwind CSS, PostgreSQL with Prisma, and edge runtime deployments.",
+        "meta_description": "Explore the top web tools of 2026. We cover TypeScript, React, Tailwind CSS, and PostgreSQL.",
         "content": """
 <div class="article-body">
     <p class="lead">The web development landscape has matured significantly over the past decade. The era of fragile JavaScript glue code has given way to end-to-end type safety, server-driven UI architectures, and globally distributed edge runtimes. Here is a definitive breakdown of the technologies powering production software in 2026.</p>
@@ -344,7 +344,7 @@ response = client.models.generate_content(
     {
         "title": "Cybersecurity Fundamentals: How University Students Can Build Real-World Defense Skills",
         "slug": "cybersecurity-fundamentals-student-guide",
-        "meta_description": "A beginner-friendly roadmap to learning ethical hacking, network defense, Linux security, and CTF competitions to launch a cybersecurity career.",
+        "meta_description": "A beginner guide to safe hacking, network defense, and Linux safety. Practice with capture-the-flag games.",
         "content": """
 <div class="article-body">
     <p class="lead">With enterprise ransomware damages reaching tens of billions of dollars annually and critical infrastructure increasingly targeted by state-sponsored actors, cybersecurity professionals are among the most sought-after engineers in the global economy. Here is how college students can systematically build hands-on defensive and offensive security skills.</p>
@@ -376,7 +376,7 @@ response = client.models.generate_content(
     {
         "title": "Machine Learning Foundations: Essential Mathematics, Python Libraries, and Project Ideas",
         "slug": "machine-learning-foundations-guide",
-        "meta_description": "A structured guide to learning supervised and unsupervised machine learning using Python, Scikit-Learn, and real-world datasets.",
+        "meta_description": "A step-by-step guide to machine learning with Python. Practice with Scikit-Learn and real data sets.",
         "content": """
 <div class="article-body">
     <p class="lead">Before jumping straight into 100-billion-parameter LLMs, every serious machine learning engineer must build intuition around classical statistical learning algorithms. Understanding linear regression, decision trees, clustering, and cross-validation provides the mental scaffolding needed to understand modern deep neural networks.</p>
@@ -410,7 +410,7 @@ response = client.models.generate_content(
     {
         "title": "Mastering Technical Coding Interviews: Data Structures, System Design & Behavioral Strategies",
         "slug": "mastering-technical-coding-interviews",
-        "meta_description": "A battle-tested blueprint for cracking LeetCode, system design rounds, and behavioral interviews at top technology companies.",
+        "meta_description": "A clear plan to pass coding tests and system design rounds. Prepare for interviews at top tech firms.",
         "content": """
 <div class="article-body">
     <p class="lead">Technical interviews at top technology firms can feel daunting, but they are an entirely learnable, repeatable skill. By treating interview preparation as an engineering project with structured milestones, students can consistently outperform applicants with years more experience.</p>
@@ -446,7 +446,7 @@ response = client.models.generate_content(
     {
         "title": "Docker and Containerization Essentials for College Students and Junior Engineers",
         "slug": "docker-containerization-guide-students",
-        "meta_description": "Learn how Docker containers eliminate 'it works on my machine' bugs. A practical guide to Dockerfiles, images, networking, and multi-container Docker Compose.",
+        "meta_description": "See how Docker stops 'it works on my machine' bugs. Learn how to build images, link apps, and run containers.",
         "content": """
 <div class="article-body">
     <p class="lead">"It works on my machine" is the most notorious phrase in software development. Docker solved this fundamental problem by packaging applications alongside their exact runtime dependencies, operating system libraries, and environment variables into lightweight, portable containers.</p>
@@ -471,7 +471,7 @@ response = client.models.generate_content(
     {
         "title": "How Pakistani & South Asian Tech Students Can Land Global Remote Engineering Jobs",
         "slug": "pakistan-south-asia-remote-tech-careers",
-        "meta_description": "Actionable strategies for Pakistani and South Asian developers to overcome currency devaluation, bypass local salary caps, and secure USD-denominated remote software roles.",
+        "meta_description": "Clear steps for coders in Pakistan and South Asia to find remote tech jobs. Learn how to earn pay in US dollars.",
         "content": """
 <div class="article-body">
     <p class="lead">For computer science graduates in Pakistan, India, Bangladesh, and broader South Asia, securing international remote employment is transformative. With local entry-level engineering salaries often suppressed by inflation, earning competitive USD or EUR compensation allows young engineers to build financial independence while contributing to the global tech ecosystem.</p>
@@ -500,7 +500,7 @@ response = client.models.generate_content(
     {
         "title": "Autonomous AI Agents Explained: Architecture, Tool Calling, and the Future of Software",
         "slug": "autonomous-ai-agents-architecture-guide",
-        "meta_description": "A deep technical explanation of how autonomous AI coding and research agents operate: memory architectures, reasoning loops, tool calling, and evaluation.",
+        "meta_description": "See how AI coding and research agents work. Learn how they use memory, step-by-step plans, and tools.",
         "content": """
 <div class="article-body">
     <p class="lead">The software industry is transitioning from passive chatbots to active, autonomous AI agents. Unlike standard question-answering systems, an AI agent perceives its environment, reasons through complex multi-step objectives, invokes tools and APIs, observes execution results, and self-corrects until a goal is accomplished.</p>
@@ -538,7 +538,7 @@ response = client.models.generate_content(
     {
         "title": "Free Tech Certifications from Microsoft, Google, and IBM That Employers Actually Respect",
         "slug": "free-tech-certifications-employers-respect",
-        "meta_description": "A curated list of completely free, high-prestige technology certifications and digital credentials from Google, Microsoft, AWS, and IBM for your resume.",
+        "meta_description": "Find free tech badges from Google, Microsoft, AWS, and IBM. Add them to your resume at no cost.",
         "content": """
 <div class="article-body">
     <p class="lead">With hundreds of commercial platforms charging thousands of dollars for generic certificates of completion, it can be difficult for students to distinguish between high-value credentials and marketing gimmicks. Fortunately, the world's leading technology companies offer official, verified certifications and learning paths completely free of charge.</p>
@@ -574,7 +574,7 @@ response = client.models.generate_content(
     {
         "title": "The Student Freelancer's Blueprint: Building a High-Income Tech Portfolio on Upwork & GitHub",
         "slug": "student-freelancer-blueprint-tech-portfolio",
-        "meta_description": "Learn how computer science students can start earning money freelancing, win their first high-paying clients, and build a standout software portfolio.",
+        "meta_description": "Learn how college students can start freelancing and win good clients. Build a strong code portfolio on GitHub.",
         "content": """
 <div class="article-body">
     <p class="lead">Freelancing while completing a university degree is one of the most effective ways to graduate with substantial savings, commercial software experience, and a proven professional network. Here is how to escape low-paying commodity gigs and build a thriving technical consultancy as a student.</p>
@@ -608,7 +608,7 @@ response = client.models.generate_content(
     {
         "title": "Production Database Design: PostgreSQL, Indexing Strategies, and Vector Search",
         "slug": "production-database-design-postgresql-guide",
-        "meta_description": "Master relational schema design, B-Tree and GIN indexes, connection pooling, and pgvector embeddings in production PostgreSQL systems.",
+        "meta_description": "Learn how to design fast PostgreSQL tables. We cover indexes, connection pools, and vector search.",
         "content": """
 <div class="article-body">
     <p class="lead">Software applications are ephemeral; data is permanent. Writing high-performance software requires designing robust relational database schemas capable of scaling gracefully from ten users to ten million without latency degradation.</p>
@@ -635,7 +635,7 @@ response = client.models.generate_content(
     {
         "title": "DevOps and CI/CD for Beginners: Automating Your Software Builds from Day One",
         "slug": "devops-cicd-beginners-guide",
-        "meta_description": "A comprehensive introduction to Continuous Integration, Continuous Deployment, GitHub Actions, and automated testing for student engineers.",
+        "meta_description": "A clear guide to GitHub Actions and auto tests. Learn how to test and ship code on every push.",
         "content": """
 <div class="article-body">
     <p class="lead">Great software engineering teams do not deploy code manually via FTP or terminal SSH sessions. Modern engineering relies on Continuous Integration and Continuous Deployment (CI/CD) pipelines to automatically run tests, verify security postures, and deploy code on every push.</p>
@@ -683,7 +683,7 @@ jobs:
     {
         "title": "AI Ethics & Alignment: Safety, Bias, and Responsible Engineering in Modern AI Systems",
         "slug": "ai-ethics-safety-responsible-engineering",
-        "meta_description": "An essential technical examination of AI alignment, dataset bias mitigation, jailbreak prevention, and ethical engineering principles for developers.",
+        "meta_description": "Learn how to keep AI safe and fair. We cover data bias, prompt safety, and honest coding habits.",
         "content": """
 <div class="article-body">
     <p class="lead">As artificial intelligence systems make increasingly consequential decisions in hiring, healthcare, credit scoring, and law enforcement, technical competence must be paired with ethical responsibility. Responsible AI is not an abstract philosophical ideal—it is an engineering discipline requiring rigorous technical safeguards.</p>

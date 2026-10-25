@@ -45,7 +45,7 @@ add('welcome',0,'A warmer welcome','Beginner','input, print, str, comments',
 add('receipt',0,'Split the receipt','Beginner','float, rounding, formatting',
     'Read a nonnegative bill amount, then a positive number of people. Print each person’s share to exactly two decimal places.',
     'bill = float(input())\npeople = int(input())\nprint(f"{bill / people:.2f}")',
-    [('25\n4\n','6.25'),('0\n3\n','0.00'),('10\n3\n','3.33')],lesson='Convert numeric text before arithmetic. Formatting with :.2f keeps two decimal places.')
+    [('25\n4\n','6.25'),('0\n3\n','0.00'),('10\n3\n','3.33')],lesson='Turn number text into a float or int before doing math. Use :.2f to show two decimal places.')
 add('temperature',0,'Reusable conversions','Developing','def, parameters, return, scope',
     'Define to_celsius(fahrenheit) and use it to convert one input temperature. Print the result to one decimal place.',
     'def to_celsius(fahrenheit):\n    return (fahrenheit - 32) * 5 / 9\n\nprint(f"{to_celsius(float(input())):.1f}")',
@@ -93,7 +93,7 @@ add('retry',3,'Ask until it is an integer','Beginner','try, except, ValueError, 
 add('ratio',3,'Divide safely','Developing','ZeroDivisionError, ValueError, exceptions',
     'Read numerator and denominator as text. Print their quotient to two decimals; invalid numeric input prints invalid; zero denominator prints undefined.',
     'a, b = input(), input()\ntry: print(f"{float(a)/float(b):.2f}")\nexcept ValueError: print("invalid")\nexcept ZeroDivisionError: print("undefined")',
-    [('9\n2\n','4.50'),('3\n0\n','undefined'),('x\n2\n','invalid')],lesson='Different exceptions deserve different feedback. Avoid a bare except that hides unrelated failures.')
+    [('9\n2\n','4.50'),('3\n0\n','undefined'),('x\n2\n','invalid')],lesson='Each error type needs its own clear message. Avoid a bare except that hides other bugs.')
 add('bounded',3,'Validate a percentage','Developing','raise, functions, validation',
     'Read an integer percentage. A function must reject values outside 0–100 with ValueError. Print valid for accepted input, invalid for rejected or noninteger input.',
     'def validate(n):\n    if not 0 <= n <= 100: raise ValueError("Out of range")\n    return n\ntry:\n    validate(int(input()))\n    print("valid")\nexcept ValueError: print("invalid")',
@@ -105,11 +105,11 @@ add('read-eof',3,'Read to the end','Developing','EOFError, while, exceptions',
 add('statistics',4,'A small data summary','Beginner','import, statistics, mean, median',
     'Read one nonempty line of integers. Use statistics to print mean then median, each to one decimal place, on separate lines.',
     'import statistics\nvalues = list(map(int, input().split()))\nprint(f"{statistics.mean(values):.1f}")\nprint(f"{statistics.median(values):.1f}")',
-    [('1 2 9\n','4.0\n2.0'),('2 4\n','3.0\n3.0'),('-3\n','-3.0\n-3.0')],lesson='The standard library offers tested tools. Import modules before using their names.')
+    [('1 2 9\n','4.0\n2.0'),('2 4\n','3.0\n3.0'),('-3\n','-3.0\n-3.0')],lesson='Python comes with built-in tools that are ready to use. Import a module before you use its name.')
 add('shuffle',4,'Reproducible randomness','Developing','random, seed, choice',
     'Read an integer seed. Create random.Random(seed) and print five calls to randint(1, 6), separated by spaces.',
     'import random\nrng = random.Random(int(input()))\nprint(*[rng.randint(1, 6) for _ in range(5)])',
-    [('1\n','2 5 1 3 1'),('0\n','4 4 1 3 5'),('42\n','6 1 1 6 3')],lesson='A dedicated seeded generator makes simulations reproducible without changing unrelated random state.')
+    [('1\n','2 5 1 3 1'),('0\n','4 4 1 3 5'),('42\n','6 1 1 6 3')],lesson='A seeded random tool gives the same test results each run. It will not change other random picks.')
 add('json-api',4,'Read an API response','Developing','json, APIs, dictionaries',
     'Read a JSON object with a results list. Print the name of each entry whose active field is true, sorted alphabetically. This is an offline API fixture; network requests are disabled.',
     'import json\ndata = json.loads(input())\nfor name in sorted(item["name"] for item in data["results"] if item.get("active", False)):\n    print(name)',
@@ -121,7 +121,7 @@ add('cli',4,'Command-line greeter','Developing','sys.argv, sys.exit, __name__',
 add('assertions',5,'Turn cases into assertions','Beginner','assert, boundary testing, functions',
     'Read an integer. Define is_even(n) and assert that it handles 0, -2, and 3 correctly. Then print True or False for the input.',
     'def is_even(n): return n % 2 == 0\nassert is_even(0)\nassert is_even(-2)\nassert not is_even(3)\nprint(is_even(int(input())))',
-    [('4\n','True'),('-3\n','False'),('0\n','True')],lesson='Assertions fail loudly when a condition is false. Include zero, negative inputs, and contrasting cases.')
+    [('4\n','True'),('-3\n','False'),('0\n','True')],lesson='An assert check stops the program when a test is false. Test zero, minus numbers, and edge cases.')
 add('test-isolation',5,'Separate logic from display','Developing','unit tests, return, pure functions',
     'Read a JSON list of [price, quantity] pairs. Define total(price, quantity) returning their product. Print a JSON list of totals without prompts or other output.',
     'import json\ndef total(price, quantity): return price * quantity\nprint(json.dumps([total(*pair) for pair in json.loads(input())]))',
@@ -137,7 +137,7 @@ add('file-lines',6,'A tidy reading list','Beginner','open, with, read, sorting',
 add('file-write',6,'Save a journal entry','Developing','write, append, context managers',
     'Read one entry from input. Append it plus a newline to journal.txt, then read the whole file and print it without adding another newline.',
     'entry = input()\nwith open("journal.txt", "a") as file: file.write(entry + "\\n")\nwith open("journal.txt") as file: print(file.read(), end="")',
-    [('Today I learned loops\n','Started learning\nToday I learned loops\n',{'journal.txt':'Started learning\n'}),('New\n','New\n',{'journal.txt':''}),('\n','A\n\n',{'journal.txt':'A\n'})],files={'journal.txt':'Started learning\n'},lesson='Mode a appends; w replaces existing contents. Exercise files are private, temporary text files inside the sandbox.')
+    [('Today I learned loops\n','Started learning\nToday I learned loops\n',{'journal.txt':'Started learning\n'}),('New\n','New\n',{'journal.txt':''}),('\n','A\n\n',{'journal.txt':'A\n'})],files={'journal.txt':'Started learning\n'},lesson='Mode a adds text to the end, while mode w wipes the file first. Lab files stay private inside your browser sandbox.')
 add('csv',6,'A class gradebook','Challenging','csv, DictReader, lambda, sorting',
     'Read grades.csv with name,score columns. Print name:score, ordered by descending integer score and then ascending name. Preserve names containing commas.',
     'import csv\nwith open("grades.csv", newline="") as file: rows = list(csv.DictReader(file))\nfor row in sorted(rows, key=lambda r: (-int(r["score"]), r["name"])):\n    print(f"{row[\'name\']}:{row[\'score\']}")',
@@ -165,11 +165,11 @@ add('email-domain',7,'Find a campus address','Challenging','IGNORECASE, escaping
 add('wallet',8,'Model a wallet','Developing','class, __init__, methods, property',
     'Read a JSON list of integer changes to a wallet starting at 0. A change that would make the balance negative is rejected. Print the final balance. Use a Wallet class with a read-only balance property.',
     'import json\nclass Wallet:\n    def __init__(self): self._balance = 0\n    @property\n    def balance(self): return self._balance\n    def change(self, amount):\n        if self._balance + amount >= 0: self._balance += amount\nw = Wallet()\nfor n in json.loads(input()): w.change(n)\nprint(w.balance)',
-    [('[10,-3,-20,4]\n','11'),('[]\n','0'),('[-1,2,-2]\n','0')],lesson='Objects keep state and behavior together. A property can expose a value without allowing direct assignment.',project=True)
+    [('[10,-3,-20,4]\n','11'),('[]\n','0'),('[-1,2,-2]\n','0')],lesson='Objects group data and actions in one place. A property lets you read a value without letting code overwrite it.',project=True)
 add('student-class',8,'Construct from a record','Developing','classmethod, staticmethod, __str__',
     'Read name,score on one line. Use Student.from_record to construct an instance. Accept scores 0–100; print NAME (SCORE) or invalid. Strip the name.',
     'class Student:\n    def __init__(self, name, score): self.name, self.score = name, score\n    @staticmethod\n    def valid(score): return 0 <= score <= 100\n    @classmethod\n    def from_record(cls, record):\n        name, score = record.rsplit(",", 1)\n        score = int(score)\n        if not cls.valid(score): raise ValueError()\n        return cls(name.strip(), score)\n    def __str__(self): return f"{self.name} ({self.score})"\ntry: print(Student.from_record(input()))\nexcept ValueError: print("invalid")',
-    [(' Ada ,95\n','Ada (95)'),('Ali,101\n','invalid'),('Lin,0\n','Lin (0)'),('bad\n','invalid')],lesson='classmethod receives the class; staticmethod receives neither class nor instance. __str__ controls readable object output.')
+    [(' Ada ,95\n','Ada (95)'),('Ali,101\n','invalid'),('Lin,0\n','Lin (0)'),('bad\n','invalid')],lesson='A class method gets the class, while a static method gets no extra input. Use __str__ to set how an object prints.')
 add('inheritance',8,'Extend a delivery service','Challenging','inheritance, super, overriding',
     'Read base or express, then an integer distance. Base delivery costs 5 + 2*distance; express adds 10. Define Delivery and ExpressDelivery classes and print the cost.',
     'class Delivery:\n    def __init__(self, distance): self.distance = distance\n    def cost(self): return 5 + 2*self.distance\nclass ExpressDelivery(Delivery):\n    def cost(self): return super().cost() + 10\nkind = input()\ndistance = int(input())\nprint((ExpressDelivery if kind == "express" else Delivery)(distance).cost())',
@@ -185,7 +185,7 @@ add('sets',9,'A unique guest list','Beginner','set, sorted, comprehensions',
 add('comprehensions',9,'Transform a dataset','Developing','map, filter, list comprehension, enumerate',
     'Read space-separated integers. Keep even values, square them, and print index:value with indices starting at 1, one per line.',
     'values = map(int, input().split())\nsquares = [n*n for n in values if n % 2 == 0]\nfor index, value in enumerate(squares, start=1): print(f"{index}:{value}")',
-    [('1 2 -4 3\n','1:4\n2:16'),('1 3\n',''),('0 2\n','1:0\n2:4')],lesson='Comprehensions combine transformation and filtering. enumerate pairs each value with an index.')
+    [('1 2 -4 3\n','1:4\n2:16'),('1 3\n',''),('0 2\n','1:0\n2:4')],lesson='List tools let you change and filter items in one line. Use enumerate to pair each item with its index.')
 add('kwargs',9,'Flexible invoice','Challenging','args, kwargs, unpacking, dict comprehension',
     'Read a JSON object containing prices (a list of integers) and discount (an integer, default 0). Define invoice(*prices, discount=0) and print max(0, sum(prices)-discount).',
     'import json\ndef invoice(*prices, discount=0): return max(0, sum(prices)-discount)\ndata = json.loads(input())\noptions = {k:v for k,v in data.items() if k == "discount"}\nprint(invoice(*data["prices"], **options))',

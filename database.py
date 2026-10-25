@@ -27,12 +27,16 @@ class DummyDictCursor:
 
 
 import threading
+import time
+import copy
 from psycopg2.pool import ThreadedConnectionPool
 
 _pool = None
 _pool_lock = threading.Lock()
 _database_init_lock = threading.Lock()
 _initialized_databases = set()
+_conn_last_used = {}
+_IDLE_CHECK_SECONDS = 60.0
 
 class PooledConnection:
     def __init__(self, conn, pool):
@@ -42,12 +46,15 @@ class PooledConnection:
         return self._conn.cursor(*args, **kwargs)
     def commit(self):
         self._conn.commit()
+        _conn_last_used[id(self._conn)] = time.monotonic()
     def rollback(self):
         self._conn.rollback()
     def close(self):
         try:
+            if not getattr(self._conn, 'closed', 1):
+                _conn_last_used[id(self._conn)] = time.monotonic()
             self._pool.putconn(self._conn)
-        except:
+        except Exception:
             pass
 
 def safe_connect():
@@ -56,24 +63,44 @@ def safe_connect():
         with _pool_lock:
             if _pool is None:
                 db_url = os.getenv('DATABASE_URL')
-                _pool = ThreadedConnectionPool(1, 30, db_url)
-    
-    # Test connection and handle Supabase stale connections
+                _pool = ThreadedConnectionPool(
+                    1, 30, db_url,
+                    keepalives=1, keepalives_idle=30,
+                    keepalives_interval=10, keepalives_count=5,
+                )
+
+    # Reuse active pooled connections immediately; only ping SELECT 1 if idle > 60s
     max_retries = 3
+    now = time.monotonic()
     for _ in range(max_retries):
+        conn = None
         try:
             conn = _pool.getconn()
-            with conn.cursor() as cursor:
-                cursor.execute('SELECT 1')
+            if getattr(conn, 'closed', 0):
+                _conn_last_used.pop(id(conn), None)
+                _pool.putconn(conn, close=True)
+                continue
+            last_ok = _conn_last_used.get(id(conn), 0.0)
+            if (now - last_ok) > _IDLE_CHECK_SECONDS:
+                with conn.cursor() as cursor:
+                    cursor.execute('SELECT 1')
+                conn.rollback()
+                _conn_last_used[id(conn)] = now
             return PooledConnection(conn, _pool)
         except Exception:
-            try:
-                _pool.putconn(conn, close=True)
-            except Exception:
-                pass
-    
+            if conn is not None:
+                _conn_last_used.pop(id(conn), None)
+                try:
+                    _pool.putconn(conn, close=True)
+                except Exception:
+                    pass
+
     # Fallback to a direct connection if pool fails
-    return PooledConnection(_pool.getconn(), _pool)
+    conn = _pool.getconn()
+    _conn_last_used[id(conn)] = time.monotonic()
+    return PooledConnection(conn, _pool)
+
+_default_safe_connect = safe_connect
 
 import json
 from datetime import date, datetime, timedelta
@@ -1054,7 +1081,7 @@ class NewsDatabase:
                 {
                     'title': 'GitHub Student Developer Pack',
                     'company': 'GitHub',
-                    'description': 'A collection of developer tools and learning resources for eligible students. Included offers and eligibility can change, so check GitHub’s official page for current details.',
+                    'description': "Free coding tools and cloud credits for college students. Offers and rules can change, so check GitHub's official page for details.",
                     'registration_url': 'https://education.github.com/pack',
                     'category': 'certification',
                     'legacy_schedule': (-15, 90),
@@ -1063,7 +1090,7 @@ class NewsDatabase:
                 {
                     'title': 'Google Summer of Code (GSoC)',
                     'company': 'Google',
-                    'description': 'A global open-source program. Project terms, applicant eligibility, and dates vary by cycle; check the official site for current rules.',
+                    'description': 'A 12-week global open-source coding program for college students and beginners. Check the official site for dates, pay, and rules.',
                     'registration_url': 'https://summerofcode.withgoogle.com/',
                     'category': 'internship',
                     'legacy_schedule': (20, 55),
@@ -1071,7 +1098,7 @@ class NewsDatabase:
                 {
                     'title': 'MLH Fellowship (Software Engineering & AI Tracks)',
                     'company': 'Major League Hacking',
-                    'description': 'Remote fellowship cohorts offer practical software development experience. Cohort dates, eligibility, and any compensation vary; check the current official listing.',
+                    'description': 'A remote software coding fellowship where students build real projects with mentors. Check the official listing for dates, pay, and rules.',
                     'registration_url': 'https://fellowship.mlh.io/',
                     'category': 'fellowship',
                     'legacy_schedule': (-5, 28),
@@ -1079,15 +1106,16 @@ class NewsDatabase:
                 {
                     'title': 'Microsoft Imagine Cup Global Student Startup Competition',
                     'company': 'Microsoft',
-                    'description': 'A student startup competition. Themes, eligibility, awards, and application dates can change between seasons; check Microsoft’s official page for current details.',
+                    'description': 'A global student tech contest where you build tools to solve real-world problems with Microsoft tech. Check the official site for dates and rules.',
                     'registration_url': 'https://imaginecup.microsoft.com/',
                     'category': 'competition',
                     'legacy_schedule': (-10, 35),
+                    'legacy_titles': ('Microsoft Imagine Cup',),
                 },
                 {
                     'title': 'Linux Foundation LFX Mentorship Program',
                     'company': 'Linux Foundation',
-                    'description': 'Open-source mentorship opportunities are offered in project cycles. Active projects, dates, eligibility, and stipends vary; check the official portal.',
+                    'description': 'Work on open-source code with help from senior mentors. Active projects, dates, pay, and rules vary on the official site.',
                     'registration_url': 'https://mentorship.lfx.linuxfoundation.org/',
                     'category': 'internship',
                     'legacy_schedule': (5, 24),
@@ -1095,7 +1123,7 @@ class NewsDatabase:
                 {
                     'title': 'Outreachy Open Source Paid Internships',
                     'company': 'Outreachy',
-                    'description': 'Remote internships contribute to open-source projects. Application rounds, eligibility, projects, and stipend details are set by Outreachy; confirm the current information on its official site.',
+                    'description': "Remote internships where you work on open-source software projects. Check Outreachy's official site for current rounds, pay, and rules.",
                     'registration_url': 'https://www.outreachy.org/',
                     'category': 'internship',
                     'legacy_schedule': (10, 42),
@@ -1103,15 +1131,16 @@ class NewsDatabase:
                 {
                     'title': 'AWS Academy & AWS Educate Cloud Credits Track',
                     'company': 'Amazon',
-                    'description': 'AWS education and learning resources for students. Current courses, credits, badges, and eligibility depend on the specific offering; check AWS’s official education pages.',
+                    'description': 'Free cloud lessons and practice labs for students from Amazon. Check the official AWS education page for current courses, badges, and rules.',
                     'registration_url': 'https://aws.amazon.com/education/awseducate/',
                     'category': 'certification',
                     'legacy_schedule': (-20, 75),
+                    'legacy_titles': ('AWS Academy & Educate',),
                 },
                 {
                     'title': 'Google Developer Groups on Campus',
                     'company': 'Google',
-                    'description': 'Campus communities help students learn and build with developer technologies. Check Google’s community page for current options and participation details.',
+                    'description': "Join or lead a Google coding club at your college. Check Google's page for current campus clubs, events, and how to join.",
                     'registration_url': 'https://developers.google.com/community',
                     'category': 'program',
                     'legacy_schedule': (12, 48),
@@ -1120,7 +1149,7 @@ class NewsDatabase:
                 {
                     'title': 'Microsoft Learn Student Ambassadors (MLSA)',
                     'company': 'Microsoft',
-                    'description': 'Check Microsoft’s official page to confirm whether applications are open and what participation currently includes.',
+                    'description': "A global campus tech club for students who love coding and teaching peers. Check Microsoft's official page for open dates and perks.",
                     'registration_url': 'https://studentambassadors.microsoft.com/',
                     'category': 'fellowship',
                     'legacy_schedule': (-7, 32),
@@ -1128,7 +1157,7 @@ class NewsDatabase:
                 {
                     'title': "NASA L'SPACE Academy",
                     'company': 'NASA',
-                    'description': 'A student learning program hosted by Arizona State University. Check the official program page for upcoming cycles, eligibility, costs, and requirements.',
+                    'description': 'A free 12-week online course where students learn space mission design and research writing with NASA scientists. Check the official site for dates and rules.',
                     'registration_url': 'https://www.lspace.asu.edu/',
                     'category': 'program',
                     'legacy_schedule': (8, 38),
@@ -1136,7 +1165,7 @@ class NewsDatabase:
                 {
                     'title': 'Harvard CS50P & CS50x OpenCourseWare Free Certificate Track',
                     'company': 'Harvard University',
-                    'description': 'Self-paced computer science and Python course materials. Review CS50’s official policies for current completion and certificate options.',
+                    'description': "Free, self-paced Python and computer science lessons from Harvard. Check CS50's official site for problem sets and certificate rules.",
                     'registration_url': 'https://cs50.harvard.edu/python/',
                     'category': 'certification',
                     'legacy_schedule': (-30, 120),
@@ -1144,7 +1173,7 @@ class NewsDatabase:
                 {
                     'title': 'Generation Google Scholarship (APAC & Global CS)',
                     'company': 'Google',
-                    'description': 'Scholarship availability and eligibility vary by region and application cycle. Check Google’s official scholarship page for current opportunities.',
+                    'description': "A scholarship for computer science students who show strong coding and leadership skills. Check Google's scholarship page for dates and region rules.",
                     'registration_url': 'https://buildyourfuture.withgoogle.com/scholarships',
                     'category': 'scholarship',
                     'legacy_schedule': (15, 60),
@@ -1152,7 +1181,7 @@ class NewsDatabase:
                 {
                     'title': 'Ignite NGIRI Final Year Project Grant (Pakistan CS/Engineering)',
                     'company': 'Ignite Pakistan',
-                    'description': 'A Pakistan-based final-year project funding program. Calls, eligibility, covered subjects, and funding terms may change; confirm details on Ignite’s official site.',
+                    'description': "Funding for final-year tech projects at colleges in Pakistan. Check Ignite's official site for open calls, topics, and rules.",
                     'registration_url': 'https://ignite.org.pk/ngiri/',
                     'category': 'scholarship',
                     'legacy_schedule': (-3, 21),
@@ -1160,7 +1189,7 @@ class NewsDatabase:
                 {
                     'title': 'Kaggle Open Machine Learning & LLM Competitions',
                     'company': 'Google / Kaggle',
-                    'description': 'Browse data science and machine learning competitions. Rules, prizes, deadlines, and eligibility are specific to each competition.',
+                    'description': 'Join data science and AI coding contests on Kaggle. Each contest sets its own rules, prizes, and due dates.',
                     'registration_url': 'https://www.kaggle.com/competitions',
                     'category': 'competition',
                     'legacy_schedule': (-5, 45),
@@ -1168,7 +1197,7 @@ class NewsDatabase:
                 {
                     'title': 'Postman Student Expert Free API Certification',
                     'company': 'Postman',
-                    'description': 'Explore Postman’s student learning resources and API program. Check the official page for current status, requirements, and credentials.',
+                    'description': 'Free, self-paced lessons to learn API building and testing with Postman. Check the official page for current badge rules.',
                     'registration_url': 'https://www.postman.com/student-program/student-expert/',
                     'category': 'certification',
                     'legacy_schedule': (-14, 80),
@@ -1176,7 +1205,7 @@ class NewsDatabase:
                 {
                     'title': 'Cloudflare Systems & AI Developer Internship Cohort',
                     'company': 'Cloudflare',
-                    'description': 'Browse Cloudflare’s student and early-career roles. Openings, locations, eligibility, and deadlines vary by job posting.',
+                    'description': 'Explore Cloudflare internships and entry-level jobs for students. Open roles, places, rules, and due dates vary by job post.',
                     'registration_url': 'https://www.cloudflare.com/careers/students/',
                     'category': 'internship',
                     'legacy_schedule': (2, 30),
@@ -1200,6 +1229,11 @@ class NewsDatabase:
                             'UPDATE student_programs SET title=%s, company=%s WHERE id=%s',
                             (p['title'], p['company'], prog_id)
                         )
+                    for old_title in p.get('legacy_titles', ()):
+                        cursor.execute(
+                            'UPDATE student_programs SET is_active=FALSE WHERE title=%s AND id != %s',
+                            (old_title, prog_id)
+                        )
                     created_day = created_at.date() if isinstance(created_at, datetime) else created_at if isinstance(created_at, date) else None
                     old_launch_offset, old_deadline_offset = p.get('legacy_schedule', (None, None))
                     if created_day and old_launch_offset is not None and old_deadline_offset is not None:
@@ -1211,14 +1245,13 @@ class NewsDatabase:
                                 (prog_id,)
                             )
                             cur_launch = cur_deadline = None
-                    if not cur_deadline or not cur_launch:
-                        cursor.execute(
-                            '''UPDATE student_programs
-                               SET description=%s, registration_url=%s, category=%s,
-                                   is_active=TRUE
-                               WHERE id=%s''',
-                            (p['description'], p['registration_url'], p['category'], prog_id)
-                        )
+                    cursor.execute(
+                        '''UPDATE student_programs
+                           SET description=%s, registration_url=%s, category=%s,
+                               is_active=TRUE
+                           WHERE id=%s''',
+                        (p['description'], p['registration_url'], p['category'], prog_id)
+                    )
                 else:
                     cursor.execute(
                         '''INSERT INTO student_programs
