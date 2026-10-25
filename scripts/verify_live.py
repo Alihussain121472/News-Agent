@@ -23,5 +23,10 @@ try:
     print('Has toggleMoreNewsBtn:', 'id="toggleMoreNewsBtn"' in news_html)
     print('Has moreNewsFeed:', 'id="moreNewsFeed"' in news_html)
     print('Has See More News text:', 'See More News' in news_html)
+    if 'id="initialNewsFeed"' in news_html and 'id="seeMoreNewsContainer"' in news_html:
+        initial_part = news_html.split('id="initialNewsFeed"')[1].split('id="seeMoreNewsContainer"')[0]
+        more_part = news_html.split('id="moreNewsFeed"')[1].split('</div>\n                </div>')[0] if 'id="moreNewsFeed"' in news_html else ''
+        print('Initial news cards rendered:', initial_part.count('<article id="article-'))
+        print('Dropdown news cards rendered:', more_part.count('<article id="article-'))
 except Exception as e:
     print('Error checking live site:', e)

@@ -3,7 +3,7 @@ import json
 import time
 import sys
 
-target_sha = 'be529df'
+target_sha = 'f91e507'
 print(f"Monitoring deployment for sha={target_sha}...")
 
 for attempt in range(40):
