@@ -15,5 +15,13 @@ try:
     print('CSS Status:', resp_css.status)
     print('Has .python-feature-banner in live CSS:', '.python-feature-banner' in css_text)
     print('Has .text-white guarantee in live CSS:', '.text-white' in css_text)
+    req_news = urllib.request.Request('https://www.novabrief.tech/news', headers={'User-Agent': 'Mozilla/5.0'})
+    resp_news = urllib.request.urlopen(req_news, timeout=15)
+    news_html = resp_news.read().decode('utf-8')
+    print('News Page Status:', resp_news.status)
+    print('Has initialNewsFeed:', 'id="initialNewsFeed"' in news_html)
+    print('Has toggleMoreNewsBtn:', 'id="toggleMoreNewsBtn"' in news_html)
+    print('Has moreNewsFeed:', 'id="moreNewsFeed"' in news_html)
+    print('Has See More News text:', 'See More News' in news_html)
 except Exception as e:
     print('Error checking live site:', e)
