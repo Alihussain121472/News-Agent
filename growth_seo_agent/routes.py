@@ -91,6 +91,21 @@ def _dashboard_view_model():
     snapshot['open_content'] = sum(1 for item in snapshot['content_opportunities'] if item.get('status') in {'idea', 'approved', 'briefed'})
     snapshot['total_competitors'] = len(snapshot.get('competitors') or [])
     snapshot['total_gaps'] = sum(len(c.get('content_gaps') or []) for c in snapshot.get('competitors') or [])
+    snapshot['max'] = max
+    if 'visitor_analytics' not in snapshot or not snapshot['visitor_analytics'] or not isinstance(snapshot['visitor_analytics'], dict) or 'devices' not in snapshot['visitor_analytics']:
+        snapshot['visitor_analytics'] = {
+            'total_visits': 0,
+            'unique_visitors': 0,
+            'today_visits': 0,
+            'today_unique': 0,
+            'yesterday_visits': 0,
+            'avg_daily_visits': 0,
+            'daily_trend': [],
+            'top_pages': [],
+            'top_referrers': [],
+            'devices': {'desktop': 0, 'mobile': 0, 'tablet': 0, 'other': 0},
+            'browsers': {'chrome': 0, 'safari': 0, 'firefox': 0, 'edge': 0, 'other': 0},
+        }
     try:
         snapshot['actionable_insights'] = generate_actionable_seo_insights(
             keywords=snapshot.get('keywords'),

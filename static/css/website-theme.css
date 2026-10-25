@@ -1,6 +1,54 @@
 /* Public/student pages only. The separate admin theme is intentionally untouched. */
-:root { color-scheme: light; }
-html.dark { color-scheme: dark; }
+:root {
+  color-scheme: light;
+  --theme-bg: #f8fafc;
+  --theme-surface: #ffffff;
+  --theme-raised: #eef3f9;
+  --theme-line: #cbd5e1;
+  --theme-edge: #93b4ef;
+  --theme-shadow: 0 8px 25px rgb(30 64 110 / 9%);
+  --theme-text: #0f172a;
+  --theme-muted: #526176;
+  --theme-blue: #1d4ed8;
+  --theme-green: #047857;
+  --theme-purple: #6d28d9;
+  --theme-red: #b91c1c;
+  --theme-amber: #92400e;
+  --theme-tint: #eaf1ff;
+  --color-text-strong: #0f172a;
+  --color-text: #1e293b;
+  --color-text-muted: #526176;
+  --color-brand: #1d4ed8;
+  --color-accent: #047857;
+  --color-danger: #b91c1c;
+  --color-warning: #92400e;
+  --color-ink: #0f172a;
+}
+html.dark {
+  color-scheme: dark;
+  --theme-bg: #080f1c;
+  --theme-surface: #111c2f;
+  --theme-raised: #19283d;
+  --theme-line: #334259;
+  --theme-edge: #4d76b4;
+  --theme-shadow: 0 10px 30px rgb(0 0 0 / 24%);
+  --theme-text: #edf3fc;
+  --theme-muted: #a7b6cc;
+  --theme-blue: #93c5fd;
+  --theme-green: #6ee7b7;
+  --theme-purple: #c4b5fd;
+  --theme-red: #fda4af;
+  --theme-amber: #fcd34d;
+  --theme-tint: #192f50;
+  --color-text-strong: #ffffff;
+  --color-text: #edf3fc;
+  --color-text-muted: #a7b6cc;
+  --color-brand: #60a5fa;
+  --color-accent: #34d399;
+  --color-danger: #fda4af;
+  --color-warning: #fcd34d;
+  --color-ink: #ffffff;
+}
 .nova-site {
   --theme-bg: #f5f7fb; --theme-surface: #ffffff; --theme-raised: #eef3f9;
   --theme-text: #0f172a; --theme-muted: #526176; --theme-line: #d5deea;
@@ -23,11 +71,177 @@ html.dark .nova-site {
   --theme-red: #fda4af; --theme-amber: #fcd34d; --theme-tint: #192f50;
   --theme-edge: #4d76b4; --theme-shadow: 0 10px 30px rgb(0 0 0 / 24%);
 }
+/* White text guarantee: never invert white text to dark on any theme */
+.text-white,
+.nova-site .text-white,
+.nova-site [class*="text-white"],
+.nova-site .hover\:text-white:hover,
+html:not(.dark) .text-white,
+body .text-white {
+  color: #ffffff !important;
+}
+
+/* Saturated and gradient buttons & badges always keep high-contrast white text */
+.nova-site :is(
+  .btn-primary, .ui-button--primary,
+  .bg-blue-600, .bg-blue-700,
+  .bg-indigo-600, .bg-indigo-700,
+  .bg-emerald-600, .bg-emerald-700,
+  .bg-red-600, .bg-red-700,
+  .bg-purple-600, .bg-purple-700,
+  .bg-slate-900,
+  [class*="from-blue-600"],
+  [class*="from-indigo-600"],
+  [class*="from-emerald-600"],
+  .st-primary,
+  .nova-profile-avatar
+) {
+  color: #ffffff !important;
+}
+.nova-site :is(
+  .btn-primary, .ui-button--primary,
+  .bg-blue-600, .bg-blue-700,
+  .bg-indigo-600, .bg-indigo-700,
+  .bg-emerald-600, .bg-emerald-700,
+  .bg-red-600, .bg-red-700,
+  .bg-purple-600, .bg-purple-700,
+  .bg-slate-900
+) :is(span, i, strong, b, p, div) {
+  color: #ffffff !important;
+}
+
+/* Dark surfaces, dark cards, hero accents, and code blocks retain high-contrast light text */
+.nova-site :is(
+  [data-theme-surface="dark"],
+  .dark-surface,
+  pre.bg-slate-900,
+  code.bg-slate-900,
+  .bg-slate-950:not([data-theme-surface="adaptive"]),
+  [class*="from-slate-900"]:not([data-theme-surface="adaptive"]),
+  [class*="from-indigo-950"]:not([data-theme-surface="adaptive"]),
+  [class*="from-blue-950"]:not([data-theme-surface="adaptive"])
+) {
+  color: #f8fafc;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(h1, h2, h3, h4, h5, h6) {
+  color: #ffffff !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.text-slate-200, .text-slate-300, .text-neutral-300, .text-neutral-400) {
+  color: #cbd5e1 !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.text-emerald-300, .text-emerald-400) {
+  color: #34d399 !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.text-indigo-300, .text-indigo-400, .text-blue-300, .text-blue-400) {
+  color: #93c5fd !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.text-amber-300, .text-amber-400) {
+  color: #fcd34d !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.text-purple-300, .text-purple-400) {
+  color: #c4b5fd !important;
+}
+
+.nova-site :is([data-theme-surface="dark"], .dark-surface, [class*="from-slate-900"]:not([data-theme-surface="adaptive"])) :is(.bg-white\/5, .bg-white\/10) {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Python Practice Hub Feature Banner - High-contrast Light Mode & Dark Mode */
+.python-feature-banner {
+  background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 50%, #eff6ff 100%) !important;
+  border: 1px solid #c7d2fe !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1), 0 8px 10px -6px rgba(99, 102, 241, 0.05) !important;
+}
+html.dark .python-feature-banner,
+html[data-theme="dark"] .python-feature-banner {
+  background: linear-gradient(to right, #0f172a, #1e1b4b, #0f172a) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  color: #ffffff !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.python-feature-banner .python-banner-title {
+  color: #0f172a !important;
+}
+html.dark .python-feature-banner .python-banner-title,
+html[data-theme="dark"] .python-feature-banner .python-banner-title {
+  color: #ffffff !important;
+}
+
+.python-feature-banner .python-banner-sub {
+  color: #334155 !important;
+}
+html.dark .python-feature-banner .python-banner-sub,
+html[data-theme="dark"] .python-feature-banner .python-banner-sub {
+  color: #cbd5e1 !important;
+}
+
+.python-feature-banner .python-badge {
+  background: #dcfce7 !important;
+  color: #14532d !important;
+  border: 1px solid #86efac !important;
+}
+html.dark .python-feature-banner .python-badge,
+html[data-theme="dark"] .python-feature-banner .python-badge {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #6ee7b7 !important;
+  border-color: transparent !important;
+}
+
+.python-feature-banner .python-stat-card {
+  background: #ffffff !important;
+  border: 1px solid #e0e7ff !important;
+  box-shadow: 0 2px 5px rgba(99, 102, 241, 0.06) !important;
+}
+html.dark .python-feature-banner .python-stat-card,
+html[data-theme="dark"] .python-feature-banner .python-stat-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+}
+
+.python-feature-banner .python-stat-label {
+  color: #475569 !important;
+}
+html.dark .python-feature-banner .python-stat-label,
+html[data-theme="dark"] .python-feature-banner .python-stat-label {
+  color: #cbd5e1 !important;
+}
+
+.python-feature-banner .python-btn-secondary {
+  background: #ffffff !important;
+  color: #4338ca !important;
+  border: 1px solid #c7d2fe !important;
+}
+.python-feature-banner .python-btn-secondary:hover {
+  background: #eef2ff !important;
+  color: #3730a3 !important;
+}
+html.dark .python-feature-banner .python-btn-secondary,
+html[data-theme="dark"] .python-feature-banner .python-btn-secondary {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+html.dark .python-feature-banner .python-btn-secondary:hover,
+html[data-theme="dark"] .python-feature-banner .python-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
 .nova-site :is(.bg-white,.bg-white\/80,.bg-white\/90,.bg-white\/95,.glass-card,.hover-card,.sidebar) {
   background: var(--theme-surface); border-color: var(--theme-line);
 }
 .nova-site :is(.bg-slate-50,.bg-slate-100,.bg-neutral-50,.bg-neutral-100,.bg-neutral-800,.bg-slate-800,.bg-slate-900\/50,.bg-dark-800\/60) { background-color: var(--theme-raised); }
-.nova-site :is(.text-neutral-900,.text-neutral-800,.text-neutral-700,.text-black,.text-slate-950,.text-slate-900,.text-slate-800,.text-slate-700,.text-slate-300,.text-slate-200) { color: var(--theme-text); }
+.nova-site :is(.text-neutral-900,.text-neutral-800,.text-neutral-700,.text-black,.text-slate-950,.text-slate-900,.text-slate-800,.text-slate-700) { color: var(--theme-text); }
 .nova-site :is(.text-neutral-300,.text-neutral-400,.text-neutral-500,.text-neutral-600,.text-slate-400,.text-slate-500,.text-slate-600) { color: var(--theme-muted); }
 .nova-site :is(.text-blue-200,.text-blue-300,.text-blue-400,.text-blue-500,.text-blue-600,.text-cyan-400,.text-sky-400,.text-indigo-400) { color: var(--theme-blue); }
 .nova-site :is(.text-purple-300,.text-purple-400,.text-purple-500) { color: var(--theme-purple); }
@@ -54,11 +268,11 @@ html.dark .nova-site {
 .nova-site .ui-button--quiet:hover { background: var(--theme-tint); color: var(--theme-blue); }
 .nova-site .ui-button--primary { color: #fff; background: linear-gradient(135deg,#1d4ed8,#047857); }
 .nova-site .ui-button--primary:hover { color: #fff; background: linear-gradient(135deg,#1e40af,#065f46); }
-.nova-site :is(.text-white,.btn-primary,.st-primary,.nova-profile-avatar) { color: #fff; }
-.nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600,.bg-slate-900) { color: #fff; }
+.nova-site :is(.btn-primary,.st-primary,.nova-profile-avatar) { color: #fff; }
+.nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600) { color: #fff; }
 .nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600):hover { color: #fff; background-color: #1d4ed8; }
-.nova-site :is(button,a).bg-slate-900 { background: #1e293b; }
-.nova-site :is(button,a).bg-slate-900:hover { background: #334155; }
+.nova-site :is(button,a).bg-slate-900 { background: #1e293b; color: #fff; }
+.nova-site :is(button,a).bg-slate-900:hover { background: #334155; color: #fff; }
 .nova-site :is(.hover\:bg-slate-700,.hover\:bg-white\/10):hover { background-color: var(--theme-raised); }
 .nova-site :is(#summaryModal,#preferencesModal) { background: rgb(8 15 28 / 60%); }
 .nova-site .student-tools {
