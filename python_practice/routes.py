@@ -1,5 +1,6 @@
 import hmac
 import secrets
+import threading
 import time
 from urllib.parse import urlsplit
 
@@ -9,84 +10,117 @@ from psycopg2 import Error as DatabaseError
 from . import repository as repo, runtime, service
 from .content import EXERCISES, QUIZZES, catalog
 
-practice_bp = Blueprint('python_practice',__name__)
+practice_bp = Blueprint('python_practice', __name__)
+
+# Temporary in-memory execution store for unauthenticated guest sessions
+GUEST_JOBS = {}
 
 
 @practice_bp.before_request
 def protect():
-    if session.get('role')!='user' or not session.get('user_email'):
-        if request.path.startswith('/api/'):
-            return jsonify(message='Please sign in to continue.'),401
-        return redirect('/user/login')
-    if request.method=='POST':
-        token=session.get('practice_csrf','')
-        supplied=request.headers.get('X-CSRF-Token','')
-        origin=request.headers.get('Origin')
-        same_origin = not origin or (urlsplit(origin).scheme==request.scheme and urlsplit(origin).netloc==request.host)
-        if not token or not hmac.compare_digest(token.encode(),supplied.encode()) or not same_origin:
-            return jsonify(message='Session verification failed. Refresh and retry.'),403
+    # 1. Allow guest learners to access the sandbox routes without forced login
+    public_paths = {
+        '/user/python',
+        '/python',
+        '/dashboard/python',
+        '/api/python/bootstrap',
+    }
+    is_guest_allowed_api = (
+        request.path.startswith('/api/python/draft/') or
+        request.path.startswith('/api/python/solution/') or
+        request.path == '/api/python/jobs' or
+        request.path.startswith('/api/python/jobs/') or
+        request.path.startswith('/api/python/quiz')
+    )
+
+    is_logged_in = session.get('role') == 'user' and session.get('user_email')
+
+    if not is_logged_in:
+        # Require login for exams to track formal test attempts
+        if request.path.startswith('/api/python/exam'):
+            return jsonify(message='Please sign in to take the formal Grand Test assessment.'), 401
+        if not (request.path in public_paths or is_guest_allowed_api):
+            if request.path.startswith('/api/'):
+                return jsonify(message='Please sign in to continue.'), 401
+            return redirect('/user/login')
+
+    # 2. CSRF check on POST requests
+    if request.method == 'POST':
+        token = session.get('practice_csrf', '')
+        supplied = request.headers.get('X-CSRF-Token', '')
+        origin = request.headers.get('Origin')
+        same_origin = not origin or (urlsplit(origin).scheme == request.scheme and urlsplit(origin).netloc == request.host)
+        if not token or not hmac.compare_digest(token.encode(), supplied.encode()) or not same_origin:
+            return jsonify(message='Session verification failed. Refresh and retry.'), 403
 
 
 @practice_bp.after_request
 def private(response):
-    response.headers['Cache-Control']='private, no-store'
+    response.headers['Cache-Control'] = 'private, no-store'
     return response
 
 
 @practice_bp.errorhandler(ValueError)
 def invalid(exc):
-    return jsonify(message=str(exc)),400
+    return jsonify(message=str(exc)), 400
 
 
 @practice_bp.errorhandler(LookupError)
 def missing(exc):
-    return jsonify(message=str(exc)),404
+    return jsonify(message=str(exc)), 404
 
 
 @practice_bp.errorhandler(DatabaseError)
 def database_error(exc):
-    current_app.logger.error('Practice database unavailable: %s',type(exc).__name__)
-    return jsonify(message='Progress storage is unavailable. Your save has not been confirmed. Please retry.'),503
+    current_app.logger.error('Practice database unavailable: %s', type(exc).__name__)
+    return jsonify(message='Progress storage is unavailable. Your save has not been confirmed. Please retry.'), 503
 
 
 def payload():
-    data=request.get_json(silent=True)
-    if not isinstance(data,dict): raise ValueError('A JSON object is required.')
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        raise ValueError('A JSON object is required.')
     return data
 
 
 def text(value, limit=40000):
-    if not isinstance(value,str) or len(value)>limit: raise ValueError(f'Text must be at most {limit} characters.')
+    if not isinstance(value, str) or len(value) > limit:
+        raise ValueError(f'Text must be at most {limit} characters.')
     return value
 
 
 def exercise(id):
-    if not isinstance(id,str) or id not in EXERCISES: raise LookupError('Exercise not found.')
+    if not isinstance(id, str) or id not in EXERCISES:
+        raise LookupError('Exercise not found.')
     return EXERCISES[id]
 
 
 def arguments(value):
-    if not isinstance(value,list) or len(value)>20 or any(not isinstance(a,str) or len(a)>200 for a in value):
+    if not isinstance(value, list) or len(value) > 20 or any(not isinstance(a, str) or len(a) > 200 for a in value):
         raise ValueError('Use at most 20 command-line arguments, each at most 200 characters.')
     return value
 
 
 def quiz_module(value):
-    if value not in [str(i) for i in range(10)]: raise ValueError('Choose a quiz module.')
-    return [q['id'] for q in QUIZZES.values() if q['module']==value]
+    if value not in [str(i) for i in range(10)]:
+        raise ValueError('Choose a quiz module.')
+    return [q['id'] for q in QUIZZES.values() if q['module'] == value]
 
 
 def quiz_answers(answers, ids, complete=False):
-    if not isinstance(answers,dict) or not set(answers)<=set(ids): raise ValueError('Choose valid quiz questions.')
-    if complete and set(answers)!=set(ids): raise ValueError('Answer every question before submitting.')
-    if any(type(a) is not int or not 0<=a<len(QUIZZES[id]['options']) for id,a in answers.items()):
+    if not isinstance(answers, dict) or not set(answers) <= set(ids):
+        raise ValueError('Choose valid quiz questions.')
+    if complete and set(answers) != set(ids):
+        raise ValueError('Answer every question before submitting.')
+    if any(type(a) is not int or not 0 <= a < len(QUIZZES[id]['options']) for id, a in answers.items()):
         raise ValueError('Choose valid answers.')
     return answers
 
 
 @practice_bp.get('/user/python')
 def hub():
-    return render_template('python_practice.html', user_name=session.get('user_name','Learner'))
+    user_name = session.get('user_name') or 'Learner'
+    return render_template('python_practice.html', user_name=user_name)
 
 
 @practice_bp.get('/python')
@@ -97,188 +131,299 @@ def hub_alias():
 
 @practice_bp.get('/api/python/bootstrap')
 def bootstrap():
-    session.setdefault('practice_csrf',secrets.token_urlsafe(32))
-    return jsonify(**catalog(),state=repo.snapshot(session['user_email']),csrf=session['practice_csrf'],
-                   server_time=time.time(),runtime_ready=runtime.available())
+    session.setdefault('practice_csrf', secrets.token_urlsafe(32))
+    email = session.get('user_email')
+    if email:
+        state = repo.snapshot(email)
+    else:
+        state = session.get('guest_practice_state') or repo.defaults()
+    return jsonify(**catalog(), state=state, csrf=session['practice_csrf'],
+                   server_time=time.time(), runtime_ready=runtime.available())
 
 
 @practice_bp.post('/api/python/draft/<id>')
 def draft(id):
-    item=exercise(id)
-    data=payload()
-    code=text(data.get('code'))
-    stdin=text(data.get('stdin',''),8000)
-    argv=arguments(data.get('argv',item['argv']))
-    with repo.state(session['user_email']) as state:
-        state['drafts'][id]=dict(code=code,stdin=stdin,argv=argv,updated=time.time())
-        state['last_exercise']=id
+    item = exercise(id)
+    data = payload()
+    code = text(data.get('code'))
+    stdin = text(data.get('stdin', ''), 8000)
+    argv = arguments(data.get('argv', item['argv']))
+    email = session.get('user_email')
+    if email:
+        with repo.state(email) as state:
+            state['drafts'][id] = dict(code=code, stdin=stdin, argv=argv, updated=time.time())
+            state['last_exercise'] = id
+    else:
+        guest_state = session.setdefault('guest_practice_state', repo.defaults())
+        guest_state.setdefault('drafts', {})[id] = dict(code=code, stdin=stdin, argv=argv, updated=time.time())
+        guest_state['last_exercise'] = id
+        session.modified = True
     return jsonify(saved=True)
 
 
 @practice_bp.post('/api/python/solution/<id>')
 def solution(id):
-    item=exercise(id)
-    if repo.snapshot(session['user_email'])['active_exam']:
+    item = exercise(id)
+    email = session.get('user_email')
+    if email and repo.snapshot(email)['active_exam']:
         raise ValueError('Finish your Grand Test before revealing practice solutions.')
-    return jsonify(code=item['solution'],explanation=item['explanation'])
+    return jsonify(code=item['solution'], explanation=item['explanation'])
 
 
 @practice_bp.post('/api/python/jobs')
 def start_job():
-    if not runtime.available(): return jsonify(message='Python runtime is not installed. Ask the site administrator to run the practice setup.'),503
-    data=payload()
-    kind=data.get('kind')
-    if kind not in {'run','submit'}: raise ValueError('Choose Run or Submit.')
-    item=exercise(data.get('exercise',''))
-    code=text(data.get('code'))
-    stdin=text(data.get('stdin',''),8000)
-    argv=arguments(data.get('argv',item['argv']))
-    email=session['user_email']
-    with repo.state(email) as state:
-        if state['active_exam'] and kind=='submit':
-            raise ValueError('Finish your Grand Test before grading practice solutions.')
-        if data.get('exam'):
-            exam=state['active_exam']
-            if not exam or exam['id']!=data['exam'] or item['id'] not in exam['codes']:
-                raise ValueError('This coding question is not part of your active assessment.')
-            if exam['status']!='active' or (exam['deadline'] and time.time()>=exam['deadline']):
-                raise ValueError('The assessment is closed for answers. Submit it to view results.')
-            exam['answers'][item['id']]=code
-            exam.setdefault('inputs',{})[item['id']]=dict(stdin=stdin,argv=argv)
-        else:
-            state['drafts'][item['id']]=dict(code=code,stdin=stdin,argv=argv,updated=time.time())
-            state['last_exercise']=item['id']
-    job=repo.create_job(email,dict(kind=kind,exercise=item['id'],code=code,stdin=stdin,argv=argv))
-    service.launch(email,job)
-    return jsonify(id=job['id']),202
+    if not runtime.available():
+        return jsonify(message='Python runtime is not installed. Ask the site administrator to run the practice setup.'), 503
+    data = payload()
+    kind = data.get('kind')
+    if kind not in {'run', 'submit'}:
+        raise ValueError('Choose Run or Submit.')
+    item = exercise(data.get('exercise', ''))
+    code = text(data.get('code'))
+    stdin = text(data.get('stdin', ''), 8000)
+    argv = arguments(data.get('argv', item['argv']))
+    email = session.get('user_email')
+
+    if email:
+        with repo.state(email) as state:
+            if state['active_exam'] and kind == 'submit':
+                raise ValueError('Finish your Grand Test before grading practice solutions.')
+            if data.get('exam'):
+                exam = state['active_exam']
+                if not exam or exam['id'] != data['exam'] or item['id'] not in exam['codes']:
+                    raise ValueError('This coding question is not part of your active assessment.')
+                if exam['status'] != 'active' or (exam['deadline'] and time.time() >= exam['deadline']):
+                    raise ValueError('The assessment is closed for answers. Submit it to view results.')
+                exam['answers'][item['id']] = code
+                exam.setdefault('inputs', {})[item['id']] = dict(stdin=stdin, argv=argv)
+            else:
+                state['drafts'][item['id']] = dict(code=code, stdin=stdin, argv=argv, updated=time.time())
+                state['last_exercise'] = item['id']
+        job = repo.create_job(email, dict(kind=kind, exercise=item['id'], code=code, stdin=stdin, argv=argv))
+        service.launch(email, job)
+        return jsonify(id=job['id']), 202
+
+    # Unauthenticated guest runner (stored in memory & session)
+    job_id = f"guest_job_{secrets.token_hex(8)}"
+    guest_job = {
+        'id': job_id,
+        'kind': kind,
+        'exercise': item['id'],
+        'code': code,
+        'stdin': stdin,
+        'argv': argv,
+        'status': 'running'
+    }
+    GUEST_JOBS[job_id] = guest_job
+    guest_state = session.setdefault('guest_practice_state', repo.defaults())
+    guest_state.setdefault('drafts', {})[item['id']] = dict(code=code, stdin=stdin, argv=argv, updated=time.time())
+    guest_state['last_exercise'] = item['id']
+    session.modified = True
+
+    def run_guest_job():
+        try:
+            cancel = threading.Event()
+            if kind == 'run':
+                res = runtime.execute(code, stdin, item['files'], argv, cancel)
+            else:
+                res = service.grade(item, code, cancel)
+                if res.get('score') == 1:
+                    guest_state.setdefault('completed', {})[item['id']] = time.time()
+                    session.modified = True
+            guest_job['status'] = 'done'
+            guest_job['result'] = res
+        except Exception as ex:
+            guest_job['status'] = 'error'
+            guest_job['message'] = str(ex)
+
+    threading.Thread(target=run_guest_job, daemon=True).start()
+    return jsonify(id=job_id), 202
 
 
 @practice_bp.get('/api/python/jobs/<id>')
 def job_status(id):
-    job=repo.get_job(session['user_email'],id)
-    return jsonify(**{k:job[k] for k in ('id','status','result','message') if k in job})
+    if id in GUEST_JOBS:
+        job = GUEST_JOBS[id]
+        return jsonify(**{k: job[k] for k in ('id', 'status', 'result', 'message') if k in job})
+    email = session.get('user_email')
+    if email:
+        job = repo.get_job(email, id)
+        return jsonify(**{k: job[k] for k in ('id', 'status', 'result', 'message') if k in job})
+    return jsonify(message='Job not found.'), 404
 
 
 @practice_bp.post('/api/python/jobs/<id>/stop')
 def stop_job(id):
-    job=repo.get_job(session['user_email'],id)
-    if job['kind']=='exam': raise ValueError('Final assessment grading cannot be stopped; it will finish automatically.')
-    repo.update_job(session['user_email'],id,dict(cancelled=True))
+    if id in GUEST_JOBS:
+        GUEST_JOBS[id]['status'] = 'stopped'
+        return jsonify(stopping=True)
+    email = session.get('user_email')
+    if email:
+        job = repo.get_job(email, id)
+        if job['kind'] == 'exam':
+            raise ValueError('Final assessment grading cannot be stopped; it will finish automatically.')
+        repo.update_job(email, id, dict(cancelled=True))
     return jsonify(stopping=True)
 
 
 @practice_bp.post('/api/python/quiz/start')
 def start_quiz():
-    data=payload()
-    module=data.get('module')
-    ids=quiz_module(module)
-    mode=data.get('mode','resume')
-    if mode not in {'resume','all','missed'}: raise ValueError('Choose a quiz mode.')
-    with repo.state(session['user_email']) as state:
-        if state['active_exam']: raise ValueError('Finish your Grand Test before starting a practice quiz.')
-        draft=state['quiz_drafts'].get(module)
-        if not draft or mode!='resume':
-            if mode=='missed':
-                latest=next((q for q in reversed(state['quiz_results']) if q['module']==module),None)
-                ids=[d['id'] for d in latest['details'] if not d['correct']] if latest else []
-                if not ids: raise ValueError('There are no missed questions to retry. Start a full quiz instead.')
-            draft=dict(id=secrets.token_urlsafe(16),questions=ids,answers={},mode=mode,updated=time.time())
-            state['quiz_drafts'][module]=draft
+    data = payload()
+    module = data.get('module')
+    ids = quiz_module(module)
+    mode = data.get('mode', 'resume')
+    if mode not in {'resume', 'all', 'missed'}:
+        raise ValueError('Choose a quiz mode.')
+    email = session.get('user_email')
+    if email:
+        with repo.state(email) as state:
+            if state['active_exam']:
+                raise ValueError('Finish your Grand Test before starting a practice quiz.')
+            draft = state['quiz_drafts'].get(module)
+            if not draft or mode != 'resume':
+                if mode == 'missed':
+                    latest = next((q for q in reversed(state['quiz_results']) if q['module'] == module), None)
+                    ids = [d['id'] for d in latest['details'] if not d['correct']] if latest else []
+                    if not ids:
+                        raise ValueError('There are no missed questions to retry. Start a full quiz instead.')
+                draft = dict(id=secrets.token_urlsafe(16), questions=ids, answers={}, mode=mode, updated=time.time())
+                state['quiz_drafts'][module] = draft
+    else:
+        guest_state = session.setdefault('guest_practice_state', repo.defaults())
+        draft = dict(id=secrets.token_urlsafe(16), questions=ids, answers={}, mode=mode, updated=time.time())
+        guest_state.setdefault('quiz_drafts', {})[module] = draft
+        session.modified = True
     return jsonify(draft=draft)
 
 
 @practice_bp.post('/api/python/quiz/draft')
 def save_quiz():
-    data=payload()
-    module=data.get('module')
+    data = payload()
+    module = data.get('module')
     quiz_module(module)
-    with repo.state(session['user_email']) as state:
-        if state['active_exam']: raise ValueError('Finish your Grand Test before editing a practice quiz.')
-        draft=state['quiz_drafts'].get(module)
-        if not draft or draft['id']!=data.get('attempt'): raise ValueError('This quiz attempt has changed. Reopen the quiz.')
-        draft.update(answers=quiz_answers(data.get('answers'),draft['questions']),updated=time.time())
+    email = session.get('user_email')
+    if email:
+        with repo.state(email) as state:
+            if state['active_exam']:
+                raise ValueError('Finish your Grand Test before editing a practice quiz.')
+            draft = state['quiz_drafts'].get(module)
+            if not draft or draft['id'] != data.get('attempt'):
+                raise ValueError('This quiz attempt has changed. Reopen the quiz.')
+            draft.update(answers=quiz_answers(data.get('answers'), draft['questions']), updated=time.time())
+    else:
+        guest_state = session.setdefault('guest_practice_state', repo.defaults())
+        draft = guest_state.setdefault('quiz_drafts', {}).get(module)
+        if not draft or draft['id'] != data.get('attempt'):
+            raise ValueError('This quiz attempt has changed. Reopen the quiz.')
+        draft.update(answers=quiz_answers(data.get('answers'), draft['questions']), updated=time.time())
+        session.modified = True
     return jsonify(saved=True)
 
 
 @practice_bp.post('/api/python/quiz')
 def submit_quiz():
-    data=payload()
-    module=data.get('module')
-    ids=quiz_module(module)
-    with repo.state(session['user_email']) as state:
-        if state['active_exam']: raise ValueError('Finish your Grand Test before submitting a practice quiz.')
-        attempt=data.get('attempt')
-        if attempt:
-            previous=next((q for q in state['quiz_results'] if q.get('attempt')==attempt and q['module']==module),None)
-            if previous: return jsonify(result=previous)
-            draft=state['quiz_drafts'].get(module)
-            if not draft or draft['id']!=attempt: raise ValueError('This quiz attempt has changed. Reopen the quiz.')
-            ids=draft['questions']
-        answers=quiz_answers(data.get('answers'),ids,complete=True)
-        details=[dict(id=id,correct=answers[id]==QUIZZES[id]['answer'],answer=QUIZZES[id]['answer'],selected=answers[id],explanation=QUIZZES[id]['explanation']) for id in ids]
-        result=dict(module=module,attempt=attempt,score=sum(d['correct'] for d in details),total=len(details),details=details,at=time.time())
-        state['quiz_results']=(state['quiz_results']+[result])[-100:]
-        state['quiz_drafts'].pop(module,None)
+    data = payload()
+    module = data.get('module')
+    ids = quiz_module(module)
+    email = session.get('user_email')
+    if email:
+        with repo.state(email) as state:
+            if state['active_exam']:
+                raise ValueError('Finish your Grand Test before submitting a practice quiz.')
+            attempt = data.get('attempt')
+            if attempt:
+                previous = next((q for q in state['quiz_results'] if q.get('attempt') == attempt and q['module'] == module), None)
+                if previous:
+                    return jsonify(result=previous)
+                draft = state['quiz_drafts'].get(module)
+                if not draft or draft['id'] != attempt:
+                    raise ValueError('This quiz attempt has changed. Reopen the quiz.')
+                ids = draft['questions']
+            answers = quiz_answers(data.get('answers'), ids, complete=True)
+            details = [dict(id=id, correct=answers[id] == QUIZZES[id]['answer'], answer=QUIZZES[id]['answer'], selected=answers[id], explanation=QUIZZES[id]['explanation']) for id in ids]
+            result = dict(module=module, attempt=attempt, score=sum(d['correct'] for d in details), total=len(details), details=details, at=time.time())
+            state['quiz_results'] = (state['quiz_results'] + [result])[-100:]
+            state['quiz_drafts'].pop(module, None)
+    else:
+        guest_state = session.setdefault('guest_practice_state', repo.defaults())
+        attempt = data.get('attempt')
+        answers = quiz_answers(data.get('answers'), ids, complete=True)
+        details = [dict(id=id, correct=answers[id] == QUIZZES[id]['answer'], answer=QUIZZES[id]['answer'], selected=answers[id], explanation=QUIZZES[id]['explanation']) for id in ids]
+        result = dict(module=module, attempt=attempt, score=sum(d['correct'] for d in details), total=len(details), details=details, at=time.time())
+        guest_state.setdefault('quiz_results', []).append(result)
+        guest_state.setdefault('quiz_drafts', {}).pop(module, None)
+        session.modified = True
     return jsonify(result=result)
 
 
 @practice_bp.post('/api/python/exam/start')
 def start_exam():
-    data=payload()
-    if type(data.get('timed')) is not bool: raise ValueError('Choose timed or untimed.')
+    data = payload()
+    if type(data.get('timed')) is not bool:
+        raise ValueError('Choose timed or untimed.')
     with repo.state(session['user_email']) as state:
-        if not state['active_exam']: state['active_exam']=service.new_exam(data['timed'])
-        exam=state['active_exam']
-    return jsonify(exam=exam,server_time=time.time())
+        if not state['active_exam']:
+            state['active_exam'] = service.new_exam(data['timed'])
+        exam = state['active_exam']
+    return jsonify(exam=exam, server_time=time.time())
 
 
 @practice_bp.post('/api/python/exam/answer')
 def save_answer():
-    data=payload()
+    data = payload()
     with repo.state(session['user_email']) as state:
-        exam=state['active_exam']
-        if not exam or exam['id']!=data.get('exam'): raise ValueError('This assessment is no longer active.')
-        if exam['status']!='active' or (exam['deadline'] and time.time()>=exam['deadline']): raise ValueError('The assessment is closed for answers. Submit it to view results.')
-        id=data.get('id')
+        exam = state['active_exam']
+        if not exam or exam['id'] != data.get('exam'):
+            raise ValueError('This assessment is no longer active.')
+        if exam['status'] != 'active' or (exam['deadline'] and time.time() >= exam['deadline']):
+            raise ValueError('The assessment is closed for answers. Submit it to view results.')
+        id = data.get('id')
         if id in exam['codes']:
-            answer=text(data.get('answer'))
+            answer = text(data.get('answer'))
             if 'stdin' in data or 'argv' in data:
-                exam.setdefault('inputs',{})[id]=dict(stdin=text(data.get('stdin',''),8000),argv=arguments(data.get('argv',[])))
+                exam.setdefault('inputs', {})[id] = dict(stdin=text(data.get('stdin', ''), 8000), argv=arguments(data.get('argv', [])))
         elif id in exam['quizzes']:
-            answer=data.get('answer')
-            if type(answer) is not int or not 0<=answer<len(QUIZZES[id]['options']): raise ValueError('Choose a valid answer.')
-        else: raise ValueError('Question is not part of this assessment.')
-        exam['answers'][id]=answer
+            answer = data.get('answer')
+            if type(answer) is not int or not 0 <= answer < len(QUIZZES[id]['options']):
+                raise ValueError('Choose a valid answer.')
+        else:
+            raise ValueError('Question is not part of this assessment.')
+        exam['answers'][id] = answer
     return jsonify(saved=True)
 
 
 @practice_bp.post('/api/python/exam/flag')
 def flag_answer():
-    data=payload()
+    data = payload()
     with repo.state(session['user_email']) as state:
-        exam=state['active_exam']
-        if not exam or exam['id']!=data.get('exam'): raise ValueError('This assessment is no longer active.')
-        if exam['status']!='active' or (exam['deadline'] and time.time()>=exam['deadline']): raise ValueError('The assessment is closed for changes.')
-        id=data.get('id')
-        if id not in exam['codes']+exam['quizzes'] or type(data.get('flagged')) is not bool: raise ValueError('Choose a valid question and review flag.')
-        flags=set(exam.get('flags',[]))
+        exam = state['active_exam']
+        if not exam or exam['id'] != data.get('exam'):
+            raise ValueError('This assessment is no longer active.')
+        if exam['status'] != 'active' or (exam['deadline'] and time.time() >= exam['deadline']):
+            raise ValueError('The assessment is closed for changes.')
+        id = data.get('id')
+        if id not in exam['codes'] + exam['quizzes'] or type(data.get('flagged')) is not bool:
+            raise ValueError('Choose a valid question and review flag.')
+        flags = set(exam.get('flags', []))
         flags.add(id) if data['flagged'] else flags.discard(id)
-        exam['flags']=sorted(flags)
+        exam['flags'] = sorted(flags)
     return jsonify(saved=True)
 
 
 @practice_bp.post('/api/python/exam/finish')
 def finish_exam():
-    if not runtime.available(): return jsonify(message='The Python runtime is unavailable. Saved assessment answers are preserved.'),503
-    email=session['user_email']
-    # Keep this state lock through job reservation to prevent two grading jobs.
+    if not runtime.available():
+        return jsonify(message='The Python runtime is unavailable. Saved assessment answers are preserved.'), 503
+    email = session['user_email']
     with repo.state(email) as state:
-        exam=state['active_exam']
-        if not exam: raise ValueError('No active assessment.')
-        if exam['status']=='grading':
-            existing=repo.get_job(email,exam['job'])
-            if existing['status'] not in {'error','stopped'}: return jsonify(id=exam['job']),202
-        job=repo.create_job(email,dict(kind='exam',exam=exam.copy()))
-        exam.update(status='grading',job=job['id'])
-    service.launch(email,job)
-    return jsonify(id=job['id']),202
+        exam = state['active_exam']
+        if not exam:
+            raise ValueError('No active assessment.')
+        if exam['status'] == 'grading':
+            existing = repo.get_job(email, exam['job'])
+            if existing['status'] not in {'error', 'stopped'}:
+                return jsonify(id=exam['job']), 202
+        job = repo.create_job(email, dict(kind='exam', exam=exam.copy()))
+        exam.update(status='grading', job=job['id'])
+    service.launch(email, job)
+    return jsonify(id=job['id']), 202

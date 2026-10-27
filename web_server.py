@@ -354,7 +354,13 @@ PROGRAM_PLAIN_DESCRIPTIONS = {
     'google developer groups on campus': "Join or lead a Google coding club at your college. Check Google's page for current campus clubs, events, and how to join.",
     'google developer student clubs (gdsc)': "Join or lead a Google coding club at your college. Check Google's page for current campus clubs, events, and how to join.",
     'microsoft learn student ambassadors (mlsa)': "A global campus tech club for students who love coding and teaching peers. Check Microsoft's official page for open dates and perks.",
-    "nasa l'space academy": 'A free 12-week online course where students learn space mission design and research writing with NASA scientists. Check the official site for dates and rules.',
+    'systems limited fresh graduate hiring & vantage internship': 'Paid hiring and internship intake for BSCS, SE, and IT students across Lahore, Karachi, and Islamabad. Open to Pakistani citizens.',
+    'arbisoft fresh graduate software engineering program': 'Paid software engineering positions and winter/summer internships in Lahore and remote. Requires passing the Arbisoft Software Engineering Test.',
+    '10pearls shine internship program': 'Intensive paid summer training in software engineering, QA, and cloud for 6th-8th semester students across Pakistan.',
+    'devsinc graduate trainee & summer internship': 'Paid engineering internships and graduate fast-track roles for Pakistani CS and Software Engineering undergraduates in Lahore and Islamabad.',
+    'motive software engineering internship (pakistan)': 'Top-tier paid software engineering internship in Islamabad, Lahore, or hybrid for Pakistani CS students with strong DSA skills.',
+    'careem software engineering fellowship & internship': 'Competitive engineering fellowship and internships for university students in Pakistan with hands-on large-scale distributed systems experience.',
+    'pseb techshaw national internship program': 'Pakistan Software Export Board paid ICT internships with PKR 45,000/month government stipend for Pakistani computing graduates nationwide.',
     'harvard cs50p & cs50x opencourseware free certificate track': "Free, self-paced Python and computer science lessons from Harvard. Check CS50's official site for problem sets and certificate rules.",
     'generation google scholarship (apac & global cs)': "A scholarship for computer science students who show strong coding and leadership skills. Check Google's scholarship page for dates and region rules.",
     'ignite ngiri final year project grant (pakistan cs/engineering)': "Funding for final-year tech projects at colleges in Pakistan. Check Ignite's official site for open calls, topics, and rules.",
@@ -869,7 +875,7 @@ def register_user_account():
         logger.error(f'Error triggering welcome email: {e}')
     return jsonify({
         'status': 'success',
-        'message': 'Welcome to Nova Brief! Your account is active.' + (' Your welcome email was sent.' if welcome_sent else ' Email delivery is temporarily unavailable; your account is still ready.'),
+        'message': 'Welcome to Nova Brief! Your account is active.' + (' Your welcome email was sent.' if welcome_sent else ''),
         'welcome_email_sent': welcome_sent,
         'user': {'name': name, 'email': email},
         'redirect': '/user/dashboard'
@@ -1544,7 +1550,7 @@ def handle_ai_chat():
                 "model": os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b').strip(),
                 "messages": [{"role": "system", "content": prompt}],
                 "temperature": 0.7,
-                "max_tokens": 150
+                "max_tokens": 512
             }
             
             response = requests.post("https://api.groq.com/openai/v1/chat/completions", json=payload, headers=headers, timeout=20)

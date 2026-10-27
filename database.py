@@ -1173,12 +1173,53 @@ class NewsDatabase:
                     'legacy_schedule': (-7, 32),
                 },
                 {
-                    'title': "NASA L'SPACE Academy",
-                    'company': 'NASA',
-                    'description': 'A free 12-week online course where students learn space mission design and research writing with NASA scientists. Check the official site for dates and rules.',
-                    'registration_url': 'https://www.lspace.asu.edu/',
-                    'category': 'program',
-                    'legacy_schedule': (8, 38),
+                    'title': 'Systems Limited Fresh Graduate Hiring & Vantage Internship',
+                    'company': 'Systems Limited',
+                    'description': 'Paid hiring and internship intake for BSCS, SE, and IT students across Lahore, Karachi, and Islamabad. Open to Pakistani citizens.',
+                    'registration_url': 'https://www.systemsltd.com/careers',
+                    'category': 'internship',
+                },
+                {
+                    'title': 'Arbisoft Fresh Graduate Software Engineering Program',
+                    'company': 'Arbisoft',
+                    'description': 'Paid software engineering positions and winter/summer internships in Lahore and remote. Requires passing the Arbisoft Software Engineering Test.',
+                    'registration_url': 'https://arbisoft.com/careers',
+                    'category': 'internship',
+                },
+                {
+                    'title': '10Pearls Shine Internship Program',
+                    'company': '10Pearls',
+                    'description': 'Intensive paid summer training in software engineering, QA, and cloud for 6th-8th semester students across Pakistan.',
+                    'registration_url': 'https://10pearls.com/careers/',
+                    'category': 'internship',
+                },
+                {
+                    'title': 'Devsinc Graduate Trainee & Summer Internship',
+                    'company': 'Devsinc',
+                    'description': 'Paid engineering internships and graduate fast-track roles for Pakistani CS and Software Engineering undergraduates in Lahore and Islamabad.',
+                    'registration_url': 'https://www.devsinc.com/careers',
+                    'category': 'internship',
+                },
+                {
+                    'title': 'Motive Software Engineering Internship (Pakistan)',
+                    'company': 'Motive',
+                    'description': 'Top-tier paid software engineering internship in Islamabad, Lahore, or hybrid for Pakistani CS students with strong DSA skills.',
+                    'registration_url': 'https://gomotive.com/company/careers/',
+                    'category': 'internship',
+                },
+                {
+                    'title': 'Careem Software Engineering Fellowship & Internship',
+                    'company': 'Careem',
+                    'description': 'Competitive engineering fellowship and internships for university students in Pakistan with hands-on large-scale distributed systems experience.',
+                    'registration_url': 'https://www.careem.com/en-ae/careers/',
+                    'category': 'internship',
+                },
+                {
+                    'title': 'PSEB Techshaw National Internship Program',
+                    'company': 'PSEB Pakistan',
+                    'description': 'Pakistan Software Export Board paid ICT internships with PKR 45,000/month government stipend for Pakistani computing graduates nationwide.',
+                    'registration_url': 'https://pseb.org.pk/',
+                    'category': 'internship',
                 },
                 {
                     'title': 'Harvard CS50P & CS50x OpenCourseWare Free Certificate Track',
@@ -1277,6 +1318,7 @@ class NewsDatabase:
                            VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE)''',
                         (p['title'], p['company'], p['description'], p['registration_url'], None, None, p['category'])
                     )
+            cursor.execute("UPDATE student_programs SET is_active=FALSE WHERE title LIKE %s", ("%NASA L'SPACE%",))
             conn.commit()
             logger.info("Seeded and enriched default student programs.")
         finally:

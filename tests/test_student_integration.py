@@ -30,7 +30,7 @@ class StudentIntegrationTests(unittest.TestCase):
         self.assertEqual(200, response.status_code)
         html = response.get_data(as_text=True)
         for marker in ('My Planner', 'Application tracker', 'Study tasks', 'Download calendar',
-                       'applicationForm', 'taskForm', 'opportunityFilters', '/static/js/student-tools.js'):
+                       'applicationForm', 'taskForm', 'opportunityFilters', '/static/js/student-tools'):
             self.assertIn(marker, html)
         self.assertNotIn("const USER_NAME = 'Student </script>'", html)
 

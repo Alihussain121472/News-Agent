@@ -61,8 +61,9 @@ class PracticeRouteTests(unittest.TestCase):
 
     def test_authentication_csrf_and_aliases(self):
         anonymous = self.app.test_client()
-        self.assertEqual(401, anonymous.get('/api/python/bootstrap').status_code)
-        self.assertEqual('/user/login', anonymous.get('/user/python').location)
+        self.assertEqual(200, anonymous.get('/api/python/bootstrap').status_code)
+        self.assertEqual(200, anonymous.get('/user/python').status_code)
+        self.assertEqual(401, anonymous.post('/api/python/exam/start', json={'timed': False}).status_code)
         self.assertEqual(200, self.client.get('/user/python').status_code)
         for path in ['/python', '/dashboard/python']:
             self.assertEqual('/user/python', self.client.get(path).location)
