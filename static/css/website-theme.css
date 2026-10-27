@@ -155,14 +155,16 @@ body .text-white {
 
 /* Python Practice Hub Feature Banner - High-contrast Light Mode & Dark Mode */
 .python-feature-banner {
-  background: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 50%, #eff6ff 100%) !important;
+  background-color: #f8fafc !important;
+  background-image: linear-gradient(135deg, #eef2ff 0%, #f0fdf4 50%, #eff6ff 100%) !important;
   border: 1px solid #c7d2fe !important;
   color: #0f172a !important;
   box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1), 0 8px 10px -6px rgba(99, 102, 241, 0.05) !important;
 }
 html.dark .python-feature-banner,
 html[data-theme="dark"] .python-feature-banner {
-  background: linear-gradient(to right, #0f172a, #1e1b4b, #0f172a) !important;
+  background-color: #0f172a !important;
+  background-image: linear-gradient(to right, #0f172a, #1e1b4b, #0f172a) !important;
   border-color: rgba(99, 102, 241, 0.3) !important;
   color: #ffffff !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
@@ -203,6 +205,7 @@ html[data-theme="dark"] .python-feature-banner .python-badge {
 }
 html.dark .python-feature-banner .python-stat-card,
 html[data-theme="dark"] .python-feature-banner .python-stat-card {
+  background-color: #1e293b !important;
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow: none !important;
@@ -266,8 +269,8 @@ html[data-theme="dark"] .python-feature-banner .python-btn-secondary:hover {
 .nova-site .ui-button--secondary:hover { background: var(--theme-raised); color: var(--theme-text); border-color: var(--theme-edge); }
 .nova-site .ui-button--quiet { color: var(--theme-muted); }
 .nova-site .ui-button--quiet:hover { background: var(--theme-tint); color: var(--theme-blue); }
-.nova-site .ui-button--primary { color: #fff; background: linear-gradient(135deg,#1d4ed8,#047857); }
-.nova-site .ui-button--primary:hover { color: #fff; background: linear-gradient(135deg,#1e40af,#065f46); }
+.nova-site .ui-button--primary { color: #ffffff !important; background-color: #1d4ed8 !important; background-image: linear-gradient(135deg,#1d4ed8,#047857) !important; }
+.nova-site .ui-button--primary:hover { color: #ffffff !important; background-color: #1e40af !important; background-image: linear-gradient(135deg,#1e40af,#065f46) !important; }
 .nova-site :is(.btn-primary,.st-primary,.nova-profile-avatar) { color: #fff; }
 .nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600) { color: #fff; }
 .nova-site :is(button,a):is(.bg-blue-600,.bg-emerald-600):hover { color: #fff; background-color: #1d4ed8; }
