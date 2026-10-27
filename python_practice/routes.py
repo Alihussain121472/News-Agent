@@ -8,7 +8,7 @@ from flask import Blueprint, current_app, jsonify, redirect, render_template, re
 from psycopg2 import Error as DatabaseError
 
 from . import repository as repo, runtime, service
-from .content import EXERCISES, QUIZZES, catalog
+from .content import EXERCISES, QUIZZES, catalog, get_skill_check_questions
 
 practice_bp = Blueprint('python_practice', __name__)
 
@@ -24,6 +24,8 @@ def protect():
         '/python',
         '/dashboard/python',
         '/api/python/bootstrap',
+        '/api/python/skill-check',
+        '/api/python/quiz/skill-check',
     }
     is_guest_allowed_api = (
         request.path.startswith('/api/python/draft/') or
@@ -354,6 +356,20 @@ def submit_quiz():
         guest_state.setdefault('quiz_drafts', {}).pop(module, None)
         session.modified = True
     return jsonify(result=result)
+
+
+@practice_bp.route('/api/python/skill-check', methods=['GET'])
+@practice_bp.route('/api/python/quiz/skill-check', methods=['GET'])
+def get_skill_check_api():
+    seen_raw = request.args.get('seen', '')
+    seen_ids = [s.strip() for s in seen_raw.split(',') if s.strip()]
+    questions = get_skill_check_questions(seen_ids=seen_ids, count=5)
+    return jsonify({
+        'status': 'success',
+        'questions': questions,
+        'total': len(questions),
+        'seen_count': len(seen_ids)
+    })
 
 
 @practice_bp.post('/api/python/exam/start')

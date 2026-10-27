@@ -121,33 +121,72 @@
                     <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">Try Right Now · No Login Needed</span>
                     <h2 class="text-2xl font-extrabold mt-1">5 Question Python Skill Check</h2>
                 </div>
-                <span id="quizScoreBadge" class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 text-xs font-bold">
-                    Score: 0 / {{ sample_quiz | length }}
-                </span>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" id="refreshQuizBtn" onclick="refreshSkillCheck()"
+                            class="px-3.5 py-1.5 rounded-lg border border-slate-300 dark:border-neutral-700 hover:border-blue-500 bg-white dark:bg-neutral-800 text-xs font-bold text-slate-700 dark:text-slate-200 transition flex items-center gap-2 shadow-sm cursor-pointer"
+                            title="Load 5 fresh questions with new topics">
+                        <i class="fas fa-rotate-right transition-transform" id="refreshQuizIcon"></i>
+                        <span>Reset &amp; New Questions</span>
+                    </button>
+                    <span id="quizScoreBadge" class="px-4 py-1.5 rounded-full bg-slate-100 dark:bg-neutral-800 text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Score: 0 / {{ sample_quiz | length }}
+                    </span>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="quizCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {% for q in sample_quiz %}
                 {% set q_idx = loop.index0 %}
-                <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/50 border border-slate-200 dark:border-neutral-800" data-quiz-card="{{ q_idx }}" data-answer="{{ q.answer }}">
-                    <div class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 mb-1">
-                        Module {{ loop.index }} · {{ q.module_title }}
+                <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/50 border border-slate-200 dark:border-neutral-800 flex flex-col justify-between"
+                     data-quiz-card="{{ q_idx }}"
+                     data-quiz-id="{{ q.id }}"
+                     data-answer="{{ q.answer }}">
+                    <div>
+                        <div class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                            Module {{ q.module_order or loop.index }} · {{ q.module_title }}
+                        </div>
+                        <p class="font-bold text-sm text-slate-900 dark:text-white mb-3">{{ q.question }}</p>
+                        <div class="space-y-2 options-container">
+                            {% for opt in q.options %}
+                            <button type="button"
+                                    onclick="checkSampleQuiz({{ q_idx }}, {{ loop.index0 }}, this)"
+                                    class="quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-medium hover:border-blue-500 transition cursor-pointer">
+                                {{ opt }}
+                            </button>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <p class="font-bold text-sm text-slate-900 dark:text-white mb-3">{{ q.question }}</p>
-                    <div class="space-y-2">
-                        {% for opt in q.options %}
-                        <button type="button"
-                                onclick="checkSampleQuiz({{ q_idx }}, {{ loop.index0 }}, this)"
-                                class="w-full text-left px-3.5 py-2 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-medium hover:border-blue-500 transition">
-                            {{ opt }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                    <div class="quiz-feedback hidden mt-3 p-3 rounded-lg text-xs leading-relaxed" id="feedback-{{ q_idx }}">
-                        {{ q.explanation }}
+                    <div class="quiz-feedback hidden mt-3.5 p-3.5 rounded-xl border text-xs leading-relaxed space-y-1.5" id="feedback-{{ q_idx }}">
+                        <div class="font-bold flex items-center gap-1.5 feedback-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <span class="feedback-title">Review &amp; Concept Breakdown:</span>
+                        </div>
+                        <div class="feedback-body space-y-1 text-slate-700 dark:text-slate-300">
+                            {% for line in q.explanation.split('\n') %}
+                            <p class="leading-relaxed">{{ line }}</p>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
+            </div>
+
+            <!-- Set Completion Banner -->
+            <div id="quizCompletionBanner" class="hidden mt-6 p-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/40 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-blue-950 dark:text-blue-100" id="completionHeadline">Round Completed!</div>
+                        <div class="text-xs text-blue-800 dark:text-blue-300" id="completionSubtext">All 5 questions reviewed. Ready to practice new topics?</div>
+                    </div>
+                </div>
+                <button type="button" onclick="refreshSkillCheck()"
+                        class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center gap-2 shadow-sm cursor-pointer">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>Load 5 New Topics &rarr;</span>
+                </button>
             </div>
         </section>
 
@@ -241,33 +280,186 @@
     </footer>
 
     <script>
+        const initialQuestions = {{ sample_quiz | tojson }};
+        let currentQuizQuestions = initialQuestions || [];
         const answeredQuestions = new Set();
         let correctCount = 0;
-        const totalQuestions = {{ sample_quiz | length }};
+
+        // Track seen question IDs across rounds in sessionStorage
+        let seenQuestionIds = new Set();
+        try {
+            const stored = JSON.parse(sessionStorage.getItem('novabrief_quiz_seen') || '[]');
+            if (Array.isArray(stored)) {
+                stored.forEach(id => seenQuestionIds.add(id));
+            }
+        } catch (e) {}
+
+        // Add initial server-rendered question IDs to seen pool
+        if (Array.isArray(currentQuizQuestions)) {
+            currentQuizQuestions.forEach(q => {
+                if (q && q.id) seenQuestionIds.add(q.id);
+            });
+            try {
+                sessionStorage.setItem('novabrief_quiz_seen', JSON.stringify(Array.from(seenQuestionIds)));
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
         function checkSampleQuiz(qIdx, selectedIdx, btn) {
             const card = document.querySelector('[data-quiz-card="' + qIdx + '"]');
             if (!card || answeredQuestions.has(qIdx)) return;
             answeredQuestions.add(qIdx);
-            const correctIdx = parseInt(card.getAttribute('data-answer'), 10);
+
+            const qData = currentQuizQuestions[qIdx];
+            const correctIdx = qData ? parseInt(qData.answer, 10) : parseInt(card.getAttribute('data-answer'), 10);
             const feedback = document.getElementById('feedback-' + qIdx);
+            const optionButtons = card.querySelectorAll('.quiz-option-btn');
+
             if (selectedIdx === correctIdx) {
                 correctCount += 1;
-                btn.className = 'w-full text-left px-3.5 py-2 rounded-lg border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold';
+                btn.className = 'quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-lg border border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 text-xs font-bold';
                 if (feedback) {
-                    feedback.className = 'mt-3 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 text-xs leading-relaxed';
-                    feedback.innerHTML = '<strong>Correct!</strong> ' + feedback.innerHTML;
+                    feedback.className = 'quiz-feedback mt-3.5 p-3.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200 text-xs leading-relaxed space-y-1.5';
+                    const header = feedback.querySelector('.feedback-header');
+                    if (header) {
+                        header.className = 'font-bold flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300';
+                        header.innerHTML = '<i class="fas fa-circle-check text-emerald-600 dark:text-emerald-400"></i><span>Correct! Concept Breakdown:</span>';
+                    }
                 }
             } else {
-                btn.className = 'w-full text-left px-3.5 py-2 rounded-lg border border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold';
+                btn.className = 'quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-lg border border-rose-500 bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs font-bold';
+                // Highlight the correct option so the student learns the right answer
+                if (optionButtons && optionButtons[correctIdx]) {
+                    optionButtons[correctIdx].className = 'quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-lg border-2 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-200 text-xs font-semibold';
+                }
                 if (feedback) {
-                    feedback.className = 'mt-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 text-xs leading-relaxed';
-                    feedback.innerHTML = '<strong>Review:</strong> ' + feedback.innerHTML;
+                    feedback.className = 'quiz-feedback mt-3.5 p-3.5 rounded-xl border border-amber-300 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-xs leading-relaxed space-y-1.5';
+                    const header = feedback.querySelector('.feedback-header');
+                    if (header) {
+                        header.className = 'font-bold flex items-center gap-1.5 text-amber-800 dark:text-amber-300';
+                        header.innerHTML = '<i class="fas fa-lightbulb text-amber-600 dark:text-amber-400"></i><span>Review &amp; Concept Breakdown:</span>';
+                    }
                 }
             }
+
+            if (feedback) {
+                feedback.classList.remove('hidden');
+            }
+
             const badge = document.getElementById('quizScoreBadge');
             if (badge) {
-                badge.textContent = 'Score: ' + correctCount + ' / ' + totalQuestions;
+                badge.textContent = 'Score: ' + correctCount + ' / ' + currentQuizQuestions.length;
+            }
+
+            // Check if all questions in this round have been answered
+            if (answeredQuestions.size === currentQuizQuestions.length) {
+                const banner = document.getElementById('quizCompletionBanner');
+                const headline = document.getElementById('completionHeadline');
+                const subtext = document.getElementById('completionSubtext');
+                if (banner && headline && subtext) {
+                    headline.textContent = 'Round Completed! Score: ' + correctCount + ' / ' + currentQuizQuestions.length;
+                    subtext.textContent = correctCount >= 4
+                        ? 'Great mastery! Ready to tackle new questions on fresh topics?'
+                        : 'Review complete! Click below to practice the next set with brand-new topics.';
+                    banner.classList.remove('hidden');
+                }
+            }
+        }
+
+        async function refreshSkillCheck() {
+            const btn = document.getElementById('refreshQuizBtn');
+            const icon = document.getElementById('refreshQuizIcon');
+            const container = document.getElementById('quizCardsContainer');
+            const badge = document.getElementById('quizScoreBadge');
+            const banner = document.getElementById('quizCompletionBanner');
+
+            if (btn) btn.disabled = true;
+            if (icon) icon.classList.add('fa-spin');
+
+            try {
+                const seenArr = Array.from(seenQuestionIds);
+                const url = '/api/python/skill-check?seen=' + encodeURIComponent(seenArr.join(','));
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Failed to fetch new questions');
+                const data = await res.json();
+
+                if (data.status === 'success' && Array.isArray(data.questions) && data.questions.length > 0) {
+                    currentQuizQuestions = data.questions;
+                    answeredQuestions.clear();
+                    correctCount = 0;
+
+                    // Add new questions to seen pool
+                    data.questions.forEach(q => {
+                        if (q && q.id) seenQuestionIds.add(q.id);
+                    });
+                    try {
+                        sessionStorage.setItem('novabrief_quiz_seen', JSON.stringify(Array.from(seenQuestionIds)));
+                    } catch (e) {}
+
+                    // Reset score badge and banner
+                    if (badge) badge.textContent = 'Score: 0 / ' + data.questions.length;
+                    if (banner) banner.classList.add('hidden');
+
+                    // Render fresh question cards dynamically
+                    let html = '';
+                    data.questions.forEach((q, idx) => {
+                        const explanationLines = (q.explanation || '').split('\n').filter(Boolean);
+                        const expHtml = explanationLines.map(line =>
+                            `<p class="leading-relaxed">${escapeHtml(line)}</p>`
+                        ).join('');
+
+                        const optionsHtml = (q.options || []).map((opt, optIdx) => `
+                            <button type="button"
+                                    onclick="checkSampleQuiz(${idx}, ${optIdx}, this)"
+                                    class="quiz-option-btn w-full text-left px-3.5 py-2.5 rounded-lg border border-slate-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-xs font-medium hover:border-blue-500 transition cursor-pointer">
+                                ${escapeHtml(opt)}
+                            </button>
+                        `).join('');
+
+                        html += `
+                        <div class="p-5 rounded-xl bg-slate-50 dark:bg-neutral-800/50 border border-slate-200 dark:border-neutral-800 flex flex-col justify-between transition-all"
+                             data-quiz-card="${idx}"
+                             data-quiz-id="${escapeHtml(q.id)}"
+                             data-answer="${q.answer}">
+                            <div>
+                                <div class="text-[11px] font-semibold text-blue-600 dark:text-blue-400 mb-1">
+                                    Module ${q.module_order || (idx + 1)} · ${escapeHtml(q.module_title || '')}
+                                </div>
+                                <p class="font-bold text-sm text-slate-900 dark:text-white mb-3">${escapeHtml(q.question)}</p>
+                                <div class="space-y-2 options-container">
+                                    ${optionsHtml}
+                                </div>
+                            </div>
+                            <div class="quiz-feedback hidden mt-3.5 p-3.5 rounded-xl border text-xs leading-relaxed space-y-1.5" id="feedback-${idx}">
+                                <div class="font-bold flex items-center gap-1.5 feedback-header">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <span class="feedback-title">Review &amp; Concept Breakdown:</span>
+                                </div>
+                                <div class="feedback-body space-y-1 text-slate-700 dark:text-slate-300">
+                                    ${expHtml}
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+
+                    if (container) {
+                        container.innerHTML = html;
+                    }
+                }
+            } catch (err) {
+                console.error('Error refreshing quiz:', err);
+            } finally {
+                if (btn) btn.disabled = false;
+                if (icon) icon.classList.remove('fa-spin');
             }
         }
     </script>

@@ -788,9 +788,9 @@ def public_program_ics(prog_id: int):
 
 @app.route('/learn-python')
 def public_python_hub():
-    from python_practice.content import MODULES, EXERCISES, QUIZZES
+    from python_practice.content import MODULES, EXERCISES, QUIZZES, get_skill_check_questions
     modules_view = []
-    sample_quiz = []
+    sample_quiz = get_skill_check_questions(count=5)
     for idx, m in enumerate(MODULES):
         mod_id = str(m['id'])
         mod_exercises = [e for e in EXERCISES.values() if str(e.get('module')) == mod_id and e.get('mode') != 'debug']
@@ -804,10 +804,6 @@ def public_python_hub():
             }
             for e in mod_exercises[:2]
         ]
-        if idx < 5 and mod_quizzes:
-            q_item = dict(mod_quizzes[0])
-            q_item['module_title'] = m['title']
-            sample_quiz.append(q_item)
         modules_view.append({
             'id': mod_id,
             'order': idx + 1,

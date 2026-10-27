@@ -249,40 +249,273 @@ for id, m, title, problem, starter, solution, cases, hint, kind in _PUZZLES:
         lesson=hint,files=cases[0][2] if len(cases[0])>2 else {})
 
 QUIZZES = {}
-def quiz(module, kind, question, options, answer, explanation):
-    id = f'q-{module}-{sum(q["module"]==str(module) for q in QUIZZES.values())+1}'
-    QUIZZES[id] = dict(id=id,module=str(module),kind=kind,question=question,options=options,answer=answer,explanation=explanation)
+SKILL_CHECK_BANK = []
 
-quiz(0,'Output prediction','What does print("  python ".strip().title()) display?', ['python','Python','  Python ','PYTHON'],1,'strip removes outer whitespace and title capitalizes the first letter.')
-quiz(0,'Error identification','Which expression raises TypeError?', ['int("3") + 1','"3" + "1"','"3" + 1','float("3") + 1'],2,'Text and an integer cannot be added directly; convert one operand.')
-quiz(0,'Multiple choice','What does a function with no explicit return return?', ['0','None','False','An empty string'],1,'Reaching the end of a function implicitly returns None.')
-quiz(1,'Output prediction','What is the value of 7 % 2 == 1 and not False?', ['True','False','1','None'],0,'7 % 2 is 1, the comparison is True, and not False is True.')
-quiz(1,'Error identification','A range is 10 through 20 inclusive. Which check is correct?', ['10 < x < 20','10 <= x <= 20','x >= 10 or x <= 20','x == 10 and x == 20'],1,'Both endpoints are included, so use <= on both sides.')
-quiz(1,'Multiple choice','Which match case is a catch-all?', ['case else:','case *:','case _:','case any:'],2,'The wildcard pattern _ matches any value without binding a name.')
-quiz(2,'Output prediction','What does list(range(2, 7, 2)) contain?', ['[2, 4, 6]','[2, 4, 6, 7]','[2, 3, 4, 5, 6]','[0, 2, 4, 6]'],0,'range starts at 2, steps by 2, and excludes 7.')
-quiz(2,'Multiple choice','What does continue do inside a loop?', ['Ends the whole program','Ends the loop','Skips to the next iteration','Restarts the function'],2,'continue skips the rest of this iteration; break ends the loop.')
-quiz(2,'Output prediction','What does {"a": 2}.get("b", 0) return?', ['None','0','2','KeyError'],1,'get returns the default when the key is missing.')
-quiz(3,'Error identification','int("three") raises which exception?', ['TypeError','KeyError','ValueError','EOFError'],2,'The type is acceptable but the string has no valid integer representation.')
-quiz(3,'Multiple choice','When does a try/except/else else block run?', ['Always','Only if try completes without an exception','Only after an exception','Before try'],1,'else separates success handling from exception handling.')
-quiz(3,'Multiple choice','How should a function report an invalid argument?', ['Ignore it','raise ValueError with context','Always exit the process','Catch every exception silently'],1,'An explicit exception lets a caller handle failure appropriately.')
-quiz(4,'Multiple choice','How do you decode a JSON string?', ['json.dumps(text)','json.loads(text)','json.load(text)','str.json(text)'],1,'loads reads JSON from a string; dumps serializes a Python value.')
-quiz(4,'Multiple choice','What is sys.argv[0] normally?', ['First user argument','Number of arguments','Script name','Python version'],2,'User-supplied arguments begin at index 1.')
-quiz(4,'Multiple choice','What is pip used for?', ['Running a loop','Installing Python packages','Formatting strings','Defining a class'],1,'pip installs distributions. Production dependencies should be reviewed and pinned; this sandbox does not allow arbitrary installs.')
-quiz(5,'Multiple choice','Which pytest test name is discovered by default?', ['check_sum','sum_testcase','test_sum','verify_sum'],2,'pytest normally discovers test_ functions in test_*.py or *_test.py files.')
-quiz(5,'Error identification','Which assertion checks that square(3) equals 9?', ['assert square(3)','assert square(3) == 9','assert square == 9','assert 3 == 9'],1,'A truthiness check accepts any nonzero result; equality tests the actual expected value.')
-quiz(5,'Multiple choice','How does pytest check an expected ValueError?', ['with pytest.raises(ValueError):','except pytest:','assert ValueError','pytest.ignore(ValueError)'],0,'The context manager fails the test if the expected exception is not raised. __init__.py marks a conventional importable package.')
-quiz(6,'Multiple choice','Which file mode preserves contents and writes at the end?', ['r','w','a','x'],2,'a appends, w truncates, r reads, and x creates a new file exclusively.')
-quiz(6,'Error identification','Why is line.split(",") unreliable for CSV?', ['It cannot split strings','Quoted fields may contain commas','CSV never has commas','It sorts rows'],1,'csv.reader and DictReader respect quoting and escaped delimiters.')
-quiz(6,'Multiple choice','Which Pillow pattern opens an image safely?', ['with Image.open(path) as image:','Image.read_csv(path)','open(path).resize()','Pillow(path).sort()'],0,'Pillow provides Image.open, transformations, and save. ImageSequence.Iterator visits animation frames. Binary image processing is not available in this text-file sandbox.')
-quiz(7,'Output prediction','Does re.fullmatch(r"a.b", "a-b") match?', ['Yes','No','Only with IGNORECASE','Raises SyntaxError'],0,'A dot matches any single character except newline by default. Use \\. for a literal dot.')
-quiz(7,'Multiple choice','What does a capturing group provide?', ['A loop','Access to the matched substring','A file','Automatic input validation'],1,'Parentheses capture substrings retrievable with group() or match indexing.')
-quiz(7,'Error identification','Which validates one or more ASCII digits across the entire string?', ['re.search(r"[0-9]", s)','re.fullmatch(r"[0-9]+", s)','re.fullmatch(r"[0-9]*", s)','re.search(r".*", s)'],1,'fullmatch covers the entire string; + requires at least one character, whereas * allows empty text.')
-quiz(8,'Multiple choice','What is self in an instance method?', ['The class name','The current instance','A global variable','A reserved constant'],1,'self is the conventional name for the instance passed to a method.')
-quiz(8,'Error identification','Where should a separate mutable list for each instance be created?', ['In __init__ as self.items = []','As a shared class attribute','Only at module scope','In __str__ every time'],0,'Instance initialization avoids unintentionally sharing one list among objects.')
-quiz(8,'Multiple choice','Which decorator supplies the class as the first argument?', ['@property','@staticmethod','@classmethod','@instance'],2,'classmethod receives cls; staticmethod receives no implicit argument. Properties use decorators to expose controlled access.')
-quiz(9,'Output prediction','What does list(map(str, [1, 2])) return?', ['[1, 2]','["1", "2"]','"12"','A set'],1,'map lazily transforms each item; list materializes the results.')
-quiz(9,'Multiple choice','What does yield do?', ['Ends the program','Pauses a generator and produces a value','Enforces a type hint','Creates a constant'],1,'The generator resumes after yield on the next request. next(iterator) raises StopIteration when exhausted.')
-quiz(9,'Error identification','Do Python type hints enforce argument types at runtime?', ['Always','Only for str','No; separate checking tools can analyze them','Only in a class'],2,'Type hints document intent and support static analysis. They do not replace runtime validation.')
+def quiz(module, kind, question, options, answer, explanation):
+    q_id = f'q-{module}-{sum(q["module"]==str(module) for q in QUIZZES.values())+1}'
+    item = dict(id=q_id, module=str(module), kind=kind, question=question, options=options, answer=answer, explanation=explanation)
+    QUIZZES[q_id] = item
+    SKILL_CHECK_BANK.append(dict(item))
+
+def skill_quiz(module, kind, question, options, answer, explanation):
+    q_id = f'q-{module}-{sum(q["module"]==str(module) for q in SKILL_CHECK_BANK)+1}'
+    item = dict(id=q_id, module=str(module), kind=kind, question=question, options=options, answer=answer, explanation=explanation)
+    SKILL_CHECK_BANK.append(item)
+
+# Module 0: Functions & variables
+quiz(0, 'Output prediction', 'What does print("  python ".strip().title()) display?',
+     ['python', 'Python', '  Python ', 'PYTHON'], 1,
+     'strip() eliminates leading and trailing whitespace while preserving inner spacing.\ntitle() converts the first letter of each word to uppercase and the rest to lowercase, yielding "Python".\nChained string methods evaluate left-to-right, returning a new immutable string at each step.')
+
+quiz(0, 'Error identification', 'Which expression raises TypeError?',
+     ['int("3") + 1', '"3" + "1"', '"3" + 1', 'float("3") + 1'], 2,
+     'Python is strongly typed and refuses to implicitly coerce strings into numbers during arithmetic operations.\n"3" + 1 attempts to add str and int, triggering TypeError: can only concatenate str (not "int") to str.\nExpressions like int("3") + 1 and "3" + "1" work because both operands share compatible types.')
+
+quiz(0, 'Multiple choice', 'What does a function with no explicit return return?',
+     ['0', 'None', 'False', 'An empty string'], 1,
+     'Reaching the end of a function body without hitting an explicit return statement yields None.\nNone is Python\'s built-in singleton object representing the absence of a value.\nWhile None evaluates to falsy in boolean expressions, it is distinct from 0, False, or "".')
+
+skill_quiz(0, 'Output prediction', 'What does len("hello\\n") return?',
+           ['5', '6', '7', 'Raises SyntaxError'], 1,
+           'The escape sequence \\n represents a single newline control character in standard Python strings.\nThe string contains 5 letters plus 1 newline character, giving a total length of 6.\nUse raw string literals (r"hello\\n") if you want the backslash and letter n treated as two separate characters.')
+
+skill_quiz(0, 'Output prediction', 'What is the output of f"{3.14159:.2f}"?',
+           ['"3.14"', '"3.14159"', '"3.1"', '"3.15"'], 0,
+           'The format specifier :.2f rounds floating-point numbers to two decimal places.\n3.14159 rounds down to 3.14 because the third decimal digit (1) is strictly less than 5.\nF-strings evaluate expressions inside curly braces at runtime with high formatting performance.')
+
+# Module 1: Conditionals
+quiz(1, 'Output prediction', 'What is the value of 7 % 2 == 1 and not False?',
+     ['True', 'False', '1', 'None'], 0,
+     '7 % 2 calculates the division remainder 1, making 7 % 2 == 1 evaluate to True.\nThe unary operator not False inverts False to True, simplifying the expression to True and True.\nThe logical "and" operator returns True only when both left and right operands are truthy.')
+
+quiz(1, 'Error identification', 'A range is 10 through 20 inclusive. Which check is correct?',
+     ['10 < x < 20', '10 <= x <= 20', 'x >= 10 or x <= 20', 'x == 10 and x == 20'], 1,
+     '"Inclusive" boundaries require less-than-or-equal (<=) on both sides to include 10 and 20.\nPython natively supports chained comparisons (10 <= x <= 20), evaluating operands in order.\nUsing < strictly excludes boundaries, while "or" erroneously matches every real number.')
+
+quiz(1, 'Multiple choice', 'Which match case is a catch-all in Python 3.10+?',
+     ['case else:', 'case *:', 'case _:', 'case any:'], 2,
+     'In Python structural pattern matching, case _: acts as the wildcard catch-all pattern.\nThe underscore matches any incoming value without binding a variable name to local scope.\nAny case patterns placed after case _: will never execute because all values are matched.')
+
+skill_quiz(1, 'Output prediction', 'What does "admin" if False else "guest" evaluate to?',
+           ['"admin"', '"guest"', 'False', 'None'], 1,
+           'Python conditional expressions follow the ternary syntax: value_if_true if condition else value_if_false.\nBecause the tested condition is False, the expression immediately evaluates to the else branch.\nPython evaluates only the chosen branch lazily, preventing side effects in the unselected branch.')
+
+skill_quiz(1, 'Multiple choice', 'Which of the following values evaluates to True in an if condition?',
+           ['[]', '""', '0', '[-1]'], 3,
+           'In Python, non-empty collections evaluate to True regardless of the values they contain.\nA list containing [-1] has a length of 1, so it evaluates to truthy in boolean contexts.\nIn contrast, empty containers ([], "", {}), numerical zero (0, 0.0), and None evaluate to False.')
+
+# Module 2: Loops
+quiz(2, 'Output prediction', 'What does list(range(2, 7, 2)) contain?',
+     ['[2, 4, 6]', '[2, 4, 6, 7]', '[2, 3, 4, 5, 6]', '[0, 2, 4, 6]'], 0,
+     'range(start, stop, step) begins at 2, steps forward by 2, and excludes the stop value (7).\nThe sequence generates 2, 4, and 6; the next value 8 exceeds the stop threshold of 7.\nThe range object generates numbers lazily; wrapping it in list() materializes all generated elements.')
+
+quiz(2, 'Multiple choice', 'What does continue do inside a loop?',
+     ['Ends the whole program', 'Ends the loop', 'Skips to the next iteration', 'Restarts the function'], 2,
+     'continue immediately halts the current loop cycle and advances control to the next iteration.\nIn contrast, break completely terminates the innermost enclosing loop.\nLoop else blocks still execute after a loop finishes normally, but not if terminated via break.')
+
+quiz(2, 'Output prediction', 'What does {"a": 2}.get("b", 0) return?',
+     ['None', '0', '2', 'KeyError'], 1,
+     'dict.get(key, default) safely retrieves a key and returns the specified default if missing.\nBecause key "b" does not exist in {"a": 2}, the fallback value 0 is returned without errors.\nUsing subscript notation (dict["b"]) would have raised a fatal KeyError.')
+
+skill_quiz(2, 'Output prediction', 'What is the value of [x**2 for x in range(3)]?',
+           ['[1, 4, 9]', '[0, 1, 4]', '[0, 2, 4]', '[0, 1, 2]'], 1,
+           'range(3) produces numbers 0, 1, and 2 in sequence.\nThe expression x**2 squares each number: 0**2 = 0, 1**2 = 1, and 2**2 = 4.\nList comprehensions are optimized in CPython byte-code and run faster than equivalent for-loops.')
+
+skill_quiz(2, 'Multiple choice', 'Which function pairs indices with elements when iterating a sequence?',
+           ['zip()', 'enumerate()', 'range()', 'map()'], 1,
+           'enumerate(sequence, start=0) yields (index, item) tuples on each iteration of the loop.\nIt eliminates the anti-pattern of manually managing an integer counter variable inside loops.\nzip() combines multiple iterables together, while range() generates numerical sequences.')
+
+# Module 3: Exceptions
+quiz(3, 'Error identification', 'int("three") raises which exception?',
+     ['TypeError', 'KeyError', 'ValueError', 'EOFError'], 2,
+     'The type passed (str) is acceptable to int(), but the content "three" cannot be parsed into base-10 digits.\nWhen an operation receives an argument with the right type but inappropriate value, ValueError is raised.\nTypeError occurs only when an entirely invalid data type (such as a list) is passed.')
+
+quiz(3, 'Multiple choice', 'When does a try/except/else block\'s else clause run?',
+     ['Always', 'Only if try completes without an exception', 'Only after an exception', 'Before try'], 1,
+     'In Python exception handling, else runs only when no exceptions were raised inside the try block.\nThis helps separate protected code that might fail from code that should only run on guaranteed success.\nCode in finally runs unconditionally, regardless of whether an exception occurred.')
+
+quiz(3, 'Multiple choice', 'How should a function signal an invalid parameter value?',
+     ['Ignore it', 'raise ValueError with context', 'Always exit the process', 'Catch every exception silently'], 1,
+     'Raising an explicit ValueError alerts calling code to invalid inputs with a clear error message.\nSilently ignoring bad parameters causes hidden data corruption downstream in production systems.\nExiting the process with sys.exit() abruptly crashes caller applications and unit test runners.')
+
+skill_quiz(3, 'Multiple choice', 'What does the finally block guarantee in exception handling?',
+           ['Executes only on error', 'Executes always, even if return was called', 'Suppresses exceptions', 'Repeats the try block'], 1,
+           'Code inside finally always executes before leaving the try statement, even if a return or exception occurred.\nThis guarantee makes finally essential for resource cleanup, closing file handles, and releasing locks.\nIf an exception is unhandled, finally executes first before the exception bubbles up the call stack.')
+
+skill_quiz(3, 'Multiple choice', 'How do you catch multiple exception types in a single except block?',
+           ['except ValueError or TypeError:', 'except (ValueError, TypeError):', 'except [ValueError, TypeError]:', 'except ValueError, TypeError:'], 1,
+           'Multiple exception types must be grouped inside parentheses as a tuple in the except clause.\nUsing "or" creates a syntax or logic bug because except tests expressions against exception class tuples.\nYou can optionally bind the caught exception instance using "as err" after the parenthesis group.')
+
+# Module 4: Libraries
+quiz(4, 'Multiple choice', 'How do you decode a JSON string into a Python dictionary?',
+     ['json.dumps(text)', 'json.loads(text)', 'json.load(text)', 'str.json(text)'], 1,
+     'json.loads() (load string) deserializes a JSON-formatted string into native Python dictionaries/lists.\njson.load() (without \'s\') reads directly from an open file descriptor stream rather than a string.\nConversely, json.dumps() and json.dump() serialize Python objects back into JSON text.')
+
+quiz(4, 'Multiple choice', 'What is sys.argv[0] in a running Python script?',
+     ['First user argument', 'Number of arguments', 'Script name or path', 'Python version'], 2,
+     'sys.argv is a list containing command-line arguments, where index 0 is always the script name or path.\nUser-supplied positional arguments begin at index 1 (sys.argv[1]).\nTo handle optional flags and typed arguments cleanly in production, prefer the argparse standard module.')
+
+quiz(4, 'Multiple choice', 'What is the standard tool used to install third-party Python packages?',
+     ['Running a loop', 'pip', 'Formatting strings', 'Defining a class'], 1,
+     'pip is Python\'s standard package installer, fetching open-source libraries from PyPI (Python Package Index).\nIn production, dependencies should always be pinned in a requirements.txt file to prevent version drift.\nUsing virtual environments (venv) isolates package dependencies per project, avoiding global conflicts.')
+
+skill_quiz(4, 'Multiple choice', 'What does random.choice([10, 20, 30]) do?',
+           ['Returns all elements', 'Picks one random item from sequence', 'Shuffles the list in place', 'Picks a random float'], 1,
+           'random.choice() returns a single randomly selected element from a non-empty sequence.\nIt raises IndexError if called on an empty sequence like [].\nTo shuffle a mutable list in place, use random.shuffle(); for multiple unique samples, use random.sample().')
+
+skill_quiz(4, 'Multiple choice', 'Why is if __name__ == "__main__": used in Python files?',
+           ['To speed up execution', 'To execute code only when run directly, not imported', 'To define the main class', 'To declare global variables'], 1,
+           'When a file is executed directly, Python sets its internal __name__ variable to "__main__".\nWhen the file is imported by another script, __name__ is set to the module\'s actual file name.\nThis guard allows a file to be both run as a standalone script and cleanly imported as a reusable library.')
+
+# Module 5: Unit testing
+quiz(5, 'Multiple choice', 'Which pytest test function name is discovered automatically?',
+     ['check_sum', 'sum_testcase', 'test_sum', 'verify_sum'], 2,
+     'pytest automatically discovers and executes functions prefixed with "test_" in test_*.py files.\nTest methods inside classes prefixed with "Test" (without __init__) are also collected.\nConsistent naming standards allow test discovery to run across large corporate codebases automatically.')
+
+quiz(5, 'Error identification', 'Which assertion checks that square(3) equals 9?',
+     ['assert square(3)', 'assert square(3) == 9', 'assert square == 9', 'assert 3 == 9'], 1,
+     'Python\'s assert statement evaluates an expression; if False, it raises an AssertionError.\nassert square(3) == 9 tests exact equality between the returned function value and expected 9.\nBare assert square(3) only checks truthiness, erroneously passing if square(3) returns 1 or -5.')
+
+quiz(5, 'Multiple choice', 'How does pytest verify that a function raises ValueError?',
+     ['with pytest.raises(ValueError):', 'except pytest:', 'assert ValueError', 'pytest.ignore(ValueError)'], 0,
+     'pytest.raises(ExpectedException) is a context manager that catches and asserts expected exceptions.\nIf the code block inside fails to raise the specified exception, pytest marks the test as failed.\nYou can also inspect the caught exception instance and its message using: with pytest.raises(...) as exc_info:.')
+
+skill_quiz(5, 'Multiple choice', 'What is the purpose of a pytest fixture?',
+           ['To skip tests', 'To provide reusable setup data and dependencies', 'To compile Python code', 'To format test files'], 1,
+           'Fixtures decorated with @pytest.fixture provide reliable, reusable test data, database mocks, or API clients.\nPytest injects fixtures into test functions by matching parameter names automatically via dependency injection.\nFixtures can yield resources and clean them up automatically after the test finishes.')
+
+skill_quiz(5, 'Multiple choice', 'Which pytest decorator runs one test across multiple input-output sets?',
+           ['@pytest.repeat', '@pytest.mark.parametrize', '@pytest.loop', '@pytest.cases'], 1,
+           '@pytest.mark.parametrize("arg,expected", [(1, 2), (2, 4)]) runs the test function for each row.\nIt eliminates redundant copy-pasted test functions and provides clear individual failure reporting.\nEach test case is reported as a separate test in pytest output summaries.')
+
+# Module 6: File I/O
+quiz(6, 'Multiple choice', 'Which file mode preserves existing contents and writes at the end?',
+     ['r', 'w', 'a', 'x'], 2,
+     'Mode "a" (append) positions the file stream pointer at the end of the file, preserving existing data.\nMode "w" (write) completely truncates and overwrites existing file contents upon opening.\nMode "r" opens files strictly for reading, and mode "x" creates a new file, failing if it already exists.')
+
+quiz(6, 'Error identification', 'Why is line.split(",") unreliable for parsing CSV data?',
+     ['It cannot split strings', 'Quoted fields may contain commas', 'CSV never has commas', 'It sorts rows'], 1,
+     'Real-world CSV records frequently contain commas inside quoted text (e.g. "Lahore, Pakistan").\nA naive line.split(",") blindly breaks inside quoted text, corrupting table column alignment.\nAlways use Python\'s built-in csv.reader or csv.DictReader to respect quotes and escaped delimiters.')
+
+quiz(6, 'Multiple choice', 'Which Pillow pattern opens an image safely?',
+     ['with Image.open(path) as image:', 'Image.read_csv(path)', 'open(path).resize()', 'Pillow(path).sort()'], 0,
+     'The with statement ensures file handles and buffers are safely freed once the image block exits.\nPillow provides Image.open, transformations, and save; ImageSequence.Iterator visits animation frames.\nUsing context managers prevents operating system file descriptor leaks in high-throughput applications.')
+
+skill_quiz(6, 'Multiple choice', 'What is the difference between f.read() and f.readlines()?',
+           ['They are identical', 'read() returns one string; readlines() returns a list of line strings', 'readlines() deletes the file', 'read() only reads binary files'], 1,
+           'f.read() loads the entire file contents into memory as a single str or bytes object.\nf.readlines() reads all lines and stores them as individual string elements in a Python list.\nFor large files, iterating directly with "for line in f:" is memory-efficient because it streams line by line.')
+
+skill_quiz(6, 'Multiple choice', 'Which module class parses tabular data into dictionary rows with header keys?',
+           ['json.reader', 'csv.DictReader', 'sys.dict', 're.table'], 1,
+           'csv.DictReader maps each row in a CSV file to a dictionary using header values as keys.\nThis allows accessing columns by name (e.g. row["email"]) rather than error-prone numeric indices.\nMissing column values automatically take the default restval specified upon initialization.')
+
+# Module 7: Regular expressions
+quiz(7, 'Output prediction', 'Does re.fullmatch(r"a.b", "a-b") match?',
+     ['Yes', 'No', 'Only with IGNORECASE', 'Raises SyntaxError'], 0,
+     'In regular expressions, the dot (.) is a wildcard that matches any single character except a newline.\nIn "a-b", the hyphen matches the dot, so the pattern "a.b" matches the string completely.\nTo match a literal period character, you must escape it with a backslash: r"a\\.b".')
+
+quiz(7, 'Multiple choice', 'What does a capturing group (parentheses) provide in regex?',
+     ['A loop', 'Access to extracted matched substrings', 'A file handle', 'Syntax validation only'], 1,
+     'Parentheses (pattern) in regex define a group that isolates specific parts of the matched text.\nExtracted substrings can be retrieved individually using match.group(1), match.group(2), etc.\nNon-capturing groups (?:pattern) can be used when grouping is needed without extraction overhead.')
+
+quiz(7, 'Error identification', 'Which regex pattern validates one or more digits across an entire string?',
+     ['re.search(r"[0-9]", s)', 're.fullmatch(r"[0-9]+", s)', 're.fullmatch(r"[0-9]*", s)', 're.search(r".*", s)'], 1,
+     're.fullmatch ensures that the pattern matches the entire string from beginning to end.\nThe plus sign (+) requires at least one digit; the asterisk (*) would erroneously match an empty string.\nIn contrast, re.search matches anywhere inside the string, passing strings that contain invalid letters.')
+
+skill_quiz(7, 'Multiple choice', 'What flag makes re.search ignore uppercase vs lowercase differences?',
+           ['re.U', 're.IGNORECASE (re.I)', 're.CASELESS', 're.L'], 1,
+           'Passing flags=re.IGNORECASE (or re.I) enables case-insensitive matching across the regex pattern.\nFor example, re.search(r"python", "PYTHON", re.IGNORECASE) matches successfully.\nYou can combine multiple regex flags using the bitwise OR operator (e.g. re.I | re.M).')
+
+skill_quiz(7, 'Multiple choice', 'What is the difference between .* and .*? in regex?',
+           ['They behave identically', '.* is greedy (matches maximum); .*? is non-greedy (matches minimum)', '.*? only matches numbers', '.* raises an error on spaces'], 1,
+           'Greedy .* expands to consume as many characters as possible until the last possible delimiter match.\nNon-greedy (lazy) .*? stops at the very first occurrence of the closing delimiter.\nIn HTML parsing, "<.*>" consumes entire paragraphs, whereas "<.*?>" matches individual tags.')
+
+# Module 8: Object-oriented programming
+quiz(8, 'Multiple choice', 'What is self in a Python instance method?',
+     ['The class name', 'The current instance object', 'A global variable', 'A reserved keyword'], 1,
+     'self is the conventional parameter name representing the specific instance the method was called on.\nWhen calling obj.method(), Python automatically passes obj as the first argument to self.\nWhile "self" is not a reserved keyword in Python syntax, using any other name violates PEP 8 standards.')
+
+quiz(8, 'Error identification', 'Where should a separate mutable list for each instance be initialized?',
+     ['Inside __init__ as self.items = []', 'As a class attribute outside methods', 'At module level', 'Inside __str__ every time'], 0,
+     'Initializing self.items = [] inside __init__ allocates a brand-new list for each unique instance.\nDefining items = [] at the class level creates a shared attribute common to all instances of the class.\nIf a class attribute list is mutated, changes bleed into every other object created from that class.')
+
+quiz(8, 'Multiple choice', 'Which decorator passes the class itself as the first argument?',
+     ['@property', '@staticmethod', '@classmethod', '@instance'], 2,
+     '@classmethod passes the class object itself (conventionally named cls) as its first argument.\nIt is commonly used to build alternative constructor factory methods (e.g. User.from_dict(data)).\n@staticmethod receives no implicit first argument, while @property exposes methods as read-only attributes.')
+
+skill_quiz(8, 'Multiple choice', 'What is the primary difference between __str__ and __repr__?',
+           ['__str__ is for end-users; __repr__ is unambiguous for developers and debugging', '__repr__ cannot return strings', '__str__ only works for integers', 'They are completely identical'], 0,
+           '__str__ produces a clean, human-readable string representation intended for application end-users.\n__repr__ aims to be an unambiguous technical representation, ideally valid Python code to recreate the object.\nWhen __str__ is not defined on a class, Python automatically falls back to calling __repr__.')
+
+skill_quiz(8, 'Multiple choice', 'How does a subclass invoke the initialization method of its parent class?',
+           ['parent.__init__()', 'super().__init__()', 'this.__init__()', 'inherit.__init__()'], 1,
+           'super().__init__() delegates initialization to the parent class following the Method Resolution Order (MRO).\nIt ensures all parent attributes and setup logic are executed before the subclass adds custom fields.\nThis is critical in cooperative multiple inheritance hierarchies to prevent duplicate constructor calls.')
+
+# Module 9: Et cetera
+quiz(9, 'Output prediction', 'What does list(map(str, [1, 2])) return?',
+     ['[1, 2]', '["1", "2"]', '"12"', 'A set {1, 2}'], 1,
+     'map(function, iterable) applies str() to each element of the input list lazily.\n1 becomes "1" and 2 becomes "2", producing an iterator yielding strings.\nWrapping the map iterator in list() materializes the elements into the concrete list ["1", "2"].')
+
+quiz(9, 'Multiple choice', 'What does the yield keyword do inside a function?',
+     ['Terminates the program', 'Pauses the generator and emits a value', 'Enforces type checking', 'Creates a static constant'], 1,
+     'Functions containing yield become generators, producing values lazily on demand instead of all at once.\nWhen yield executes, the function state and local variables are frozen until the next value is requested.\nThis enables processing massive datasets or infinite streams with minimal memory overhead.')
+
+quiz(9, 'Error identification', 'Do Python type hints enforce parameter types at runtime by default?',
+     ['Always', 'Only for strings', 'No; they are annotations for static analysis tools like mypy', 'Only inside classes'], 2,
+     'Standard Python type annotations (e.g. def add(x: int) -> int:) are not enforced at runtime by CPython.\nPassing a string to an int-annotated function executes without errors unless explicit validation is coded.\nType hints serve as documentation and allow static type linters (mypy, Pyright) to catch bugs before execution.')
+
+skill_quiz(9, 'Output prediction', 'What does the set intersection operator {1, 2, 3} & {2, 3, 4} return?',
+           ['{1, 2, 3, 4}', '{2, 3}', '{1, 4}', '[2, 3]'], 1,
+           'The ampersand operator (&) performs set intersection, finding elements present in both sets.\nThe numbers 2 and 3 exist in both operand sets, resulting in the new set {2, 3}.\nSet operations in Python run with average O(min(len(s), len(t))) time complexity via hash table lookups.')
+
+skill_quiz(9, 'Multiple choice', 'What do *args and **kwargs accept in function signatures?',
+           ['Pointers and references', 'Arbitrary positional arguments (as a tuple) and keyword arguments (as a dict)', 'Required integers only', 'Database connection parameters'], 1,
+           '*args collects excess positional arguments passed to the function into an immutable tuple.\n**kwargs collects excess keyword arguments (key=value) into a standard mutable dictionary.\nThis enables writing flexible wrapper decorators and API proxies that forward arbitrary arguments.')
+
+
+def get_skill_check_questions(seen_ids=None, count=5):
+    """
+    Returns `count` questions from distinct modules.
+    Prioritizes modules and questions that have NOT been seen yet.
+    Ensures that when a user refreshes or passes a set of questions,
+    new questions with new topics load on it without repeating previous ones.
+    """
+    seen_set = set(seen_ids or [])
+
+    mod_stats = []
+    for mod_idx in range(10):
+        mod_key = str(mod_idx)
+        all_qs = [q for q in SKILL_CHECK_BANK if str(q['module']) == mod_key]
+        unseen_qs = [q for q in all_qs if q['id'] not in seen_set]
+        seen_qs = [q for q in all_qs if q['id'] in seen_set]
+        mod_stats.append({
+            'module': mod_idx,
+            'module_key': mod_key,
+            'all': all_qs,
+            'unseen': unseen_qs,
+            'seen': seen_qs,
+            'unseen_count': len(unseen_qs),
+            'seen_count': len(seen_qs),
+        })
+
+    # Sort modules: modules with more unseen questions first.
+    # If tied on unseen_count, prioritize modules with fewer seen questions, then by module index.
+    sorted_mods = sorted(mod_stats, key=lambda m: (-m['unseen_count'], m['seen_count'], m['module']))
+    selected_mods = sorted(sorted_mods[:count], key=lambda m: m['module'])
+
+    selected_questions = []
+    for m in selected_mods:
+        if m['unseen']:
+            q = dict(m['unseen'][0])
+        else:
+            q = dict(m['all'][0])
+
+        mod_meta = next((mod for mod in MODULES if str(mod['id']) == str(q['module'])), None)
+        q['module_title'] = mod_meta['title'] if mod_meta else f"Module {int(q['module']) + 1}"
+        q['module_order'] = int(q['module']) + 1
+        selected_questions.append(q)
+
+    return selected_questions
 
 
 def public_exercise(item):

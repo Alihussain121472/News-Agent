@@ -171,6 +171,31 @@ class PracticeRouteTests(unittest.TestCase):
         self.assertNotEqual(first.json['id'], retry.json['id'])
         self.assertEqual(2, self.launch.call_count)
 
+    def test_skill_check_rotation_and_multiline_explanations(self):
+        res1 = self.client.get('/api/python/skill-check')
+        self.assertEqual(200, res1.status_code)
+        data1 = res1.json
+        self.assertEqual('success', data1['status'])
+        self.assertEqual(5, len(data1['questions']))
+
+        for q in data1['questions']:
+            lines = [line.strip() for line in q['explanation'].splitlines() if line.strip()]
+            self.assertGreaterEqual(len(lines), 2)
+            self.assertTrue(q['module_title'])
+            self.assertTrue(q['options'])
+            self.assertIn(q['answer'], range(len(q['options'])))
+
+        seen_ids = [q['id'] for q in data1['questions']]
+        res2 = self.client.get('/api/python/skill-check?seen=' + ','.join(seen_ids))
+        self.assertEqual(200, res2.status_code)
+        data2 = res2.json
+        q2_ids = [q['id'] for q in data2['questions']]
+
+        self.assertTrue(set(seen_ids).isdisjoint(set(q2_ids)))
+        mod1 = {str(q['module']) for q in data1['questions']}
+        mod2 = {str(q['module']) for q in data2['questions']}
+        self.assertTrue(mod1.isdisjoint(mod2))
+
 
 if __name__ == '__main__':
     unittest.main()
