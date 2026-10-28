@@ -76,6 +76,7 @@ def minify_js(js_content: str) -> str:
 def run():
     print("=== Minifying CSS Files ===")
     css_files = [
+        Path("static/css/variables.css"),
         Path("static/css/styles.css"),
         Path("static/css/main.css"),
         Path("static/css/student-tools.css"),

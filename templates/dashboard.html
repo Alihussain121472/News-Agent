@@ -52,7 +52,7 @@
       <button onclick="switchTab('emaillogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-emaillogs"><i class="fas fa-envelope-open-text w-4 text-center"></i> Email Logs</button>
       <button onclick="switchTab('agentlogs')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-agentlogs"><i class="fas fa-robot w-4 text-center"></i> Agent Logs</button>
       <button onclick="switchTab('contacts')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-neutral-600 dark:text-slate-300 mb-1" id="nav-contacts"><i class="fas fa-comments w-4 text-center"></i> Contact Messages</button>
-      <button onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-400 mt-4"><i class="fas fa-sign-out-alt w-4 text-center"></i> Logout</button>
+      <button type="button" onclick="handleLogout()" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition mt-4" aria-label="Log out"><i class="fas fa-sign-out-alt w-4 text-center" aria-hidden="true"></i> Logout</button>
     </nav>
   </aside>
 
@@ -65,10 +65,10 @@
       </div>
       <div class="flex items-center gap-3">
         <button onclick="runAgentNow()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition !text-white"><i class="fas fa-play mr-1"></i>Run Agent</button>
-        <button onclick="loadOverview()" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
-        <button data-theme-toggle aria-label="Switch to dark mode" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-moon dark:hidden"></i><i class="fas fa-sun hidden dark:inline"></i></button>
-          <a href="/" class="bg-white dark:bg-slate-900/70 backdrop-blur-md shadow-sm border border-neutral-200 dark:border-slate-700/50 hover:bg-white/10 text-xs text-neutral-600 dark:text-slate-300 px-3 py-2 rounded-lg transition"><i class="fas fa-home mr-1"></i>Site</a>
-        <button onclick="handleLogout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs px-3 py-2 rounded-lg transition"><i class="fas fa-sign-out-alt mr-1"></i>Logout</button>
+        <button onclick="loadOverview()" class="btn-nav-action text-xs px-3 py-2 rounded-lg transition"><i class="fas fa-sync-alt mr-1"></i>Refresh</button>
+        <button data-theme-toggle aria-label="Switch theme mode" class="btn-nav-action text-xs px-3 py-2 rounded-lg transition"><i class="fas fa-moon dark:hidden" aria-hidden="true"></i><i class="fas fa-sun hidden dark:inline" aria-hidden="true"></i></button>
+        <a href="/" class="btn-nav-action text-xs px-3 py-2 rounded-lg transition" aria-label="Return to site"><i class="fas fa-home mr-1" aria-hidden="true"></i>Site</a>
+        <button type="button" onclick="handleLogout()" class="btn-pill-danger text-xs px-3 py-2 rounded-lg transition" aria-label="Log out"><i class="fas fa-sign-out-alt mr-1" aria-hidden="true"></i>Logout</button>
       </div>
     </header>
 
